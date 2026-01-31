@@ -3,41 +3,28 @@ import {
   Mail,
   Shield,
   Bell,
-  User,
   Check,
   ExternalLink,
   AlertTriangle,
   Plus,
   Trash2,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
-
-interface EmailConnection {
-  provider: "gmail" | "outlook";
-  email: string;
-  connected: boolean;
-  permissions: string[];
-}
-
-const initialConnections: EmailConnection[] = [];
-
-const whitelist = ["vip@important.com", "client@company.com"];
-const blacklist = ["spam@junk.com", "newsletter@unwanted.com"];
+import { useEmailAccounts } from "@/hooks/useEmailAccounts";
 
 export default function Settings() {
-  const [connections, setConnections] = useState<EmailConnection[]>(initialConnections);
+  const { accounts, isLoading, disconnectAccount } = useEmailAccounts();
   const [newWhitelistEmail, setNewWhitelistEmail] = useState("");
   const [newBlacklistEmail, setNewBlacklistEmail] = useState("");
-  const [whitelistEmails, setWhitelistEmails] = useState(whitelist);
-  const [blacklistEmails, setBlacklistEmails] = useState(blacklist);
+  const [whitelistEmails, setWhitelistEmails] = useState<string[]>([]);
+  const [blacklistEmails, setBlacklistEmails] = useState<string[]>([]);
   
   // Notification settings
   const [emailNotifications, setEmailNotifications] = useState(true);
@@ -45,12 +32,11 @@ export default function Settings() {
   const [dailyDigest, setDailyDigest] = useState(true);
 
   const handleConnectGmail = () => {
-    // In real implementation, this would trigger OAuth flow
-    toast.info("Gmail OAuth integration requires backend setup. Enable Lovable Cloud to connect your inbox.");
+    toast.info("Gmail OAuth integration coming soon. Connect your inbox via OAuth for secure email access.");
   };
 
   const handleConnectOutlook = () => {
-    toast.info("Outlook OAuth integration requires backend setup. Enable Lovable Cloud to connect your inbox.");
+    toast.info("Outlook OAuth integration coming soon. Connect your inbox via OAuth for secure email access.");
   };
 
   const handleAddToWhitelist = () => {
@@ -68,6 +54,14 @@ export default function Settings() {
       toast.success("Added to blacklist");
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-8">
@@ -97,6 +91,45 @@ export default function Settings() {
 
         {/* Email Connections Tab */}
         <TabsContent value="connections">
+          {/* Connected Accounts */}
+          {accounts.length > 0 && (
+            <div className="mb-6">
+              <h3 className="mb-4 text-lg font-medium text-foreground">Connected Accounts</h3>
+              <div className="space-y-3">
+                {accounts.map((account) => (
+                  <Card key={account.id} className="border border-border">
+                    <CardContent className="flex items-center justify-between p-4">
+                      <div className="flex items-center gap-3">
+                        <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${
+                          account.provider === "gmail" ? "bg-red-100" : "bg-blue-100"
+                        }`}>
+                          <Mail className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-card-foreground">{account.email_address}</p>
+                          <p className="text-sm text-muted-foreground capitalize">{account.provider}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Badge variant={account.is_active ? "default" : "secondary"}>
+                          {account.is_active ? "Active" : "Paused"}
+                        </Badge>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => disconnectAccount.mutate(account.id)}
+                          disabled={disconnectAccount.isPending}
+                        >
+                          Disconnect
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Gmail */}
             <Card className="border border-border">
@@ -117,22 +150,10 @@ export default function Settings() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {connections.find((c) => c.provider === "gmail") ? (
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-green-600" />
-                      <span className="text-sm text-card-foreground">Connected</span>
-                    </div>
-                    <Button variant="outline" className="w-full">
-                      Disconnect
-                    </Button>
-                  </div>
-                ) : (
-                  <Button onClick={handleConnectGmail} className="w-full">
-                    Connect Gmail
-                    <ExternalLink className="ml-2 h-4 w-4" />
-                  </Button>
-                )}
+                <Button onClick={handleConnectGmail} className="w-full">
+                  Connect Gmail
+                  <ExternalLink className="ml-2 h-4 w-4" />
+                </Button>
               </CardContent>
             </Card>
 
@@ -155,22 +176,10 @@ export default function Settings() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {connections.find((c) => c.provider === "outlook") ? (
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-green-600" />
-                      <span className="text-sm text-card-foreground">Connected</span>
-                    </div>
-                    <Button variant="outline" className="w-full">
-                      Disconnect
-                    </Button>
-                  </div>
-                ) : (
-                  <Button onClick={handleConnectOutlook} className="w-full" variant="outline">
-                    Connect Outlook
-                    <ExternalLink className="ml-2 h-4 w-4" />
-                  </Button>
-                )}
+                <Button onClick={handleConnectOutlook} className="w-full" variant="outline">
+                  Connect Outlook
+                  <ExternalLink className="ml-2 h-4 w-4" />
+                </Button>
               </CardContent>
             </Card>
           </div>
@@ -218,24 +227,28 @@ export default function Settings() {
                   </Button>
                 </div>
                 <div className="space-y-2">
-                  {whitelistEmails.map((email) => (
-                    <div
-                      key={email}
-                      className="flex items-center justify-between rounded-lg bg-green-50 px-3 py-2"
-                    >
-                      <span className="text-sm text-green-800">{email}</span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6"
-                        onClick={() =>
-                          setWhitelistEmails(whitelistEmails.filter((e) => e !== email))
-                        }
+                  {whitelistEmails.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No emails in whitelist</p>
+                  ) : (
+                    whitelistEmails.map((email) => (
+                      <div
+                        key={email}
+                        className="flex items-center justify-between rounded-lg bg-green-50 px-3 py-2"
                       >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  ))}
+                        <span className="text-sm text-green-800">{email}</span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() =>
+                            setWhitelistEmails(whitelistEmails.filter((e) => e !== email))
+                          }
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -263,24 +276,28 @@ export default function Settings() {
                   </Button>
                 </div>
                 <div className="space-y-2">
-                  {blacklistEmails.map((email) => (
-                    <div
-                      key={email}
-                      className="flex items-center justify-between rounded-lg bg-red-50 px-3 py-2"
-                    >
-                      <span className="text-sm text-red-800">{email}</span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6"
-                        onClick={() =>
-                          setBlacklistEmails(blacklistEmails.filter((e) => e !== email))
-                        }
+                  {blacklistEmails.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No emails in blacklist</p>
+                  ) : (
+                    blacklistEmails.map((email) => (
+                      <div
+                        key={email}
+                        className="flex items-center justify-between rounded-lg bg-red-50 px-3 py-2"
                       >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  ))}
+                        <span className="text-sm text-red-800">{email}</span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() =>
+                            setBlacklistEmails(blacklistEmails.filter((e) => e !== email))
+                          }
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>

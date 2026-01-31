@@ -10,10 +10,11 @@ import {
   Send,
   Plus,
   Clock,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -26,68 +27,28 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useEmailQueue, type QueuedEmail } from "@/hooks/useEmailQueue";
 
-interface QueuedEmail {
-  id: string;
-  from: string;
-  subject: string;
-  body: string;
-  receivedAt: string;
-  confidence: number;
-  reason: string;
-  suggestedReply: string;
-  category: string;
-}
+const getConfidenceColor = (confidence: number | null) => {
+  if (!confidence) return "text-muted-foreground bg-muted";
+  if (confidence >= 0.7) return "text-green-600 bg-green-50";
+  if (confidence >= 0.5) return "text-amber-600 bg-amber-50";
+  return "text-red-600 bg-red-50";
+};
 
-const initialQueue: QueuedEmail[] = [
-  {
-    id: "1",
-    from: "sarah@startup.io",
-    subject: "Partnership opportunity discussion",
-    body: "Hi there,\n\nI'm the BD lead at Startup.io and I've been following your company's growth. We're building a complementary product and I think there could be great synergy between our solutions.\n\nWould you be open to a quick call next week to explore potential partnership opportunities?\n\nBest,\nSarah",
-    receivedAt: "32 min ago",
-    confidence: 42,
-    reason: "Partnership inquiries are outside knowledge base scope",
-    suggestedReply: "Thank you for reaching out about a potential partnership. I'll forward this to our business development team who will be in touch with you shortly to schedule a call.",
-    category: "Partnership",
-  },
-  {
-    id: "2",
-    from: "james@enterprise.com",
-    subject: "Custom pricing request for 500+ users",
-    body: "Hello,\n\nWe're evaluating your solution for our organization of 500+ employees. The pricing page shows up to 100 users - what are the options for enterprise deployment?\n\nAlso interested in:\n- SSO integration\n- Dedicated support\n- SLA guarantees\n\nPlease advise.\n\nJames Miller\nIT Director, Enterprise Corp",
-    receivedAt: "1 hr ago",
-    confidence: 35,
-    reason: "Enterprise pricing not in knowledge base",
-    suggestedReply: "Thank you for your interest in our enterprise solution. For organizations of 500+ users, we offer custom pricing with dedicated support, SSO integration, and SLA guarantees. I'll have our enterprise sales team reach out to you with a tailored proposal.",
-    category: "Sales",
-  },
-  {
-    id: "3",
-    from: "angry.customer@email.com",
-    subject: "URGENT: Service outage affecting our team",
-    body: "This is unacceptable! Our team has been unable to access the platform for the past 2 hours. We have critical deadlines and this is severely impacting our work.\n\nWe need this resolved IMMEDIATELY or we'll be forced to look at alternatives.\n\nExpecting a response within the hour.",
-    receivedAt: "45 min ago",
-    confidence: 28,
-    reason: "Urgent complaint requires human attention",
-    suggestedReply: "I sincerely apologize for the service disruption you're experiencing. I understand how critical this is for your team. I'm escalating this to our technical team immediately and someone will reach out to you within the next 30 minutes with an update.",
-    category: "Support",
-  },
-  {
-    id: "4",
-    from: "intern@company.org",
-    subject: "Question about API rate limits",
-    body: "Hi,\n\nI'm working on integrating your API and noticed we're hitting rate limits. The docs mention 1000 requests/minute but we're getting 429 errors at around 800.\n\nIs there something we're missing? Any way to increase the limit?\n\nThanks!",
-    receivedAt: "2 hrs ago",
-    confidence: 55,
-    reason: "Technical details partially match knowledge base but need verification",
-    suggestedReply: "Thank you for reaching out about the API rate limits. The standard limit is indeed 1000 requests per minute. The discrepancy you're seeing might be due to concurrent request handling. I'd recommend implementing exponential backoff. For higher limits, please contact our API team with your use case details.",
-    category: "Technical",
-  },
-];
+const formatTimeAgo = (date: string) => {
+  const now = new Date();
+  const then = new Date(date);
+  const diffMs = now.getTime() - then.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  
+  if (diffMins < 60) return `${diffMins} min ago`;
+  if (diffMins < 1440) return `${Math.floor(diffMins / 60)} hr ago`;
+  return `${Math.floor(diffMins / 1440)} days ago`;
+};
 
 export default function EmailQueue() {
-  const [queue, setQueue] = useState<QueuedEmail[]>(initialQueue);
+  const { emails, isLoading, updateEmailStatus, pendingCount } = useEmailQueue();
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editingReply, setEditingReply] = useState<string | null>(null);
@@ -95,26 +56,23 @@ export default function EmailQueue() {
   const [addKBDialogOpen, setAddKBDialogOpen] = useState(false);
   const [selectedEmailForKB, setSelectedEmailForKB] = useState<QueuedEmail | null>(null);
 
-  const filteredQueue = queue.filter(
+  const filteredQueue = emails.filter(
     (email) =>
       email.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      email.from.toLowerCase().includes(searchQuery.toLowerCase())
+      email.from_address.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleApprove = (id: string) => {
-    setQueue(queue.filter((e) => e.id !== id));
-    toast.success("Email reply sent successfully");
+  const handleApprove = async (id: string) => {
+    await updateEmailStatus.mutateAsync({ id, status: "approved" });
   };
 
-  const handleIgnore = (id: string) => {
-    setQueue(queue.filter((e) => e.id !== id));
-    toast.info("Email ignored");
+  const handleIgnore = async (id: string) => {
+    await updateEmailStatus.mutateAsync({ id, status: "ignored" });
   };
 
-  const handleEditSend = (id: string) => {
-    setQueue(queue.filter((e) => e.id !== id));
+  const handleEditSend = async (id: string) => {
+    await updateEmailStatus.mutateAsync({ id, status: "sent", editedReply });
     setEditingReply(null);
-    toast.success("Edited reply sent successfully");
   };
 
   const handleAddToKB = (email: QueuedEmail) => {
@@ -122,11 +80,13 @@ export default function EmailQueue() {
     setAddKBDialogOpen(true);
   };
 
-  const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 70) return "text-green-600 bg-green-50";
-    if (confidence >= 50) return "text-amber-600 bg-amber-50";
-    return "text-red-600 bg-red-50";
-  };
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-8">
@@ -141,7 +101,7 @@ export default function EmailQueue() {
         <div className="flex items-center gap-3">
           <Badge variant="secondary" className="py-1.5 text-sm">
             <Clock className="mr-1 h-3 w-3" />
-            {queue.length} pending
+            {pendingCount} pending
           </Badge>
         </div>
       </div>
@@ -164,6 +124,7 @@ export default function EmailQueue() {
         {filteredQueue.map((email) => {
           const isExpanded = expandedId === email.id;
           const isEditing = editingReply === email.id;
+          const confidencePercent = email.confidence_score ? Math.round(email.confidence_score * 100) : null;
 
           return (
             <Card key={email.id} className="border border-border overflow-hidden">
@@ -181,15 +142,19 @@ export default function EmailQueue() {
                       {email.subject}
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      From: {email.from} • {email.receivedAt}
+                      From: {email.from_name || email.from_address} • {formatTimeAgo(email.queued_at)}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Badge className={cn("font-medium", getConfidenceColor(email.confidence))}>
-                    {email.confidence}% confidence
-                  </Badge>
-                  <Badge variant="outline">{email.category}</Badge>
+                  {confidencePercent !== null && (
+                    <Badge className={cn("font-medium", getConfidenceColor(email.confidence_score))}>
+                      {confidencePercent}% confidence
+                    </Badge>
+                  )}
+                  {email.intent && (
+                    <Badge variant="outline" className="capitalize">{email.intent}</Badge>
+                  )}
                   {isExpanded ? (
                     <ChevronUp className="h-5 w-5 text-muted-foreground" />
                   ) : (
@@ -202,10 +167,12 @@ export default function EmailQueue() {
               {isExpanded && (
                 <CardContent className="border-t border-border bg-muted/30 pt-5">
                   {/* Reason */}
-                  <div className="mb-4 flex items-start gap-2 rounded-lg bg-amber-50 p-3">
-                    <AlertCircle className="mt-0.5 h-4 w-4 text-amber-600" />
-                    <p className="text-sm text-amber-800">{email.reason}</p>
-                  </div>
+                  {email.flag_reason && (
+                    <div className="mb-4 flex items-start gap-2 rounded-lg bg-amber-50 p-3">
+                      <AlertCircle className="mt-0.5 h-4 w-4 text-amber-600" />
+                      <p className="text-sm text-amber-800">{email.flag_reason}</p>
+                    </div>
+                  )}
 
                   {/* Original Email */}
                   <div className="mb-6">
@@ -220,31 +187,40 @@ export default function EmailQueue() {
                   </div>
 
                   {/* Suggested Reply */}
-                  <div className="mb-6">
-                    <h4 className="mb-2 text-sm font-medium text-card-foreground">
-                      AI Suggested Reply
-                    </h4>
-                    {isEditing ? (
-                      <Textarea
-                        className="min-h-[120px]"
-                        value={editedReply}
-                        onChange={(e) => setEditedReply(e.target.value)}
-                      />
-                    ) : (
-                      <div className="rounded-lg border border-border bg-card p-4">
-                        <p className="whitespace-pre-wrap text-sm text-card-foreground">
-                          {email.suggestedReply}
-                        </p>
-                      </div>
-                    )}
-                  </div>
+                  {email.suggested_reply && (
+                    <div className="mb-6">
+                      <h4 className="mb-2 text-sm font-medium text-card-foreground">
+                        AI Suggested Reply
+                      </h4>
+                      {isEditing ? (
+                        <Textarea
+                          className="min-h-[120px]"
+                          value={editedReply}
+                          onChange={(e) => setEditedReply(e.target.value)}
+                        />
+                      ) : (
+                        <div className="rounded-lg border border-border bg-card p-4">
+                          <p className="whitespace-pre-wrap text-sm text-card-foreground">
+                            {email.suggested_reply}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {/* Actions */}
                   <div className="flex flex-wrap gap-3">
                     {isEditing ? (
                       <>
-                        <Button onClick={() => handleEditSend(email.id)}>
-                          <Send className="mr-2 h-4 w-4" />
+                        <Button 
+                          onClick={() => handleEditSend(email.id)}
+                          disabled={updateEmailStatus.isPending}
+                        >
+                          {updateEmailStatus.isPending ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <Send className="mr-2 h-4 w-4" />
+                          )}
                           Send Edited Reply
                         </Button>
                         <Button
@@ -256,23 +232,33 @@ export default function EmailQueue() {
                       </>
                     ) : (
                       <>
-                        <Button onClick={() => handleApprove(email.id)}>
-                          <Check className="mr-2 h-4 w-4" />
+                        <Button 
+                          onClick={() => handleApprove(email.id)}
+                          disabled={updateEmailStatus.isPending}
+                        >
+                          {updateEmailStatus.isPending ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <Check className="mr-2 h-4 w-4" />
+                          )}
                           Approve & Send
                         </Button>
-                        <Button
-                          variant="outline"
-                          onClick={() => {
-                            setEditingReply(email.id);
-                            setEditedReply(email.suggestedReply);
-                          }}
-                        >
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit & Send
-                        </Button>
+                        {email.suggested_reply && (
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              setEditingReply(email.id);
+                              setEditedReply(email.suggested_reply || "");
+                            }}
+                          >
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit & Send
+                          </Button>
+                        )}
                         <Button
                           variant="outline"
                           onClick={() => handleIgnore(email.id)}
+                          disabled={updateEmailStatus.isPending}
                         >
                           <X className="mr-2 h-4 w-4" />
                           Ignore

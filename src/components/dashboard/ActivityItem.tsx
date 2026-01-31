@@ -5,7 +5,7 @@ interface ActivityItemProps {
   email: {
     from: string;
     subject: string;
-    action: "replied" | "ignored" | "queued" | "forwarded";
+    action: "replied" | "ignored" | "queued" | "forwarded" | "labeled";
     time: string;
     confidence?: number;
   };
@@ -31,6 +31,11 @@ const actionConfig = {
     icon: Forward,
     label: "Forwarded",
     className: "text-primary bg-primary/10",
+  },
+  labeled: {
+    icon: Check,
+    label: "Labeled",
+    className: "text-blue-600 bg-blue-50",
   },
 };
 
