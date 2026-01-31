@@ -1,81 +1,71 @@
-import { Mail, Send, Clock, Zap, TrendingUp, AlertCircle } from "lucide-react";
+import { Mail, Send, Clock, Zap, TrendingUp, AlertCircle, Loader2 } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { ActivityItem } from "@/components/dashboard/ActivityItem";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-
-const stats = [
-  {
-    title: "Emails Received",
-    value: 247,
-    subtitle: "Last 7 days",
-    icon: Mail,
-    trend: { value: 12, isPositive: true },
-    variant: "primary" as const,
-  },
-  {
-    title: "Auto-Replied",
-    value: 183,
-    subtitle: "74% of total",
-    icon: Send,
-    trend: { value: 8, isPositive: true },
-    variant: "success" as const,
-  },
-  {
-    title: "In Review Queue",
-    value: 12,
-    subtitle: "Needs your attention",
-    icon: Clock,
-    variant: "warning" as const,
-  },
-  {
-    title: "Time Saved",
-    value: "14.2 hrs",
-    subtitle: "This week",
-    icon: Zap,
-    trend: { value: 23, isPositive: true },
-    variant: "default" as const,
-  },
-];
-
-const recentActivity = [
-  {
-    from: "john@company.com",
-    subject: "Question about pricing plans",
-    action: "replied" as const,
-    time: "2 min ago",
-    confidence: 94,
-  },
-  {
-    from: "newsletter@techweekly.com",
-    subject: "This Week in Tech - Issue #234",
-    action: "ignored" as const,
-    time: "15 min ago",
-  },
-  {
-    from: "sarah@startup.io",
-    subject: "Partnership opportunity discussion",
-    action: "queued" as const,
-    time: "32 min ago",
-    confidence: 42,
-  },
-  {
-    from: "support@vendor.com",
-    subject: "Your invoice is ready",
-    action: "forwarded" as const,
-    time: "1 hr ago",
-  },
-  {
-    from: "mike@clientco.com",
-    subject: "Meeting reschedule request",
-    action: "replied" as const,
-    time: "2 hrs ago",
-    confidence: 88,
-  },
-];
+import { useActivityLogs } from "@/hooks/useActivityLogs";
+import { useEmailQueue } from "@/hooks/useEmailQueue";
 
 export default function Dashboard() {
+  const { logs, isLoading: logsLoading } = useActivityLogs(10);
+  const { pendingCount, isLoading: queueLoading } = useEmailQueue();
+
+  const isLoading = logsLoading || queueLoading;
+
+  // Calculate stats from logs
+  const repliedCount = logs.filter(l => l.action === "replied").length;
+  const ignoredCount = logs.filter(l => l.action === "ignored").length;
+  const totalActions = logs.length;
+
+  const stats = [
+    {
+      title: "Total Actions",
+      value: totalActions,
+      subtitle: "Recent activity",
+      icon: Mail,
+      variant: "primary" as const,
+    },
+    {
+      title: "Auto-Replied",
+      value: repliedCount,
+      subtitle: totalActions > 0 ? `${Math.round((repliedCount / totalActions) * 100)}% of total` : "0%",
+      icon: Send,
+      variant: "success" as const,
+    },
+    {
+      title: "In Review Queue",
+      value: pendingCount,
+      subtitle: "Needs your attention",
+      icon: Clock,
+      variant: "warning" as const,
+    },
+    {
+      title: "Time Saved",
+      value: `${Math.round(repliedCount * 3)} min`,
+      subtitle: "Estimated",
+      icon: Zap,
+      variant: "default" as const,
+    },
+  ];
+
+  // Transform activity logs for display
+  const recentActivity = logs.map(log => ({
+    from: log.email_from || "Unknown",
+    subject: log.email_subject || "No subject",
+    action: log.action,
+    time: formatTimeAgo(log.created_at),
+    confidence: log.action === "replied" ? 90 : log.action === "queued" ? 45 : undefined,
+  }));
+
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="p-8">
       {/* Header */}
@@ -107,9 +97,15 @@ export default function Dashboard() {
               </Button>
             </CardHeader>
             <CardContent className="space-y-3">
-              {recentActivity.map((email, index) => (
-                <ActivityItem key={index} email={email} />
-              ))}
+              {recentActivity.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">
+                  No activity yet. Connect your email to get started.
+                </p>
+              ) : (
+                recentActivity.map((email, index) => (
+                  <ActivityItem key={index} email={email} />
+                ))
+              )}
             </CardContent>
           </Card>
         </div>
@@ -117,26 +113,48 @@ export default function Dashboard() {
         {/* Quick Actions & Status */}
         <div className="space-y-6">
           {/* Queue Alert */}
-          <Card className="border-amber-200 bg-amber-50">
-            <CardContent className="flex items-start gap-4 p-5">
-              <div className="rounded-full bg-amber-100 p-2">
-                <AlertCircle className="h-5 w-5 text-amber-600" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-medium text-amber-900">
-                  12 emails need review
-                </h3>
-                <p className="mt-1 text-sm text-amber-700">
-                  The AI wasn't confident about these emails.
+          {pendingCount > 0 && (
+            <Card className="border-amber-200 bg-amber-50">
+              <CardContent className="flex items-start gap-4 p-5">
+                <div className="rounded-full bg-amber-100 p-2">
+                  <AlertCircle className="h-5 w-5 text-amber-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-medium text-amber-900">
+                    {pendingCount} email{pendingCount !== 1 ? "s" : ""} need review
+                  </h3>
+                  <p className="mt-1 text-sm text-amber-700">
+                    The AI wasn't confident about these emails.
+                  </p>
+                  <Link to="/queue">
+                    <Button size="sm" className="mt-3" variant="outline">
+                      Review Now
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Getting Started */}
+          {totalActions === 0 && (
+            <Card className="border-primary/20 bg-primary/5">
+              <CardContent className="p-5">
+                <h3 className="font-medium text-card-foreground">Getting Started</h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  1. Connect your email in Settings<br />
+                  2. Add knowledge to the Knowledge Base<br />
+                  3. Configure AI instructions<br />
+                  4. Enable automation
                 </p>
-                <Link to="/queue">
-                  <Button size="sm" className="mt-3" variant="outline">
-                    Review Now
+                <Link to="/settings">
+                  <Button size="sm" className="mt-4">
+                    Go to Settings
                   </Button>
                 </Link>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Performance */}
           <Card className="border border-border">
@@ -150,28 +168,29 @@ export default function Dashboard() {
               <div>
                 <div className="mb-1 flex justify-between text-sm">
                   <span className="text-muted-foreground">Auto-reply rate</span>
-                  <span className="font-medium text-card-foreground">74%</span>
+                  <span className="font-medium text-card-foreground">
+                    {totalActions > 0 ? Math.round((repliedCount / totalActions) * 100) : 0}%
+                  </span>
                 </div>
                 <div className="h-2 rounded-full bg-muted">
-                  <div className="h-full w-[74%] rounded-full bg-primary" />
+                  <div 
+                    className="h-full rounded-full bg-primary" 
+                    style={{ width: `${totalActions > 0 ? (repliedCount / totalActions) * 100 : 0}%` }}
+                  />
                 </div>
               </div>
               <div>
                 <div className="mb-1 flex justify-between text-sm">
-                  <span className="text-muted-foreground">Avg. confidence</span>
-                  <span className="font-medium text-card-foreground">87%</span>
+                  <span className="text-muted-foreground">Ignored rate</span>
+                  <span className="font-medium text-card-foreground">
+                    {totalActions > 0 ? Math.round((ignoredCount / totalActions) * 100) : 0}%
+                  </span>
                 </div>
                 <div className="h-2 rounded-full bg-muted">
-                  <div className="h-full w-[87%] rounded-full bg-green-500" />
-                </div>
-              </div>
-              <div>
-                <div className="mb-1 flex justify-between text-sm">
-                  <span className="text-muted-foreground">KB coverage</span>
-                  <span className="font-medium text-card-foreground">62%</span>
-                </div>
-                <div className="h-2 rounded-full bg-muted">
-                  <div className="h-full w-[62%] rounded-full bg-amber-500" />
+                  <div 
+                    className="h-full rounded-full bg-amber-500" 
+                    style={{ width: `${totalActions > 0 ? (ignoredCount / totalActions) * 100 : 0}%` }}
+                  />
                 </div>
               </div>
             </CardContent>
@@ -180,4 +199,15 @@ export default function Dashboard() {
       </div>
     </div>
   );
+}
+
+function formatTimeAgo(date: string) {
+  const now = new Date();
+  const then = new Date(date);
+  const diffMs = now.getTime() - then.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  
+  if (diffMins < 60) return `${diffMins} min ago`;
+  if (diffMins < 1440) return `${Math.floor(diffMins / 60)} hr ago`;
+  return `${Math.floor(diffMins / 1440)} days ago`;
 }

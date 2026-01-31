@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Save, RotateCcw, Info, Sparkles } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Save, RotateCcw, Info, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,31 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-
-const defaultInstructions = `You are an AI email assistant. Follow these rules strictly:
-
-1. REPLYING TO EMAILS
-   - Only answer questions using information from the knowledge base
-   - If you're unsure or the information isn't in the knowledge base, send the email to the review queue
-   - Never make up information or guess answers
-   - Keep replies concise (1-2 paragraphs maximum)
-
-2. EMAILS TO IGNORE
-   - Newsletters and promotional emails
-   - Cold sales pitches
-   - Spam or suspicious emails
-   - Emails marked as spam
-
-3. EMAILS TO ESCALATE
-   - Urgent requests or complaints
-   - Requests for meetings or calls
-   - Partnership inquiries
-   - Any email asking for something not covered in the knowledge base
-
-4. TONE & STYLE
-   - Be professional but friendly
-   - Use the user's first name when available
-   - End with a helpful closing`;
+import { useAIInstructions } from "@/hooks/useAIInstructions";
 
 const examplePrompts = [
   "Only answer pricing questions if the exact price is in the knowledge base",
@@ -47,26 +23,50 @@ const examplePrompts = [
 ];
 
 export default function Instructions() {
-  const [instructions, setInstructions] = useState(defaultInstructions);
-  const [tone, setTone] = useState("professional");
-  const [replyLength, setReplyLength] = useState("medium");
+  const { instructions, isLoading, updateInstructions, defaultInstructions } = useAIInstructions();
+  
+  const [localInstructions, setLocalInstructions] = useState("");
+  const [tone, setTone] = useState<"formal" | "professional" | "friendly" | "concise">("professional");
+  const [replyLength, setReplyLength] = useState<"short" | "medium" | "long">("medium");
   const [signature, setSignature] = useState("Best regards,\nThe Team");
-  const [autoReply, setAutoReply] = useState(true);
+  const [autoReply, setAutoReply] = useState(false);
   const [escalateUncertain, setEscalateUncertain] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
 
-  const handleSave = () => {
-    setIsSaving(true);
-    setTimeout(() => {
-      setIsSaving(false);
-      toast.success("Instructions saved successfully");
-    }, 1000);
+  // Sync local state with fetched data
+  useEffect(() => {
+    if (instructions) {
+      setLocalInstructions(instructions.system_prompt || defaultInstructions);
+      setTone(instructions.tone || "professional");
+      setReplyLength(instructions.reply_length || "medium");
+      setSignature(instructions.signature || "Best regards,\nThe Team");
+      setAutoReply(instructions.auto_reply_enabled ?? false);
+      setEscalateUncertain(instructions.escalate_unknown ?? true);
+    }
+  }, [instructions, defaultInstructions]);
+
+  const handleSave = async () => {
+    await updateInstructions.mutateAsync({
+      system_prompt: localInstructions,
+      tone,
+      reply_length: replyLength,
+      signature,
+      auto_reply_enabled: autoReply,
+      escalate_unknown: escalateUncertain,
+    });
   };
 
   const handleReset = () => {
-    setInstructions(defaultInstructions);
+    setLocalInstructions(defaultInstructions);
     toast.info("Instructions reset to default");
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-8">
@@ -94,14 +94,18 @@ export default function Instructions() {
             <CardContent>
               <Textarea
                 className="min-h-[400px] font-mono text-sm"
-                value={instructions}
-                onChange={(e) => setInstructions(e.target.value)}
+                value={localInstructions}
+                onChange={(e) => setLocalInstructions(e.target.value)}
                 placeholder="Enter your instructions here..."
               />
               <div className="mt-4 flex gap-3">
-                <Button onClick={handleSave} disabled={isSaving}>
-                  <Save className="mr-2 h-4 w-4" />
-                  {isSaving ? "Saving..." : "Save Changes"}
+                <Button onClick={handleSave} disabled={updateInstructions.isPending}>
+                  {updateInstructions.isPending ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save className="mr-2 h-4 w-4" />
+                  )}
+                  Save Changes
                 </Button>
                 <Button variant="outline" onClick={handleReset}>
                   <RotateCcw className="mr-2 h-4 w-4" />
@@ -128,7 +132,7 @@ export default function Instructions() {
                   key={i}
                   className="cursor-pointer rounded-lg bg-card p-2 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
                   onClick={() => {
-                    setInstructions((prev) => prev + "\n\n" + prompt);
+                    setLocalInstructions((prev) => prev + "\n\n" + prompt);
                     toast.success("Added to instructions");
                   }}
                 >
@@ -149,7 +153,7 @@ export default function Instructions() {
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <Label>Tone</Label>
-                <Select value={tone} onValueChange={setTone}>
+                <Select value={tone} onValueChange={(v) => setTone(v as typeof tone)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -164,7 +168,7 @@ export default function Instructions() {
 
               <div className="space-y-2">
                 <Label>Reply Length</Label>
-                <Select value={replyLength} onValueChange={setReplyLength}>
+                <Select value={replyLength} onValueChange={(v) => setReplyLength(v as typeof replyLength)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>

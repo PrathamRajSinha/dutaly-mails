@@ -7,7 +7,7 @@ import {
   File,
   Trash2,
   Edit,
-  ChevronDown,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,78 +32,27 @@ import {
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-
-interface KnowledgeEntry {
-  id: string;
-  type: "text" | "faq" | "document" | "snippet";
-  title: string;
-  content: string;
-  category: string;
-  createdAt: string;
-}
+import { useKnowledgeBase, type KnowledgeEntry } from "@/hooks/useKnowledgeBase";
 
 const typeConfig = {
-  text: { icon: FileText, label: "Text Entry", color: "bg-primary/10 text-primary" },
   faq: { icon: MessageSquare, label: "FAQ", color: "bg-green-100 text-green-700" },
-  document: { icon: File, label: "Document", color: "bg-amber-100 text-amber-700" },
   snippet: { icon: FileText, label: "Snippet", color: "bg-purple-100 text-purple-700" },
+  document: { icon: File, label: "Document", color: "bg-amber-100 text-amber-700" },
+  policy: { icon: FileText, label: "Policy", color: "bg-primary/10 text-primary" },
 };
 
-const initialEntries: KnowledgeEntry[] = [
-  {
-    id: "1",
-    type: "snippet",
-    title: "Pricing Information",
-    content: "Our pricing starts at ₹9,999/month for the Starter plan. Pro plan is ₹24,999/month and Enterprise is custom pricing.",
-    category: "Pricing",
-    createdAt: "2024-01-15",
-  },
-  {
-    id: "2",
-    type: "text",
-    title: "Support Hours",
-    content: "Support hours are Mon–Fri, 10am–6pm IST. For urgent issues, email urgent@company.com.",
-    category: "Support",
-    createdAt: "2024-01-14",
-  },
-  {
-    id: "3",
-    type: "faq",
-    title: "Refund Policy",
-    content: "We offer full refunds within 7 days of purchase. After 7 days, no refunds are provided. Contact billing@company.com for refund requests.",
-    category: "Policies",
-    createdAt: "2024-01-13",
-  },
-  {
-    id: "4",
-    type: "snippet",
-    title: "Demo Booking Link",
-    content: "Book a demo with our team: https://calendly.com/company/demo",
-    category: "Sales",
-    createdAt: "2024-01-12",
-  },
-  {
-    id: "5",
-    type: "document",
-    title: "Product Documentation",
-    content: "Complete product documentation PDF uploaded. Contains setup guides, API reference, and troubleshooting.",
-    category: "Documentation",
-    createdAt: "2024-01-10",
-  },
-];
-
-const categories = ["All", "Pricing", "Support", "Policies", "Sales", "Documentation"];
+const categories = ["All", "faq", "snippet", "document", "policy"];
 
 export default function KnowledgeBase() {
-  const [entries, setEntries] = useState<KnowledgeEntry[]>(initialEntries);
+  const { entries, isLoading, createEntry, deleteEntry } = useKnowledgeBase();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newEntry, setNewEntry] = useState({
-    type: "text" as KnowledgeEntry["type"],
+    category: "faq" as KnowledgeEntry["category"],
     title: "",
     content: "",
-    category: "",
+    tags: [] as string[],
   });
 
   const filteredEntries = entries.filter((entry) => {
@@ -115,26 +64,32 @@ export default function KnowledgeBase() {
     return matchesSearch && matchesCategory;
   });
 
-  const handleAddEntry = () => {
+  const handleAddEntry = async () => {
     if (!newEntry.title || !newEntry.content) return;
 
-    const entry: KnowledgeEntry = {
-      id: Date.now().toString(),
-      type: newEntry.type,
+    await createEntry.mutateAsync({
+      category: newEntry.category,
       title: newEntry.title,
       content: newEntry.content,
-      category: newEntry.category || "General",
-      createdAt: new Date().toISOString().split("T")[0],
-    };
+      tags: newEntry.tags,
+      storage_path: null,
+    });
 
-    setEntries([entry, ...entries]);
-    setNewEntry({ type: "text", title: "", content: "", category: "" });
+    setNewEntry({ category: "faq", title: "", content: "", tags: [] });
     setIsAddDialogOpen(false);
   };
 
-  const handleDeleteEntry = (id: string) => {
-    setEntries(entries.filter((e) => e.id !== id));
+  const handleDeleteEntry = async (id: string) => {
+    await deleteEntry.mutateAsync(id);
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-8">
@@ -164,18 +119,18 @@ export default function KnowledgeBase() {
               <div className="space-y-2">
                 <Label>Type</Label>
                 <Select
-                  value={newEntry.type}
+                  value={newEntry.category}
                   onValueChange={(v) =>
-                    setNewEntry({ ...newEntry, type: v as KnowledgeEntry["type"] })
+                    setNewEntry({ ...newEntry, category: v as KnowledgeEntry["category"] })
                   }
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="text">Text Entry</SelectItem>
                     <SelectItem value="faq">FAQ</SelectItem>
                     <SelectItem value="snippet">Answer Snippet</SelectItem>
+                    <SelectItem value="policy">Policy</SelectItem>
                     <SelectItem value="document">Document</SelectItem>
                   </SelectContent>
                 </Select>
@@ -187,16 +142,6 @@ export default function KnowledgeBase() {
                   value={newEntry.title}
                   onChange={(e) =>
                     setNewEntry({ ...newEntry, title: e.target.value })
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Category</Label>
-                <Input
-                  placeholder="e.g., Sales, Support, Policies"
-                  value={newEntry.category}
-                  onChange={(e) =>
-                    setNewEntry({ ...newEntry, category: e.target.value })
                   }
                 />
               </div>
@@ -216,7 +161,12 @@ export default function KnowledgeBase() {
               <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleAddEntry}>Add Entry</Button>
+              <Button onClick={handleAddEntry} disabled={createEntry.isPending}>
+                {createEntry.isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : null}
+                Add Entry
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -240,6 +190,7 @@ export default function KnowledgeBase() {
               variant={selectedCategory === cat ? "default" : "outline"}
               size="sm"
               onClick={() => setSelectedCategory(cat)}
+              className="capitalize"
             >
               {cat}
             </Button>
@@ -250,8 +201,8 @@ export default function KnowledgeBase() {
       {/* Entries Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {filteredEntries.map((entry) => {
-          const config = typeConfig[entry.type];
-          const Icon = config.icon;
+          const config = typeConfig[entry.category];
+          const Icon = config?.icon || FileText;
 
           return (
             <Card
@@ -261,10 +212,10 @@ export default function KnowledgeBase() {
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2">
-                    <div className={cn("rounded-lg p-2", config.color)}>
+                    <div className={cn("rounded-lg p-2", config?.color || "bg-muted")}>
                       <Icon className="h-4 w-4" />
                     </div>
-                    <Badge variant="secondary" className="text-xs">
+                    <Badge variant="secondary" className="text-xs capitalize">
                       {entry.category}
                     </Badge>
                   </div>
@@ -277,6 +228,7 @@ export default function KnowledgeBase() {
                       size="icon"
                       className="h-8 w-8 text-destructive"
                       onClick={() => handleDeleteEntry(entry.id)}
+                      disabled={deleteEntry.isPending}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -289,7 +241,7 @@ export default function KnowledgeBase() {
                   {entry.content}
                 </p>
                 <p className="mt-3 text-xs text-muted-foreground">
-                  Added {entry.createdAt}
+                  Added {new Date(entry.created_at).toLocaleDateString()}
                 </p>
               </CardContent>
             </Card>

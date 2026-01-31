@@ -14,7 +14,259 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      activity_logs: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          email_account_id: string | null
+          email_from: string | null
+          email_subject: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          email_account_id?: string | null
+          email_from?: string | null
+          email_subject?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          email_account_id?: string | null
+          email_from?: string | null
+          email_subject?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_logs_email_account_id_fkey"
+            columns: ["email_account_id"]
+            isOneToOne: false
+            referencedRelation: "email_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_instructions: {
+        Row: {
+          auto_reply_enabled: boolean | null
+          created_at: string
+          escalate_unknown: boolean | null
+          id: string
+          ignore_promotions: boolean | null
+          ignore_spam: boolean | null
+          reply_length: string
+          signature: string | null
+          system_prompt: string
+          tone: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auto_reply_enabled?: boolean | null
+          created_at?: string
+          escalate_unknown?: boolean | null
+          id?: string
+          ignore_promotions?: boolean | null
+          ignore_spam?: boolean | null
+          reply_length?: string
+          signature?: string | null
+          system_prompt?: string
+          tone?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auto_reply_enabled?: boolean | null
+          created_at?: string
+          escalate_unknown?: boolean | null
+          id?: string
+          ignore_promotions?: boolean | null
+          ignore_spam?: boolean | null
+          reply_length?: string
+          signature?: string | null
+          system_prompt?: string
+          tone?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      email_accounts: {
+        Row: {
+          access_token: string | null
+          created_at: string
+          email_address: string
+          id: string
+          is_active: boolean | null
+          provider: string
+          refresh_token: string | null
+          token_expires_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token?: string | null
+          created_at?: string
+          email_address: string
+          id?: string
+          is_active?: boolean | null
+          provider: string
+          refresh_token?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string | null
+          created_at?: string
+          email_address?: string
+          id?: string
+          is_active?: boolean | null
+          provider?: string
+          refresh_token?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      email_queue: {
+        Row: {
+          body: string
+          confidence_score: number | null
+          created_at: string
+          email_account_id: string | null
+          external_email_id: string | null
+          flag_reason: string | null
+          from_address: string
+          from_name: string | null
+          id: string
+          intent: string | null
+          queued_at: string
+          reviewed_at: string | null
+          status: string
+          subject: string
+          suggested_reply: string | null
+          user_id: string
+        }
+        Insert: {
+          body: string
+          confidence_score?: number | null
+          created_at?: string
+          email_account_id?: string | null
+          external_email_id?: string | null
+          flag_reason?: string | null
+          from_address: string
+          from_name?: string | null
+          id?: string
+          intent?: string | null
+          queued_at?: string
+          reviewed_at?: string | null
+          status?: string
+          subject: string
+          suggested_reply?: string | null
+          user_id: string
+        }
+        Update: {
+          body?: string
+          confidence_score?: number | null
+          created_at?: string
+          email_account_id?: string | null
+          external_email_id?: string | null
+          flag_reason?: string | null
+          from_address?: string
+          from_name?: string | null
+          id?: string
+          intent?: string | null
+          queued_at?: string
+          reviewed_at?: string | null
+          status?: string
+          subject?: string
+          suggested_reply?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_queue_email_account_id_fkey"
+            columns: ["email_account_id"]
+            isOneToOne: false
+            referencedRelation: "email_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_base_entries: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          id: string
+          storage_path: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          content: string
+          created_at?: string
+          id?: string
+          storage_path?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          id?: string
+          storage_path?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
