@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   Mail,
   Shield,
@@ -18,25 +19,97 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useEmailAccounts } from "@/hooks/useEmailAccounts";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Settings() {
+  const { session } = useAuth();
   const { accounts, isLoading, disconnectAccount } = useEmailAccounts();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [newWhitelistEmail, setNewWhitelistEmail] = useState("");
   const [newBlacklistEmail, setNewBlacklistEmail] = useState("");
   const [whitelistEmails, setWhitelistEmails] = useState<string[]>([]);
   const [blacklistEmails, setBlacklistEmails] = useState<string[]>([]);
+  const [isConnecting, setIsConnecting] = useState(false);
   
   // Notification settings
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [queueAlerts, setQueueAlerts] = useState(true);
   const [dailyDigest, setDailyDigest] = useState(true);
 
-  const handleConnectGmail = () => {
-    toast.info("Gmail OAuth integration coming soon. Connect your inbox via OAuth for secure email access.");
+  // Handle OAuth callback messages
+  useEffect(() => {
+    const success = searchParams.get("success");
+    const error = searchParams.get("error");
+
+    if (success) {
+      if (success === "gmail_connected") {
+        toast.success("Gmail account connected successfully!");
+      } else if (success === "outlook_connected") {
+        toast.success("Outlook account connected successfully!");
+      }
+      setSearchParams({});
+    }
+
+    if (error) {
+      const errorMessages: Record<string, string> = {
+        missing_params: "OAuth callback missing parameters",
+        invalid_state: "Invalid OAuth state - please try again",
+        token_exchange_failed: "Failed to exchange OAuth code for tokens",
+        user_info_failed: "Failed to get email information",
+        db_error: "Failed to save email account",
+        internal_error: "An unexpected error occurred",
+        access_denied: "Access was denied",
+      };
+      toast.error(errorMessages[error] || `OAuth error: ${error}`);
+      setSearchParams({});
+    }
+  }, [searchParams, setSearchParams]);
+
+  const handleConnectGmail = async () => {
+    if (!session?.access_token) {
+      toast.error("Please sign in to connect your Gmail account");
+      return;
+    }
+
+    setIsConnecting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("gmail-auth-init", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error("Gmail connection error:", error);
+      toast.error("Failed to start Gmail connection");
+      setIsConnecting(false);
+    }
   };
 
-  const handleConnectOutlook = () => {
-    toast.info("Outlook OAuth integration coming soon. Connect your inbox via OAuth for secure email access.");
+  const handleConnectOutlook = async () => {
+    if (!session?.access_token) {
+      toast.error("Please sign in to connect your Outlook account");
+      return;
+    }
+
+    setIsConnecting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("outlook-auth-init", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error("Outlook connection error:", error);
+      toast.error("Failed to start Outlook connection");
+      setIsConnecting(false);
+    }
   };
 
   const handleAddToWhitelist = () => {
@@ -150,9 +223,18 @@ export default function Settings() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button onClick={handleConnectGmail} className="w-full">
-                  Connect Gmail
-                  <ExternalLink className="ml-2 h-4 w-4" />
+                <Button onClick={handleConnectGmail} className="w-full" disabled={isConnecting}>
+                  {isConnecting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Connecting...
+                    </>
+                  ) : (
+                    <>
+                      Connect Gmail
+                      <ExternalLink className="ml-2 h-4 w-4" />
+                    </>
+                  )}
                 </Button>
               </CardContent>
             </Card>
@@ -176,9 +258,18 @@ export default function Settings() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button onClick={handleConnectOutlook} className="w-full" variant="outline">
-                  Connect Outlook
-                  <ExternalLink className="ml-2 h-4 w-4" />
+                <Button onClick={handleConnectOutlook} className="w-full" variant="outline" disabled={isConnecting}>
+                  {isConnecting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Connecting...
+                    </>
+                  ) : (
+                    <>
+                      Connect Outlook
+                      <ExternalLink className="ml-2 h-4 w-4" />
+                    </>
+                  )}
                 </Button>
               </CardContent>
             </Card>
