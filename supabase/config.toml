@@ -17,3 +17,9 @@ verify_jwt = false
 
 [functions.fetch-gmail-emails]
 verify_jwt = false
+
+[functions.send-gmail-reply]
+verify_jwt = false
+
+[functions.parse-document]
+verify_jwt = false

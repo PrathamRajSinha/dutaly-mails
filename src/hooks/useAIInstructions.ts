@@ -14,6 +14,9 @@ export interface AIInstructions {
   escalate_unknown: boolean;
   ignore_spam: boolean;
   ignore_promotions: boolean;
+  auto_reply_confidence_threshold: number;
+  greeting_response_enabled: boolean;
+  greeting_template: string;
   created_at: string;
   updated_at: string;
 }
@@ -67,6 +70,9 @@ export function useAIInstructions() {
             escalate_unknown: true,
             ignore_spam: true,
             ignore_promotions: true,
+            auto_reply_confidence_threshold: 0.8,
+            greeting_response_enabled: true,
+            greeting_template: "Hello! Thank you for reaching out. How can I assist you today?",
           };
         }
         throw error;

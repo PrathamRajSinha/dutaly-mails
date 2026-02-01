@@ -20,6 +20,7 @@ interface KnowledgeEntry {
   title: string;
   content: string;
   category: string;
+  extracted_text: string | null;
 }
 
 interface AIInstructions {
@@ -31,6 +32,9 @@ interface AIInstructions {
   escalate_unknown: boolean;
   ignore_spam: boolean;
   ignore_promotions: boolean;
+  auto_reply_confidence_threshold: number;
+  greeting_response_enabled: boolean;
+  greeting_template: string;
 }
 
 serve(async (req) => {
@@ -69,10 +73,10 @@ serve(async (req) => {
     const emailData: ProcessEmailRequest = await req.json();
     console.log("Processing email:", emailData.subject);
 
-    // Fetch user's knowledge base
+    // Fetch user's knowledge base (include extracted_text for file-based entries)
     const { data: knowledgeEntries, error: kbError } = await supabase
       .from("knowledge_base_entries")
-      .select("id, title, content, category")
+      .select("id, title, content, category, extracted_text")
       .eq("user_id", user.id);
 
     if (kbError) {
@@ -101,12 +105,18 @@ serve(async (req) => {
       escalate_unknown: true,
       ignore_spam: true,
       ignore_promotions: true,
+      auto_reply_confidence_threshold: 0.8,
+      greeting_response_enabled: true,
+      greeting_template: "Hello! Thank you for reaching out. How can I assist you today?",
     };
 
-    // Build context from knowledge base
-    const knowledgeContext = (knowledgeEntries || []).map((entry: KnowledgeEntry) => 
-      `[${entry.category.toUpperCase()}] ${entry.title}:\n${entry.content}`
-    ).join("\n\n");
+    // Build context from knowledge base (include extracted_text for file uploads)
+    const knowledgeContext = (knowledgeEntries || []).map((entry: KnowledgeEntry) => {
+      const content = entry.extracted_text 
+        ? `${entry.content}\n\nExtracted content:\n${entry.extracted_text}`
+        : entry.content;
+      return `[${entry.category.toUpperCase()}] ${entry.title}:\n${content}`;
+    }).join("\n\n");
 
     // Classify the email and generate response using Lovable AI
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -130,10 +140,19 @@ INSTRUCTIONS:
 - Reply length: ${aiInstructions.reply_length}
 - Add this signature at the end: ${aiInstructions.signature}
 
+GREETING DETECTION:
+${aiInstructions.greeting_response_enabled ? `- If the email is a simple greeting (hi, hello, hey, good morning/afternoon/evening, etc.) with no specific question:
+  - Set intent to "greeting"
+  - Set action to "reply"
+  - Set confidence to 0.95
+  - Use this greeting template as the reply: "${aiInstructions.greeting_template}"
+  - You can personalize the greeting using the sender's name if available
+  - This does NOT require knowledge base lookup` : "- Greeting auto-response is disabled"}
+
 RESPONSE FORMAT:
 You must respond with a valid JSON object containing:
 {
-  "intent": "support" | "sales" | "personal" | "newsletter" | "spam" | "unknown",
+  "intent": "support" | "sales" | "personal" | "newsletter" | "spam" | "greeting" | "unknown",
   "action": "reply" | "ignore" | "queue",
   "confidence": 0.0 to 1.0,
   "reason": "Brief explanation of your decision",
@@ -141,6 +160,7 @@ You must respond with a valid JSON object containing:
 }
 
 DECISION RULES:
+- If the email is a simple greeting and greeting response is enabled, reply with the greeting template (high confidence)
 - If the email is spam or promotional and ignore_spam is enabled, set action to "ignore"
 - If you can confidently answer using the knowledge base, set action to "reply"
 - If you're uncertain (confidence < 0.7) or the topic isn't in the knowledge base, set action to "queue"
@@ -249,15 +269,21 @@ ${emailData.body}`
     }
 
     if (parsedResponse.action === "reply") {
+      // Determine if we should auto-send based on confidence threshold
+      const shouldAutoSend = aiInstructions.auto_reply_enabled && 
+        parsedResponse.confidence >= aiInstructions.auto_reply_confidence_threshold;
+
       // Log the reply
       await supabase.from("activity_logs").insert({
         user_id: user.id,
-        action: "replied",
+        action: shouldAutoSend ? "auto_replied" : "replied",
         email_subject: emailData.subject,
         email_from: emailData.from_address,
         details: { 
           confidence: parsedResponse.confidence,
-          auto_sent: aiInstructions.auto_reply_enabled,
+          auto_sent: shouldAutoSend,
+          intent: parsedResponse.intent,
+          threshold: aiInstructions.auto_reply_confidence_threshold,
         },
       });
 
@@ -266,7 +292,8 @@ ${emailData.body}`
           action: "reply",
           suggested_reply: parsedResponse.suggested_reply,
           confidence: parsedResponse.confidence,
-          auto_send: aiInstructions.auto_reply_enabled,
+          auto_send: shouldAutoSend,
+          intent: parsedResponse.intent,
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );

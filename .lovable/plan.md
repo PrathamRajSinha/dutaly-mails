@@ -179,13 +179,15 @@ Choose: "Text Entry" or "Upload File"
 
 ---
 
-## Implementation Order
+## Implementation Status
 
-1. Database migrations (add new columns)
-2. `send-gmail-reply` edge function
-3. Update `process-email` with greeting detection
-4. Update `fetch-gmail-emails` for auto-sending
-5. Instructions page UI updates
-6. `parse-document` edge function
-7. Knowledge Base file upload UI
+| Step | Status |
+|------|--------|
+| 1. Database migrations (add new columns) | ✅ Done |
+| 2. `send-gmail-reply` edge function | ✅ Done |
+| 3. Update `process-email` with greeting detection | ✅ Done |
+| 4. Update `fetch-gmail-emails` for auto-sending | ✅ Done |
+| 5. Instructions page UI updates | ✅ Done |
+| 6. `parse-document` edge function | ✅ Done |
+| 7. Knowledge Base file upload UI | ✅ Done |
 

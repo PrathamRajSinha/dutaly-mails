@@ -11,6 +11,9 @@ export interface KnowledgeEntry {
   category: "faq" | "snippet" | "document" | "policy";
   tags: string[];
   storage_path: string | null;
+  file_type: string | null;
+  file_name: string | null;
+  extracted_text: string | null;
   created_at: string;
   updated_at: string;
 }

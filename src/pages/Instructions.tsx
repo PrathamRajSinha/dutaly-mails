@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Save, RotateCcw, Info, Sparkles, Loader2 } from "lucide-react";
+import { Save, RotateCcw, Info, Sparkles, Loader2, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 import { useAIInstructions } from "@/hooks/useAIInstructions";
 
@@ -31,6 +32,9 @@ export default function Instructions() {
   const [signature, setSignature] = useState("Best regards,\nThe Team");
   const [autoReply, setAutoReply] = useState(false);
   const [escalateUncertain, setEscalateUncertain] = useState(true);
+  const [confidenceThreshold, setConfidenceThreshold] = useState(0.8);
+  const [greetingEnabled, setGreetingEnabled] = useState(true);
+  const [greetingTemplate, setGreetingTemplate] = useState("Hello! Thank you for reaching out. How can I assist you today?");
 
   // Sync local state with fetched data
   useEffect(() => {
@@ -41,6 +45,9 @@ export default function Instructions() {
       setSignature(instructions.signature || "Best regards,\nThe Team");
       setAutoReply(instructions.auto_reply_enabled ?? false);
       setEscalateUncertain(instructions.escalate_unknown ?? true);
+      setConfidenceThreshold(instructions.auto_reply_confidence_threshold ?? 0.8);
+      setGreetingEnabled(instructions.greeting_response_enabled ?? true);
+      setGreetingTemplate(instructions.greeting_template || "Hello! Thank you for reaching out. How can I assist you today?");
     }
   }, [instructions, defaultInstructions]);
 
@@ -52,6 +59,9 @@ export default function Instructions() {
       signature,
       auto_reply_enabled: autoReply,
       escalate_unknown: escalateUncertain,
+      auto_reply_confidence_threshold: confidenceThreshold,
+      greeting_response_enabled: greetingEnabled,
+      greeting_template: greetingTemplate,
     });
   };
 
@@ -197,7 +207,7 @@ export default function Instructions() {
             <CardHeader>
               <CardTitle className="text-base">Behavior Controls</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-card-foreground">Auto-reply enabled</p>
@@ -207,6 +217,29 @@ export default function Instructions() {
                 </div>
                 <Switch checked={autoReply} onCheckedChange={setAutoReply} />
               </div>
+              
+              {autoReply && (
+                <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-3">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <Label className="text-sm">Confidence Threshold</Label>
+                      <span className="text-sm font-medium text-primary">{Math.round(confidenceThreshold * 100)}%</span>
+                    </div>
+                    <Slider
+                      value={[confidenceThreshold]}
+                      onValueChange={([v]) => setConfidenceThreshold(v)}
+                      min={0.5}
+                      max={1}
+                      step={0.05}
+                      className="w-full"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Only auto-send replies when AI confidence is above this threshold
+                    </p>
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-card-foreground">
@@ -221,6 +254,45 @@ export default function Instructions() {
                   onCheckedChange={setEscalateUncertain}
                 />
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Greeting Settings */}
+          <Card className="border border-border">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <MessageCircle className="h-4 w-4 text-primary" />
+                Greeting Response
+              </CardTitle>
+              <CardDescription>
+                Auto-respond to simple greetings like "Hi" or "Hello"
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-card-foreground">Enable greeting response</p>
+                  <p className="text-xs text-muted-foreground">
+                    Automatically reply to simple greetings
+                  </p>
+                </div>
+                <Switch checked={greetingEnabled} onCheckedChange={setGreetingEnabled} />
+              </div>
+              
+              {greetingEnabled && (
+                <div className="space-y-2">
+                  <Label>Greeting Template</Label>
+                  <Textarea
+                    rows={3}
+                    value={greetingTemplate}
+                    onChange={(e) => setGreetingTemplate(e.target.value)}
+                    placeholder="Your greeting response..."
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    This response will be sent for simple greetings (no knowledge base needed)
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

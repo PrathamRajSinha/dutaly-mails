@@ -57,9 +57,12 @@ export type Database = {
       }
       ai_instructions: {
         Row: {
+          auto_reply_confidence_threshold: number | null
           auto_reply_enabled: boolean | null
           created_at: string
           escalate_unknown: boolean | null
+          greeting_response_enabled: boolean | null
+          greeting_template: string | null
           id: string
           ignore_promotions: boolean | null
           ignore_spam: boolean | null
@@ -71,9 +74,12 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          auto_reply_confidence_threshold?: number | null
           auto_reply_enabled?: boolean | null
           created_at?: string
           escalate_unknown?: boolean | null
+          greeting_response_enabled?: boolean | null
+          greeting_template?: string | null
           id?: string
           ignore_promotions?: boolean | null
           ignore_spam?: boolean | null
@@ -85,9 +91,12 @@ export type Database = {
           user_id: string
         }
         Update: {
+          auto_reply_confidence_threshold?: number | null
           auto_reply_enabled?: boolean | null
           created_at?: string
           escalate_unknown?: boolean | null
+          greeting_response_enabled?: boolean | null
+          greeting_template?: string | null
           id?: string
           ignore_promotions?: boolean | null
           ignore_spam?: boolean | null
@@ -209,6 +218,9 @@ export type Database = {
           category: string
           content: string
           created_at: string
+          extracted_text: string | null
+          file_name: string | null
+          file_type: string | null
           id: string
           storage_path: string | null
           tags: string[] | null
@@ -220,6 +232,9 @@ export type Database = {
           category: string
           content: string
           created_at?: string
+          extracted_text?: string | null
+          file_name?: string | null
+          file_type?: string | null
           id?: string
           storage_path?: string | null
           tags?: string[] | null
@@ -231,6 +246,9 @@ export type Database = {
           category?: string
           content?: string
           created_at?: string
+          extracted_text?: string | null
+          file_name?: string | null
+          file_type?: string | null
           id?: string
           storage_path?: string | null
           tags?: string[] | null

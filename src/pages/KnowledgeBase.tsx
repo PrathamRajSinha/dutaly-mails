@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   Plus,
   Search,
@@ -8,6 +8,10 @@ import {
   Trash2,
   Edit,
   Loader2,
+  Upload,
+  FileImage,
+  FileSpreadsheet,
+  FileType2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,8 +35,12 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { useKnowledgeBase, type KnowledgeEntry } from "@/hooks/useKnowledgeBase";
+import { useQueryClient } from "@tanstack/react-query";
 
 const typeConfig = {
   faq: { icon: MessageSquare, label: "FAQ", color: "bg-green-100 text-green-700" },
@@ -41,13 +49,29 @@ const typeConfig = {
   policy: { icon: FileText, label: "Policy", color: "bg-primary/10 text-primary" },
 };
 
+const fileTypeIcons: Record<string, typeof FileText> = {
+  pdf: FileType2,
+  docx: FileText,
+  pptx: FileSpreadsheet,
+  image: FileImage,
+  txt: FileText,
+  text: FileText,
+};
+
 const categories = ["All", "faq", "snippet", "document", "policy"];
+
+const ACCEPTED_FILE_TYPES = ".pdf,.doc,.docx,.ppt,.pptx,.txt,.md,.jpg,.jpeg,.png,.gif,.webp";
 
 export default function KnowledgeBase() {
   const { entries, isLoading, createEntry, deleteEntry } = useKnowledgeBase();
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadTab, setUploadTab] = useState<"text" | "file">("text");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [newEntry, setNewEntry] = useState({
     category: "faq" as KnowledgeEntry["category"],
     title: "",
@@ -73,10 +97,112 @@ export default function KnowledgeBase() {
       content: newEntry.content,
       tags: newEntry.tags,
       storage_path: null,
+      file_type: null,
+      file_name: null,
+      extracted_text: null,
     });
 
     setNewEntry({ category: "faq", title: "", content: "", tags: [] });
+    setSelectedFile(null);
+    setUploadTab("text");
     setIsAddDialogOpen(false);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      // Auto-fill title from filename if empty
+      if (!newEntry.title) {
+        const nameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
+        setNewEntry(prev => ({ ...prev, title: nameWithoutExt }));
+      }
+    }
+  };
+
+  const handleFileUpload = async () => {
+    if (!selectedFile || !newEntry.title) {
+      toast.error("Please provide a title and select a file");
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Not authenticated");
+        return;
+      }
+
+      // Create unique file path
+      const fileExt = selectedFile.name.split(".").pop();
+      const fileName = `${user.id}/${Date.now()}-${selectedFile.name}`;
+
+      // Upload to storage
+      const { error: uploadError } = await supabase.storage
+        .from("kb-documents")
+        .upload(fileName, selectedFile);
+
+      if (uploadError) {
+        console.error("Upload error:", uploadError);
+        toast.error("Failed to upload file");
+        return;
+      }
+
+      // Create the knowledge base entry
+      const { data: entry, error: entryError } = await supabase
+        .from("knowledge_base_entries")
+        .insert({
+          user_id: user.id,
+          category: newEntry.category,
+          title: newEntry.title,
+          content: newEntry.content || `Uploaded file: ${selectedFile.name}`,
+          tags: newEntry.tags,
+          storage_path: fileName,
+          file_name: selectedFile.name,
+          file_type: fileExt || "unknown",
+        })
+        .select()
+        .single();
+
+      if (entryError) {
+        console.error("Entry error:", entryError);
+        toast.error("Failed to create entry");
+        return;
+      }
+
+      // Call parse-document to extract text
+      const { data: { session } } = await supabase.auth.getSession();
+      const parseResponse = await supabase.functions.invoke("parse-document", {
+        body: {
+          storage_path: fileName,
+          file_name: selectedFile.name,
+          file_type: fileExt,
+          entry_id: entry.id,
+        },
+      });
+
+      if (parseResponse.error) {
+        console.warn("Parse warning:", parseResponse.error);
+        // Don't fail the upload if parsing fails
+      }
+
+      toast.success("File uploaded and processed");
+      setNewEntry({ category: "faq", title: "", content: "", tags: [] });
+      setSelectedFile(null);
+      setUploadTab("text");
+      setIsAddDialogOpen(false);
+      
+      // Refresh the list
+      queryClient.invalidateQueries({ queryKey: ["knowledge-base"] });
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("Failed to upload file");
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleDeleteEntry = async (id: string) => {
@@ -115,59 +241,162 @@ export default function KnowledgeBase() {
                 Add information that the AI can use to answer emails.
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label>Type</Label>
-                <Select
-                  value={newEntry.category}
-                  onValueChange={(v) =>
-                    setNewEntry({ ...newEntry, category: v as KnowledgeEntry["category"] })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="faq">FAQ</SelectItem>
-                    <SelectItem value="snippet">Answer Snippet</SelectItem>
-                    <SelectItem value="policy">Policy</SelectItem>
-                    <SelectItem value="document">Document</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Title</Label>
-                <Input
-                  placeholder="e.g., Pricing Information"
-                  value={newEntry.title}
-                  onChange={(e) =>
-                    setNewEntry({ ...newEntry, title: e.target.value })
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Content</Label>
-                <Textarea
-                  placeholder="Enter the information..."
-                  rows={5}
-                  value={newEntry.content}
-                  onChange={(e) =>
-                    setNewEntry({ ...newEntry, content: e.target.value })
-                  }
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleAddEntry} disabled={createEntry.isPending}>
-                {createEntry.isPending ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : null}
-                Add Entry
-              </Button>
-            </DialogFooter>
+            <Tabs value={uploadTab} onValueChange={(v) => setUploadTab(v as "text" | "file")} className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="text">Text Entry</TabsTrigger>
+                <TabsTrigger value="file">Upload File</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="text" className="space-y-4 mt-4">
+                <div className="space-y-2">
+                  <Label>Type</Label>
+                  <Select
+                    value={newEntry.category}
+                    onValueChange={(v) =>
+                      setNewEntry({ ...newEntry, category: v as KnowledgeEntry["category"] })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="faq">FAQ</SelectItem>
+                      <SelectItem value="snippet">Answer Snippet</SelectItem>
+                      <SelectItem value="policy">Policy</SelectItem>
+                      <SelectItem value="document">Document</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Title</Label>
+                  <Input
+                    placeholder="e.g., Pricing Information"
+                    value={newEntry.title}
+                    onChange={(e) =>
+                      setNewEntry({ ...newEntry, title: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Content</Label>
+                  <Textarea
+                    placeholder="Enter the information..."
+                    rows={5}
+                    value={newEntry.content}
+                    onChange={(e) =>
+                      setNewEntry({ ...newEntry, content: e.target.value })
+                    }
+                  />
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleAddEntry} disabled={createEntry.isPending}>
+                    {createEntry.isPending ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : null}
+                    Add Entry
+                  </Button>
+                </DialogFooter>
+              </TabsContent>
+
+              <TabsContent value="file" className="space-y-4 mt-4">
+                <div className="space-y-2">
+                  <Label>Type</Label>
+                  <Select
+                    value={newEntry.category}
+                    onValueChange={(v) =>
+                      setNewEntry({ ...newEntry, category: v as KnowledgeEntry["category"] })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="document">Document</SelectItem>
+                      <SelectItem value="faq">FAQ</SelectItem>
+                      <SelectItem value="snippet">Answer Snippet</SelectItem>
+                      <SelectItem value="policy">Policy</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Title</Label>
+                  <Input
+                    placeholder="e.g., Product Documentation"
+                    value={newEntry.title}
+                    onChange={(e) =>
+                      setNewEntry({ ...newEntry, title: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Description (optional)</Label>
+                  <Textarea
+                    placeholder="Add context about this file..."
+                    rows={2}
+                    value={newEntry.content}
+                    onChange={(e) =>
+                      setNewEntry({ ...newEntry, content: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>File</Label>
+                  <div 
+                    className={cn(
+                      "border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors",
+                      selectedFile ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                    )}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept={ACCEPTED_FILE_TYPES}
+                      onChange={handleFileSelect}
+                      className="hidden"
+                    />
+                    {selectedFile ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <File className="h-5 w-5 text-primary" />
+                        <span className="text-sm font-medium">{selectedFile.name}</span>
+                        <Badge variant="secondary" className="text-xs">
+                          {(selectedFile.size / 1024).toFixed(1)} KB
+                        </Badge>
+                      </div>
+                    ) : (
+                      <div>
+                        <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                        <p className="text-sm text-muted-foreground">
+                          Click to upload or drag and drop
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          PDF, Word, PowerPoint, Text, Images
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={handleFileUpload} 
+                    disabled={isUploading || !selectedFile || !newEntry.title}
+                  >
+                    {isUploading ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Upload className="mr-2 h-4 w-4" />
+                    )}
+                    Upload & Process
+                  </Button>
+                </DialogFooter>
+              </TabsContent>
+            </Tabs>
           </DialogContent>
         </Dialog>
       </div>
@@ -202,7 +431,9 @@ export default function KnowledgeBase() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {filteredEntries.map((entry) => {
           const config = typeConfig[entry.category];
-          const Icon = config?.icon || FileText;
+          // Use file type icon if it's a file-based entry
+          const FileIcon = entry.file_type ? (fileTypeIcons[entry.file_type] || File) : null;
+          const Icon = FileIcon || config?.icon || FileText;
 
           return (
             <Card
@@ -218,6 +449,11 @@ export default function KnowledgeBase() {
                     <Badge variant="secondary" className="text-xs capitalize">
                       {entry.category}
                     </Badge>
+                    {entry.file_name && (
+                      <Badge variant="outline" className="text-xs">
+                        {entry.file_type?.toUpperCase()}
+                      </Badge>
+                    )}
                   </div>
                   <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                     <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -240,6 +476,12 @@ export default function KnowledgeBase() {
                 <p className="line-clamp-3 text-sm text-muted-foreground">
                   {entry.content}
                 </p>
+                {entry.file_name && (
+                  <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
+                    <File className="h-3 w-3" />
+                    <span className="truncate">{entry.file_name}</span>
+                  </div>
+                )}
                 <p className="mt-3 text-xs text-muted-foreground">
                   Added {new Date(entry.created_at).toLocaleDateString()}
                 </p>
