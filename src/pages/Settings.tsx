@@ -10,6 +10,7 @@ import {
   Plus,
   Trash2,
   Loader2,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +22,103 @@ import { toast } from "sonner";
 import { useEmailAccounts } from "@/hooks/useEmailAccounts";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import type { Session } from "@supabase/supabase-js";
+
+interface EmailAccount {
+  id: string;
+  email_address: string;
+  provider: string;
+  is_active: boolean | null;
+}
+
+function ConnectedAccountCard({
+  account,
+  onDisconnect,
+  isDisconnecting,
+  session,
+}: {
+  account: EmailAccount;
+  onDisconnect: () => void;
+  isDisconnecting: boolean;
+  session: Session | null;
+}) {
+  const [isFetching, setIsFetching] = useState(false);
+
+  const handleFetchEmails = async () => {
+    if (!session?.access_token) {
+      toast.error("Please sign in to fetch emails");
+      return;
+    }
+
+    setIsFetching(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("fetch-gmail-emails", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+
+      if (error) throw error;
+
+      if (data.processed > 0) {
+        toast.success(`Fetched ${data.processed} new email(s)`);
+      } else if (data.total === 0) {
+        toast.info("No unread emails found");
+      } else {
+        toast.info(`No new emails (${data.skipped} already processed)`);
+      }
+    } catch (error) {
+      console.error("Fetch emails error:", error);
+      toast.error("Failed to fetch emails");
+    } finally {
+      setIsFetching(false);
+    }
+  };
+
+  return (
+    <Card className="border border-border">
+      <CardContent className="flex items-center justify-between p-4">
+        <div className="flex items-center gap-3">
+          <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${
+            account.provider === "gmail" ? "bg-red-100" : "bg-blue-100"
+          }`}>
+            <Mail className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="font-medium text-card-foreground">{account.email_address}</p>
+            <p className="text-sm text-muted-foreground capitalize">{account.provider}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <Badge variant={account.is_active ? "default" : "secondary"}>
+            {account.is_active ? "Active" : "Paused"}
+          </Badge>
+          {account.provider === "gmail" && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleFetchEmails}
+              disabled={isFetching}
+            >
+              {isFetching ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="mr-2 h-4 w-4" />
+              )}
+              Fetch Emails
+            </Button>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onDisconnect}
+            disabled={isDisconnecting}
+          >
+            Disconnect
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function Settings() {
   const { session } = useAuth();
@@ -170,34 +268,13 @@ export default function Settings() {
               <h3 className="mb-4 text-lg font-medium text-foreground">Connected Accounts</h3>
               <div className="space-y-3">
                 {accounts.map((account) => (
-                  <Card key={account.id} className="border border-border">
-                    <CardContent className="flex items-center justify-between p-4">
-                      <div className="flex items-center gap-3">
-                        <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${
-                          account.provider === "gmail" ? "bg-red-100" : "bg-blue-100"
-                        }`}>
-                          <Mail className="h-5 w-5" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-card-foreground">{account.email_address}</p>
-                          <p className="text-sm text-muted-foreground capitalize">{account.provider}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Badge variant={account.is_active ? "default" : "secondary"}>
-                          {account.is_active ? "Active" : "Paused"}
-                        </Badge>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => disconnectAccount.mutate(account.id)}
-                          disabled={disconnectAccount.isPending}
-                        >
-                          Disconnect
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <ConnectedAccountCard
+                    key={account.id}
+                    account={account}
+                    onDisconnect={() => disconnectAccount.mutate(account.id)}
+                    isDisconnecting={disconnectAccount.isPending}
+                    session={session}
+                  />
                 ))}
               </div>
             </div>
