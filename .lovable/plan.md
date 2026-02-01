@@ -1,129 +1,191 @@
 
 
-# Gmail and Outlook OAuth Implementation
+# Email AI Enhancement Plan
 
-This plan implements secure OAuth2 authentication for Gmail and Microsoft Outlook, allowing users to connect their email accounts.
+## Overview
 
----
-
-## Step 1: Add Required Secrets
-
-Before I can write the code, you need to add these OAuth credentials to Supabase:
-
-| Secret Name | Description |
-|-------------|-------------|
-| `GOOGLE_CLIENT_ID` | From Google Cloud Console |
-| `GOOGLE_CLIENT_SECRET` | From Google Cloud Console |
-| `MICROSOFT_CLIENT_ID` | From Azure Portal |
-| `MICROSOFT_CLIENT_SECRET` | From Azure Portal |
+This plan addresses three major enhancements:
+1. **Auto-reply functionality** - Automatically send replies for high-confidence emails
+2. **Greeting auto-response** - Handle simple greetings without knowledge base entries
+3. **Knowledge Base file uploads** - Support for PDFs, Word docs, PPTs, images, and text
 
 ---
 
-## Step 2: Create Edge Functions
+## 1. Auto-Reply System
 
-### gmail-auth-init
-- Generates Google OAuth2 authorization URL
-- Creates secure state token with user ID
-- Returns URL for frontend redirect
+### Current State
+- The `process-email` function already detects when to reply (confidence >= 0.7)
+- The `auto_reply_enabled` setting exists in `ai_instructions`
+- Gmail OAuth already has `gmail.send` scope
 
-### gmail-auth-callback  
-- Receives authorization code from Google
-- Exchanges code for access/refresh tokens
-- Fetches user's email from Google API
-- Stores tokens in `email_accounts` table
-- Redirects to Settings page
+### What Needs to Change
 
-### outlook-auth-init
-- Generates Microsoft OAuth2 authorization URL
-- Creates secure state token with user ID
-- Returns URL for frontend redirect
+**A. Create `send-gmail-reply` Edge Function**
+- Accept email_id, recipient, subject, and reply body
+- Use Gmail API to send the reply
+- Handle OAuth token refresh if needed
+- Mark the original email as read
 
-### outlook-auth-callback
-- Receives authorization code from Microsoft
-- Exchanges code for tokens via Microsoft endpoint
-- Fetches user profile from Graph API
-- Stores tokens in `email_accounts` table
-- Redirects to Settings page
+**B. Update `fetch-gmail-emails` Function**
+- When `process-email` returns `action: "reply"` AND `auto_send: true`
+- Call the new `send-gmail-reply` function
+- Log the auto-sent reply in activity_logs
 
----
-
-## Step 3: Create Callback Pages
-
-### OAuthGmailCallback.tsx
-- Reads `code` and `state` from URL
-- Calls `gmail-auth-callback` edge function
-- Shows loading spinner during processing
-- Redirects to Settings on success
-
-### OAuthOutlookCallback.tsx
-- Same pattern for Microsoft OAuth
+**C. Add Auto-Reply Threshold Setting**
+- Add `auto_reply_confidence_threshold` column to `ai_instructions` (default: 0.8)
+- Only auto-send when confidence exceeds this threshold
+- Add UI slider in Instructions page to configure
 
 ---
 
-## Step 4: Update Settings Page
+## 2. Greeting Auto-Response (No Knowledge Base Needed)
 
-Modify connection handlers to:
-- Call the `*-auth-init` edge function
-- Get the OAuth URL from response
-- Redirect user to Google/Microsoft authorization
+### Current Behavior
+Simple greetings like "Hi" or "Hello" get low confidence because they don't match knowledge base entries.
+
+### Solution
+
+**A. Update `process-email` Prompt**
+Add special handling in the AI system prompt:
+- Recognize common greetings: "hi", "hello", "hey", "good morning/afternoon/evening"
+- Set `intent: "greeting"` for these cases
+- Generate a friendly, contextual greeting response
+- Set high confidence (0.95) for clear greetings
+- No knowledge base lookup required for greetings
+
+**B. Add Greeting Templates to AI Instructions**
+- Add `greeting_template` column to `ai_instructions`
+- Default: "Hello! Thank you for reaching out. How can I assist you today?"
+- Users can customize their greeting response
 
 ---
 
-## Step 5: Update App Routes
+## 3. Knowledge Base File Uploads
 
-Add routes in `App.tsx`:
-- `/oauth/gmail/callback`
-- `/oauth/outlook/callback`
+### Current State
+- Only text-based entries (title + content)
+- `storage_path` column exists but unused
+- `kb-documents` storage bucket exists
 
----
+### Implementation
 
-## Step 6: Update config.toml
+**A. Database Schema Changes**
+Add columns to `knowledge_base_entries`:
+- `file_type`: text (pdf, docx, pptx, txt, image, text)
+- `file_name`: text (original filename)
+- `extracted_text`: text (for search and AI context)
 
-Register the new edge functions with `verify_jwt = false` (authentication handled in code).
+**B. Create `parse-document` Edge Function**
+- Accept uploaded file from storage
+- Use document parsing logic based on file type:
+  - **PDF/Word/PPT**: Extract text content
+  - **Images**: Use OCR or describe as image attachment
+  - **Text files**: Direct text extraction
+- Store extracted text in `extracted_text` column
 
----
+**C. Update Knowledge Base UI**
+- Add file upload input (accept: .pdf, .doc, .docx, .ppt, .pptx, .txt, .jpg, .png)
+- Upload to `kb-documents` bucket
+- Call `parse-document` function after upload
+- Show file preview/icon based on type
+- Allow adding text description alongside files
 
-## File Changes Summary
-
-| File | Action |
-|------|--------|
-| `supabase/functions/gmail-auth-init/index.ts` | Create |
-| `supabase/functions/gmail-auth-callback/index.ts` | Create |
-| `supabase/functions/outlook-auth-init/index.ts` | Create |
-| `supabase/functions/outlook-auth-callback/index.ts` | Create |
-| `src/pages/OAuthGmailCallback.tsx` | Create |
-| `src/pages/OAuthOutlookCallback.tsx` | Create |
-| `src/pages/Settings.tsx` | Modify |
-| `src/App.tsx` | Modify |
-| `supabase/config.toml` | Modify |
+**D. Update `process-email` Function**
+- Fetch `extracted_text` from file-based entries
+- Include in knowledge context sent to AI
 
 ---
 
 ## Technical Details
 
-### Security Implementation
-
-- **State parameter**: JWT containing user ID to prevent CSRF attacks
-- **Server-side token storage**: Access/refresh tokens stored in database, never exposed to frontend
-- **Service role**: Callback functions use service role to insert tokens for the authenticated user
-
-### OAuth Flow
+### New Database Columns
 
 ```text
-1. User clicks "Connect Gmail/Outlook"
-2. Frontend calls *-auth-init edge function
-3. Edge function returns OAuth URL with state token
-4. User authorizes app in Google/Microsoft
-5. Provider redirects to callback edge function
-6. Edge function exchanges code for tokens
-7. Tokens saved to email_accounts table
-8. User redirected to Settings with success message
+ai_instructions:
+  + auto_reply_confidence_threshold (numeric, default 0.8)
+  + greeting_response_enabled (boolean, default true)
+  + greeting_template (text, default greeting message)
+
+knowledge_base_entries:
+  + file_type (text, nullable)
+  + file_name (text, nullable)
+  + extracted_text (text, nullable)
 ```
 
-### Token Storage Schema
+### New Edge Functions
 
-Uses existing `email_accounts` table columns:
-- `access_token` - Short-lived API token
-- `refresh_token` - Long-lived refresh token  
-- `token_expires_at` - Expiration timestamp
+1. **send-gmail-reply** - Send email replies via Gmail API
+2. **parse-document** - Extract text from uploaded files
+
+### Modified Files
+
+| File | Changes |
+|------|---------|
+| `supabase/functions/process-email/index.ts` | Add greeting detection, use extracted_text |
+| `supabase/functions/fetch-gmail-emails/index.ts` | Trigger auto-reply when conditions met |
+| `src/pages/Instructions.tsx` | Add greeting settings, confidence threshold slider |
+| `src/pages/KnowledgeBase.tsx` | Add file upload UI, show file types |
+| `src/hooks/useKnowledgeBase.ts` | Handle file uploads, parse documents |
+
+---
+
+## User Experience Flow
+
+### Auto-Reply Flow
+```text
+Email received
+    |
+    v
+AI classifies email
+    |
+    +--> Low confidence --> Add to queue
+    |
+    +--> Greeting detected --> Generate greeting response
+    |           |
+    |           +--> Auto-reply enabled? --> Send reply
+    |
+    +--> High confidence --> Generate reply from KB
+                |
+                +--> Confidence > threshold AND auto-reply enabled?
+                        |
+                        +--> Yes --> Send reply automatically
+                        |
+                        +--> No --> Add to queue with suggested reply
+```
+
+### File Upload Flow
+```text
+User clicks "Add Entry"
+    |
+    v
+Choose: "Text Entry" or "Upload File"
+    |
+    +--> Text Entry --> Current flow
+    |
+    +--> Upload File --> Select file
+                |
+                v
+            Upload to storage bucket
+                |
+                v
+            Call parse-document function
+                |
+                v
+            Extract text content
+                |
+                v
+            Create entry with file_type, file_name, extracted_text
+```
+
+---
+
+## Implementation Order
+
+1. Database migrations (add new columns)
+2. `send-gmail-reply` edge function
+3. Update `process-email` with greeting detection
+4. Update `fetch-gmail-emails` for auto-sending
+5. Instructions page UI updates
+6. `parse-document` edge function
+7. Knowledge Base file upload UI
 
