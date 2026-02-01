@@ -277,6 +277,51 @@ serve(async (req) => {
         processed++;
         const result = await processResponse.json();
         console.log(`Email processed: ${result.action}`);
+
+        // If auto_send is true, send the reply automatically
+        if (result.action === "reply" && result.auto_send && result.suggested_reply) {
+          console.log(`Auto-sending reply to ${fromAddress}...`);
+          
+          const sendResponse = await fetch(
+            `${supabaseUrl}/functions/v1/send-gmail-reply`,
+            {
+              method: "POST",
+              headers: {
+                Authorization: authHeader,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                email_account_id: account.id,
+                to_address: fromAddress,
+                subject: subject,
+                body: result.suggested_reply,
+                message_id: msg.id,
+                thread_id: msg.threadId,
+              }),
+            }
+          );
+
+          if (sendResponse.ok) {
+            const sendResult = await sendResponse.json();
+            console.log(`Auto-reply sent successfully, message ID: ${sendResult.message_id}`);
+            
+            // Log the auto-sent reply
+            await supabase.from("activity_logs").insert({
+              user_id: user.id,
+              email_account_id: account.id,
+              action: "auto_sent",
+              email_subject: subject,
+              email_from: fromAddress,
+              details: { 
+                intent: result.intent,
+                confidence: result.confidence,
+                sent_message_id: sendResult.message_id,
+              },
+            });
+          } else {
+            console.error("Failed to auto-send reply:", await sendResponse.text());
+          }
+        }
       } else {
         console.error(`Failed to process email ${msg.id}:`, await processResponse.text());
       }
