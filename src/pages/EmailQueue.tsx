@@ -11,6 +11,7 @@ import {
   Plus,
   Clock,
   Loader2,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +29,9 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useEmailQueue, type QueuedEmail } from "@/hooks/useEmailQueue";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 const getConfidenceColor = (confidence: number | null) => {
   if (!confidence) return "text-muted-foreground bg-muted";
@@ -48,6 +52,8 @@ const formatTimeAgo = (date: string) => {
 };
 
 export default function EmailQueue() {
+  const { session } = useAuth();
+  const queryClient = useQueryClient();
   const { emails, isLoading, updateEmailStatus, pendingCount } = useEmailQueue();
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -55,6 +61,44 @@ export default function EmailQueue() {
   const [editedReply, setEditedReply] = useState("");
   const [addKBDialogOpen, setAddKBDialogOpen] = useState(false);
   const [selectedEmailForKB, setSelectedEmailForKB] = useState<QueuedEmail | null>(null);
+  const [isFetching, setIsFetching] = useState(false);
+
+  const handleFetchEmails = async () => {
+    if (!session?.access_token) {
+      toast.error("Please sign in to fetch emails");
+      return;
+    }
+
+    setIsFetching(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("fetch-gmail-emails", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+
+      if (error) throw error;
+
+      // Invalidate email queue to refresh the list
+      await queryClient.invalidateQueries({ queryKey: ["email-queue"] });
+
+      if (data.processed > 0) {
+        toast.success(`Fetched ${data.processed} new email(s)`);
+      } else if (data.total === 0) {
+        toast.info("No unread emails found");
+      } else {
+        toast.info(`No new emails (${data.skipped} already processed)`);
+      }
+    } catch (error) {
+      console.error("Fetch emails error:", error);
+      toast.error("Failed to fetch emails");
+    } finally {
+      setIsFetching(false);
+    }
+  };
+
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ["email-queue"] });
+    toast.success("Queue refreshed");
+  };
 
   const filteredQueue = emails.filter(
     (email) =>
@@ -99,6 +143,26 @@ export default function EmailQueue() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleFetchEmails}
+            disabled={isFetching}
+          >
+            {isFetching ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="mr-2 h-4 w-4" />
+            )}
+            Fetch New Emails
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleRefresh}
+          >
+            <RefreshCw className="h-4 w-4" />
+          </Button>
           <Badge variant="secondary" className="py-1.5 text-sm">
             <Clock className="mr-1 h-3 w-3" />
             {pendingCount} pending
