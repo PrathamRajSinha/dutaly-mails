@@ -84,38 +84,22 @@ export function useAIInstructions() {
 
   const updateInstructions = useMutation({
     mutationFn: async (updates: Partial<AIInstructions>) => {
-      // First check if a record exists
-      const { data: existing } = await supabase
+      // Use upsert to handle both insert and update in one operation
+      // This is more reliable than checking existence first
+      const { data, error } = await supabase
         .from("ai_instructions")
-        .select("id")
+        .upsert({
+          ...updates,
+          user_id: user!.id,
+          system_prompt: updates.system_prompt || defaultInstructions,
+        }, {
+          onConflict: 'user_id',
+        })
+        .select()
         .single();
 
-      if (existing) {
-        // Update existing
-        const { data, error } = await supabase
-          .from("ai_instructions")
-          .update(updates)
-          .eq("user_id", user!.id)
-          .select()
-          .single();
-
-        if (error) throw error;
-        return data;
-      } else {
-        // Create new
-        const { data, error } = await supabase
-          .from("ai_instructions")
-          .insert({
-            ...updates,
-            user_id: user!.id,
-            system_prompt: updates.system_prompt || defaultInstructions,
-          })
-          .select()
-          .single();
-
-        if (error) throw error;
-        return data;
-      }
+      if (error) throw error;
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["ai-instructions"] });
