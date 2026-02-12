@@ -19,6 +19,8 @@ export interface AIInstructions {
   greeting_template: string;
   email_footer: string;
   logo_url: string | null;
+  do_rules: string[];
+  do_not_rules: string[];
   created_at: string;
   updated_at: string;
 }
@@ -77,6 +79,8 @@ export function useAIInstructions() {
             greeting_template: "Hello! Thank you for reaching out. How can I assist you today?",
             email_footer: "This email was sent by an AI assistant. If you believe this was sent in error, please let us know.",
             logo_url: null,
+            do_rules: [],
+            do_not_rules: [],
           };
         }
         throw error;

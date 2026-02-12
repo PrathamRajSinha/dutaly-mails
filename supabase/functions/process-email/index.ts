@@ -36,6 +36,8 @@ interface AIInstructions {
   auto_reply_confidence_threshold: number;
   greeting_response_enabled: boolean;
   greeting_template: string;
+  do_rules: string[];
+  do_not_rules: string[];
 }
 
 serve(async (req) => {
@@ -105,6 +107,8 @@ serve(async (req) => {
       auto_reply_confidence_threshold: 0.8,
       greeting_response_enabled: true,
       greeting_template: "Hello! Thank you for reaching out. How can I assist you today?",
+      do_rules: [],
+      do_not_rules: [],
     };
 
     // Build context from knowledge base
@@ -136,8 +140,12 @@ INSTRUCTIONS:
 - Tone: ${aiInstructions.tone}
 - Reply length: ${aiInstructions.reply_length}
 - Add this signature at the end: ${aiInstructions.signature}
-
-CRITICAL REPLY RULES:
+${(aiInstructions.do_rules && aiInstructions.do_rules.length > 0) ? `
+DO (you MUST follow these rules):
+${aiInstructions.do_rules.map((r: string) => `- ${r}`).join("\n")}` : ""}
+${(aiInstructions.do_not_rules && aiInstructions.do_not_rules.length > 0) ? `
+DO NOT (you must NEVER do these):
+${aiInstructions.do_not_rules.map((r: string) => `- ${r}`).join("\n")}` : ""}
 - NEVER use markdown formatting (no **, no ##, no bullet points with -). Write replies as plain, natural email text. Use line breaks for paragraphs.
 - NEVER invent, guess, or fabricate information. If the knowledge base does NOT contain specific details (like pricing, dates, features), DO NOT make them up. Instead, set action to "queue" so a human can respond.
 - ONLY reply with information that is EXPLICITLY stated in the knowledge base above. If the knowledge base only has a link or brief mention without details, say you'll forward the inquiry — do NOT fabricate details.
