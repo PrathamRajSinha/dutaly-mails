@@ -49,6 +49,8 @@ export default function Instructions() {
   const [emailFooter, setEmailFooter] = useState("This email was sent by an AI assistant. If you believe this was sent in error, please let us know.");
   const [logoUrl, setLogoUrl] = useState("");
   const [showAutoReplyConfirm, setShowAutoReplyConfirm] = useState(false);
+  const [showThresholdConfirm, setShowThresholdConfirm] = useState(false);
+  const [pendingThreshold, setPendingThreshold] = useState(0.8);
 
   const saveToggle = (updates: Record<string, unknown>) => {
     const payload = {
@@ -266,7 +268,10 @@ export default function Instructions() {
                   </div>
                   <Slider
                     value={[confidenceThreshold]}
-                    onValueChange={([v]) => setConfidenceThreshold(v)}
+                    onValueChange={([v]) => {
+                      setPendingThreshold(v);
+                      setShowThresholdConfirm(true);
+                    }}
                     min={0.5}
                     max={1}
                     step={0.05}
@@ -382,6 +387,30 @@ export default function Instructions() {
           </Card>
         </div>
       </div>
+
+      {/* Confidence threshold confirmation dialog */}
+      <AlertDialog open={showThresholdConfirm} onOpenChange={(open) => {
+        if (!open) setPendingThreshold(confidenceThreshold);
+        setShowThresholdConfirm(open);
+      }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Change Confidence Threshold?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You're changing the auto-reply confidence threshold from {Math.round(confidenceThreshold * 100)}% to {Math.round(pendingThreshold * 100)}%. This affects which emails get auto-replied.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => {
+              setConfidenceThreshold(pendingThreshold);
+              saveToggle({ auto_reply_confidence_threshold: pendingThreshold });
+            }}>
+              Confirm Change
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Auto-reply confirmation dialog */}
       <AlertDialog open={showAutoReplyConfirm} onOpenChange={setShowAutoReplyConfirm}>
