@@ -50,8 +50,6 @@ export default function Instructions() {
   const [logoUrl, setLogoUrl] = useState("");
   const [showAutoReplyConfirm, setShowAutoReplyConfirm] = useState(false);
 
-  // Helper to immediately persist a toggle change to the DB
-  // Uses explicit current values + overrides to avoid stale closures
   const saveToggle = (updates: Record<string, unknown>) => {
     const payload = {
       system_prompt: localInstructions || defaultInstructions,
@@ -70,7 +68,6 @@ export default function Instructions() {
     updateInstructions.mutate(payload as any);
   };
 
-  // Sync local state with fetched data
   useEffect(() => {
     if (instructions) {
       setLocalInstructions(instructions.system_prompt || defaultInstructions);
@@ -119,16 +116,33 @@ export default function Instructions() {
   return (
     <div className="p-8">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">AI Instructions</h1>
-        <p className="mt-1 text-muted-foreground">
-          Tell the AI how to handle your emails in plain English
-        </p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">AI Instructions</h1>
+          <p className="mt-1 text-muted-foreground">
+            Tell the AI how to handle your emails in plain English
+          </p>
+        </div>
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={handleReset}>
+            <RotateCcw className="mr-2 h-4 w-4" />
+            Reset
+          </Button>
+          <Button onClick={handleSave} disabled={updateInstructions.isPending}>
+            {updateInstructions.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="mr-2 h-4 w-4" />
+            )}
+            Save Changes
+          </Button>
+        </div>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-3">
-        {/* Main Instructions */}
-        <div className="lg:col-span-2">
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Column 1 */}
+        <div className="space-y-6">
+          {/* Behavior Instructions */}
           <Card className="border border-border">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -136,37 +150,211 @@ export default function Instructions() {
                 Behavior Instructions
               </CardTitle>
               <CardDescription>
-                Write your instructions in plain English. The AI will follow these rules when processing emails.
+                Write rules in plain English for how the AI should process emails.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Textarea
-                className="min-h-[400px] font-mono text-sm"
+                className="min-h-[220px] font-mono text-sm"
                 value={localInstructions}
                 onChange={(e) => setLocalInstructions(e.target.value)}
                 placeholder="Enter your instructions here..."
               />
-              <div className="mt-4 flex gap-3">
-                <Button onClick={handleSave} disabled={updateInstructions.isPending}>
-                  {updateInstructions.isPending ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Save className="mr-2 h-4 w-4" />
-                  )}
-                  Save Changes
-                </Button>
-                <Button variant="outline" onClick={handleReset}>
-                  <RotateCcw className="mr-2 h-4 w-4" />
-                  Reset to Default
-                </Button>
+            </CardContent>
+          </Card>
+
+          {/* Reply Style */}
+          <Card className="border border-border">
+            <CardHeader>
+              <CardTitle className="text-base">Reply Style</CardTitle>
+              <CardDescription>Control the tone and length of AI-generated replies.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Tone</Label>
+                  <Select value={tone} onValueChange={(v) => setTone(v as typeof tone)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="formal">Formal</SelectItem>
+                      <SelectItem value="professional">Professional</SelectItem>
+                      <SelectItem value="friendly">Friendly</SelectItem>
+                      <SelectItem value="concise">Concise</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Reply Length</Label>
+                  <Select value={replyLength} onValueChange={(v) => setReplyLength(v as typeof replyLength)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="short">Short (1 paragraph)</SelectItem>
+                      <SelectItem value="medium">Medium (2 paragraphs)</SelectItem>
+                      <SelectItem value="long">Long (detailed)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Signature & Footer */}
+          <Card className="border border-border">
+            <CardHeader>
+              <CardTitle className="text-base">Signature & Footer</CardTitle>
+              <CardDescription>Customize the closing of every email reply.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label>Email Signature</Label>
+                <Textarea
+                  rows={3}
+                  value={signature}
+                  onChange={(e) => setSignature(e.target.value)}
+                  placeholder="Your email signature..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Email Footer</Label>
+                <Textarea
+                  rows={2}
+                  value={emailFooter}
+                  onChange={(e) => setEmailFooter(e.target.value)}
+                  placeholder="Footer text appended to every email..."
+                />
+                <p className="text-xs text-muted-foreground">
+                  Appears at the bottom of every sent email
+                </p>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Settings Sidebar */}
+        {/* Column 2 */}
         <div className="space-y-6">
-          {/* Quick Tips */}
+          {/* Automation Controls */}
+          <Card className="border border-border">
+            <CardHeader>
+              <CardTitle className="text-base">Automation Controls</CardTitle>
+              <CardDescription>Configure when and how the AI acts on your behalf.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-card-foreground">Auto-reply enabled</p>
+                  <p className="text-xs text-muted-foreground">AI sends replies automatically</p>
+                </div>
+                <Switch checked={autoReply} onCheckedChange={(v) => {
+                  if (v) {
+                    setShowAutoReplyConfirm(true);
+                  } else {
+                    setAutoReply(false);
+                    saveToggle({ auto_reply_enabled: false });
+                  }
+                }} />
+              </div>
+              
+              {autoReply && (
+                <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <Label className="text-sm">Confidence Threshold</Label>
+                    <span className="text-sm font-medium text-primary">{Math.round(confidenceThreshold * 100)}%</span>
+                  </div>
+                  <Slider
+                    value={[confidenceThreshold]}
+                    onValueChange={([v]) => setConfidenceThreshold(v)}
+                    min={0.5}
+                    max={1}
+                    step={0.05}
+                    className="w-full"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Only auto-send when AI confidence exceeds this threshold
+                  </p>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-card-foreground">Escalate uncertain emails</p>
+                  <p className="text-xs text-muted-foreground">Queue emails with low confidence</p>
+                </div>
+                <Switch checked={escalateUncertain} onCheckedChange={(v) => { setEscalateUncertain(v); saveToggle({ escalate_unknown: v }); }} />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Greeting Response */}
+          <Card className="border border-border">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <MessageCircle className="h-4 w-4 text-primary" />
+                Greeting Response
+              </CardTitle>
+              <CardDescription>Auto-respond to simple greetings like "Hi" or "Hello".</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-card-foreground">Enable greeting response</p>
+                  <p className="text-xs text-muted-foreground">Automatically reply to simple greetings</p>
+                </div>
+                <Switch checked={greetingEnabled} onCheckedChange={(v) => { setGreetingEnabled(v); saveToggle({ greeting_response_enabled: v }); }} />
+              </div>
+              
+              {greetingEnabled && (
+                <div className="space-y-2">
+                  <Label>Greeting Template</Label>
+                  <Textarea
+                    rows={3}
+                    value={greetingTemplate}
+                    onChange={(e) => setGreetingTemplate(e.target.value)}
+                    placeholder="Your greeting response..."
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Sent for simple greetings (no knowledge base needed)
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Branding */}
+          <Card className="border border-border">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Image className="h-4 w-4 text-primary" />
+                Branding
+              </CardTitle>
+              <CardDescription>Add your logo to email replies.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="space-y-2">
+                <Label>Logo URL</Label>
+                <Input
+                  value={logoUrl}
+                  onChange={(e) => setLogoUrl(e.target.value)}
+                  placeholder="https://example.com/logo.png"
+                />
+              </div>
+              {logoUrl && (
+                <div className="rounded-lg border border-border bg-muted/30 p-3">
+                  <img
+                    src={logoUrl}
+                    alt="Logo preview"
+                    className="h-12 max-w-[200px] object-contain"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Example Instructions */}
           <Card className="border-primary/20 bg-primary/5">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base">
@@ -192,191 +380,9 @@ export default function Instructions() {
               </p>
             </CardContent>
           </Card>
-
-          {/* Reply Settings */}
-          <Card className="border border-border">
-            <CardHeader>
-              <CardTitle className="text-base">Reply Settings</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <Label>Tone</Label>
-                <Select value={tone} onValueChange={(v) => setTone(v as typeof tone)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="formal">Formal</SelectItem>
-                    <SelectItem value="professional">Professional</SelectItem>
-                    <SelectItem value="friendly">Friendly</SelectItem>
-                    <SelectItem value="concise">Concise</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Reply Length</Label>
-                <Select value={replyLength} onValueChange={(v) => setReplyLength(v as typeof replyLength)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="short">Short (1 paragraph)</SelectItem>
-                    <SelectItem value="medium">Medium (2 paragraphs)</SelectItem>
-                    <SelectItem value="long">Long (detailed)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Email Signature</Label>
-                <Textarea
-                  rows={3}
-                  value={signature}
-                  onChange={(e) => setSignature(e.target.value)}
-                  placeholder="Your email signature..."
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Email Footer</Label>
-                <Textarea
-                  rows={3}
-                  value={emailFooter}
-                  onChange={(e) => setEmailFooter(e.target.value)}
-                  placeholder="Footer text appended to every email..."
-                />
-                <p className="text-xs text-muted-foreground">
-                  Appears at the bottom of every sent email
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2">
-                  <Image className="h-4 w-4 text-primary" />
-                  Logo URL
-                </Label>
-                <Input
-                  value={logoUrl}
-                  onChange={(e) => setLogoUrl(e.target.value)}
-                  placeholder="https://example.com/logo.png"
-                />
-                {logoUrl && (
-                  <div className="mt-2 rounded-lg border border-border bg-muted/30 p-3">
-                    <img
-                      src={logoUrl}
-                      alt="Logo preview"
-                      className="h-12 max-w-[200px] object-contain"
-                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                    />
-                  </div>
-                )}
-                <p className="text-xs text-muted-foreground">
-                  Your logo will appear in email replies
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Behavior Toggles */}
-          <Card className="border border-border">
-            <CardHeader>
-              <CardTitle className="text-base">Behavior Controls</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-card-foreground">Auto-reply enabled</p>
-                  <p className="text-xs text-muted-foreground">
-                    AI can send replies automatically
-                  </p>
-                </div>
-                <Switch checked={autoReply} onCheckedChange={(v) => {
-                  if (v) {
-                    setShowAutoReplyConfirm(true);
-                  } else {
-                    setAutoReply(false);
-                    saveToggle({ auto_reply_enabled: false });
-                  }
-                }} />
-              </div>
-              
-              {autoReply && (
-                <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-3">
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <Label className="text-sm">Confidence Threshold</Label>
-                      <span className="text-sm font-medium text-primary">{Math.round(confidenceThreshold * 100)}%</span>
-                    </div>
-                    <Slider
-                      value={[confidenceThreshold]}
-                      onValueChange={([v]) => setConfidenceThreshold(v)}
-                      min={0.5}
-                      max={1}
-                      step={0.05}
-                      className="w-full"
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Only auto-send replies when AI confidence is above this threshold
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-card-foreground">
-                    Escalate uncertain emails
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Queue emails with low confidence
-                  </p>
-                </div>
-                <Switch checked={escalateUncertain} onCheckedChange={(v) => { setEscalateUncertain(v); saveToggle({ escalate_unknown: v }); }} />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Greeting Settings */}
-          <Card className="border border-border">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <MessageCircle className="h-4 w-4 text-primary" />
-                Greeting Response
-              </CardTitle>
-              <CardDescription>
-                Auto-respond to simple greetings like "Hi" or "Hello"
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-card-foreground">Enable greeting response</p>
-                  <p className="text-xs text-muted-foreground">
-                    Automatically reply to simple greetings
-                  </p>
-                </div>
-                <Switch checked={greetingEnabled} onCheckedChange={(v) => { setGreetingEnabled(v); saveToggle({ greeting_response_enabled: v }); }} />
-              </div>
-              
-              {greetingEnabled && (
-                <div className="space-y-2">
-                  <Label>Greeting Template</Label>
-                  <Textarea
-                    rows={3}
-                    value={greetingTemplate}
-                    onChange={(e) => setGreetingTemplate(e.target.value)}
-                    placeholder="Your greeting response..."
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    This response will be sent for simple greetings (no knowledge base needed)
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
         </div>
       </div>
+
       {/* Auto-reply confirmation dialog */}
       <AlertDialog open={showAutoReplyConfirm} onOpenChange={setShowAutoReplyConfirm}>
         <AlertDialogContent>
