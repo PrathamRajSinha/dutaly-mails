@@ -138,13 +138,19 @@ INSTRUCTIONS:
 - Add this signature at the end: ${aiInstructions.signature}
 
 GREETING DETECTION:
-${aiInstructions.greeting_response_enabled ? `- If the email is a simple greeting (hi, hello, hey, good morning/afternoon/evening, etc.) with no specific question:
+${aiInstructions.greeting_response_enabled ? `- If the email is a simple greeting (hi, hello, hey, good morning/afternoon/evening, etc.) from a REAL PERSON with no specific question:
   - Set intent to "greeting"
   - Set action to "reply"
   - Set confidence to 0.95
   - Use this greeting template as the reply: "${aiInstructions.greeting_template}"
   - You can personalize the greeting using the sender's name if available
-  - This does NOT require knowledge base lookup` : "- Greeting auto-response is disabled"}
+  - This does NOT require knowledge base lookup
+- IMPORTANT: Automated/transactional emails (order confirmations, delivery notifications, account alerts, newsletters, marketing, no-reply addresses) are NOT greetings even if they contain "Hello [Name]". These should be classified as "newsletter", "spam", or their actual intent and IGNORED.` : "- Greeting auto-response is disabled"}
+
+AUTOMATED EMAIL DETECTION:
+- Emails from no-reply, noreply, alerts@, notifications@, care@, support@ (from businesses), marketing@, boom@, info@ (bulk senders) are typically automated
+- Order confirmations, delivery updates, account alerts, banking notifications, promotional offers are automated - IGNORE them
+- Only classify as "greeting" if the email body is primarily a personal greeting from a real person (e.g., "hi how are you", "hello, just checking in")
 
 RESPONSE FORMAT:
 You must respond with a valid JSON object containing:
@@ -157,7 +163,8 @@ You must respond with a valid JSON object containing:
 }
 
 DECISION RULES:
-- If the email is a simple greeting and greeting response is enabled, reply with the greeting template (high confidence)
+- If the email is automated/transactional (order updates, banking alerts, promotions, newsletters), set action to "ignore" regardless of content
+- If the email is a simple greeting FROM A REAL PERSON and greeting response is enabled, reply with the greeting template (high confidence)
 - If the email is spam or promotional and ignore_spam is enabled, set action to "ignore"
 - If you can confidently answer using the knowledge base, set action to "reply"
 - If you're uncertain (confidence < 0.7) or the topic isn't in the knowledge base, set action to "queue"
