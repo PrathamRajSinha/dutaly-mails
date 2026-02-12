@@ -36,6 +36,7 @@ import { useEmailQueue, type QueuedEmail } from "@/hooks/useEmailQueue";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { useEmailAccounts } from "@/hooks/useEmailAccounts";
 
 const getConfidenceColor = (confidence: number | null) => {
   if (!confidence) return "text-muted-foreground bg-muted";
@@ -260,6 +261,7 @@ function EmailCard({
 export default function EmailQueue() {
   const { session } = useAuth();
   const queryClient = useQueryClient();
+  const { accounts } = useEmailAccounts();
   const { needsReview, drafted, sent, ignored, isLoading, updateEmailStatus, pendingCount } = useEmailQueue();
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -275,17 +277,47 @@ export default function EmailQueue() {
     }
     setIsFetching(true);
     try {
-      const { data, error } = await supabase.functions.invoke("fetch-gmail-emails", {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
-      if (error) throw error;
+      const hasGmail = accounts.some(a => a.provider === "gmail" && a.is_active);
+      const hasImap = accounts.some(a => a.provider === "imap" && a.is_active);
+
+      const fetches: Promise<{ data: any; error: any }>[] = [];
+      if (hasGmail) {
+        fetches.push(supabase.functions.invoke("fetch-gmail-emails", {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        }));
+      }
+      if (hasImap) {
+        fetches.push(supabase.functions.invoke("fetch-imap-emails", {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        }));
+      }
+      if (fetches.length === 0) {
+        toast.info("No active email accounts connected");
+        setIsFetching(false);
+        return;
+      }
+
+      const results = await Promise.allSettled(fetches);
+      let totalProcessed = 0;
+      let totalSkipped = 0;
+      let totalTotal = 0;
+
+      for (const result of results) {
+        if (result.status === "fulfilled" && !result.value.error) {
+          const data = result.value.data;
+          totalProcessed += data.processed || 0;
+          totalSkipped += data.skipped || 0;
+          totalTotal += data.total || 0;
+        }
+      }
+
       await queryClient.invalidateQueries({ queryKey: ["email-queue"] });
-      if (data.processed > 0) {
-        toast.success(`Fetched ${data.processed} new email(s)`);
-      } else if (data.total === 0) {
+      if (totalProcessed > 0) {
+        toast.success(`Fetched ${totalProcessed} new email(s)`);
+      } else if (totalTotal === 0) {
         toast.info("No unread emails found");
       } else {
-        toast.info(`No new emails (${data.skipped} already processed)`);
+        toast.info(`No new emails (${totalSkipped} already processed)`);
       }
     } catch (error) {
       console.error("Fetch emails error:", error);
