@@ -36,6 +36,22 @@ export default function Instructions() {
   const [greetingEnabled, setGreetingEnabled] = useState(true);
   const [greetingTemplate, setGreetingTemplate] = useState("Hello! Thank you for reaching out. How can I assist you today?");
 
+  // Helper to immediately persist a toggle change to the DB
+  const saveToggle = (updates: Record<string, unknown>) => {
+    updateInstructions.mutate({
+      system_prompt: localInstructions || defaultInstructions,
+      tone,
+      reply_length: replyLength,
+      signature,
+      auto_reply_enabled: autoReply,
+      escalate_unknown: escalateUncertain,
+      auto_reply_confidence_threshold: confidenceThreshold,
+      greeting_response_enabled: greetingEnabled,
+      greeting_template: greetingTemplate,
+      ...updates,
+    } as any);
+  };
+
   // Sync local state with fetched data
   useEffect(() => {
     if (instructions) {
@@ -215,7 +231,7 @@ export default function Instructions() {
                     AI can send replies automatically
                   </p>
                 </div>
-                <Switch checked={autoReply} onCheckedChange={setAutoReply} />
+                <Switch checked={autoReply} onCheckedChange={(v) => { setAutoReply(v); saveToggle({ auto_reply_enabled: v }); }} />
               </div>
               
               {autoReply && (
@@ -249,10 +265,7 @@ export default function Instructions() {
                     Queue emails with low confidence
                   </p>
                 </div>
-                <Switch
-                  checked={escalateUncertain}
-                  onCheckedChange={setEscalateUncertain}
-                />
+                <Switch checked={escalateUncertain} onCheckedChange={(v) => { setEscalateUncertain(v); saveToggle({ escalate_unknown: v }); }} />
               </div>
             </CardContent>
           </Card>
@@ -276,7 +289,7 @@ export default function Instructions() {
                     Automatically reply to simple greetings
                   </p>
                 </div>
-                <Switch checked={greetingEnabled} onCheckedChange={setGreetingEnabled} />
+                <Switch checked={greetingEnabled} onCheckedChange={(v) => { setGreetingEnabled(v); saveToggle({ greeting_response_enabled: v }); }} />
               </div>
               
               {greetingEnabled && (
