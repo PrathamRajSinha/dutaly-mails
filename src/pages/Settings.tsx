@@ -11,6 +11,7 @@ import {
   Trash2,
   Loader2,
   RefreshCw,
+  Server,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +19,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useEmailAccounts } from "@/hooks/useEmailAccounts";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,6 +32,16 @@ interface EmailAccount {
   provider: string;
   is_active: boolean | null;
 }
+
+const PROVIDER_PRESETS: Record<string, { imap_host: string; imap_port: number; smtp_host: string; smtp_port: number }> = {
+  "yahoo.com": { imap_host: "imap.mail.yahoo.com", imap_port: 993, smtp_host: "smtp.mail.yahoo.com", smtp_port: 587 },
+  "yahoo.co.uk": { imap_host: "imap.mail.yahoo.com", imap_port: 993, smtp_host: "smtp.mail.yahoo.com", smtp_port: 587 },
+  "aol.com": { imap_host: "imap.aol.com", imap_port: 993, smtp_host: "smtp.aol.com", smtp_port: 587 },
+  "icloud.com": { imap_host: "imap.mail.me.com", imap_port: 993, smtp_host: "smtp.mail.me.com", smtp_port: 587 },
+  "me.com": { imap_host: "imap.mail.me.com", imap_port: 993, smtp_host: "smtp.mail.me.com", smtp_port: 587 },
+  "zoho.com": { imap_host: "imap.zoho.com", imap_port: 993, smtp_host: "smtp.zoho.com", smtp_port: 587 },
+  "protonmail.com": { imap_host: "127.0.0.1", imap_port: 1143, smtp_host: "127.0.0.1", smtp_port: 1025 },
+};
 
 function ConnectedAccountCard({
   account,
@@ -52,7 +64,8 @@ function ConnectedAccountCard({
 
     setIsFetching(true);
     try {
-      const { data, error } = await supabase.functions.invoke("fetch-gmail-emails", {
+      const functionName = account.provider === "imap" ? "fetch-imap-emails" : "fetch-gmail-emails";
+      const { data, error } = await supabase.functions.invoke(functionName, {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
 
@@ -73,25 +86,25 @@ function ConnectedAccountCard({
     }
   };
 
+  const providerColor = account.provider === "gmail" ? "bg-red-100" : account.provider === "outlook" ? "bg-blue-100" : "bg-purple-100";
+
   return (
     <Card className="border border-border">
       <CardContent className="flex items-center justify-between p-4">
         <div className="flex items-center gap-3">
-          <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${
-            account.provider === "gmail" ? "bg-red-100" : "bg-blue-100"
-          }`}>
-            <Mail className="h-5 w-5" />
+          <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${providerColor}`}>
+            {account.provider === "imap" ? <Server className="h-5 w-5" /> : <Mail className="h-5 w-5" />}
           </div>
           <div>
             <p className="font-medium text-card-foreground">{account.email_address}</p>
-            <p className="text-sm text-muted-foreground capitalize">{account.provider}</p>
+            <p className="text-sm text-muted-foreground capitalize">{account.provider === "imap" ? "IMAP/SMTP" : account.provider}</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
           <Badge variant={account.is_active ? "default" : "secondary"}>
             {account.is_active ? "Active" : "Paused"}
           </Badge>
-          {account.provider === "gmail" && (
+          {(account.provider === "gmail" || account.provider === "imap") && (
             <Button
               variant="outline"
               size="sm"
@@ -115,6 +128,158 @@ function ConnectedAccountCard({
             Disconnect
           </Button>
         </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ImapConnectionForm({ session }: { session: Session | null }) {
+  const [email, setEmail] = useState("");
+  const [imapHost, setImapHost] = useState("");
+  const [imapPort, setImapPort] = useState("993");
+  const [smtpHost, setSmtpHost] = useState("");
+  const [smtpPort, setSmtpPort] = useState("587");
+  const [password, setPassword] = useState("");
+  const [isConnecting, setIsConnecting] = useState(false);
+
+  // Auto-detect preset
+  useEffect(() => {
+    if (!email.includes("@")) return;
+    const domain = email.split("@")[1]?.toLowerCase();
+    if (domain && PROVIDER_PRESETS[domain]) {
+      const preset = PROVIDER_PRESETS[domain];
+      setImapHost(preset.imap_host);
+      setImapPort(String(preset.imap_port));
+      setSmtpHost(preset.smtp_host);
+      setSmtpPort(String(preset.smtp_port));
+    }
+  }, [email]);
+
+  const handleConnect = async () => {
+    if (!session?.access_token) {
+      toast.error("Please sign in first");
+      return;
+    }
+    if (!email || !imapHost || !smtpHost || !password) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    setIsConnecting(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { error } = await supabase.from("email_accounts").insert({
+        user_id: user.id,
+        email_address: email,
+        provider: "imap",
+        is_active: true,
+        imap_host: imapHost,
+        imap_port: parseInt(imapPort),
+        smtp_host: smtpHost,
+        smtp_port: parseInt(smtpPort),
+        imap_password: password,
+      });
+
+      if (error) throw error;
+
+      toast.success("Email account connected!");
+      setEmail("");
+      setPassword("");
+      setImapHost("");
+      setSmtpHost("");
+    } catch (error: unknown) {
+      console.error("IMAP connection error:", error);
+      toast.error("Failed to connect account");
+    } finally {
+      setIsConnecting(false);
+    }
+  };
+
+  return (
+    <Card className="border border-border">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100">
+            <Server className="h-5 w-5" />
+          </div>
+          Other Email (IMAP/SMTP)
+        </CardTitle>
+        <CardDescription>
+          Connect Yahoo, iCloud, Zoho, ProtonMail, or any IMAP-compatible provider
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Label>Email Address</Label>
+          <Input
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-2">
+            <Label>IMAP Host</Label>
+            <Input
+              placeholder="imap.example.com"
+              value={imapHost}
+              onChange={(e) => setImapHost(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>IMAP Port</Label>
+            <Input
+              type="number"
+              value={imapPort}
+              onChange={(e) => setImapPort(e.target.value)}
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-2">
+            <Label>SMTP Host</Label>
+            <Input
+              placeholder="smtp.example.com"
+              value={smtpHost}
+              onChange={(e) => setSmtpHost(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>SMTP Port</Label>
+            <Input
+              type="number"
+              value={smtpPort}
+              onChange={(e) => setSmtpPort(e.target.value)}
+            />
+          </div>
+        </div>
+        <div className="space-y-2">
+          <Label>App Password</Label>
+          <Input
+            type="password"
+            placeholder="Your app password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <p className="text-xs text-muted-foreground">
+            Use an app-specific password if your provider supports it (recommended for Yahoo, iCloud, etc.)
+          </p>
+        </div>
+        <Button onClick={handleConnect} className="w-full" disabled={isConnecting}>
+          {isConnecting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Connecting...
+            </>
+          ) : (
+            <>
+              Connect Account
+              <Plus className="ml-2 h-4 w-4" />
+            </>
+          )}
+        </Button>
       </CardContent>
     </Card>
   );
@@ -350,6 +515,9 @@ export default function Settings() {
                 </Button>
               </CardContent>
             </Card>
+
+            {/* IMAP/SMTP */}
+            <ImapConnectionForm session={session} />
           </div>
 
           {/* Permissions Info */}
@@ -362,7 +530,7 @@ export default function Settings() {
                 </h3>
                 <p className="mt-1 text-sm text-muted-foreground">
                   We only request minimal permissions: read emails, send replies, and apply labels. 
-                  We never store your email password and you can disconnect at any time.
+                  IMAP/SMTP passwords are stored encrypted. You can disconnect at any time.
                 </p>
               </div>
             </CardContent>

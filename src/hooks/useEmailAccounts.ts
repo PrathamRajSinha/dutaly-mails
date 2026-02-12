@@ -7,10 +7,14 @@ export interface EmailAccount {
   id: string;
   user_id: string;
   email_address: string;
-  provider: "gmail" | "outlook";
+  provider: "gmail" | "outlook" | "imap";
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  imap_host?: string | null;
+  imap_port?: number | null;
+  smtp_host?: string | null;
+  smtp_port?: number | null;
 }
 
 export function useEmailAccounts() {

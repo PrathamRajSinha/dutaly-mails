@@ -127,9 +127,14 @@ export type Database = {
           created_at: string
           email_address: string
           id: string
+          imap_host: string | null
+          imap_password: string | null
+          imap_port: number | null
           is_active: boolean | null
           provider: string
           refresh_token: string | null
+          smtp_host: string | null
+          smtp_port: number | null
           token_expires_at: string | null
           updated_at: string
           user_id: string
@@ -139,9 +144,14 @@ export type Database = {
           created_at?: string
           email_address: string
           id?: string
+          imap_host?: string | null
+          imap_password?: string | null
+          imap_port?: number | null
           is_active?: boolean | null
           provider: string
           refresh_token?: string | null
+          smtp_host?: string | null
+          smtp_port?: number | null
           token_expires_at?: string | null
           updated_at?: string
           user_id: string
@@ -151,9 +161,14 @@ export type Database = {
           created_at?: string
           email_address?: string
           id?: string
+          imap_host?: string | null
+          imap_password?: string | null
+          imap_port?: number | null
           is_active?: boolean | null
           provider?: string
           refresh_token?: string | null
+          smtp_host?: string | null
+          smtp_port?: number | null
           token_expires_at?: string | null
           updated_at?: string
           user_id?: string
