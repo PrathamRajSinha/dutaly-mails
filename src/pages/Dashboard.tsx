@@ -1,4 +1,4 @@
-import { Mail, Send, Clock, Zap, TrendingUp, AlertCircle, Loader2 } from "lucide-react";
+import { Mail, Send, Clock, Zap, TrendingUp, AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { ActivityItem } from "@/components/dashboard/ActivityItem";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,13 +6,47 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useActivityLogs } from "@/hooks/useActivityLogs";
 import { useEmailQueue } from "@/hooks/useEmailQueue";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Dashboard() {
   const { logs, isLoading: logsLoading } = useActivityLogs(10);
   const { pendingCount, isLoading: queueLoading } = useEmailQueue();
 
+  const { session } = useAuth();
+  const queryClient = useQueryClient();
+  const [isFetching, setIsFetching] = useState(false);
+
   const isLoading = logsLoading || queueLoading;
 
+  const handleFetchEmails = async () => {
+    if (!session?.access_token) {
+      toast.error("Please sign in to fetch emails");
+      return;
+    }
+    setIsFetching(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("fetch-gmail-emails", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (error) throw error;
+      if (data?.error) {
+        toast.error(data.error);
+      } else {
+        toast.success(`Fetched emails: ${data?.processed || 0} new, ${data?.skipped || 0} skipped`);
+        queryClient.invalidateQueries({ queryKey: ["email-queue"] });
+        queryClient.invalidateQueries({ queryKey: ["activity-logs"] });
+      }
+    } catch (error) {
+      console.error("Fetch emails error:", error);
+      toast.error("Failed to fetch emails");
+    } finally {
+      setIsFetching(false);
+    }
+  };
   // Calculate stats from logs
   const repliedCount = logs.filter(l => l.action === "replied" || l.action === "auto_replied" || l.action === "auto_sent").length;
   const ignoredCount = logs.filter(l => l.action === "ignored").length;
@@ -76,11 +110,26 @@ export default function Dashboard() {
   return (
     <div className="p-8">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-        <p className="mt-1 text-muted-foreground">
-          Monitor your AI email agent's performance and activity
-        </p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
+          <p className="mt-1 text-muted-foreground">
+            Monitor your AI email agent's performance and activity
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleFetchEmails}
+          disabled={isFetching}
+        >
+          {isFetching ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <RefreshCw className="mr-2 h-4 w-4" />
+          )}
+          Fetch Emails
+        </Button>
       </div>
 
       {/* Stats Grid */}
