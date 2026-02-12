@@ -63,7 +63,7 @@ const categories = ["All", "faq", "snippet", "document", "policy"];
 const ACCEPTED_FILE_TYPES = ".pdf,.doc,.docx,.ppt,.pptx,.txt,.md,.jpg,.jpeg,.png,.gif,.webp";
 
 export default function KnowledgeBase() {
-  const { entries, isLoading, createEntry, deleteEntry } = useKnowledgeBase();
+  const { entries, isLoading, createEntry, updateEntry, deleteEntry } = useKnowledgeBase();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -78,6 +78,8 @@ export default function KnowledgeBase() {
     content: "",
     tags: [] as string[],
   });
+  const [editingEntry, setEditingEntry] = useState<KnowledgeEntry | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const filteredEntries = entries.filter((entry) => {
     const matchesSearch =
@@ -207,6 +209,24 @@ export default function KnowledgeBase() {
 
   const handleDeleteEntry = async (id: string) => {
     await deleteEntry.mutateAsync(id);
+  };
+
+  const handleEditEntry = (entry: KnowledgeEntry) => {
+    setEditingEntry({ ...entry });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingEntry || !editingEntry.title || !editingEntry.content) return;
+    await updateEntry.mutateAsync({
+      id: editingEntry.id,
+      title: editingEntry.title,
+      content: editingEntry.content,
+      category: editingEntry.category,
+      tags: editingEntry.tags,
+    });
+    setIsEditDialogOpen(false);
+    setEditingEntry(null);
   };
 
   if (isLoading) {
@@ -456,7 +476,7 @@ export default function KnowledgeBase() {
                     )}
                   </div>
                   <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEditEntry(entry)}>
                       <Edit className="h-4 w-4" />
                     </Button>
                     <Button
@@ -490,6 +510,67 @@ export default function KnowledgeBase() {
           );
         })}
       </div>
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit Knowledge Entry</DialogTitle>
+            <DialogDescription>Update this knowledge base entry.</DialogDescription>
+          </DialogHeader>
+          {editingEntry && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Type</Label>
+                <Select
+                  value={editingEntry.category}
+                  onValueChange={(v) =>
+                    setEditingEntry({ ...editingEntry, category: v as KnowledgeEntry["category"] })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="faq">FAQ</SelectItem>
+                    <SelectItem value="snippet">Answer Snippet</SelectItem>
+                    <SelectItem value="policy">Policy</SelectItem>
+                    <SelectItem value="document">Document</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Title</Label>
+                <Input
+                  value={editingEntry.title}
+                  onChange={(e) =>
+                    setEditingEntry({ ...editingEntry, title: e.target.value })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Content</Label>
+                <Textarea
+                  rows={5}
+                  value={editingEntry.content}
+                  onChange={(e) =>
+                    setEditingEntry({ ...editingEntry, content: e.target.value })
+                  }
+                />
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSaveEdit} disabled={updateEntry.isPending}>
+                  {updateEntry.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Save Changes
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {filteredEntries.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 text-center">
