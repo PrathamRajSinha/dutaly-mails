@@ -77,8 +77,11 @@ function EmailCard({
   readOnly?: boolean;
 }) {
   const [isEditing, setIsEditing] = useState(false);
+  const [isComposing, setIsComposing] = useState(false);
   const [editedReply, setEditedReply] = useState(email.suggested_reply || "");
+  const [composedReply, setComposedReply] = useState("");
   const confidencePercent = email.confidence_score ? Math.round(email.confidence_score * 100) : null;
+  const hasReply = !!email.suggested_reply;
 
   const statusBadge = () => {
     switch (email.status) {
@@ -158,7 +161,8 @@ function EmailCard({
             </div>
           </div>
 
-          {email.suggested_reply && (
+          {/* Suggested Reply Section */}
+          {hasReply && (
             <div className="mb-6">
               <h4 className="mb-2 text-sm font-medium text-card-foreground">
                 {readOnly ? "Reply Sent" : "AI Suggested Reply"}
@@ -177,6 +181,27 @@ function EmailCard({
             </div>
           )}
 
+          {/* Compose area for emails without a suggestion */}
+          {!hasReply && !readOnly && (
+            <div className="mb-6">
+              <h4 className="mb-2 text-sm font-medium text-card-foreground">
+                {isComposing ? "Compose Reply" : "No AI reply generated"}
+              </h4>
+              {isComposing ? (
+                <Textarea
+                  className="min-h-[120px]"
+                  placeholder="Write your reply here..."
+                  value={composedReply}
+                  onChange={(e) => setComposedReply(e.target.value)}
+                />
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  This email doesn't have a suggested reply. Compose one manually or ignore it.
+                </p>
+              )}
+            </div>
+          )}
+
           {!readOnly && (
             <div className="flex flex-wrap gap-3">
               {isEditing ? (
@@ -187,13 +212,28 @@ function EmailCard({
                   </Button>
                   <Button variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
                 </>
+              ) : isComposing ? (
+                <>
+                  <Button onClick={() => { onEditSend(composedReply); setIsComposing(false); }} disabled={isPending || !composedReply.trim()}>
+                    {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+                    Send Reply
+                  </Button>
+                  <Button variant="outline" onClick={() => setIsComposing(false)}>Cancel</Button>
+                </>
               ) : (
                 <>
-                  <Button onClick={onApprove} disabled={isPending}>
-                    {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
-                    Approve & Send
-                  </Button>
-                  {email.suggested_reply && (
+                  {hasReply ? (
+                    <Button onClick={onApprove} disabled={isPending}>
+                      {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
+                      Approve & Send
+                    </Button>
+                  ) : (
+                    <Button onClick={() => setIsComposing(true)}>
+                      <Edit className="mr-2 h-4 w-4" />
+                      Compose Reply
+                    </Button>
+                  )}
+                  {hasReply && (
                     <Button variant="outline" onClick={() => { setIsEditing(true); setEditedReply(email.suggested_reply || ""); }}>
                       <Edit className="mr-2 h-4 w-4" />
                       Edit & Send
