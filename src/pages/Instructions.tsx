@@ -339,11 +339,28 @@ export default function Instructions() {
               When enabled, the AI will automatically send replies to incoming emails that meet the confidence threshold. Make sure your instructions and knowledge base are configured properly.
             </AlertDialogDescription>
           </AlertDialogHeader>
+          <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-4 my-2">
+            <div className="flex items-center justify-between mb-2">
+              <Label className="text-sm">Confidence Threshold</Label>
+              <span className="text-sm font-medium text-primary">{Math.round(confidenceThreshold * 100)}%</span>
+            </div>
+            <Slider
+              value={[confidenceThreshold]}
+              onValueChange={([v]) => setConfidenceThreshold(v)}
+              min={0.5}
+              max={1}
+              step={0.05}
+              className="w-full"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Only auto-send replies when AI confidence is above this threshold
+            </p>
+          </div>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={() => {
               setAutoReply(true);
-              saveToggle({ auto_reply_enabled: true });
+              saveToggle({ auto_reply_enabled: true, auto_reply_confidence_threshold: confidenceThreshold });
             }}>
               Enable Auto-Reply
             </AlertDialogAction>
