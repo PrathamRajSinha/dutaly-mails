@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Save, RotateCcw, Info, Sparkles, Loader2, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +15,16 @@ import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 import { useAIInstructions } from "@/hooks/useAIInstructions";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const examplePrompts = [
   "Only answer pricing questions if the exact price is in the knowledge base",
@@ -35,10 +45,12 @@ export default function Instructions() {
   const [confidenceThreshold, setConfidenceThreshold] = useState(0.8);
   const [greetingEnabled, setGreetingEnabled] = useState(true);
   const [greetingTemplate, setGreetingTemplate] = useState("Hello! Thank you for reaching out. How can I assist you today?");
+  const [showAutoReplyConfirm, setShowAutoReplyConfirm] = useState(false);
 
   // Helper to immediately persist a toggle change to the DB
+  // Uses explicit current values + overrides to avoid stale closures
   const saveToggle = (updates: Record<string, unknown>) => {
-    updateInstructions.mutate({
+    const payload = {
       system_prompt: localInstructions || defaultInstructions,
       tone,
       reply_length: replyLength,
@@ -49,7 +61,8 @@ export default function Instructions() {
       greeting_response_enabled: greetingEnabled,
       greeting_template: greetingTemplate,
       ...updates,
-    } as any);
+    };
+    updateInstructions.mutate(payload as any);
   };
 
   // Sync local state with fetched data
@@ -231,7 +244,14 @@ export default function Instructions() {
                     AI can send replies automatically
                   </p>
                 </div>
-                <Switch checked={autoReply} onCheckedChange={(v) => { setAutoReply(v); saveToggle({ auto_reply_enabled: v }); }} />
+                <Switch checked={autoReply} onCheckedChange={(v) => {
+                  if (v) {
+                    setShowAutoReplyConfirm(true);
+                  } else {
+                    setAutoReply(false);
+                    saveToggle({ auto_reply_enabled: false });
+                  }
+                }} />
               </div>
               
               {autoReply && (
@@ -310,6 +330,26 @@ export default function Instructions() {
           </Card>
         </div>
       </div>
+      {/* Auto-reply confirmation dialog */}
+      <AlertDialog open={showAutoReplyConfirm} onOpenChange={setShowAutoReplyConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Enable Auto-Reply?</AlertDialogTitle>
+            <AlertDialogDescription>
+              When enabled, the AI will automatically send replies to incoming emails that meet the confidence threshold. Make sure your instructions and knowledge base are configured properly.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => {
+              setAutoReply(true);
+              saveToggle({ auto_reply_enabled: true });
+            }}>
+              Enable Auto-Reply
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
