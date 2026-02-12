@@ -146,25 +146,25 @@ function EmailCard({
       </div>
 
       {isExpanded && (
-        <CardContent className="border-t border-border bg-muted/30 pt-5">
+        <CardContent className="border-t border-border bg-card px-5 pb-5 pt-5 space-y-4">
           {email.flag_reason && (
-            <div className="mb-4 flex items-start gap-2 rounded-lg bg-amber-50 p-3">
-              <AlertCircle className="mt-0.5 h-4 w-4 text-amber-600" />
+            <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50/50 p-3">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
               <p className="text-sm text-amber-800">{email.flag_reason}</p>
             </div>
           )}
 
-          <div className="mb-6">
-            <h4 className="mb-2 text-sm font-medium text-card-foreground">Original Email</h4>
-            <div className="rounded-lg border border-border bg-card p-4">
-              <p className="whitespace-pre-wrap text-sm text-card-foreground">{email.body}</p>
+          <div>
+            <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Original Email</h4>
+            <div className="rounded-lg border border-border bg-muted/40 p-4">
+              <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{email.body}</p>
             </div>
           </div>
 
           {/* Suggested Reply Section */}
           {hasReply && (
-            <div className="mb-6">
-              <h4 className="mb-2 text-sm font-medium text-card-foreground">
+            <div>
+              <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 {readOnly ? "Reply Sent" : "AI Suggested Reply"}
               </h4>
               {isEditing ? (
@@ -174,8 +174,8 @@ function EmailCard({
                   onChange={(e) => setEditedReply(e.target.value)}
                 />
               ) : (
-                <div className="rounded-lg border border-border bg-card p-4">
-                  <p className="whitespace-pre-wrap text-sm text-card-foreground">{email.suggested_reply}</p>
+                <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{email.suggested_reply}</p>
                 </div>
               )}
             </div>
@@ -183,8 +183,8 @@ function EmailCard({
 
           {/* Compose area for emails without a suggestion */}
           {!hasReply && !readOnly && (
-            <div className="mb-6">
-              <h4 className="mb-2 text-sm font-medium text-card-foreground">
+            <div>
+              <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 {isComposing ? "Compose Reply" : "No AI reply generated"}
               </h4>
               {isComposing ? (
