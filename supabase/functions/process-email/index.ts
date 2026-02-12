@@ -137,6 +137,11 @@ INSTRUCTIONS:
 - Reply length: ${aiInstructions.reply_length}
 - Add this signature at the end: ${aiInstructions.signature}
 
+CRITICAL REPLY RULES:
+- When answering questions, you MUST include SPECIFIC DETAILS from the knowledge base in your reply. Do NOT just reference that information exists — actually extract and present the relevant facts, skills, experiences, names, dates, etc.
+- For example, if asked "who is Pratham?" and the knowledge base contains a resume, your reply MUST include Pratham's role, skills, experience, education, etc. — NOT just "Pratham is someone whose background is in the resume."
+- Be thorough and informative. Pull out ALL relevant details that answer the question.
+
 GREETING DETECTION:
 ${aiInstructions.greeting_response_enabled ? `- If the email is a simple greeting (hi, hello, hey, good morning/afternoon/evening, etc.) from a REAL PERSON with no specific question:
   - Set intent to "greeting"
@@ -166,7 +171,7 @@ DECISION RULES:
 - If the email is automated/transactional (order updates, banking alerts, promotions, newsletters), set action to "ignore" regardless of content
 - If the email is a simple greeting FROM A REAL PERSON and greeting response is enabled, reply with the greeting template (high confidence)
 - If the email is spam or promotional and ignore_spam is enabled, set action to "ignore"
-- If you can confidently answer using the knowledge base, set action to "reply"
+- If you can confidently answer using the knowledge base, set action to "reply" and include SPECIFIC DETAILS extracted from the knowledge base — never just say "I have it on file"
 - If you're uncertain (confidence < 0.7) or the topic isn't in the knowledge base, set action to "queue"
 - Never make up information not in the knowledge base`
           },
