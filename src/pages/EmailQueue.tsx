@@ -12,12 +12,16 @@ import {
   Clock,
   Loader2,
   RefreshCw,
+  FileEdit,
+  XCircle,
+  Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -51,35 +55,191 @@ const formatTimeAgo = (date: string) => {
   return `${Math.floor(diffMins / 1440)} days ago`;
 };
 
+function EmailCard({ 
+  email, 
+  isExpanded, 
+  onToggle, 
+  onApprove, 
+  onIgnore, 
+  onEditSend,
+  onAddToKB,
+  isPending,
+  readOnly = false,
+}: {
+  email: QueuedEmail;
+  isExpanded: boolean;
+  onToggle: () => void;
+  onApprove: () => void;
+  onIgnore: () => void;
+  onEditSend: (reply: string) => void;
+  onAddToKB: () => void;
+  isPending: boolean;
+  readOnly?: boolean;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedReply, setEditedReply] = useState(email.suggested_reply || "");
+  const confidencePercent = email.confidence_score ? Math.round(email.confidence_score * 100) : null;
+
+  const statusBadge = () => {
+    switch (email.status) {
+      case "sent":
+      case "sending":
+        return <Badge className="bg-green-50 text-green-600 font-medium">Sent</Badge>;
+      case "approved":
+        return <Badge className="bg-green-50 text-green-600 font-medium">Approved</Badge>;
+      case "ignored":
+        return <Badge className="bg-muted text-muted-foreground font-medium">Ignored</Badge>;
+      case "edited":
+        return <Badge className="bg-blue-50 text-blue-600 font-medium">Edited & Sent</Badge>;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <Card className="border border-border overflow-hidden">
+      <div
+        className="flex cursor-pointer items-center justify-between p-5"
+        onClick={onToggle}
+      >
+        <div className="flex items-start gap-4">
+          <div className={cn(
+            "flex h-10 w-10 items-center justify-center rounded-full",
+            email.status === "sent" || email.status === "approved" || email.status === "sending"
+              ? "bg-green-100"
+              : email.status === "ignored"
+              ? "bg-muted"
+              : "bg-primary/10"
+          )}>
+            {email.status === "sent" || email.status === "approved" || email.status === "sending" ? (
+              <Check className="h-5 w-5 text-green-600" />
+            ) : email.status === "ignored" ? (
+              <XCircle className="h-5 w-5 text-muted-foreground" />
+            ) : email.suggested_reply ? (
+              <FileEdit className="h-5 w-5 text-primary" />
+            ) : (
+              <AlertCircle className="h-5 w-5 text-primary" />
+            )}
+          </div>
+          <div className="min-w-0">
+            <h3 className="font-medium text-card-foreground">{email.subject}</h3>
+            <p className="text-sm text-muted-foreground">
+              From: {email.from_name || email.from_address} • {formatTimeAgo(email.queued_at)}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          {statusBadge()}
+          {confidencePercent !== null && (
+            <Badge className={cn("font-medium", getConfidenceColor(email.confidence_score))}>
+              {confidencePercent}%
+            </Badge>
+          )}
+          {email.intent && (
+            <Badge variant="outline" className="capitalize">{email.intent}</Badge>
+          )}
+          {isExpanded ? <ChevronUp className="h-5 w-5 text-muted-foreground" /> : <ChevronDown className="h-5 w-5 text-muted-foreground" />}
+        </div>
+      </div>
+
+      {isExpanded && (
+        <CardContent className="border-t border-border bg-muted/30 pt-5">
+          {email.flag_reason && (
+            <div className="mb-4 flex items-start gap-2 rounded-lg bg-amber-50 p-3">
+              <AlertCircle className="mt-0.5 h-4 w-4 text-amber-600" />
+              <p className="text-sm text-amber-800">{email.flag_reason}</p>
+            </div>
+          )}
+
+          <div className="mb-6">
+            <h4 className="mb-2 text-sm font-medium text-card-foreground">Original Email</h4>
+            <div className="rounded-lg border border-border bg-card p-4">
+              <p className="whitespace-pre-wrap text-sm text-card-foreground">{email.body}</p>
+            </div>
+          </div>
+
+          {email.suggested_reply && (
+            <div className="mb-6">
+              <h4 className="mb-2 text-sm font-medium text-card-foreground">
+                {readOnly ? "Reply Sent" : "AI Suggested Reply"}
+              </h4>
+              {isEditing ? (
+                <Textarea
+                  className="min-h-[120px]"
+                  value={editedReply}
+                  onChange={(e) => setEditedReply(e.target.value)}
+                />
+              ) : (
+                <div className="rounded-lg border border-border bg-card p-4">
+                  <p className="whitespace-pre-wrap text-sm text-card-foreground">{email.suggested_reply}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {!readOnly && (
+            <div className="flex flex-wrap gap-3">
+              {isEditing ? (
+                <>
+                  <Button onClick={() => { onEditSend(editedReply); setIsEditing(false); }} disabled={isPending}>
+                    {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+                    Send Edited Reply
+                  </Button>
+                  <Button variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
+                </>
+              ) : (
+                <>
+                  <Button onClick={onApprove} disabled={isPending}>
+                    {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
+                    Approve & Send
+                  </Button>
+                  {email.suggested_reply && (
+                    <Button variant="outline" onClick={() => { setIsEditing(true); setEditedReply(email.suggested_reply || ""); }}>
+                      <Edit className="mr-2 h-4 w-4" />
+                      Edit & Send
+                    </Button>
+                  )}
+                  <Button variant="outline" onClick={onIgnore} disabled={isPending}>
+                    <X className="mr-2 h-4 w-4" />
+                    Ignore
+                  </Button>
+                  <Button variant="ghost" onClick={onAddToKB}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add to Knowledge Base
+                  </Button>
+                </>
+              )}
+            </div>
+          )}
+        </CardContent>
+      )}
+    </Card>
+  );
+}
+
 export default function EmailQueue() {
   const { session } = useAuth();
   const queryClient = useQueryClient();
-  const { emails, isLoading, updateEmailStatus, pendingCount } = useEmailQueue();
+  const { needsReview, drafted, sent, ignored, isLoading, updateEmailStatus, pendingCount } = useEmailQueue();
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [editingReply, setEditingReply] = useState<string | null>(null);
-  const [editedReply, setEditedReply] = useState("");
   const [addKBDialogOpen, setAddKBDialogOpen] = useState(false);
   const [selectedEmailForKB, setSelectedEmailForKB] = useState<QueuedEmail | null>(null);
   const [isFetching, setIsFetching] = useState(false);
+  const [activeTab, setActiveTab] = useState("needs_review");
 
   const handleFetchEmails = async () => {
     if (!session?.access_token) {
       toast.error("Please sign in to fetch emails");
       return;
     }
-
     setIsFetching(true);
     try {
       const { data, error } = await supabase.functions.invoke("fetch-gmail-emails", {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
-
       if (error) throw error;
-
-      // Invalidate email queue to refresh the list
       await queryClient.invalidateQueries({ queryKey: ["email-queue"] });
-
       if (data.processed > 0) {
         toast.success(`Fetched ${data.processed} new email(s)`);
       } else if (data.total === 0) {
@@ -95,16 +255,12 @@ export default function EmailQueue() {
     }
   };
 
-  const handleRefresh = () => {
-    queryClient.invalidateQueries({ queryKey: ["email-queue"] });
-    toast.success("Queue refreshed");
-  };
-
-  const filteredQueue = emails.filter(
-    (email) =>
-      email.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      email.from_address.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filterEmails = (emails: QueuedEmail[]) =>
+    emails.filter(
+      (email) =>
+        email.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        email.from_address.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
   const handleApprove = async (id: string) => {
     await updateEmailStatus.mutateAsync({ id, status: "approved" });
@@ -114,14 +270,46 @@ export default function EmailQueue() {
     await updateEmailStatus.mutateAsync({ id, status: "ignored" });
   };
 
-  const handleEditSend = async (id: string) => {
-    await updateEmailStatus.mutateAsync({ id, status: "sent", editedReply });
-    setEditingReply(null);
+  const handleEditSend = async (id: string, editedReply: string) => {
+    await updateEmailStatus.mutateAsync({ id, status: "edited", editedReply });
   };
 
   const handleAddToKB = (email: QueuedEmail) => {
     setSelectedEmailForKB(email);
     setAddKBDialogOpen(true);
+  };
+
+  const renderEmailList = (emails: QueuedEmail[], readOnly = false) => {
+    const filtered = filterEmails(emails);
+    if (filtered.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="rounded-full bg-muted p-4">
+            <Check className="h-8 w-8 text-muted-foreground" />
+          </div>
+          <h3 className="mt-4 text-lg font-medium text-foreground">Nothing here</h3>
+          <p className="mt-1 text-muted-foreground">No emails in this category</p>
+        </div>
+      );
+    }
+    return (
+      <div className="space-y-4">
+        {filtered.map((email) => (
+          <EmailCard
+            key={email.id}
+            email={email}
+            isExpanded={expandedId === email.id}
+            onToggle={() => setExpandedId(expandedId === email.id ? null : email.id)}
+            onApprove={() => handleApprove(email.id)}
+            onIgnore={() => handleIgnore(email.id)}
+            onEditSend={(reply) => handleEditSend(email.id, reply)}
+            onAddToKB={() => handleAddToKB(email)}
+            isPending={updateEmailStatus.isPending}
+            readOnly={readOnly}
+          />
+        ))}
+      </div>
+    );
   };
 
   if (isLoading) {
@@ -139,7 +327,7 @@ export default function EmailQueue() {
         <div>
           <h1 className="text-3xl font-bold text-foreground">Email Queue</h1>
           <p className="mt-1 text-muted-foreground">
-            Review emails the AI wasn't confident about
+            Review and manage all processed emails
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -159,14 +347,13 @@ export default function EmailQueue() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={handleRefresh}
+            onClick={() => {
+              queryClient.invalidateQueries({ queryKey: ["email-queue"] });
+              toast.success("Queue refreshed");
+            }}
           >
             <RefreshCw className="h-4 w-4" />
           </Button>
-          <Badge variant="secondary" className="py-1.5 text-sm">
-            <Clock className="mr-1 h-3 w-3" />
-            {pendingCount} pending
-          </Badge>
         </div>
       </div>
 
@@ -183,180 +370,44 @@ export default function EmailQueue() {
         </div>
       </div>
 
-      {/* Queue List */}
-      <div className="space-y-4">
-        {filteredQueue.map((email) => {
-          const isExpanded = expandedId === email.id;
-          const isEditing = editingReply === email.id;
-          const confidencePercent = email.confidence_score ? Math.round(email.confidence_score * 100) : null;
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="mb-6">
+          <TabsTrigger value="needs_review" className="gap-2">
+            <AlertCircle className="h-4 w-4" />
+            Needs Review
+            {needsReview.length > 0 && (
+              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">{needsReview.length}</Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="drafted" className="gap-2">
+            <FileEdit className="h-4 w-4" />
+            Drafted
+            {drafted.length > 0 && (
+              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">{drafted.length}</Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="sent" className="gap-2">
+            <Send className="h-4 w-4" />
+            Sent
+            {sent.length > 0 && (
+              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">{sent.length}</Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="ignored" className="gap-2">
+            <XCircle className="h-4 w-4" />
+            Ignored
+            {ignored.length > 0 && (
+              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">{ignored.length}</Badge>
+            )}
+          </TabsTrigger>
+        </TabsList>
 
-          return (
-            <Card key={email.id} className="border border-border overflow-hidden">
-              {/* Header */}
-              <div
-                className="flex cursor-pointer items-center justify-between p-5"
-                onClick={() => setExpandedId(isExpanded ? null : email.id)}
-              >
-                <div className="flex items-start gap-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                    <AlertCircle className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className="font-medium text-card-foreground">
-                      {email.subject}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      From: {email.from_name || email.from_address} • {formatTimeAgo(email.queued_at)}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  {confidencePercent !== null && (
-                    <Badge className={cn("font-medium", getConfidenceColor(email.confidence_score))}>
-                      {confidencePercent}% confidence
-                    </Badge>
-                  )}
-                  {email.intent && (
-                    <Badge variant="outline" className="capitalize">{email.intent}</Badge>
-                  )}
-                  {isExpanded ? (
-                    <ChevronUp className="h-5 w-5 text-muted-foreground" />
-                  ) : (
-                    <ChevronDown className="h-5 w-5 text-muted-foreground" />
-                  )}
-                </div>
-              </div>
-
-              {/* Expanded Content */}
-              {isExpanded && (
-                <CardContent className="border-t border-border bg-muted/30 pt-5">
-                  {/* Reason */}
-                  {email.flag_reason && (
-                    <div className="mb-4 flex items-start gap-2 rounded-lg bg-amber-50 p-3">
-                      <AlertCircle className="mt-0.5 h-4 w-4 text-amber-600" />
-                      <p className="text-sm text-amber-800">{email.flag_reason}</p>
-                    </div>
-                  )}
-
-                  {/* Original Email */}
-                  <div className="mb-6">
-                    <h4 className="mb-2 text-sm font-medium text-card-foreground">
-                      Original Email
-                    </h4>
-                    <div className="rounded-lg border border-border bg-card p-4">
-                      <p className="whitespace-pre-wrap text-sm text-card-foreground">
-                        {email.body}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Suggested Reply */}
-                  {email.suggested_reply && (
-                    <div className="mb-6">
-                      <h4 className="mb-2 text-sm font-medium text-card-foreground">
-                        AI Suggested Reply
-                      </h4>
-                      {isEditing ? (
-                        <Textarea
-                          className="min-h-[120px]"
-                          value={editedReply}
-                          onChange={(e) => setEditedReply(e.target.value)}
-                        />
-                      ) : (
-                        <div className="rounded-lg border border-border bg-card p-4">
-                          <p className="whitespace-pre-wrap text-sm text-card-foreground">
-                            {email.suggested_reply}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Actions */}
-                  <div className="flex flex-wrap gap-3">
-                    {isEditing ? (
-                      <>
-                        <Button 
-                          onClick={() => handleEditSend(email.id)}
-                          disabled={updateEmailStatus.isPending}
-                        >
-                          {updateEmailStatus.isPending ? (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          ) : (
-                            <Send className="mr-2 h-4 w-4" />
-                          )}
-                          Send Edited Reply
-                        </Button>
-                        <Button
-                          variant="outline"
-                          onClick={() => setEditingReply(null)}
-                        >
-                          Cancel
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <Button 
-                          onClick={() => handleApprove(email.id)}
-                          disabled={updateEmailStatus.isPending}
-                        >
-                          {updateEmailStatus.isPending ? (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          ) : (
-                            <Check className="mr-2 h-4 w-4" />
-                          )}
-                          Approve & Send
-                        </Button>
-                        {email.suggested_reply && (
-                          <Button
-                            variant="outline"
-                            onClick={() => {
-                              setEditingReply(email.id);
-                              setEditedReply(email.suggested_reply || "");
-                            }}
-                          >
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit & Send
-                          </Button>
-                        )}
-                        <Button
-                          variant="outline"
-                          onClick={() => handleIgnore(email.id)}
-                          disabled={updateEmailStatus.isPending}
-                        >
-                          <X className="mr-2 h-4 w-4" />
-                          Ignore
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          onClick={() => handleAddToKB(email)}
-                        >
-                          <Plus className="mr-2 h-4 w-4" />
-                          Add to Knowledge Base
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </CardContent>
-              )}
-            </Card>
-          );
-        })}
-      </div>
-
-      {filteredQueue.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="rounded-full bg-green-100 p-4">
-            <Check className="h-8 w-8 text-green-600" />
-          </div>
-          <h3 className="mt-4 text-lg font-medium text-foreground">
-            All caught up!
-          </h3>
-          <p className="mt-1 text-muted-foreground">
-            No emails need your review right now
-          </p>
-        </div>
-      )}
+        <TabsContent value="needs_review">{renderEmailList(needsReview)}</TabsContent>
+        <TabsContent value="drafted">{renderEmailList(drafted)}</TabsContent>
+        <TabsContent value="sent">{renderEmailList(sent, true)}</TabsContent>
+        <TabsContent value="ignored">{renderEmailList(ignored, true)}</TabsContent>
+      </Tabs>
 
       {/* Add to KB Dialog */}
       <Dialog open={addKBDialogOpen} onOpenChange={setAddKBDialogOpen}>
@@ -371,9 +422,7 @@ export default function EmailQueue() {
             <div className="space-y-4 py-4">
               <div>
                 <p className="text-sm font-medium">Email Subject</p>
-                <p className="text-sm text-muted-foreground">
-                  {selectedEmailForKB.subject}
-                </p>
+                <p className="text-sm text-muted-foreground">{selectedEmailForKB.subject}</p>
               </div>
               <Textarea
                 placeholder="What knowledge should be added from this interaction?"
@@ -382,15 +431,8 @@ export default function EmailQueue() {
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setAddKBDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                setAddKBDialogOpen(false);
-                toast.success("Added to knowledge base");
-              }}
-            >
+            <Button variant="outline" onClick={() => setAddKBDialogOpen(false)}>Cancel</Button>
+            <Button onClick={() => { setAddKBDialogOpen(false); toast.success("Added to knowledge base"); }}>
               Add Entry
             </Button>
           </DialogFooter>

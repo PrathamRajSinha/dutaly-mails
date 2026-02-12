@@ -13,6 +13,7 @@ interface ProcessEmailRequest {
   from_name?: string;
   subject: string;
   body: string;
+  email_account_id?: string;
 }
 
 interface KnowledgeEntry {
@@ -38,13 +39,11 @@ interface AIInstructions {
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
   try {
-    // Get auth header
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       return new Response(
@@ -53,12 +52,10 @@ serve(async (req) => {
       );
     }
 
-    // Create Supabase client
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Verify user
     const token = authHeader.replace("Bearer ", "");
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     
@@ -73,7 +70,7 @@ serve(async (req) => {
     const emailData: ProcessEmailRequest = await req.json();
     console.log("Processing email:", emailData.subject);
 
-    // Fetch user's knowledge base (include extracted_text for file-based entries)
+    // Fetch user's knowledge base
     const { data: knowledgeEntries, error: kbError } = await supabase
       .from("knowledge_base_entries")
       .select("id, title, content, category, extracted_text")
@@ -110,7 +107,7 @@ serve(async (req) => {
       greeting_template: "Hello! Thank you for reaching out. How can I assist you today?",
     };
 
-    // Build context from knowledge base (include extracted_text for file uploads)
+    // Build context from knowledge base
     const knowledgeContext = (knowledgeEntries || []).map((entry: KnowledgeEntry) => {
       const content = entry.extracted_text 
         ? `${entry.content}\n\nExtracted content:\n${entry.extracted_text}`
@@ -190,7 +187,6 @@ ${emailData.body}`
     // Parse AI response
     let parsedResponse;
     try {
-      // Extract JSON from the response (handle markdown code blocks)
       const jsonMatch = aiContent.match(/\{[\s\S]*\}/);
       parsedResponse = JSON.parse(jsonMatch ? jsonMatch[0] : aiContent);
     } catch (parseError) {
@@ -206,102 +202,77 @@ ${emailData.body}`
 
     console.log("AI decision:", parsedResponse);
 
-    // Handle the email based on AI decision
-    if (parsedResponse.action === "queue" || parsedResponse.confidence < 0.7) {
-      // Add to review queue
-      const { error: queueError } = await supabase
-        .from("email_queue")
-        .insert({
-          user_id: user.id,
-          external_email_id: emailData.email_id,
-          from_address: emailData.from_address,
-          from_name: emailData.from_name,
-          subject: emailData.subject,
-          body: emailData.body,
-          suggested_reply: parsedResponse.suggested_reply,
-          confidence_score: parsedResponse.confidence,
-          flag_reason: parsedResponse.reason,
-          intent: parsedResponse.intent,
-          status: "pending",
-        });
+    // Determine status for the queue entry
+    const shouldAutoSend = aiInstructions.auto_reply_enabled && 
+      parsedResponse.action === "reply" &&
+      parsedResponse.confidence >= aiInstructions.auto_reply_confidence_threshold;
 
-      if (queueError) {
-        console.error("Error adding to queue:", queueError);
-        throw new Error("Failed to add email to queue");
-      }
-
-      // Log the action
-      await supabase.from("activity_logs").insert({
-        user_id: user.id,
-        action: "queued",
-        email_subject: emailData.subject,
-        email_from: emailData.from_address,
-        details: { reason: parsedResponse.reason, confidence: parsedResponse.confidence },
-      });
-
-      return new Response(
-        JSON.stringify({
-          action: "queued",
-          reason: parsedResponse.reason,
-          confidence: parsedResponse.confidence,
-        }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
+    let queueStatus: string;
     if (parsedResponse.action === "ignore") {
-      // Log the ignored email
-      await supabase.from("activity_logs").insert({
-        user_id: user.id,
-        action: "ignored",
-        email_subject: emailData.subject,
-        email_from: emailData.from_address,
-        details: { reason: parsedResponse.reason, intent: parsedResponse.intent },
-      });
-
-      return new Response(
-        JSON.stringify({
-          action: "ignored",
-          reason: parsedResponse.reason,
-        }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      queueStatus = "ignored";
+    } else if (shouldAutoSend) {
+      // Will be updated to "sent" after actual send in fetch-gmail-emails
+      queueStatus = "sending";
+    } else if (parsedResponse.action === "reply") {
+      // Has a draft reply but not auto-sending
+      queueStatus = "pending";
+    } else {
+      // Queued for review
+      queueStatus = "pending";
     }
 
-    if (parsedResponse.action === "reply") {
-      // Determine if we should auto-send based on confidence threshold
-      const shouldAutoSend = aiInstructions.auto_reply_enabled && 
-        parsedResponse.confidence >= aiInstructions.auto_reply_confidence_threshold;
-
-      // Log the reply
-      await supabase.from("activity_logs").insert({
+    // Always insert into email_queue for tracking
+    const { error: queueError } = await supabase
+      .from("email_queue")
+      .insert({
         user_id: user.id,
-        action: shouldAutoSend ? "auto_replied" : "replied",
-        email_subject: emailData.subject,
-        email_from: emailData.from_address,
-        details: { 
-          confidence: parsedResponse.confidence,
-          auto_sent: shouldAutoSend,
-          intent: parsedResponse.intent,
-          threshold: aiInstructions.auto_reply_confidence_threshold,
-        },
+        email_account_id: emailData.email_account_id || null,
+        external_email_id: emailData.email_id,
+        from_address: emailData.from_address,
+        from_name: emailData.from_name,
+        subject: emailData.subject,
+        body: emailData.body,
+        suggested_reply: parsedResponse.suggested_reply,
+        confidence_score: parsedResponse.confidence,
+        flag_reason: parsedResponse.reason,
+        intent: parsedResponse.intent === "greeting" ? "personal" : parsedResponse.intent,
+        status: queueStatus,
       });
 
-      return new Response(
-        JSON.stringify({
-          action: "reply",
-          suggested_reply: parsedResponse.suggested_reply,
-          confidence: parsedResponse.confidence,
-          auto_send: shouldAutoSend,
-          intent: parsedResponse.intent,
-        }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    if (queueError) {
+      console.error("Error adding to queue:", queueError);
+      throw new Error("Failed to add email to queue");
     }
+
+    // Log the action
+    const logAction = parsedResponse.action === "ignore" ? "ignored" 
+      : shouldAutoSend ? "auto_replied" 
+      : parsedResponse.action === "reply" ? "drafted"
+      : "queued";
+
+    await supabase.from("activity_logs").insert({
+      user_id: user.id,
+      action: logAction,
+      email_subject: emailData.subject,
+      email_from: emailData.from_address,
+      details: { 
+        reason: parsedResponse.reason, 
+        confidence: parsedResponse.confidence,
+        intent: parsedResponse.intent,
+        auto_send: shouldAutoSend,
+      },
+    });
 
     return new Response(
-      JSON.stringify({ error: "Unknown action" }),
-      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      JSON.stringify({
+        action: parsedResponse.action,
+        suggested_reply: parsedResponse.suggested_reply,
+        confidence: parsedResponse.confidence,
+        auto_send: shouldAutoSend,
+        intent: parsedResponse.intent,
+        reason: parsedResponse.reason,
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
 
   } catch (error: unknown) {

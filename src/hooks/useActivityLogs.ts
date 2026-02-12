@@ -7,7 +7,7 @@ export interface ActivityLog {
   id: string;
   user_id: string;
   email_account_id: string | null;
-  action: "replied" | "ignored" | "queued" | "labeled" | "forwarded";
+  action: string;
   email_subject: string | null;
   email_from: string | null;
   details: Json;
