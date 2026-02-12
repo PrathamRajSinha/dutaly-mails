@@ -44,18 +44,14 @@ function base64UrlDecode(data: string): string {
 }
 
 function extractEmailBody(payload: GmailMessageDetail["payload"]): string {
-  // Try to get plain text body first
   if (payload.body?.data) {
     return base64UrlDecode(payload.body.data);
   }
-
-  // Check parts for text/plain or text/html
   if (payload.parts) {
     for (const part of payload.parts) {
       if (part.mimeType === "text/plain" && part.body?.data) {
         return base64UrlDecode(part.body.data);
       }
-      // Check nested parts (for multipart/alternative)
       if (part.parts) {
         for (const nestedPart of part.parts) {
           if (nestedPart.mimeType === "text/plain" && nestedPart.body?.data) {
@@ -64,16 +60,13 @@ function extractEmailBody(payload: GmailMessageDetail["payload"]): string {
         }
       }
     }
-    // Fallback to HTML if no plain text
     for (const part of payload.parts) {
       if (part.mimeType === "text/html" && part.body?.data) {
         const html = base64UrlDecode(part.body.data);
-        // Strip HTML tags for processing
         return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
       }
     }
   }
-
   return "";
 }
 
@@ -219,6 +212,12 @@ serve(async (req) => {
       .eq("user_id", user.id)
       .not("external_email_id", "is", null);
 
+    // Also check activity logs for already-processed emails
+    const { data: existingLogs } = await supabase
+      .from("activity_logs")
+      .select("details")
+      .eq("user_id", user.id);
+
     const existingIds = new Set((existingEmails || []).map((e) => e.external_email_id));
 
     let processed = 0;
@@ -265,6 +264,7 @@ serve(async (req) => {
           },
           body: JSON.stringify({
             email_id: msg.id,
+            email_account_id: account.id,
             from_address: fromAddress,
             from_name: fromName,
             subject: subject,
@@ -276,50 +276,79 @@ serve(async (req) => {
       if (processResponse.ok) {
         processed++;
         const result = await processResponse.json();
-        console.log(`Email processed: ${result.action}`);
+        console.log(`Email processed: ${result.action}, auto_send: ${result.auto_send}`);
 
-        // If auto_send is true, send the reply automatically
+        // If auto_send is true, actually send the reply via Gmail
         if (result.action === "reply" && result.auto_send && result.suggested_reply) {
           console.log(`Auto-sending reply to ${fromAddress}...`);
           
-          const sendResponse = await fetch(
-            `${supabaseUrl}/functions/v1/send-gmail-reply`,
-            {
-              method: "POST",
-              headers: {
-                Authorization: authHeader,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                email_account_id: account.id,
-                to_address: fromAddress,
-                subject: subject,
-                body: result.suggested_reply,
-                message_id: msg.id,
-                thread_id: msg.threadId,
-              }),
-            }
-          );
+          try {
+            const sendResponse = await fetch(
+              `${supabaseUrl}/functions/v1/send-gmail-reply`,
+              {
+                method: "POST",
+                headers: {
+                  Authorization: authHeader,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  email_account_id: account.id,
+                  to_address: fromAddress,
+                  subject: subject,
+                  body: result.suggested_reply,
+                  message_id: msg.id,
+                  thread_id: msg.threadId,
+                }),
+              }
+            );
 
-          if (sendResponse.ok) {
-            const sendResult = await sendResponse.json();
-            console.log(`Auto-reply sent successfully, message ID: ${sendResult.message_id}`);
-            
-            // Log the auto-sent reply
-            await supabase.from("activity_logs").insert({
-              user_id: user.id,
-              email_account_id: account.id,
-              action: "auto_sent",
-              email_subject: subject,
-              email_from: fromAddress,
-              details: { 
-                intent: result.intent,
-                confidence: result.confidence,
-                sent_message_id: sendResult.message_id,
-              },
-            });
-          } else {
-            console.error("Failed to auto-send reply:", await sendResponse.text());
+            if (sendResponse.ok) {
+              const sendResult = await sendResponse.json();
+              console.log(`Auto-reply sent successfully, message ID: ${sendResult.message_id}`);
+              
+              // Update queue entry status to "sent"
+              await supabase
+                .from("email_queue")
+                .update({ 
+                  status: "sent",
+                  reviewed_at: new Date().toISOString(),
+                  email_account_id: account.id,
+                })
+                .eq("external_email_id", msg.id)
+                .eq("user_id", user.id);
+
+              // Update activity log action to confirmed sent
+              await supabase.from("activity_logs").insert({
+                user_id: user.id,
+                email_account_id: account.id,
+                action: "auto_sent",
+                email_subject: subject,
+                email_from: fromAddress,
+                details: { 
+                  intent: result.intent,
+                  confidence: result.confidence,
+                  sent_message_id: sendResult.message_id,
+                },
+              });
+            } else {
+              const errorText = await sendResponse.text();
+              console.error("Failed to auto-send reply:", errorText);
+              
+              // Revert queue status to pending so user can manually review
+              await supabase
+                .from("email_queue")
+                .update({ status: "pending" })
+                .eq("external_email_id", msg.id)
+                .eq("user_id", user.id);
+            }
+          } catch (sendError) {
+            console.error("Error during auto-send:", sendError);
+            // Revert queue status to pending
+            await supabase
+              .from("email_queue")
+              .update({ status: "pending" })
+              .eq("external_email_id", msg.id)
+              .eq("user_id", user.id);
           }
         }
       } else {

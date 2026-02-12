@@ -1,21 +1,36 @@
 import { cn } from "@/lib/utils";
-import { Check, Clock, AlertCircle, XCircle, Forward } from "lucide-react";
+import { Check, Clock, AlertCircle, XCircle, Forward, Send, FileEdit } from "lucide-react";
 
 interface ActivityItemProps {
   email: {
     from: string;
     subject: string;
-    action: "replied" | "ignored" | "queued" | "forwarded" | "labeled";
+    action: string;
     time: string;
     confidence?: number;
   };
 }
 
-const actionConfig = {
+const actionConfig: Record<string, { icon: typeof Check; label: string; className: string }> = {
   replied: {
     icon: Check,
     label: "Auto-replied",
     className: "text-green-600 bg-green-50",
+  },
+  auto_replied: {
+    icon: Send,
+    label: "Auto-replied",
+    className: "text-green-600 bg-green-50",
+  },
+  auto_sent: {
+    icon: Send,
+    label: "Sent",
+    className: "text-green-600 bg-green-50",
+  },
+  drafted: {
+    icon: FileEdit,
+    label: "Drafted",
+    className: "text-primary bg-primary/10",
   },
   ignored: {
     icon: XCircle,
@@ -39,8 +54,14 @@ const actionConfig = {
   },
 };
 
+const defaultConfig = {
+  icon: AlertCircle,
+  label: "Unknown",
+  className: "text-muted-foreground bg-muted/50",
+};
+
 export function ActivityItem({ email }: ActivityItemProps) {
-  const config = actionConfig[email.action];
+  const config = actionConfig[email.action] || defaultConfig;
   const Icon = config.icon;
 
   return (
@@ -64,7 +85,7 @@ export function ActivityItem({ email }: ActivityItemProps) {
           <span className={cn("rounded-full px-2 py-0.5 text-xs font-medium", config.className)}>
             {config.label}
           </span>
-          {email.confidence && (
+          {email.confidence !== undefined && email.confidence > 0 && (
             <span className="text-xs text-muted-foreground">
               {email.confidence}% confidence
             </span>

@@ -14,7 +14,7 @@ export default function Dashboard() {
   const isLoading = logsLoading || queueLoading;
 
   // Calculate stats from logs
-  const repliedCount = logs.filter(l => l.action === "replied").length;
+  const repliedCount = logs.filter(l => l.action === "replied" || l.action === "auto_replied" || l.action === "auto_sent").length;
   const ignoredCount = logs.filter(l => l.action === "ignored").length;
   const totalActions = logs.length;
 
@@ -49,14 +49,21 @@ export default function Dashboard() {
     },
   ];
 
-  // Transform activity logs for display
-  const recentActivity = logs.map(log => ({
-    from: log.email_from || "Unknown",
-    subject: log.email_subject || "No subject",
-    action: log.action,
-    time: formatTimeAgo(log.created_at),
-    confidence: log.action === "replied" ? 90 : log.action === "queued" ? 45 : undefined,
-  }));
+  // Transform activity logs for display with real confidence from details
+  const recentActivity = logs.map(log => {
+    const details = log.details as Record<string, unknown> | null;
+    const confidence = details?.confidence 
+      ? Math.round(Number(details.confidence) * 100) 
+      : undefined;
+
+    return {
+      from: log.email_from || "Unknown",
+      subject: log.email_subject || "No subject",
+      action: log.action,
+      time: formatTimeAgo(log.created_at),
+      confidence,
+    };
+  });
 
   if (isLoading) {
     return (
@@ -92,9 +99,11 @@ export default function Dashboard() {
               <CardTitle className="text-lg font-semibold text-card-foreground">
                 Recent Activity
               </CardTitle>
-              <Button variant="ghost" size="sm" className="text-primary">
-                View all
-              </Button>
+              <Link to="/queue">
+                <Button variant="ghost" size="sm" className="text-primary">
+                  View all
+                </Button>
+              </Link>
             </CardHeader>
             <CardContent className="space-y-3">
               {recentActivity.length === 0 ? (

@@ -16,23 +16,24 @@ export interface QueuedEmail {
   confidence_score: number | null;
   flag_reason: string | null;
   intent: "support" | "sales" | "personal" | "newsletter" | "spam" | "unknown" | null;
-  status: "pending" | "approved" | "edited" | "ignored" | "sent";
+  status: "pending" | "approved" | "edited" | "ignored" | "sent" | "sending";
   queued_at: string;
   reviewed_at: string | null;
   created_at: string;
 }
 
-export function useEmailQueue() {
+export type QueueTab = "needs_review" | "drafted" | "sent" | "ignored";
+
+export function useEmailQueue(statusFilter?: string) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const { data: emails = [], isLoading, error } = useQuery({
+  const { data: allEmails = [], isLoading, error } = useQuery({
     queryKey: ["email-queue", user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("email_queue")
         .select("*")
-        .eq("status", "pending")
         .order("queued_at", { ascending: false });
 
       if (error) throw error;
@@ -40,6 +41,16 @@ export function useEmailQueue() {
     },
     enabled: !!user,
   });
+
+  // Categorize emails
+  const needsReview = allEmails.filter(
+    e => e.status === "pending" && (!e.suggested_reply || (e.confidence_score !== null && e.confidence_score < 0.7))
+  );
+  const drafted = allEmails.filter(
+    e => e.status === "pending" && e.suggested_reply && (e.confidence_score === null || e.confidence_score >= 0.7)
+  );
+  const sent = allEmails.filter(e => e.status === "sent" || e.status === "approved" || e.status === "edited" || e.status === "sending");
+  const ignored = allEmails.filter(e => e.status === "ignored");
 
   const updateEmailStatus = useMutation({
     mutationFn: async ({ id, status, editedReply }: { id: string; status: QueuedEmail["status"]; editedReply?: string }) => {
@@ -93,11 +104,15 @@ export function useEmailQueue() {
   });
 
   return {
-    emails,
+    emails: allEmails,
+    needsReview,
+    drafted,
+    sent,
+    ignored,
     isLoading,
     error,
     updateEmailStatus,
     deleteEmail,
-    pendingCount: emails.filter(e => e.status === "pending").length,
+    pendingCount: allEmails.filter(e => e.status === "pending").length,
   };
 }
