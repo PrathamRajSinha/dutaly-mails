@@ -60,6 +60,8 @@ export type Database = {
           auto_reply_confidence_threshold: number | null
           auto_reply_enabled: boolean | null
           created_at: string
+          do_not_rules: string[] | null
+          do_rules: string[] | null
           email_footer: string | null
           escalate_unknown: boolean | null
           greeting_response_enabled: boolean | null
@@ -79,6 +81,8 @@ export type Database = {
           auto_reply_confidence_threshold?: number | null
           auto_reply_enabled?: boolean | null
           created_at?: string
+          do_not_rules?: string[] | null
+          do_rules?: string[] | null
           email_footer?: string | null
           escalate_unknown?: boolean | null
           greeting_response_enabled?: boolean | null
@@ -98,6 +102,8 @@ export type Database = {
           auto_reply_confidence_threshold?: number | null
           auto_reply_enabled?: boolean | null
           created_at?: string
+          do_not_rules?: string[] | null
+          do_rules?: string[] | null
           email_footer?: string | null
           escalate_unknown?: boolean | null
           greeting_response_enabled?: boolean | null

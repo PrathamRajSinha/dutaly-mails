@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Save, RotateCcw, Info, Sparkles, Loader2, MessageCircle, Image } from "lucide-react";
+import { Save, RotateCcw, Info, Sparkles, Loader2, MessageCircle, Image, Plus, X, CheckCircle, Ban } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,6 +48,10 @@ export default function Instructions() {
   const [greetingTemplate, setGreetingTemplate] = useState("Hello! Thank you for reaching out. How can I assist you today?");
   const [emailFooter, setEmailFooter] = useState("This email was sent by an AI assistant. If you believe this was sent in error, please let us know.");
   const [logoUrl, setLogoUrl] = useState("");
+  const [doRules, setDoRules] = useState<string[]>([]);
+  const [doNotRules, setDoNotRules] = useState<string[]>([]);
+  const [newDoRule, setNewDoRule] = useState("");
+  const [newDoNotRule, setNewDoNotRule] = useState("");
   const [showAutoReplyConfirm, setShowAutoReplyConfirm] = useState(false);
   const [showThresholdConfirm, setShowThresholdConfirm] = useState(false);
   const [pendingThreshold, setPendingThreshold] = useState(0.8);
@@ -65,6 +69,8 @@ export default function Instructions() {
       greeting_template: greetingTemplate,
       email_footer: emailFooter,
       logo_url: logoUrl || null,
+      do_rules: doRules,
+      do_not_rules: doNotRules,
       ...updates,
     };
     updateInstructions.mutate(payload as any);
@@ -83,6 +89,8 @@ export default function Instructions() {
       setGreetingTemplate(instructions.greeting_template || "Hello! Thank you for reaching out. How can I assist you today?");
       setEmailFooter(instructions.email_footer || "This email was sent by an AI assistant. If you believe this was sent in error, please let us know.");
       setLogoUrl(instructions.logo_url || "");
+      setDoRules(instructions.do_rules || []);
+      setDoNotRules(instructions.do_not_rules || []);
     }
   }, [instructions, defaultInstructions]);
 
@@ -99,6 +107,8 @@ export default function Instructions() {
       greeting_template: greetingTemplate,
       email_footer: emailFooter,
       logo_url: logoUrl || null,
+      do_rules: doRules,
+      do_not_rules: doNotRules,
     });
   };
 
@@ -165,7 +175,109 @@ export default function Instructions() {
             </CardContent>
           </Card>
 
-          {/* Reply Style */}
+          {/* Do & Don't Rules */}
+          <Card className="border border-border">
+            <CardHeader>
+              <CardTitle className="text-base">Do & Don't Rules</CardTitle>
+              <CardDescription>
+                Specific rules the AI must always follow or avoid when replying.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* DO rules */}
+              <div className="space-y-3">
+                <Label className="flex items-center gap-2 text-sm font-semibold text-primary">
+                  <CheckCircle className="h-4 w-4" />
+                  DO (Always follow)
+                </Label>
+                <div className="space-y-2">
+                  {doRules.map((rule, i) => (
+                    <div key={i} className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2">
+                      <span className="flex-1 text-sm text-foreground">{rule}</span>
+                      <button
+                        onClick={() => setDoRules(doRules.filter((_, idx) => idx !== i))}
+                        className="text-muted-foreground hover:text-destructive"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                  <div className="flex gap-2">
+                    <Input
+                      value={newDoRule}
+                      onChange={(e) => setNewDoRule(e.target.value)}
+                      placeholder="e.g. Always include a link to our FAQ page"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && newDoRule.trim()) {
+                          setDoRules([...doRules, newDoRule.trim()]);
+                          setNewDoRule("");
+                        }
+                      }}
+                    />
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => {
+                        if (newDoRule.trim()) {
+                          setDoRules([...doRules, newDoRule.trim()]);
+                          setNewDoRule("");
+                        }
+                      }}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* DON'T rules */}
+              <div className="space-y-3">
+                <Label className="flex items-center gap-2 text-sm font-semibold text-destructive">
+                  <Ban className="h-4 w-4" />
+                  DON'T (Never do)
+                </Label>
+                <div className="space-y-2">
+                  {doNotRules.map((rule, i) => (
+                    <div key={i} className="flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2">
+                      <span className="flex-1 text-sm text-foreground">{rule}</span>
+                      <button
+                        onClick={() => setDoNotRules(doNotRules.filter((_, idx) => idx !== i))}
+                        className="text-muted-foreground hover:text-destructive"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                  <div className="flex gap-2">
+                    <Input
+                      value={newDoNotRule}
+                      onChange={(e) => setNewDoNotRule(e.target.value)}
+                      placeholder="e.g. Never make up pricing information"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && newDoNotRule.trim()) {
+                          setDoNotRules([...doNotRules, newDoNotRule.trim()]);
+                          setNewDoNotRule("");
+                        }
+                      }}
+                    />
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => {
+                        if (newDoNotRule.trim()) {
+                          setDoNotRules([...doNotRules, newDoNotRule.trim()]);
+                          setNewDoNotRule("");
+                        }
+                      }}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           <Card className="border border-border">
             <CardHeader>
               <CardTitle className="text-base">Reply Style</CardTitle>
