@@ -17,6 +17,8 @@ export interface AIInstructions {
   auto_reply_confidence_threshold: number;
   greeting_response_enabled: boolean;
   greeting_template: string;
+  email_footer: string;
+  logo_url: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -73,6 +75,8 @@ export function useAIInstructions() {
             auto_reply_confidence_threshold: 0.8,
             greeting_response_enabled: true,
             greeting_template: "Hello! Thank you for reaching out. How can I assist you today?",
+            email_footer: "This email was sent by an AI assistant. If you believe this was sent in error, please let us know.",
+            logo_url: null,
           };
         }
         throw error;

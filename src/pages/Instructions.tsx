@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { Save, RotateCcw, Info, Sparkles, Loader2, MessageCircle } from "lucide-react";
+import { Save, RotateCcw, Info, Sparkles, Loader2, MessageCircle, Image } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -45,6 +46,8 @@ export default function Instructions() {
   const [confidenceThreshold, setConfidenceThreshold] = useState(0.8);
   const [greetingEnabled, setGreetingEnabled] = useState(true);
   const [greetingTemplate, setGreetingTemplate] = useState("Hello! Thank you for reaching out. How can I assist you today?");
+  const [emailFooter, setEmailFooter] = useState("This email was sent by an AI assistant. If you believe this was sent in error, please let us know.");
+  const [logoUrl, setLogoUrl] = useState("");
   const [showAutoReplyConfirm, setShowAutoReplyConfirm] = useState(false);
 
   // Helper to immediately persist a toggle change to the DB
@@ -60,6 +63,8 @@ export default function Instructions() {
       auto_reply_confidence_threshold: confidenceThreshold,
       greeting_response_enabled: greetingEnabled,
       greeting_template: greetingTemplate,
+      email_footer: emailFooter,
+      logo_url: logoUrl || null,
       ...updates,
     };
     updateInstructions.mutate(payload as any);
@@ -77,6 +82,8 @@ export default function Instructions() {
       setConfidenceThreshold(instructions.auto_reply_confidence_threshold ?? 0.8);
       setGreetingEnabled(instructions.greeting_response_enabled ?? true);
       setGreetingTemplate(instructions.greeting_template || "Hello! Thank you for reaching out. How can I assist you today?");
+      setEmailFooter(instructions.email_footer || "This email was sent by an AI assistant. If you believe this was sent in error, please let us know.");
+      setLogoUrl(instructions.logo_url || "");
     }
   }, [instructions, defaultInstructions]);
 
@@ -91,6 +98,8 @@ export default function Instructions() {
       auto_reply_confidence_threshold: confidenceThreshold,
       greeting_response_enabled: greetingEnabled,
       greeting_template: greetingTemplate,
+      email_footer: emailFooter,
+      logo_url: logoUrl || null,
     });
   };
 
@@ -227,6 +236,44 @@ export default function Instructions() {
                   onChange={(e) => setSignature(e.target.value)}
                   placeholder="Your email signature..."
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Email Footer</Label>
+                <Textarea
+                  rows={3}
+                  value={emailFooter}
+                  onChange={(e) => setEmailFooter(e.target.value)}
+                  placeholder="Footer text appended to every email..."
+                />
+                <p className="text-xs text-muted-foreground">
+                  Appears at the bottom of every sent email
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Image className="h-4 w-4 text-primary" />
+                  Logo URL
+                </Label>
+                <Input
+                  value={logoUrl}
+                  onChange={(e) => setLogoUrl(e.target.value)}
+                  placeholder="https://example.com/logo.png"
+                />
+                {logoUrl && (
+                  <div className="mt-2 rounded-lg border border-border bg-muted/30 p-3">
+                    <img
+                      src={logoUrl}
+                      alt="Logo preview"
+                      className="h-12 max-w-[200px] object-contain"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    />
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Your logo will appear in email replies
+                </p>
               </div>
             </CardContent>
           </Card>
