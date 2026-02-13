@@ -43,6 +43,28 @@ const PROVIDER_PRESETS: Record<string, { imap_host: string; imap_port: number; s
   "protonmail.com": { imap_host: "127.0.0.1", imap_port: 1143, smtp_host: "127.0.0.1", smtp_port: 1025 },
 };
 
+const APP_PASSWORD_LINKS: Record<string, { label: string; url: string; note?: string }> = {
+  "yahoo.com": { label: "Yahoo App Password", url: "https://login.yahoo.com/account/security/app-passwords" },
+  "yahoo.co.uk": { label: "Yahoo App Password", url: "https://login.yahoo.com/account/security/app-passwords" },
+  "aol.com": { label: "AOL App Password", url: "https://login.aol.com/account/security/app-passwords" },
+  "icloud.com": { label: "Apple App-Specific Password", url: "https://appleid.apple.com/account/manage", note: "Go to Security → App-Specific Passwords" },
+  "me.com": { label: "Apple App-Specific Password", url: "https://appleid.apple.com/account/manage", note: "Go to Security → App-Specific Passwords" },
+  "zoho.com": { label: "Zoho App Password", url: "https://accounts.zoho.com/home#security/security_pwd" },
+  "protonmail.com": { label: "ProtonMail Bridge", url: "https://proton.me/mail/bridge", note: "ProtonMail requires Bridge to use IMAP" },
+};
+
+function getAppPasswordHelp(email: string) {
+  if (!email.includes("@")) {
+    return { type: "generic" as const, message: "Use an app-specific password for better security" };
+  }
+  const domain = email.split("@")[1]?.toLowerCase();
+  if (domain && APP_PASSWORD_LINKS[domain]) {
+    const info = APP_PASSWORD_LINKS[domain];
+    return { type: "known" as const, ...info };
+  }
+  return { type: "unknown" as const, message: "Check your email provider's settings for an app-specific password option" };
+}
+
 function ConnectedAccountCard({
   account,
   onDisconnect,
@@ -263,9 +285,33 @@ function ImapConnectionForm({ session }: { session: Session | null }) {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <p className="text-xs text-muted-foreground">
-            Use an app-specific password if your provider supports it (recommended for Yahoo, iCloud, etc.)
-          </p>
+          {(() => {
+            const help = getAppPasswordHelp(email);
+            if (help.type === "known") {
+              return (
+                <div className="text-xs text-muted-foreground space-y-1">
+                  <p>
+                    {help.label} required.{" "}
+                    <a
+                      href={help.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-primary hover:underline font-medium"
+                    >
+                      Generate one here
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </p>
+                  {help.note && <p className="text-muted-foreground/70">{help.note}</p>}
+                </div>
+              );
+            }
+            return (
+              <p className="text-xs text-muted-foreground">
+                {help.message}
+              </p>
+            );
+          })()}
         </div>
         <Button onClick={handleConnect} className="w-full" disabled={isConnecting}>
           {isConnecting ? (
