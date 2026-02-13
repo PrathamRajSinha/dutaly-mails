@@ -74,7 +74,7 @@ serve(async (req) => {
 
     // Format emails as context
     const emailContext = emails.map((e: any, i: number) => {
-      let entry = `Email #${i + 1} [${e.queued_at}]\nFrom: ${e.from_name || e.from_address}\nSubject: ${e.subject}\nIntent: ${e.intent || "unknown"} | Status: ${e.status}\n\n${e.body}`;
+      let entry = `Email from ${e.from_name || e.from_address} [${e.queued_at}]\nSubject: ${e.subject}\nIntent: ${e.intent || "unknown"} | Status: ${e.status}\n\n${e.body}`;
       if (e.suggested_reply) {
         entry += `\n\nAI Reply: ${e.suggested_reply}`;
       }
