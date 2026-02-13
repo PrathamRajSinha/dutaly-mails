@@ -7,6 +7,7 @@ export interface EmailSummary {
   from_name: string | null;
   from_address: string;
   subject: string;
+  body: string;
   status: string;
   intent: string | null;
   queued_at: string;
@@ -71,12 +72,20 @@ export function EmailDetailDialog({ email, open, onOpenChange }: EmailDetailDial
             )}
           </div>
 
+          <Separator />
+          <div>
+            <p className="text-xs text-muted-foreground mb-2">Email Body</p>
+            <div className="rounded-md bg-muted p-3 text-sm text-foreground whitespace-pre-wrap max-h-60 overflow-y-auto">
+              {email.body}
+            </div>
+          </div>
+
           {email.suggested_reply && (
             <>
               <Separator />
               <div>
                 <p className="text-xs text-muted-foreground mb-2">AI Generated Reply</p>
-                <div className="rounded-md bg-muted p-3 text-sm text-foreground whitespace-pre-wrap">
+                <div className="rounded-md bg-primary/5 border border-primary/20 p-3 text-sm text-foreground whitespace-pre-wrap max-h-60 overflow-y-auto">
                   {email.suggested_reply}
                 </div>
               </div>

@@ -86,6 +86,7 @@ serve(async (req) => {
       from_name: e.from_name,
       from_address: e.from_address,
       subject: e.subject,
+      body: e.body,
       status: e.status,
       intent: e.intent,
       queued_at: e.queued_at,

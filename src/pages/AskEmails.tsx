@@ -209,6 +209,11 @@ export default function AskEmails() {
                 <p className="whitespace-pre-wrap text-sm leading-relaxed">
                   {msg.content}
                 </p>
+                {msg.role === "assistant" && msg.emailCount !== undefined && (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Based on {msg.emailCount} email{msg.emailCount !== 1 ? "s" : ""}
+                  </p>
+                )}
                 {msg.role === "assistant" && msg.emails && msg.emails.length > 0 && (
                   <EmailReferenceList
                     emails={msg.emails}
@@ -217,18 +222,6 @@ export default function AskEmails() {
                       setDialogOpen(true);
                     }}
                   />
-                )}
-                {msg.emailCount !== undefined && (
-                  <p
-                    className={cn(
-                      "mt-2 text-xs",
-                      msg.role === "user"
-                        ? "text-primary-foreground/70"
-                        : "text-muted-foreground"
-                    )}
-                  >
-                    Based on {msg.emailCount} email{msg.emailCount !== 1 ? "s" : ""}
-                  </p>
                 )}
               </CardContent>
             </Card>
