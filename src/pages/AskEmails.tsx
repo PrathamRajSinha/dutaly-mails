@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { format } from "date-fns";
-import { CalendarIcon, Send, Loader2, MessageSquare, Sparkles } from "lucide-react";
+import { CalendarIcon, Send, Loader2, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,11 +10,14 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { EmailDetailDialog, type EmailSummary } from "@/components/ask-emails/EmailDetailDialog";
+import { EmailReferenceList } from "@/components/ask-emails/EmailReferenceList";
 
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
   emailCount?: number;
+  emails?: EmailSummary[];
 }
 
 const SUGGESTIONS = [
@@ -31,6 +34,8 @@ export default function AskEmails() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedEmail, setSelectedEmail] = useState<EmailSummary | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const handleSend = async (question?: string) => {
     const q = question || input.trim();
@@ -66,6 +71,7 @@ export default function AskEmails() {
             role: "assistant",
             content: data.answer,
             emailCount: data.email_count,
+            emails: data.emails || [],
           },
         ]);
       }
@@ -203,6 +209,15 @@ export default function AskEmails() {
                 <p className="whitespace-pre-wrap text-sm leading-relaxed">
                   {msg.content}
                 </p>
+                {msg.role === "assistant" && msg.emails && msg.emails.length > 0 && (
+                  <EmailReferenceList
+                    emails={msg.emails}
+                    onEmailClick={(email) => {
+                      setSelectedEmail(email);
+                      setDialogOpen(true);
+                    }}
+                  />
+                )}
                 {msg.emailCount !== undefined && (
                   <p
                     className={cn(
@@ -254,6 +269,11 @@ export default function AskEmails() {
           )}
         </Button>
       </div>
+      <EmailDetailDialog
+        email={selectedEmail}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+      />
     </div>
   );
 }

@@ -81,6 +81,18 @@ serve(async (req) => {
       return entry;
     }).join("\n\n===\n\n");
 
+    // Build a summary of emails to return to the frontend
+    const emailSummaries = emails.map((e: any) => ({
+      from_name: e.from_name,
+      from_address: e.from_address,
+      subject: e.subject,
+      status: e.status,
+      intent: e.intent,
+      queued_at: e.queued_at,
+      confidence_score: e.confidence_score,
+      suggested_reply: e.suggested_reply,
+    }));
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -95,7 +107,7 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are an email analyst assistant. The user will ask questions about their emails. Answer based ONLY on the email data provided below. Be specific, cite email subjects/senders when relevant. If you can't find the answer in the emails, say so.
+            content: `You are an email analyst assistant. The user will ask questions about their emails. Answer based ONLY on the email data provided below. Be specific and ALWAYS mention the sender's name or email address when referencing emails. Include the subject line too.
 
 IMPORTANT: Respond in PLAIN TEXT only. Do NOT use any markdown formatting such as bold (**text**), italics, bullet points (* or -), headers (#), or code blocks. Use simple numbered lists or dashes if needed, but no markdown syntax.
 
@@ -133,7 +145,7 @@ ${emailContext}`,
     const answer = aiResult.choices?.[0]?.message?.content || "No response generated.";
 
     return new Response(
-      JSON.stringify({ answer, email_count: emails.length }),
+      JSON.stringify({ answer, email_count: emails.length, emails: emailSummaries }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: unknown) {
