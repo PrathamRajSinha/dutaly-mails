@@ -104,15 +104,68 @@ function parseEmailHeaders(raw: string): { from: string; fromName: string | null
   return { from: fromAddress, fromName, subject, messageId, threadId };
 }
 
+function decodeQuotedPrintable(text: string): string {
+  return text
+    .replace(/=\r?\n/g, "") // soft line breaks
+    .replace(/=([0-9A-Fa-f]{2})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+}
+
+function decodeBase64(text: string): string {
+  try {
+    const cleaned = text.replace(/\r?\n/g, "");
+    const bytes = Uint8Array.from(atob(cleaned), c => c.charCodeAt(0));
+    return new TextDecoder("utf-8").decode(bytes);
+  } catch { return text; }
+}
+
 function extractPlainBody(raw: string): string {
-  // Split headers from body
-  const parts = raw.split(/\r?\n\r?\n/);
-  if (parts.length < 2) return "";
-  
-  const body = parts.slice(1).join("\n\n");
-  
-  // Simple: strip HTML tags if present, return plain text
-  return body.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().substring(0, 5000);
+  // Extract BODY[TEXT] content from IMAP FETCH response
+  const bodyTextMatch = raw.match(/BODY\[TEXT\]\s*\{(\d+)\}\r?\n([\s\S]*)/);
+  let bodyContent = bodyTextMatch ? bodyTextMatch[2] : raw;
+
+  // Remove trailing IMAP protocol lines (e.g., ") * 9 FETCH ... F9 OK FETCH")
+  bodyContent = bodyContent.replace(/\)\s*\*\s*\d+\s+FETCH\s+\(.*$/s, "");
+  bodyContent = bodyContent.replace(/\)\r?\n[A-Z]\d+\s+(OK|NO|BAD)\s+FETCH.*$/s, "");
+  // Also strip trailing tagged response
+  bodyContent = bodyContent.replace(/[A-Z]\d+\s+(OK|NO|BAD)\s+FETCH.*$/s, "");
+
+  // Check if this is a MIME multipart message
+  const boundaryMatch = bodyContent.match(/--([^\s\r\n]+)/);
+  if (boundaryMatch) {
+    const boundary = boundaryMatch[1].replace(/--$/, ""); // strip trailing --
+    const parts = bodyContent.split(new RegExp(`--${boundary.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`));
+    
+    // Find the text/plain part
+    for (const part of parts) {
+      if (part.match(/Content-Type:\s*text\/plain/i)) {
+        // Extract content after the part headers
+        const contentSections = part.split(/\r?\n\r?\n/);
+        if (contentSections.length >= 2) {
+          let content = contentSections.slice(1).join("\n\n").trim();
+          
+          // Handle content transfer encoding
+          if (part.match(/Content-Transfer-Encoding:\s*quoted-printable/i)) {
+            content = decodeQuotedPrintable(content);
+          } else if (part.match(/Content-Transfer-Encoding:\s*base64/i)) {
+            content = decodeBase64(content);
+          }
+          
+          // Decode UTF-8 bytes
+          try {
+            const bytes = Uint8Array.from(content, c => c.charCodeAt(0));
+            content = new TextDecoder("utf-8").decode(bytes);
+          } catch { /* already decoded */ }
+          
+          return content.trim().substring(0, 5000);
+        }
+      }
+    }
+  }
+
+  // Fallback: no MIME, treat as plain text
+  const headerBodySplit = bodyContent.split(/\r?\n\r?\n/);
+  const plainBody = headerBodySplit.length > 1 ? headerBodySplit.slice(1).join("\n\n") : bodyContent;
+  return plainBody.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().substring(0, 5000);
 }
 
 serve(async (req) => {
