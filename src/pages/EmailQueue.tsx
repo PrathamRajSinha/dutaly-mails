@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Search,
   Check,
@@ -15,6 +15,8 @@ import {
   FileEdit,
   XCircle,
   Eye,
+  Play,
+  Pause,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -269,6 +271,41 @@ export default function EmailQueue() {
   const [selectedEmailForKB, setSelectedEmailForKB] = useState<QueuedEmail | null>(null);
   const [isFetching, setIsFetching] = useState(false);
   const [activeTab, setActiveTab] = useState("needs_review");
+  const [autoFetchEnabled, setAutoFetchEnabled] = useState(false);
+  const isFetchingRef = useRef(false);
+
+  const handleAutoFetch = useCallback(async () => {
+    if (!session?.access_token || isFetchingRef.current) return;
+    isFetchingRef.current = true;
+    try {
+      const hasGmail = accounts.some(a => a.provider === "gmail" && a.is_active);
+      const hasImap = accounts.some(a => a.provider === "imap" && a.is_active);
+      const fetches: Promise<{ data: any; error: any }>[] = [];
+      if (hasGmail) {
+        fetches.push(supabase.functions.invoke("fetch-gmail-emails", {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        }));
+      }
+      if (hasImap) {
+        fetches.push(supabase.functions.invoke("fetch-imap-emails", {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        }));
+      }
+      if (fetches.length === 0) return;
+      await Promise.allSettled(fetches);
+      await queryClient.invalidateQueries({ queryKey: ["email-queue"] });
+    } catch (error) {
+      console.error("Auto-fetch error:", error);
+    } finally {
+      isFetchingRef.current = false;
+    }
+  }, [session?.access_token, accounts, queryClient]);
+
+  useEffect(() => {
+    if (!autoFetchEnabled) return;
+    const interval = setInterval(handleAutoFetch, 10000);
+    return () => clearInterval(interval);
+  }, [autoFetchEnabled, handleAutoFetch]);
 
   const handleFetchEmails = async () => {
     if (!session?.access_token) {
@@ -404,6 +441,29 @@ export default function EmailQueue() {
         </div>
         <div className="flex items-center gap-3">
           <Button
+            variant={autoFetchEnabled ? "destructive" : "outline"}
+            size="sm"
+            onClick={() => setAutoFetchEnabled(!autoFetchEnabled)}
+          >
+            {autoFetchEnabled ? (
+              <>
+                <Pause className="mr-2 h-4 w-4" />
+                Stop Auto-Fetch
+              </>
+            ) : (
+              <>
+                <Play className="mr-2 h-4 w-4" />
+                Auto-Fetch
+              </>
+            )}
+          </Button>
+          {autoFetchEnabled && (
+            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+              Every 10s
+            </span>
+          )}
+          <Button
             variant="outline"
             size="sm"
             onClick={handleFetchEmails}
@@ -414,17 +474,7 @@ export default function EmailQueue() {
             ) : (
               <RefreshCw className="mr-2 h-4 w-4" />
             )}
-            Fetch New Emails
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              queryClient.invalidateQueries({ queryKey: ["email-queue"] });
-              toast.success("Queue refreshed");
-            }}
-          >
-            <RefreshCw className="h-4 w-4" />
+            Fetch Now
           </Button>
         </div>
       </div>

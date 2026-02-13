@@ -46,7 +46,7 @@ async function imapCommand(conn: Deno.TlsConn, tag: string, command: string): Pr
   return await readMultiLine(conn, tag);
 }
 
-function parseEmailHeaders(raw: string): { from: string; fromName: string | null; subject: string; messageId: string } {
+function parseEmailHeaders(raw: string): { from: string; fromName: string | null; subject: string; messageId: string; threadId: string | null } {
   const getHeader = (name: string): string => {
     const regex = new RegExp(`^${name}:\\s*(.+?)$`, "mi");
     const match = raw.match(regex);
@@ -56,13 +56,27 @@ function parseEmailHeaders(raw: string): { from: string; fromName: string | null
   const from = getHeader("From");
   const subject = getHeader("Subject");
   const messageId = getHeader("Message-ID") || getHeader("Message-Id");
+  const inReplyTo = getHeader("In-Reply-To");
+  const references = getHeader("References");
+
+  // Derive thread ID from In-Reply-To or References, fallback to normalized subject
+  let threadId: string | null = null;
+  if (inReplyTo) {
+    threadId = inReplyTo.replace(/[<>]/g, "");
+  } else if (references) {
+    threadId = references.split(/\s+/)[0].replace(/[<>]/g, "");
+  } else {
+    // Fallback: normalize subject by stripping Re:/Fwd: prefixes
+    const normalized = subject.replace(/^(Re|Fwd|Fw):\s*/gi, "").trim();
+    if (normalized) threadId = `subj:${normalized}`;
+  }
 
   // Parse from
   const fromMatch = from.match(/^(?:"?([^"]*)"?\s)?<?([^>]+)>?$/);
   const fromAddress = fromMatch ? fromMatch[2].trim() : from.trim();
   const fromName = fromMatch ? (fromMatch[1]?.trim() || null) : null;
 
-  return { from: fromAddress, fromName, subject, messageId };
+  return { from: fromAddress, fromName, subject, messageId, threadId };
 }
 
 function extractPlainBody(raw: string): string {
@@ -177,7 +191,7 @@ serve(async (req) => {
           // Fetch message
           const fetchResp = await imapCommand(conn, `F${uid}`, `FETCH ${uid} (BODY[HEADER] BODY[TEXT])`);
           
-          const { from, fromName, subject, messageId } = parseEmailHeaders(fetchResp);
+          const { from, fromName, subject, messageId, threadId } = parseEmailHeaders(fetchResp);
           const body = extractPlainBody(fetchResp);
 
           if (!from || !subject) {
@@ -203,6 +217,7 @@ serve(async (req) => {
                 from_name: fromName,
                 subject,
                 body,
+                thread_id: threadId,
               }),
             }
           );

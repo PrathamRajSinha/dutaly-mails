@@ -269,6 +269,7 @@ serve(async (req) => {
             from_name: fromName,
             subject: subject,
             body: body,
+            thread_id: msg.threadId || null,
           }),
         }
       );

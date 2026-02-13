@@ -192,6 +192,7 @@ export type Database = {
           status: string
           subject: string
           suggested_reply: string | null
+          thread_id: string | null
           user_id: string
         }
         Insert: {
@@ -210,6 +211,7 @@ export type Database = {
           status?: string
           subject: string
           suggested_reply?: string | null
+          thread_id?: string | null
           user_id: string
         }
         Update: {
@@ -228,6 +230,7 @@ export type Database = {
           status?: string
           subject?: string
           suggested_reply?: string | null
+          thread_id?: string | null
           user_id?: string
         }
         Relationships: [

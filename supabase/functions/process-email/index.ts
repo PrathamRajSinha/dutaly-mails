@@ -14,6 +14,7 @@ interface ProcessEmailRequest {
   subject: string;
   body: string;
   email_account_id?: string;
+  thread_id?: string;
 }
 
 interface KnowledgeEntry {
@@ -111,6 +112,28 @@ serve(async (req) => {
       do_not_rules: [],
     };
 
+    // Fetch thread history if thread_id is provided
+    let threadContext = "";
+    if (emailData.thread_id) {
+      const { data: threadEmails } = await supabase
+        .from("email_queue")
+        .select("from_address, from_name, subject, body, suggested_reply, queued_at, status")
+        .eq("user_id", user.id)
+        .eq("thread_id", emailData.thread_id)
+        .order("queued_at", { ascending: true });
+
+      if (threadEmails && threadEmails.length > 0) {
+        threadContext = "\n\nCONVERSATION HISTORY (previous emails in this thread):\n" +
+          threadEmails.map((e: any) => {
+            let entry = `[${e.queued_at}] From: ${e.from_name || e.from_address}\nSubject: ${e.subject}\n${e.body}`;
+            if (e.suggested_reply && (e.status === "sent" || e.status === "approved" || e.status === "edited")) {
+              entry += `\n\nOur Reply:\n${e.suggested_reply}`;
+            }
+            return entry;
+          }).join("\n---\n");
+      }
+    }
+
     // Build context from knowledge base
     const knowledgeContext = (knowledgeEntries || []).map((entry: KnowledgeEntry) => {
       const content = entry.extracted_text 
@@ -135,6 +158,7 @@ serve(async (req) => {
 
 KNOWLEDGE BASE:
 ${knowledgeContext || "No knowledge entries available."}
+${threadContext}
 
 INSTRUCTIONS:
 - Tone: ${aiInstructions.tone}
@@ -259,6 +283,7 @@ ${emailData.body}`
         flag_reason: parsedResponse.reason,
         intent: parsedResponse.intent === "greeting" ? "personal" : parsedResponse.intent,
         status: queueStatus,
+        thread_id: emailData.thread_id || null,
       });
 
     if (queueError) {
