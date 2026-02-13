@@ -167,10 +167,14 @@ function ImapConnectionForm({ session }: { session: Session | null }) {
   const [smtpPort, setSmtpPort] = useState("587");
   const [password, setPassword] = useState("");
   const [isConnecting, setIsConnecting] = useState(false);
+  const [step, setStep] = useState<"email" | "details">("email");
+  const [detectedPreset, setDetectedPreset] = useState<string | null>(null);
 
-  // Auto-detect preset
-  useEffect(() => {
-    if (!email.includes("@")) return;
+  const handleEmailConfirm = () => {
+    if (!email.includes("@")) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
     const domain = email.split("@")[1]?.toLowerCase();
     if (domain && PROVIDER_PRESETS[domain]) {
       const preset = PROVIDER_PRESETS[domain];
@@ -178,8 +182,16 @@ function ImapConnectionForm({ session }: { session: Session | null }) {
       setImapPort(String(preset.imap_port));
       setSmtpHost(preset.smtp_host);
       setSmtpPort(String(preset.smtp_port));
+      setDetectedPreset(domain);
+    } else {
+      setDetectedPreset(null);
     }
-  }, [email]);
+    setStep("details");
+  };
+
+  const handleBack = () => {
+    setStep("email");
+  };
 
   const handleConnect = async () => {
     if (!session?.access_token) {
@@ -215,6 +227,8 @@ function ImapConnectionForm({ session }: { session: Session | null }) {
       setPassword("");
       setImapHost("");
       setSmtpHost("");
+      setStep("email");
+      setDetectedPreset(null);
     } catch (error: unknown) {
       console.error("IMAP connection error:", error);
       toast.error("Failed to connect account");
@@ -223,113 +237,194 @@ function ImapConnectionForm({ session }: { session: Session | null }) {
     }
   };
 
+  const handleApplyPreset = (presetKey: string) => {
+    const preset = PROVIDER_PRESETS[presetKey];
+    if (preset) {
+      setImapHost(preset.imap_host);
+      setImapPort(String(preset.imap_port));
+      setSmtpHost(preset.smtp_host);
+      setSmtpPort(String(preset.smtp_port));
+      setDetectedPreset(presetKey);
+    }
+  };
+
   return (
     <Card className="border border-border">
       <CardHeader>
         <CardTitle className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary">
             <Server className="h-5 w-5" />
           </div>
           Other Email (IMAP/SMTP)
         </CardTitle>
         <CardDescription>
-          Connect Yahoo, iCloud, Zoho, ProtonMail, or any IMAP-compatible provider
+          Connect Yahoo, iCloud, Zoho, GoDaddy, ProtonMail, or any IMAP-compatible provider
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label>Email Address</Label>
-          <Input
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-2">
-            <Label>IMAP Host</Label>
-            <Input
-              placeholder="imap.example.com"
-              value={imapHost}
-              onChange={(e) => setImapHost(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>IMAP Port</Label>
-            <Input
-              type="number"
-              value={imapPort}
-              onChange={(e) => setImapPort(e.target.value)}
-            />
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-2">
-            <Label>SMTP Host</Label>
-            <Input
-              placeholder="smtp.example.com"
-              value={smtpHost}
-              onChange={(e) => setSmtpHost(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>SMTP Port</Label>
-            <Input
-              type="number"
-              value={smtpPort}
-              onChange={(e) => setSmtpPort(e.target.value)}
-            />
-          </div>
-        </div>
-        <div className="space-y-2">
-          <Label>App Password</Label>
-          <Input
-            type="password"
-            placeholder="Your app password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          {(() => {
-            const help = getAppPasswordHelp(email);
-            if (help.type === "known") {
-              return (
-                <div className="text-xs text-muted-foreground space-y-1">
-                  <p>
-                    {help.label} required.{" "}
-                    <a
-                      href={help.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-primary hover:underline font-medium"
-                    >
-                      Generate one here
-                      <ExternalLink className="h-3 w-3" />
-                    </a>
-                  </p>
-                  {help.note && <p className="text-muted-foreground/70">{help.note}</p>}
-                </div>
-              );
-            }
-            return (
+        {step === "email" ? (
+          <>
+            <div className="space-y-2">
+              <Label>Email Address</Label>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleEmailConfirm()}
+                  className="flex-1"
+                />
+                <Button
+                  onClick={handleEmailConfirm}
+                  size="icon"
+                  disabled={!email.includes("@")}
+                  title="Continue"
+                >
+                  <Check className="h-4 w-4" />
+                </Button>
+              </div>
               <p className="text-xs text-muted-foreground">
-                {help.message}
+                Enter your email and click the checkmark to continue
               </p>
-            );
-          })()}
-        </div>
-        <Button onClick={handleConnect} className="w-full" disabled={isConnecting}>
-          {isConnecting ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Connecting...
-            </>
-          ) : (
-            <>
-              Connect Account
-              <Plus className="ml-2 h-4 w-4" />
-            </>
-          )}
-        </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm" onClick={handleBack}>
+                ← Back
+              </Button>
+              <Badge variant="outline" className="text-sm">
+                {email}
+              </Badge>
+            </div>
+
+            {detectedPreset ? (
+              <div className="flex items-center gap-2 rounded-md border border-primary/20 bg-primary/5 p-3 text-sm">
+                <Check className="h-4 w-4 text-primary shrink-0" />
+                <span className="text-foreground">
+                  Server settings auto-filled for{" "}
+                  <span className="font-medium">
+                    {APP_PASSWORD_LINKS[detectedPreset]?.label || detectedPreset}
+                  </span>
+                </span>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex items-start gap-2 rounded-md border border-border bg-muted/50 p-3 text-sm">
+                  <AlertTriangle className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                  <div className="space-y-2">
+                    <p className="text-foreground">
+                      We couldn't auto-detect your email provider. Select your hosting provider or enter settings manually.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {Object.entries(PROVIDER_PRESETS).map(([domain]) => {
+                        const link = APP_PASSWORD_LINKS[domain];
+                        const label = link?.label || domain;
+                        return (
+                          <Button
+                            key={domain}
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleApplyPreset(domain)}
+                            className="text-xs"
+                          >
+                            {label}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>IMAP Host</Label>
+                <Input
+                  placeholder="imap.example.com"
+                  value={imapHost}
+                  onChange={(e) => setImapHost(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>IMAP Port</Label>
+                <Input
+                  type="number"
+                  value={imapPort}
+                  onChange={(e) => setImapPort(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>SMTP Host</Label>
+                <Input
+                  placeholder="smtp.example.com"
+                  value={smtpHost}
+                  onChange={(e) => setSmtpHost(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>SMTP Port</Label>
+                <Input
+                  type="number"
+                  value={smtpPort}
+                  onChange={(e) => setSmtpPort(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Password</Label>
+              <Input
+                type="password"
+                placeholder="Your email password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              {(() => {
+                const help = getAppPasswordHelp(email);
+                if (help.type === "known") {
+                  return (
+                    <div className="text-xs text-muted-foreground space-y-1">
+                      <p>
+                        {help.note || `${help.label} required.`}{" "}
+                        <a
+                          href={help.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-primary hover:underline font-medium"
+                        >
+                          Learn more
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </p>
+                    </div>
+                  );
+                }
+                return (
+                  <p className="text-xs text-muted-foreground">
+                    {help.message}
+                  </p>
+                );
+              })()}
+            </div>
+            <Button onClick={handleConnect} className="w-full" disabled={isConnecting}>
+              {isConnecting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Connecting...
+                </>
+              ) : (
+                <>
+                  Connect Account
+                  <Plus className="ml-2 h-4 w-4" />
+                </>
+              )}
+            </Button>
+          </>
+        )}
       </CardContent>
     </Card>
   );
