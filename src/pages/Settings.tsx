@@ -169,6 +169,7 @@ function ImapConnectionForm({ session }: { session: Session | null }) {
   const [isConnecting, setIsConnecting] = useState(false);
   const [step, setStep] = useState<"email" | "details">("email");
   const [detectedPreset, setDetectedPreset] = useState<string | null>(null);
+  const [showManualFields, setShowManualFields] = useState(false);
 
   const handleEmailConfirm = () => {
     if (!email.includes("@")) {
@@ -198,10 +199,17 @@ function ImapConnectionForm({ session }: { session: Session | null }) {
       toast.error("Please sign in first");
       return;
     }
-    if (!email || !imapHost || !smtpHost || !password) {
+    if (!email || !password) {
       toast.error("Please fill in all required fields");
       return;
     }
+    if (!detectedPreset && (!imapHost || !smtpHost)) {
+      toast.error("Please fill in server host fields or select a provider");
+      return;
+    }
+    // If preset detected but hosts not manually set, ensure they're filled from preset
+    const finalImapHost = imapHost || (detectedPreset ? PROVIDER_PRESETS[detectedPreset]?.imap_host : "");
+    const finalSmtpHost = smtpHost || (detectedPreset ? PROVIDER_PRESETS[detectedPreset]?.smtp_host : "");
 
     setIsConnecting(true);
     try {
@@ -213,9 +221,9 @@ function ImapConnectionForm({ session }: { session: Session | null }) {
         email_address: email,
         provider: "imap",
         is_active: true,
-        imap_host: imapHost,
+        imap_host: finalImapHost,
         imap_port: parseInt(imapPort),
-        smtp_host: smtpHost,
+        smtp_host: finalSmtpHost,
         smtp_port: parseInt(smtpPort),
         imap_password: password,
       });
@@ -229,6 +237,7 @@ function ImapConnectionForm({ session }: { session: Session | null }) {
       setSmtpHost("");
       setStep("email");
       setDetectedPreset(null);
+      setShowManualFields(false);
     } catch (error: unknown) {
       console.error("IMAP connection error:", error);
       toast.error("Failed to connect account");
@@ -326,55 +335,51 @@ function ImapConnectionForm({ session }: { session: Session | null }) {
                             key={domain}
                             variant="outline"
                             size="sm"
-                            onClick={() => handleApplyPreset(domain)}
+                            onClick={() => {
+                              handleApplyPreset(domain);
+                              setShowManualFields(false);
+                            }}
                             className="text-xs"
                           >
                             {label}
                           </Button>
                         );
                       })}
+                      <Button
+                        variant={showManualFields ? "secondary" : "outline"}
+                        size="sm"
+                        onClick={() => setShowManualFields(!showManualFields)}
+                        className="text-xs"
+                      >
+                        Other (Manual)
+                      </Button>
                     </div>
                   </div>
                 </div>
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>IMAP Host</Label>
-                <Input
-                  placeholder="imap.example.com"
-                  value={imapHost}
-                  onChange={(e) => setImapHost(e.target.value)}
-                />
+            {showManualFields && !detectedPreset && (
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label>IMAP Host</Label>
+                  <Input
+                    placeholder="imap.example.com"
+                    value={imapHost}
+                    onChange={(e) => setImapHost(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>SMTP Host</Label>
+                  <Input
+                    placeholder="smtp.example.com"
+                    value={smtpHost}
+                    onChange={(e) => setSmtpHost(e.target.value)}
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label>IMAP Port</Label>
-                <Input
-                  type="number"
-                  value={imapPort}
-                  onChange={(e) => setImapPort(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>SMTP Host</Label>
-                <Input
-                  placeholder="smtp.example.com"
-                  value={smtpHost}
-                  onChange={(e) => setSmtpHost(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>SMTP Port</Label>
-                <Input
-                  type="number"
-                  value={smtpPort}
-                  onChange={(e) => setSmtpPort(e.target.value)}
-                />
-              </div>
-            </div>
+            )}
+
             <div className="space-y-2">
               <Label>Password</Label>
               <Input
