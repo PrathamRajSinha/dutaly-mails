@@ -97,6 +97,8 @@ serve(async (req) => {
             role: "system",
             content: `You are an email analyst assistant. The user will ask questions about their emails. Answer based ONLY on the email data provided below. Be specific, cite email subjects/senders when relevant. If you can't find the answer in the emails, say so.
 
+IMPORTANT: Respond in PLAIN TEXT only. Do NOT use any markdown formatting such as bold (**text**), italics, bullet points (* or -), headers (#), or code blocks. Use simple numbered lists or dashes if needed, but no markdown syntax.
+
 EMAILS (${emails.length} total):
 ${emailContext}`,
           },
