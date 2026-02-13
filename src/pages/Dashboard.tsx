@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useActivityLogs } from "@/hooks/useActivityLogs";
 import { useEmailQueue } from "@/hooks/useEmailQueue";
+import { useEmailAccounts } from "@/hooks/useEmailAccounts";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -16,6 +17,7 @@ export default function Dashboard() {
   const { logs, isLoading: logsLoading } = useActivityLogs(10);
   const { pendingCount, isLoading: queueLoading } = useEmailQueue();
 
+  const { accounts } = useEmailAccounts();
   const { session } = useAuth();
   const queryClient = useQueryClient();
   const [isFetching, setIsFetching] = useState(false);
@@ -29,17 +31,39 @@ export default function Dashboard() {
     }
     setIsFetching(true);
     try {
-      const { data, error } = await supabase.functions.invoke("fetch-gmail-emails", {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
-      if (error) throw error;
-      if (data?.error) {
-        toast.error(data.error);
-      } else {
-        toast.success(`Fetched emails: ${data?.processed || 0} new, ${data?.skipped || 0} skipped`);
-        queryClient.invalidateQueries({ queryKey: ["email-queue"] });
-        queryClient.invalidateQueries({ queryKey: ["activity-logs"] });
+      const hasGmail = accounts.some(a => a.provider === "gmail" && a.is_active);
+      const hasImap = accounts.some(a => a.provider === "imap" && a.is_active);
+
+      const fetches: Promise<{ data: any; error: any }>[] = [];
+      if (hasGmail) {
+        fetches.push(supabase.functions.invoke("fetch-gmail-emails", {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        }));
       }
+      if (hasImap) {
+        fetches.push(supabase.functions.invoke("fetch-imap-emails", {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        }));
+      }
+
+      if (fetches.length === 0) {
+        toast.info("No active email accounts found");
+        setIsFetching(false);
+        return;
+      }
+
+      const results = await Promise.all(fetches);
+      let totalProcessed = 0;
+      let totalSkipped = 0;
+      for (const { data, error } of results) {
+        if (error) throw error;
+        if (data?.error) { toast.error(data.error); continue; }
+        totalProcessed += data?.processed || 0;
+        totalSkipped += data?.skipped || 0;
+      }
+      toast.success(`Fetched emails: ${totalProcessed} new, ${totalSkipped} skipped`);
+      queryClient.invalidateQueries({ queryKey: ["email-queue"] });
+      queryClient.invalidateQueries({ queryKey: ["activity-logs"] });
     } catch (error) {
       console.error("Fetch emails error:", error);
       toast.error("Failed to fetch emails");

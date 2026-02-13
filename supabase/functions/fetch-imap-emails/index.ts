@@ -46,11 +46,36 @@ async function imapCommand(conn: Deno.TlsConn, tag: string, command: string): Pr
   return await readMultiLine(conn, tag);
 }
 
+function decodeMimeEncodedWord(str: string): string {
+  // Decode RFC 2047 encoded words: =?charset?encoding?encoded_text?=
+  return str.replace(/=\?([^?]+)\?([BbQq])\?([^?]*)\?=/g, (_match, _charset, encoding, text) => {
+    if (encoding.toUpperCase() === "B") {
+      // Base64
+      try {
+        const bytes = Uint8Array.from(atob(text), c => c.charCodeAt(0));
+        return new TextDecoder("utf-8").decode(bytes);
+      } catch { return text; }
+    } else if (encoding.toUpperCase() === "Q") {
+      // Quoted-printable
+      const decoded = text
+        .replace(/_/g, " ")
+        .replace(/=([0-9A-Fa-f]{2})/g, (_: string, hex: string) => String.fromCharCode(parseInt(hex, 16)));
+      try {
+        const bytes = Uint8Array.from(decoded, c => c.charCodeAt(0));
+        return new TextDecoder("utf-8").decode(bytes);
+      } catch { return decoded; }
+    }
+    return text;
+  });
+}
+
 function parseEmailHeaders(raw: string): { from: string; fromName: string | null; subject: string; messageId: string; threadId: string | null } {
   const getHeader = (name: string): string => {
-    const regex = new RegExp(`^${name}:\\s*(.+?)$`, "mi");
+    // Handle multi-line folded headers
+    const regex = new RegExp(`^${name}:\\s*((?:.*(?:\\r?\\n[ \\t]+.*)*)*)`, "mi");
     const match = raw.match(regex);
-    return match ? match[1].trim() : "";
+    if (!match) return "";
+    return decodeMimeEncodedWord(match[1].replace(/\\r?\\n[ \\t]+/g, " ").trim());
   };
 
   const from = getHeader("From");
