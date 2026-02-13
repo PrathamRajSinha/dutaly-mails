@@ -41,6 +41,8 @@ const PROVIDER_PRESETS: Record<string, { imap_host: string; imap_port: number; s
   "me.com": { imap_host: "imap.mail.me.com", imap_port: 993, smtp_host: "smtp.mail.me.com", smtp_port: 587 },
   "zoho.com": { imap_host: "imap.zoho.com", imap_port: 993, smtp_host: "smtp.zoho.com", smtp_port: 587 },
   "protonmail.com": { imap_host: "127.0.0.1", imap_port: 1143, smtp_host: "127.0.0.1", smtp_port: 1025 },
+  "secureserver.net": { imap_host: "imap.secureserver.net", imap_port: 993, smtp_host: "smtpout.secureserver.net", smtp_port: 465 },
+  "godaddy.com": { imap_host: "imap.secureserver.net", imap_port: 993, smtp_host: "smtpout.secureserver.net", smtp_port: 465 },
 };
 
 const APP_PASSWORD_LINKS: Record<string, { label: string; url: string; note?: string }> = {
@@ -51,6 +53,8 @@ const APP_PASSWORD_LINKS: Record<string, { label: string; url: string; note?: st
   "me.com": { label: "Apple App-Specific Password", url: "https://appleid.apple.com/account/manage", note: "Go to Security → App-Specific Passwords" },
   "zoho.com": { label: "Zoho App Password", url: "https://accounts.zoho.com/home#security/security_pwd" },
   "protonmail.com": { label: "ProtonMail Bridge", url: "https://proton.me/mail/bridge", note: "ProtonMail requires Bridge to use IMAP" },
+  "secureserver.net": { label: "GoDaddy Email Setup", url: "https://www.godaddy.com/help/add-my-workspace-email-to-my-email-client-6932", note: "Use your regular GoDaddy email password" },
+  "godaddy.com": { label: "GoDaddy Email Setup", url: "https://www.godaddy.com/help/add-my-workspace-email-to-my-email-client-6932", note: "Use your regular GoDaddy email password" },
 };
 
 function getAppPasswordHelp(email: string) {
