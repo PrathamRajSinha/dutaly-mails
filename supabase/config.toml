@@ -29,3 +29,6 @@ verify_jwt = false
 
 [functions.send-imap-reply]
 verify_jwt = false
+
+[functions.ask-about-emails]
+verify_jwt = false
