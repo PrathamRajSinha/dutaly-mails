@@ -270,7 +270,10 @@ export default function EmailQueue() {
   const [addKBDialogOpen, setAddKBDialogOpen] = useState(false);
   const [selectedEmailForKB, setSelectedEmailForKB] = useState<QueuedEmail | null>(null);
   const [isFetching, setIsFetching] = useState(false);
-  const [activeTab, setActiveTab] = useState("needs_review");
+  const [activeTab, setActiveTab] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("tab") || "needs_review";
+  });
   const [autoFetchEnabled, setAutoFetchEnabled] = useState(false);
   const isFetchingRef = useRef(false);
 
