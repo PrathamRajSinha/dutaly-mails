@@ -28,7 +28,7 @@ async function readLine(conn: Deno.TlsConn): Promise<string> {
 }
 
 async function readMultiLine(conn: Deno.TlsConn, tag: string): Promise<string> {
-  const buf = new Uint8Array(8192);
+  const buf = new Uint8Array(32768);
   let result = "";
   while (true) {
     const n = await conn.read(buf);
