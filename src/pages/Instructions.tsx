@@ -54,6 +54,8 @@ export default function Instructions() {
   const [newDoNotRule, setNewDoNotRule] = useState("");
   const [backupEmail, setBackupEmail] = useState("");
   const [backupEmailInput, setBackupEmailInput] = useState("");
+  const [escalationConditions, setEscalationConditions] = useState<string[]>([]);
+  const [newCondition, setNewCondition] = useState("");
   const [showBackupEmailConfirm, setShowBackupEmailConfirm] = useState(false);
   const [showAutoReplyConfirm, setShowAutoReplyConfirm] = useState(false);
   const [showThresholdConfirm, setShowThresholdConfirm] = useState(false);
@@ -75,6 +77,7 @@ export default function Instructions() {
       do_rules: doRules,
       do_not_rules: doNotRules,
       backup_email: backupEmail || null,
+      escalation_conditions: escalationConditions,
       ...updates,
     };
     updateInstructions.mutate(payload as any);
@@ -96,6 +99,7 @@ export default function Instructions() {
       setDoRules(instructions.do_rules || []);
       setDoNotRules(instructions.do_not_rules || []);
       setBackupEmail(instructions.backup_email || "");
+      setEscalationConditions(instructions.escalation_conditions || []);
     }
   }, [instructions, defaultInstructions]);
 
@@ -115,6 +119,7 @@ export default function Instructions() {
       do_rules: doRules,
       do_not_rules: doNotRules,
       backup_email: backupEmail || null,
+      escalation_conditions: escalationConditions,
     });
   };
 
@@ -488,7 +493,7 @@ export default function Instructions() {
                 When an urgent or uncertain email arrives, a notification will be sent to this address.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-4">
               {backupEmail ? (
                 <div className="flex items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
                   <Mail className="h-4 w-4 text-primary" />
@@ -548,6 +553,55 @@ export default function Instructions() {
                   </p>
                 </div>
               )}
+
+              {/* Escalation Conditions */}
+              <div className="space-y-3">
+                <Label className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                  <ShieldAlert className="h-4 w-4 text-primary" />
+                  Escalation Conditions
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Define when the backup email should be notified. The AI will check incoming emails against these conditions.
+                </p>
+                <div className="space-y-2">
+                  {escalationConditions.map((condition, i) => (
+                    <div key={i} className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2">
+                      <span className="flex-1 text-sm text-foreground">{condition}</span>
+                      <button
+                        onClick={() => setEscalationConditions(escalationConditions.filter((_, idx) => idx !== i))}
+                        className="text-muted-foreground hover:text-destructive"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                  <div className="flex gap-2">
+                    <Input
+                      value={newCondition}
+                      onChange={(e) => setNewCondition(e.target.value)}
+                      placeholder="e.g. Email mentions 'urgent' or 'ASAP'"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && newCondition.trim()) {
+                          setEscalationConditions([...escalationConditions, newCondition.trim()]);
+                          setNewCondition("");
+                        }
+                      }}
+                    />
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => {
+                        if (newCondition.trim()) {
+                          setEscalationConditions([...escalationConditions, newCondition.trim()]);
+                          setNewCondition("");
+                        }
+                      }}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
