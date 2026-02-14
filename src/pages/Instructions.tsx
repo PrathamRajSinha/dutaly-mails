@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Save, RotateCcw, Info, Sparkles, Loader2, MessageCircle, Image, Plus, X, CheckCircle, Ban } from "lucide-react";
+import { Save, RotateCcw, Info, Sparkles, Loader2, MessageCircle, Image, Plus, X, CheckCircle, Ban, Mail, ShieldAlert } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -52,6 +52,9 @@ export default function Instructions() {
   const [doNotRules, setDoNotRules] = useState<string[]>([]);
   const [newDoRule, setNewDoRule] = useState("");
   const [newDoNotRule, setNewDoNotRule] = useState("");
+  const [backupEmail, setBackupEmail] = useState("");
+  const [backupEmailInput, setBackupEmailInput] = useState("");
+  const [showBackupEmailConfirm, setShowBackupEmailConfirm] = useState(false);
   const [showAutoReplyConfirm, setShowAutoReplyConfirm] = useState(false);
   const [showThresholdConfirm, setShowThresholdConfirm] = useState(false);
   const [pendingThreshold, setPendingThreshold] = useState(0.8);
@@ -71,6 +74,7 @@ export default function Instructions() {
       logo_url: logoUrl || null,
       do_rules: doRules,
       do_not_rules: doNotRules,
+      backup_email: backupEmail || null,
       ...updates,
     };
     updateInstructions.mutate(payload as any);
@@ -91,6 +95,7 @@ export default function Instructions() {
       setLogoUrl(instructions.logo_url || "");
       setDoRules(instructions.do_rules || []);
       setDoNotRules(instructions.do_not_rules || []);
+      setBackupEmail(instructions.backup_email || "");
     }
   }, [instructions, defaultInstructions]);
 
@@ -109,6 +114,7 @@ export default function Instructions() {
       logo_url: logoUrl || null,
       do_rules: doRules,
       do_not_rules: doNotRules,
+      backup_email: backupEmail || null,
     });
   };
 
@@ -471,6 +477,80 @@ export default function Instructions() {
             </CardContent>
           </Card>
 
+          {/* Backup Email */}
+          <Card className="border border-border">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <ShieldAlert className="h-4 w-4 text-primary" />
+                Backup Email (Escalation)
+              </CardTitle>
+              <CardDescription>
+                When an urgent or uncertain email arrives, a notification will be sent to this address.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {backupEmail ? (
+                <div className="flex items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
+                  <Mail className="h-4 w-4 text-primary" />
+                  <span className="flex-1 text-sm font-medium text-foreground">{backupEmail}</span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setBackupEmailInput("");
+                      setShowBackupEmailConfirm(true);
+                    }}
+                  >
+                    Change
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:text-destructive"
+                    onClick={() => {
+                      setBackupEmail("");
+                      saveToggle({ backup_email: null });
+                      toast.success("Backup email removed");
+                    }}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <Input
+                      type="email"
+                      value={backupEmailInput}
+                      onChange={(e) => setBackupEmailInput(e.target.value)}
+                      placeholder="e.g. manager@company.com"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && backupEmailInput.trim()) {
+                          setShowBackupEmailConfirm(true);
+                        }
+                      }}
+                    />
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        if (backupEmailInput.trim()) {
+                          setShowBackupEmailConfirm(true);
+                        } else {
+                          toast.error("Please enter an email address");
+                        }
+                      }}
+                    >
+                      Set
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Urgent, doubtful, or escalated emails will trigger a notification to this address
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Example Instructions */}
           <Card className="border-primary/20 bg-primary/5">
             <CardHeader className="pb-3">
@@ -557,6 +637,53 @@ export default function Instructions() {
               saveToggle({ auto_reply_enabled: true, auto_reply_confidence_threshold: confidenceThreshold });
             }}>
               Enable Auto-Reply
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Backup email confirmation dialog */}
+      <AlertDialog open={showBackupEmailConfirm} onOpenChange={setShowBackupEmailConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Backup Email</AlertDialogTitle>
+            <AlertDialogDescription>
+              {backupEmail
+                ? `You're changing the backup email from "${backupEmail}" to a new address. Please enter and confirm the new email below.`
+                : "Urgent or doubtful emails will trigger a notification to this address. Please confirm the email is correct."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-3 my-2">
+            <div className="space-y-2">
+              <Label>Email Address</Label>
+              <Input
+                type="email"
+                value={backupEmailInput}
+                onChange={(e) => setBackupEmailInput(e.target.value)}
+                placeholder="Enter backup email address"
+              />
+            </div>
+            <div className="rounded-lg border border-border bg-muted/30 p-3">
+              <p className="text-xs text-muted-foreground">
+                <strong>When does this trigger?</strong> The system will send a notification to this email when it detects an urgent request, a complaint, or an email it's uncertain how to handle.
+              </p>
+            </div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                const email = backupEmailInput.trim();
+                if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                  toast.error("Please enter a valid email address");
+                  return;
+                }
+                setBackupEmail(email);
+                saveToggle({ backup_email: email });
+                toast.success(`Backup email set to ${email}`);
+              }}
+            >
+              Confirm Email
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
