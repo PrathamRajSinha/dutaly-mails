@@ -22,6 +22,7 @@ export interface AIInstructions {
   do_rules: string[];
   do_not_rules: string[];
   backup_email: string | null;
+  escalation_conditions: string[];
   created_at: string;
   updated_at: string;
 }
@@ -83,6 +84,7 @@ export function useAIInstructions() {
             do_rules: [],
             do_not_rules: [],
             backup_email: null,
+            escalation_conditions: [],
           };
         }
         throw error;

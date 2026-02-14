@@ -1,0 +1,1 @@
+ALTER TABLE public.ai_instructions ADD COLUMN escalation_conditions text[] DEFAULT '{}'::text[];

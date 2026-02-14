@@ -65,6 +65,7 @@ export type Database = {
           do_rules: string[] | null
           email_footer: string | null
           escalate_unknown: boolean | null
+          escalation_conditions: string[] | null
           greeting_response_enabled: boolean | null
           greeting_template: string | null
           id: string
@@ -87,6 +88,7 @@ export type Database = {
           do_rules?: string[] | null
           email_footer?: string | null
           escalate_unknown?: boolean | null
+          escalation_conditions?: string[] | null
           greeting_response_enabled?: boolean | null
           greeting_template?: string | null
           id?: string
@@ -109,6 +111,7 @@ export type Database = {
           do_rules?: string[] | null
           email_footer?: string | null
           escalate_unknown?: boolean | null
+          escalation_conditions?: string[] | null
           greeting_response_enabled?: boolean | null
           greeting_template?: string | null
           id?: string
