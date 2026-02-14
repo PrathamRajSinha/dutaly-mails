@@ -243,6 +243,54 @@ export type Database = {
           },
         ]
       }
+      email_templates: {
+        Row: {
+          accent_color: string
+          body: string
+          category: string
+          created_at: string
+          font_family: string
+          font_size: string
+          footer_logo_url: string
+          footer_text: string
+          id: string
+          name: string
+          text_color: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accent_color?: string
+          body: string
+          category?: string
+          created_at?: string
+          font_family?: string
+          font_size?: string
+          footer_logo_url?: string
+          footer_text?: string
+          id?: string
+          name: string
+          text_color?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accent_color?: string
+          body?: string
+          category?: string
+          created_at?: string
+          font_family?: string
+          font_size?: string
+          footer_logo_url?: string
+          footer_text?: string
+          id?: string
+          name?: string
+          text_color?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       knowledge_base_entries: {
         Row: {
           category: string

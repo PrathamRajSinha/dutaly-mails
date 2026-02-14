@@ -17,6 +17,9 @@ import {
   Eye,
   Play,
   Pause,
+  FileText,
+  Paperclip,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,6 +42,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEmailAccounts } from "@/hooks/useEmailAccounts";
+import { TemplatePickerDialog } from "@/components/email-templates/TemplatePickerDialog";
+import { type EmailTemplate } from "@/hooks/useEmailTemplates";
+import { replaceVariables, renderEmailHtml } from "@/lib/emailHtml";
 
 const getConfidenceColor = (confidence: number | null) => {
   if (!confidence) return "text-muted-foreground bg-muted";
@@ -68,23 +74,78 @@ function EmailCard({
   onAddToKB,
   isPending,
   readOnly = false,
+  userName,
 }: {
   email: QueuedEmail;
   isExpanded: boolean;
   onToggle: () => void;
-  onApprove: () => void;
+  onApprove: (htmlBody?: string, attachmentUrls?: string[]) => void;
   onIgnore: () => void;
-  onEditSend: (reply: string) => void;
+  onEditSend: (reply: string, htmlBody?: string, attachmentUrls?: string[]) => void;
   onAddToKB: () => void;
   isPending: boolean;
   readOnly?: boolean;
+  userName?: string;
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [isComposing, setIsComposing] = useState(false);
   const [editedReply, setEditedReply] = useState(email.suggested_reply || "");
   const [composedReply, setComposedReply] = useState("");
+  const [templatePickerOpen, setTemplatePickerOpen] = useState(false);
+  const [activeTemplate, setActiveTemplate] = useState<EmailTemplate | null>(null);
+  const [attachments, setAttachments] = useState<{ name: string; url: string }[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { user } = useAuth();
+
   const confidencePercent = email.confidence_score ? Math.round(email.confidence_score * 100) : null;
   const hasReply = !!email.suggested_reply;
+
+  const handleTemplateSelect = (template: EmailTemplate) => {
+    const replaced = replaceVariables(template.body, {
+      sender_name: email.from_name || email.from_address.split("@")[0],
+      subject: email.subject,
+      my_name: userName,
+    });
+    if (isEditing) {
+      setEditedReply(replaced);
+    } else {
+      setComposedReply(replaced);
+      setIsComposing(true);
+    }
+    setActiveTemplate(template);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || !user) return;
+    setIsUploading(true);
+    try {
+      for (const file of Array.from(files)) {
+        const filePath = `${user.id}/${crypto.randomUUID()}_${file.name}`;
+        const { error } = await supabase.storage.from("email-attachments").upload(filePath, file);
+        if (error) throw error;
+        const { data: urlData } = supabase.storage.from("email-attachments").getPublicUrl(filePath);
+        setAttachments((prev) => [...prev, { name: file.name, url: urlData.publicUrl }]);
+      }
+    } catch (err: any) {
+      toast.error("Upload failed: " + err.message);
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const removeAttachment = (url: string) => {
+    setAttachments((prev) => prev.filter((a) => a.url !== url));
+  };
+
+  const getHtmlBody = (textBody: string) => {
+    if (!activeTemplate) return undefined;
+    return renderEmailHtml(textBody, activeTemplate);
+  };
+
+  const attachmentUrls = attachments.length > 0 ? attachments.map((a) => a.url) : undefined;
 
   const statusBadge = () => {
     switch (email.status) {
@@ -205,28 +266,81 @@ function EmailCard({
             </div>
           )}
 
+          {/* Attachments display */}
+          {attachments.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {attachments.map((a) => (
+                <Badge key={a.url} variant="secondary" className="gap-1 pr-1">
+                  <Paperclip className="h-3 w-3" />
+                  {a.name}
+                  <button
+                    onClick={() => removeAttachment(a.url)}
+                    className="ml-1 rounded-full p-0.5 hover:bg-destructive/20"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </Badge>
+              ))}
+            </div>
+          )}
+
+          {/* Active template indicator */}
+          {activeTemplate && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <FileText className="h-3.5 w-3.5" />
+              Using template: <span className="font-medium">{activeTemplate.name}</span>
+              <button onClick={() => setActiveTemplate(null)} className="text-destructive hover:underline">
+                Remove
+              </button>
+            </div>
+          )}
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            className="hidden"
+            onChange={handleFileUpload}
+          />
+
           {!readOnly && (
             <div className="flex flex-wrap gap-3">
               {isEditing ? (
                 <>
-                  <Button onClick={() => { onEditSend(editedReply); setIsEditing(false); }} disabled={isPending}>
+                  <Button onClick={() => { onEditSend(editedReply, getHtmlBody(editedReply), attachmentUrls); setIsEditing(false); }} disabled={isPending}>
                     {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
                     Send Edited Reply
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => setTemplatePickerOpen(true)}>
+                    <FileText className="mr-2 h-4 w-4" />
+                    Use Template
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
+                    {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Paperclip className="mr-2 h-4 w-4" />}
+                    Attach File
                   </Button>
                   <Button variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
                 </>
               ) : isComposing ? (
                 <>
-                  <Button onClick={() => { onEditSend(composedReply); setIsComposing(false); }} disabled={isPending || !composedReply.trim()}>
+                  <Button onClick={() => { onEditSend(composedReply, getHtmlBody(composedReply), attachmentUrls); setIsComposing(false); }} disabled={isPending || !composedReply.trim()}>
                     {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
                     Send Reply
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => setTemplatePickerOpen(true)}>
+                    <FileText className="mr-2 h-4 w-4" />
+                    Use Template
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
+                    {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Paperclip className="mr-2 h-4 w-4" />}
+                    Attach File
                   </Button>
                   <Button variant="outline" onClick={() => setIsComposing(false)}>Cancel</Button>
                 </>
               ) : (
                 <>
                   {hasReply ? (
-                    <Button onClick={onApprove} disabled={isPending}>
+                    <Button onClick={() => onApprove(undefined, attachmentUrls)} disabled={isPending}>
                       {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
                       Approve & Send
                     </Button>
@@ -242,6 +356,10 @@ function EmailCard({
                       Edit & Send
                     </Button>
                   )}
+                  <Button variant="outline" size="sm" onClick={() => setTemplatePickerOpen(true)}>
+                    <FileText className="mr-2 h-4 w-4" />
+                    Use Template
+                  </Button>
                   <Button variant="outline" onClick={onIgnore} disabled={isPending}>
                     <X className="mr-2 h-4 w-4" />
                     Ignore
@@ -256,6 +374,12 @@ function EmailCard({
           )}
         </CardContent>
       )}
+
+      <TemplatePickerDialog
+        open={templatePickerOpen}
+        onOpenChange={setTemplatePickerOpen}
+        onSelect={handleTemplateSelect}
+      />
     </Card>
   );
 }
@@ -374,7 +498,7 @@ export default function EmailQueue() {
         email.from_address.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-  const handleApprove = async (id: string) => {
+  const handleApprove = async (id: string, _htmlBody?: string, _attachmentUrls?: string[]) => {
     await updateEmailStatus.mutateAsync({ id, status: "approved" });
   };
 
@@ -382,7 +506,7 @@ export default function EmailQueue() {
     await updateEmailStatus.mutateAsync({ id, status: "ignored" });
   };
 
-  const handleEditSend = async (id: string, editedReply: string) => {
+  const handleEditSend = async (id: string, editedReply: string, _htmlBody?: string, _attachmentUrls?: string[]) => {
     await updateEmailStatus.mutateAsync({ id, status: "edited", editedReply });
   };
 
@@ -412,9 +536,9 @@ export default function EmailQueue() {
             email={email}
             isExpanded={expandedId === email.id}
             onToggle={() => setExpandedId(expandedId === email.id ? null : email.id)}
-            onApprove={() => handleApprove(email.id)}
+            onApprove={(htmlBody, attachmentUrls) => handleApprove(email.id, htmlBody, attachmentUrls)}
             onIgnore={() => handleIgnore(email.id)}
-            onEditSend={(reply) => handleEditSend(email.id, reply)}
+            onEditSend={(reply, htmlBody, attachmentUrls) => handleEditSend(email.id, reply, htmlBody, attachmentUrls)}
             onAddToKB={() => handleAddToKB(email)}
             isPending={updateEmailStatus.isPending}
             readOnly={readOnly}
