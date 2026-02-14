@@ -26,7 +26,7 @@ export default function Auth() {
   // Redirect if already logged in
   useEffect(() => {
     if (user && !authLoading) {
-      navigate("/");
+      navigate("/dashboard");
     }
   }, [user, authLoading, navigate]);
 
@@ -65,7 +65,7 @@ export default function Auth() {
       }
     } else {
       toast.success("Welcome back!");
-      navigate("/");
+      navigate("/dashboard");
     }
   };
 

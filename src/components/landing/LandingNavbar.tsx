@@ -45,7 +45,7 @@ export function LandingNavbar() {
       style={{ backgroundColor: bg, backdropFilter: blur }}
     >
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        <Link to="/landing" className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-2">
           <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
             <Mail className="h-4 w-4 text-white" />
           </div>
