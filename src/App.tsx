@@ -12,6 +12,7 @@ import Instructions from "./pages/Instructions";
 import EmailQueue from "./pages/EmailQueue";
 import Settings from "./pages/Settings";
 import AskEmails from "./pages/AskEmails";
+import Templates from "./pages/Templates";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -38,6 +39,7 @@ const App = () => (
               <Route path="/instructions" element={<Instructions />} />
               <Route path="/queue" element={<EmailQueue />} />
               <Route path="/ask" element={<AskEmails />} />
+              <Route path="/templates" element={<Templates />} />
               <Route path="/settings" element={<Settings />} />
             </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

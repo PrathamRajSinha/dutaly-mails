@@ -20,6 +20,7 @@ const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },
   { icon: BookOpen, label: "Knowledge Base", path: "/knowledge-base" },
   { icon: FileText, label: "Instructions", path: "/instructions" },
+  { icon: Mail, label: "Templates", path: "/templates" },
   { icon: Inbox, label: "Email Queue", path: "/queue" },
   { icon: MessageSquare, label: "Ask Me Anything", path: "/ask" },
   { icon: Settings, label: "Settings", path: "/settings" },

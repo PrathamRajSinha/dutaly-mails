@@ -12,8 +12,16 @@ interface SendReplyRequest {
   to_address: string;
   subject: string;
   body: string;
+  html_body?: string;
+  attachments?: string[]; // URLs to download
   thread_id?: string;
   message_id?: string;
+}
+
+interface AttachmentData {
+  filename: string;
+  contentType: string;
+  base64: string;
 }
 
 async function refreshAccessToken(
@@ -56,25 +64,81 @@ async function refreshAccessToken(
   return tokens.access_token;
 }
 
-function createEmailRaw(to: string, subject: string, body: string, fromEmail: string, threadId?: string): string {
-  // Create RFC 2822 formatted email
-  const emailLines = [
+async function downloadAttachment(url: string): Promise<AttachmentData> {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`Failed to download attachment: ${url}`);
+  const buffer = await response.arrayBuffer();
+  const uint8 = new Uint8Array(buffer);
+  let binary = "";
+  for (let i = 0; i < uint8.length; i++) {
+    binary += String.fromCharCode(uint8[i]);
+  }
+  const base64 = btoa(binary);
+  const contentType = response.headers.get("content-type") || "application/octet-stream";
+  const filename = url.split("/").pop()?.split("?")[0] || "attachment";
+  // Remove UUID prefix if present (format: uuid_filename)
+  const cleanName = filename.includes("_") ? filename.substring(filename.indexOf("_") + 1) : filename;
+  return { filename: cleanName, contentType, base64 };
+}
+
+function createEmailRaw(
+  to: string,
+  subject: string,
+  body: string,
+  fromEmail: string,
+  htmlBody?: string,
+  attachments?: AttachmentData[]
+): string {
+  const boundary = `boundary_${crypto.randomUUID().replace(/-/g, "")}`;
+  const hasAttachments = attachments && attachments.length > 0;
+  const hasHtml = !!htmlBody;
+
+  const headers = [
     `From: ${fromEmail}`,
     `To: ${to}`,
     `Subject: Re: ${subject.replace(/^Re:\s*/i, "")}`,
-    `Content-Type: text/plain; charset="UTF-8"`,
     `MIME-Version: 1.0`,
-    "",
-    body,
   ];
 
-  const rawEmail = emailLines.join("\r\n");
-  
-  // Base64url encode
-  return btoa(rawEmail)
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
+  if (!hasAttachments && !hasHtml) {
+    // Plain text only
+    headers.push(`Content-Type: text/plain; charset="UTF-8"`);
+    const rawEmail = [...headers, "", body].join("\r\n");
+    return btoa(rawEmail).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  }
+
+  headers.push(`Content-Type: multipart/mixed; boundary="${boundary}"`);
+
+  const parts: string[] = [...headers, ""];
+
+  // Body part
+  parts.push(`--${boundary}`);
+  if (hasHtml) {
+    parts.push(`Content-Type: text/html; charset="UTF-8"`);
+    parts.push("");
+    parts.push(htmlBody!);
+  } else {
+    parts.push(`Content-Type: text/plain; charset="UTF-8"`);
+    parts.push("");
+    parts.push(body);
+  }
+
+  // Attachment parts
+  if (hasAttachments) {
+    for (const att of attachments!) {
+      parts.push(`--${boundary}`);
+      parts.push(`Content-Type: ${att.contentType}; name="${att.filename}"`);
+      parts.push(`Content-Disposition: attachment; filename="${att.filename}"`);
+      parts.push(`Content-Transfer-Encoding: base64`);
+      parts.push("");
+      parts.push(att.base64);
+    }
+  }
+
+  parts.push(`--${boundary}--`);
+
+  const rawEmail = parts.join("\r\n");
+  return btoa(rawEmail).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
 serve(async (req) => {
@@ -138,33 +202,40 @@ serve(async (req) => {
       }
     }
 
+    // Download attachments if any
+    let attachmentData: AttachmentData[] = [];
+    if (requestData.attachments && requestData.attachments.length > 0) {
+      console.log(`Downloading ${requestData.attachments.length} attachments...`);
+      attachmentData = await Promise.all(requestData.attachments.map(downloadAttachment));
+    }
+
     // Create the raw email message
     const rawMessage = createEmailRaw(
       requestData.to_address,
       requestData.subject,
       requestData.body,
       account.email_address,
-      requestData.thread_id
+      requestData.html_body,
+      attachmentData
     );
 
     // Send via Gmail API
-    const sendUrl = requestData.thread_id
-      ? `https://gmail.googleapis.com/gmail/v1/users/me/messages/send`
-      : `https://gmail.googleapis.com/gmail/v1/users/me/messages/send`;
-
     const sendBody: { raw: string; threadId?: string } = { raw: rawMessage };
     if (requestData.thread_id) {
       sendBody.threadId = requestData.thread_id;
     }
 
-    const sendResponse = await fetch(sendUrl, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(sendBody),
-    });
+    const sendResponse = await fetch(
+      "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(sendBody),
+      }
+    );
 
     if (!sendResponse.ok) {
       const errorText = await sendResponse.text();

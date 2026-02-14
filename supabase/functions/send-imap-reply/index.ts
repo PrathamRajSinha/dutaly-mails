@@ -13,6 +13,8 @@ interface SendReplyRequest {
   to_address: string;
   subject: string;
   body: string;
+  html_body?: string;
+  attachments?: string[]; // URLs to download
 }
 
 serve(async (req) => {
@@ -95,13 +97,47 @@ serve(async (req) => {
       ? requestData.subject 
       : `Re: ${requestData.subject}`;
 
-    await client.send({
+    // Build send options with html support
+    const sendOptions: Record<string, unknown> = {
       from: account.email_address,
       to: requestData.to_address,
       subject,
-      content: requestData.body,
-    });
+    };
 
+    if (requestData.html_body) {
+      sendOptions.content = "auto";
+      sendOptions.html = requestData.html_body;
+    } else {
+      sendOptions.content = requestData.body;
+    }
+
+    // Download and attach files if any
+    if (requestData.attachments && requestData.attachments.length > 0) {
+      console.log(`Processing ${requestData.attachments.length} attachments...`);
+      const attachmentList = [];
+      for (const url of requestData.attachments) {
+        const response = await fetch(url);
+        if (!response.ok) {
+          console.warn(`Failed to download attachment: ${url}`);
+          continue;
+        }
+        const buffer = await response.arrayBuffer();
+        const filename = url.split("/").pop()?.split("?")[0] || "attachment";
+        const cleanName = filename.includes("_") ? filename.substring(filename.indexOf("_") + 1) : filename;
+        const contentType = response.headers.get("content-type") || "application/octet-stream";
+        
+        attachmentList.push({
+          filename: cleanName,
+          content: new Uint8Array(buffer),
+          contentType,
+        });
+      }
+      if (attachmentList.length > 0) {
+        sendOptions.attachments = attachmentList;
+      }
+    }
+
+    await client.send(sendOptions as any);
     await client.close();
 
     console.log("SMTP email sent successfully");
