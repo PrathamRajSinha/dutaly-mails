@@ -119,38 +119,39 @@ function decodeBase64(text: string): string {
 }
 
 function extractPlainBody(raw: string): string {
-  // Extract BODY[TEXT] content from IMAP FETCH response
-  const bodyTextMatch = raw.match(/BODY\[TEXT\]\s*\{(\d+)\}\r?\n([\s\S]*)/);
-  let bodyContent = bodyTextMatch ? bodyTextMatch[2] : raw;
-
-  // Remove trailing IMAP protocol lines (e.g., ") * 9 FETCH ... F9 OK FETCH")
-  bodyContent = bodyContent.replace(/\)\s*\*\s*\d+\s+FETCH\s+\(.*$/s, "");
-  bodyContent = bodyContent.replace(/\)\r?\n[A-Z]\d+\s+(OK|NO|BAD)\s+FETCH.*$/s, "");
-  // Also strip trailing tagged response
-  bodyContent = bodyContent.replace(/[A-Z]\d+\s+(OK|NO|BAD)\s+FETCH.*$/s, "");
+  // Extract BODY[TEXT] content using the byte-count literal {N}
+  const bodyTextMatch = raw.match(/BODY\[TEXT\]\s*\{(\d+)\}\r?\n/);
+  let bodyContent: string;
+  
+  if (bodyTextMatch) {
+    const byteCount = parseInt(bodyTextMatch[1], 10);
+    const startIdx = raw.indexOf(bodyTextMatch[0]) + bodyTextMatch[0].length;
+    // Use the byte count to extract exactly the right amount of content
+    bodyContent = raw.substring(startIdx, startIdx + byteCount);
+  } else {
+    bodyContent = raw;
+  }
 
   // Check if this is a MIME multipart message
   const boundaryMatch = bodyContent.match(/--([^\s\r\n]+)/);
   if (boundaryMatch) {
-    const boundary = boundaryMatch[1].replace(/--$/, ""); // strip trailing --
-    const parts = bodyContent.split(new RegExp(`--${boundary.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`));
+    const boundary = boundaryMatch[1].replace(/--$/, "");
+    const escapedBoundary = boundary.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const parts = bodyContent.split(new RegExp(`--${escapedBoundary}`));
     
     // Find the text/plain part
     for (const part of parts) {
       if (part.match(/Content-Type:\s*text\/plain/i)) {
-        // Extract content after the part headers
         const contentSections = part.split(/\r?\n\r?\n/);
         if (contentSections.length >= 2) {
           let content = contentSections.slice(1).join("\n\n").trim();
           
-          // Handle content transfer encoding
           if (part.match(/Content-Transfer-Encoding:\s*quoted-printable/i)) {
             content = decodeQuotedPrintable(content);
           } else if (part.match(/Content-Transfer-Encoding:\s*base64/i)) {
             content = decodeBase64(content);
           }
           
-          // Decode UTF-8 bytes
           try {
             const bytes = Uint8Array.from(content, c => c.charCodeAt(0));
             content = new TextDecoder("utf-8").decode(bytes);
@@ -162,10 +163,9 @@ function extractPlainBody(raw: string): string {
     }
   }
 
-  // Fallback: no MIME, treat as plain text
-  const headerBodySplit = bodyContent.split(/\r?\n\r?\n/);
-  const plainBody = headerBodySplit.length > 1 ? headerBodySplit.slice(1).join("\n\n") : bodyContent;
-  return plainBody.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().substring(0, 5000);
+  // Fallback: no MIME boundaries, treat as plain text
+  const plainBody = bodyContent.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+  return plainBody.substring(0, 5000);
 }
 
 serve(async (req) => {
