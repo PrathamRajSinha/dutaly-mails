@@ -17,21 +17,20 @@ export function HeroSection() {
 
   return (
     <section ref={ref} className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
-      {/* Animated grid background */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:64px_64px]" />
+      {/* Grid is now handled globally in Landing.tsx */}
 
-      {/* Gradient blobs */}
+      {/* Animated floating blobs */}
       <motion.div
         style={{ y: y1 }}
-        className="absolute top-1/4 -left-32 w-96 h-96 bg-indigo-500/20 rounded-full blur-[128px]"
+        className="absolute top-1/4 -left-32 w-96 h-96 bg-indigo-500/20 rounded-full blur-[128px] animate-[blob-drift_12s_ease-in-out_infinite]"
       />
       <motion.div
         style={{ y: y2 }}
-        className="absolute bottom-1/4 -right-32 w-96 h-96 bg-purple-500/20 rounded-full blur-[128px]"
+        className="absolute bottom-1/4 -right-32 w-96 h-96 bg-purple-500/20 rounded-full blur-[128px] animate-[blob-drift_15s_ease-in-out_infinite_reverse]"
       />
       <motion.div
         style={{ y: y1 }}
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 w-64 h-64 bg-cyan-500/10 rounded-full blur-[100px]"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 w-64 h-64 bg-cyan-500/10 rounded-full blur-[100px] animate-[blob-drift_10s_ease-in-out_infinite_alternate]"
       />
 
       {/* Noise overlay */}
