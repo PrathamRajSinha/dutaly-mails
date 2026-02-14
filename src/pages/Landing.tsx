@@ -23,11 +23,25 @@ export default function Landing() {
   return (
     <>
       <style>{`
-        @keyframes blob-drift {
+        @keyframes blob1 {
           0%, 100% { transform: translate(0, 0) scale(1); }
-          25% { transform: translate(30px, -20px) scale(1.05); }
-          50% { transform: translate(-20px, 30px) scale(0.95); }
-          75% { transform: translate(20px, 20px) scale(1.02); }
+          20% { transform: translate(80px, -60px) scale(1.1); }
+          40% { transform: translate(-40px, 80px) scale(0.9); }
+          60% { transform: translate(60px, 40px) scale(1.05); }
+          80% { transform: translate(-70px, -30px) scale(0.95); }
+        }
+        @keyframes blob2 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          15% { transform: translate(-90px, 50px) scale(1.08); }
+          35% { transform: translate(70px, -70px) scale(0.92); }
+          55% { transform: translate(-50px, -60px) scale(1.06); }
+          75% { transform: translate(80px, 40px) scale(0.96); }
+        }
+        @keyframes blob3 {
+          0%, 100% { transform: translate(-50%, 0) scale(1); }
+          25% { transform: translate(calc(-50% + 60px), -50px) scale(1.12); }
+          50% { transform: translate(calc(-50% - 80px), 60px) scale(0.88); }
+          75% { transform: translate(calc(-50% + 40px), 30px) scale(1.04); }
         }
       `}</style>
       <div
