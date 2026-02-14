@@ -8,20 +8,20 @@ import { MagneticButton } from "./LandingNavbar";
 const plans = [
   {
     name: "Starter",
-    price: "$0",
-    period: "/month",
+    price: "Free",
+    period: "",
     description: "For individuals getting started",
-    features: ["100 emails/month", "1 email account", "Basic AI replies", "Community support"],
-    cta: "Start Free",
+    features: ["Limited emails/month", "1 email account", "Basic AI replies", "Community support"],
+    cta: "Get Started",
     highlighted: false,
   },
   {
     name: "Pro",
-    price: "$29",
-    period: "/month",
+    price: "Pro",
+    period: "",
     description: "For growing teams",
-    features: ["5,000 emails/month", "5 email accounts", "Knowledge base", "Custom instructions", "Email templates", "Priority support"],
-    cta: "Start Free Trial",
+    features: ["More emails/month", "Multiple email accounts", "Knowledge base", "Custom instructions", "Email templates", "Priority support"],
+    cta: "Coming Soon",
     highlighted: true,
   },
   {
@@ -30,7 +30,7 @@ const plans = [
     period: "",
     description: "For large organizations",
     features: ["Unlimited emails", "Unlimited accounts", "Custom integrations", "SLA guarantee", "Dedicated support", "SSO & SAML"],
-    cta: "Contact Sales",
+    cta: "Contact Us",
     highlighted: false,
   },
 ];
