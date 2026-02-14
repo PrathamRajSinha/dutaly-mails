@@ -1,4 +1,4 @@
-import { Mail, Send, Clock, Zap, TrendingUp, AlertCircle, Loader2, RefreshCw } from "lucide-react";
+import { Mail, Send, Clock, Zap, TrendingUp, AlertCircle, Loader2, RefreshCw, FileEdit } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { ActivityItem } from "@/components/dashboard/ActivityItem";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +15,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 export default function Dashboard() {
   const { logs, isLoading: logsLoading } = useActivityLogs(10);
-  const { pendingCount, isLoading: queueLoading } = useEmailQueue();
+  const { pendingCount, needsReview, drafted, isLoading: queueLoading } = useEmailQueue();
 
   const { accounts } = useEmailAccounts();
   const { session } = useAuth();
@@ -194,21 +194,45 @@ export default function Dashboard() {
 
         {/* Quick Actions & Status */}
         <div className="space-y-6">
-          {/* Queue Alert */}
-          {pendingCount > 0 && (
+          {/* Queue Alert - Drafted */}
+          {drafted.length > 0 && (
             <Card className="border-amber-200 bg-amber-50">
               <CardContent className="flex items-start gap-4 p-5">
                 <div className="rounded-full bg-amber-100 p-2">
-                  <AlertCircle className="h-5 w-5 text-amber-600" />
+                  <FileEdit className="h-5 w-5 text-amber-600" />
                 </div>
                 <div className="flex-1">
                   <h3 className="font-medium text-amber-900">
-                    {pendingCount} email{pendingCount !== 1 ? "s" : ""} need review
+                    {drafted.length} drafted repl{drafted.length !== 1 ? "ies" : "y"} ready
                   </h3>
                   <p className="mt-1 text-sm text-amber-700">
+                    AI has drafted replies for your review.
+                  </p>
+                  <Link to="/queue?tab=drafted">
+                    <Button size="sm" className="mt-3" variant="outline">
+                      Review Now
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Queue Alert - Needs Review */}
+          {needsReview.length > 0 && (
+            <Card className="border-red-200 bg-red-50">
+              <CardContent className="flex items-start gap-4 p-5">
+                <div className="rounded-full bg-red-100 p-2">
+                  <AlertCircle className="h-5 w-5 text-red-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-medium text-red-900">
+                    {needsReview.length} email{needsReview.length !== 1 ? "s" : ""} need attention
+                  </h3>
+                  <p className="mt-1 text-sm text-red-700">
                     The AI wasn't confident about these emails.
                   </p>
-                  <Link to="/queue">
+                  <Link to="/queue?tab=needs_review">
                     <Button size="sm" className="mt-3" variant="outline">
                       Review Now
                     </Button>
