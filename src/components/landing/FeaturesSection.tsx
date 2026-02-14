@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useCallback } from "react";
 import { motion, useInView } from "framer-motion";
 import { Brain, Zap, Shield, BookOpen, Mail, Settings } from "lucide-react";
 
@@ -7,37 +7,43 @@ const features = [
     icon: Brain,
     title: "AI-Powered Replies",
     description: "Understands context and tone to draft perfect responses based on your knowledge base.",
-    color: "from-indigo-500 to-blue-500",
+    spotlightColor: "rgba(129, 140, 248, 0.15)",
+    iconBg: "from-indigo-500 to-blue-600",
   },
   {
     icon: Zap,
     title: "Instant Processing",
     description: "Emails are analyzed and replies generated in seconds, not minutes.",
-    color: "from-purple-500 to-pink-500",
+    spotlightColor: "rgba(251, 191, 36, 0.15)",
+    iconBg: "from-amber-400 to-orange-500",
   },
   {
     icon: Shield,
     title: "Smart Escalation",
     description: "Automatically escalates emails that need human attention based on your custom rules.",
-    color: "from-cyan-500 to-teal-500",
+    spotlightColor: "rgba(34, 211, 238, 0.12)",
+    iconBg: "from-cyan-400 to-teal-500",
   },
   {
     icon: BookOpen,
     title: "Knowledge Base",
     description: "Upload documents, FAQs, and guides. The AI learns your business inside out.",
-    color: "from-amber-500 to-orange-500",
+    spotlightColor: "rgba(168, 85, 247, 0.15)",
+    iconBg: "from-purple-500 to-violet-600",
   },
   {
     icon: Mail,
     title: "Multi-Account Support",
     description: "Connect Gmail, Outlook, or any IMAP account. Manage all inboxes in one place.",
-    color: "from-green-500 to-emerald-500",
+    spotlightColor: "rgba(52, 211, 153, 0.12)",
+    iconBg: "from-emerald-400 to-green-500",
   },
   {
     icon: Settings,
     title: "Custom Instructions",
     description: "Define tone, rules, and constraints. The AI follows your exact playbook.",
-    color: "from-rose-500 to-red-500",
+    spotlightColor: "rgba(251, 113, 133, 0.15)",
+    iconBg: "from-rose-400 to-pink-500",
   },
 ];
 
@@ -51,24 +57,26 @@ export function FeaturesSection() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-16"
+          transition={{ duration: 0.6 }}
+          className="text-center mb-20"
         >
-          <span className="text-sm font-medium text-indigo-400">Features</span>
-          <h2 className="mt-2 text-3xl sm:text-4xl md:text-5xl font-bold text-white">
+          <span className="inline-block text-sm font-medium text-indigo-400 mb-3 tracking-wider uppercase">
+            Features
+          </span>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight">
             Everything you need to{" "}
-            <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
               automate email
             </span>
           </h2>
-          <p className="mt-4 text-zinc-400 max-w-2xl mx-auto">
+          <p className="mt-5 text-zinc-400 max-w-2xl mx-auto text-lg">
             A complete AI email assistant that learns from your knowledge base and follows your rules.
           </p>
         </motion.div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-1">
           {features.map((feature, i) => (
-            <FeatureCard key={feature.title} feature={feature} index={i} isInView={isInView} />
+            <SpotlightCard key={feature.title} feature={feature} index={i} isInView={isInView} />
           ))}
         </div>
       </div>
@@ -76,7 +84,7 @@ export function FeaturesSection() {
   );
 }
 
-function FeatureCard({
+function SpotlightCard({
   feature,
   index,
   isInView,
@@ -85,39 +93,64 @@ function FeatureCard({
   index: number;
   isInView: boolean;
 }) {
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const cardRef = useRef<HTMLDivElement>(null);
+  const divRef = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [opacity, setOpacity] = useState(0);
 
-  const handleMouse = (e: React.MouseEvent) => {
-    const rect = cardRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-  };
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!divRef.current) return;
+    const rect = divRef.current.getBoundingClientRect();
+    setPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+  }, []);
+
+  const handleMouseEnter = useCallback(() => setOpacity(1), []);
+  const handleMouseLeave = useCallback(() => setOpacity(0), []);
 
   const Icon = feature.icon;
 
   return (
     <motion.div
-      ref={cardRef}
-      initial={{ opacity: 0, y: 30 }}
+      ref={divRef}
+      initial={{ opacity: 0, y: 40 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
-      onMouseMove={handleMouse}
-      className="group relative rounded-2xl border border-white/5 bg-zinc-900/50 p-6 hover:border-white/10 transition-colors duration-300 overflow-hidden"
+      transition={{ duration: 0.5, delay: index * 0.08, ease: [0.25, 0.46, 0.45, 0.94] }}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      className="relative rounded-xl border border-white/[0.06] bg-white/[0.02] p-8 overflow-hidden transition-colors duration-500 hover:border-white/[0.12]"
     >
-      {/* Mouse follow glow */}
+      {/* Spotlight radial gradient */}
       <div
-        className="pointer-events-none absolute -inset-px opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        className="pointer-events-none absolute inset-0 transition-opacity duration-500"
         style={{
-          background: `radial-gradient(400px circle at ${mousePos.x}px ${mousePos.y}px, rgba(99,102,241,0.06), transparent 40%)`,
+          opacity,
+          background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, ${feature.spotlightColor}, transparent 40%)`,
         }}
       />
 
-      <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-        <Icon className="h-5 w-5 text-white" />
+      {/* Animated border glow on hover */}
+      <div
+        className="pointer-events-none absolute inset-0 rounded-xl transition-opacity duration-500"
+        style={{
+          opacity: opacity * 0.5,
+          background: `radial-gradient(400px circle at ${position.x}px ${position.y}px, ${feature.spotlightColor}, transparent 40%)`,
+          mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+          WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+          maskComposite: "exclude",
+          WebkitMaskComposite: "xor",
+          padding: "1px",
+        }}
+      />
+
+      <div className="relative z-10">
+        <div
+          className={`w-11 h-11 rounded-lg bg-gradient-to-br ${feature.iconBg} flex items-center justify-center mb-5 shadow-lg`}
+        >
+          <Icon className="h-5 w-5 text-white" strokeWidth={2} />
+        </div>
+        <h3 className="text-lg font-semibold text-white mb-2 tracking-tight">{feature.title}</h3>
+        <p className="text-[15px] text-zinc-400 leading-relaxed">{feature.description}</p>
       </div>
-      <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
-      <p className="text-sm text-zinc-400 leading-relaxed">{feature.description}</p>
     </motion.div>
   );
 }
