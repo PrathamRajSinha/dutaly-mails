@@ -5,6 +5,7 @@ const tabs = [
   { label: "Incoming Email", key: "incoming" },
   { label: "AI Analysis", key: "analysis" },
   { label: "Draft Reply", key: "reply" },
+  { label: "Auto Reply", key: "autoreply" },
 ];
 
 const typingText = "Thank you for reaching out regarding your subscription. I've checked your account and can confirm that your Pro plan renewal has been processed successfully. Your next billing date is March 14, 2026. Let me know if you need anything else!";
@@ -158,6 +159,28 @@ export function InteractiveDemoSection() {
                         Ready to send
                       </div>
                       <span className="text-xs text-zinc-500">96% confidence score</span>
+                    </div>
+                  </motion.div>
+                )}
+                {activeTab === "autoreply" && (
+                  <motion.div key="autoreply" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.3 }}>
+                    <div className="space-y-4">
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="flex items-center gap-2 text-sm text-zinc-300">
+                        <div className="w-1.5 h-1.5 rounded-full bg-green-400" /> Confidence threshold met (96% ≥ 80%)
+                      </motion.div>
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} className="flex items-center gap-2 text-sm text-zinc-300">
+                        <div className="w-1.5 h-1.5 rounded-full bg-green-400" /> Auto-reply enabled — sending automatically
+                      </motion.div>
+                      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 1.2 }} className="mt-4 p-4 rounded-xl bg-green-500/5 border border-green-500/20 text-sm text-zinc-300 leading-relaxed">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="px-2 py-0.5 text-[10px] font-bold rounded bg-green-500/20 text-green-400 uppercase tracking-wider">Sent</div>
+                          <span className="text-xs text-zinc-500">just now</span>
+                        </div>
+                        Reply delivered to john.doe@company.com — original email marked as read.
+                      </motion.div>
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.8 }} className="text-xs text-zinc-500 italic">
+                        No human intervention needed. Configure threshold & rules in Settings.
+                      </motion.div>
                     </div>
                   </motion.div>
                 )}
