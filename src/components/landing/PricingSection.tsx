@@ -3,7 +3,7 @@ import { motion, useInView } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
-
+import { MagneticButton } from "./LandingNavbar";
 
 const plans = [
   {
@@ -87,6 +87,7 @@ export function PricingSection() {
               </ul>
               <div className="mt-8">
                 <Link to="/auth">
+                  <MagneticButton>
                     <Button
                       className={`w-full rounded-xl ${
                         plan.highlighted
@@ -96,6 +97,7 @@ export function PricingSection() {
                     >
                       {plan.cta}
                     </Button>
+                  </MagneticButton>
                 </Link>
               </div>
             </motion.div>

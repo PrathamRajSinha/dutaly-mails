@@ -11,6 +11,27 @@ const navLinks = [
   { label: "Testimonials", href: "#testimonials" },
 ];
 
+export function MagneticButton({ children }: { children: React.ReactNode }) {
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+
+  const handleMouse = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width / 2;
+    const y = e.clientY - rect.top - rect.height / 2;
+    setPosition({ x: x * 0.15, y: y * 0.15 });
+  };
+
+  return (
+    <motion.div
+      onMouseMove={handleMouse}
+      onMouseLeave={() => setPosition({ x: 0, y: 0 })}
+      animate={{ x: position.x, y: position.y }}
+      transition={{ type: "spring", stiffness: 200, damping: 15 }}
+    >
+      {children}
+    </motion.div>
+  );
+}
 
 export function LandingNavbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -50,9 +71,11 @@ export function LandingNavbar() {
             </Button>
           </Link>
           <Link to="/auth">
+            <MagneticButton>
               <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white border-0 rounded-xl">
                 Get Started Free
               </Button>
+            </MagneticButton>
           </Link>
         </div>
 
