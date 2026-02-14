@@ -59,6 +59,7 @@ export type Database = {
         Row: {
           auto_reply_confidence_threshold: number | null
           auto_reply_enabled: boolean | null
+          backup_email: string | null
           created_at: string
           do_not_rules: string[] | null
           do_rules: string[] | null
@@ -80,6 +81,7 @@ export type Database = {
         Insert: {
           auto_reply_confidence_threshold?: number | null
           auto_reply_enabled?: boolean | null
+          backup_email?: string | null
           created_at?: string
           do_not_rules?: string[] | null
           do_rules?: string[] | null
@@ -101,6 +103,7 @@ export type Database = {
         Update: {
           auto_reply_confidence_threshold?: number | null
           auto_reply_enabled?: boolean | null
+          backup_email?: string | null
           created_at?: string
           do_not_rules?: string[] | null
           do_rules?: string[] | null

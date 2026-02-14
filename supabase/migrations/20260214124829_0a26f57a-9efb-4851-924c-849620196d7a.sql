@@ -1,0 +1,1 @@
+ALTER TABLE public.ai_instructions ADD COLUMN backup_email text DEFAULT NULL;

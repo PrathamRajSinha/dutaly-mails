@@ -21,6 +21,7 @@ export interface AIInstructions {
   logo_url: string | null;
   do_rules: string[];
   do_not_rules: string[];
+  backup_email: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -81,6 +82,7 @@ export function useAIInstructions() {
             logo_url: null,
             do_rules: [],
             do_not_rules: [],
+            backup_email: null,
           };
         }
         throw error;
