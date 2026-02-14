@@ -3,7 +3,7 @@ import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
-import { MagneticButton } from "./LandingNavbar";
+
 
 const words = ["Stop reading.", "Start replying.", "Automatically."];
 
@@ -82,12 +82,10 @@ export function HeroSection() {
           className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
         >
           <Link to="/auth">
-            <MagneticButton>
               <Button className="h-12 px-8 text-base bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white border-0 rounded-2xl shadow-lg shadow-indigo-500/25 transition-shadow hover:shadow-xl hover:shadow-indigo-500/30">
                 Start Free Trial
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-            </MagneticButton>
           </Link>
           <a href="#demo">
             <Button variant="ghost" className="h-12 px-8 text-base text-zinc-300 hover:text-white hover:bg-white/5 rounded-2xl border border-white/10">

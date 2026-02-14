@@ -71,11 +71,9 @@ export function LandingNavbar() {
             </Button>
           </Link>
           <Link to="/auth">
-            <MagneticButton>
               <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white border-0 rounded-xl">
                 Get Started Free
               </Button>
-            </MagneticButton>
           </Link>
         </div>
 
