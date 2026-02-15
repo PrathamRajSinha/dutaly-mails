@@ -3,7 +3,7 @@ import { motion, useInView } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { MagneticButton } from "./LandingNavbar";
+import { StarBorder } from "./StarBorder";
 
 export function CTASection() {
   const ref = useRef<HTMLDivElement>(null);
@@ -34,12 +34,12 @@ export function CTASection() {
         </p>
         <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link to="/auth">
-            <MagneticButton>
+            <StarBorder color="hsl(239, 84%, 67%)" speed="5s" thickness={2}>
               <Button className="h-12 px-8 text-base bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white border-0 rounded-2xl shadow-lg shadow-indigo-500/25">
                 Get Started Free
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-            </MagneticButton>
+            </StarBorder>
           </Link>
           <span className="text-sm text-zinc-500">No credit card required</span>
         </div>

@@ -3,6 +3,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Mail, Menu, X } from "lucide-react";
+import { StarBorder } from "./StarBorder";
 
 const navLinks = [
   { label: "Features", href: "#features" },
@@ -71,11 +72,11 @@ export function LandingNavbar() {
             </Button>
           </Link>
           <Link to="/auth">
-            <MagneticButton>
-              <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white border-0 rounded-xl">
+            <StarBorder color="hsl(239, 84%, 67%)" speed="5s" thickness={2}>
+              <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white border-0 rounded-2xl">
                 Get Started Free
               </Button>
-            </MagneticButton>
+            </StarBorder>
           </Link>
         </div>
 
