@@ -16,6 +16,7 @@ import Templates from "./pages/Templates";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import Landing from "./pages/Landing";
+import ChoosePlan from "./pages/ChoosePlan";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/choose-plan" element={<ChoosePlan />} />
             <Route
               element={
                 <ProtectedRoute>

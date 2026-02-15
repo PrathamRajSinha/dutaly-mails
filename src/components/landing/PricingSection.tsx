@@ -8,20 +8,20 @@ import { MagneticButton } from "./LandingNavbar";
 const plans = [
   {
     name: "Starter",
-    price: "Free",
-    period: "",
+    price: "TBD",
+    period: "/mo",
     description: "For individuals getting started",
-    features: ["Limited emails/month", "1 email account", "Basic AI replies", "Community support"],
+    features: ["100 emails/month", "20 AI questions/month", "10 knowledge base entries", "2 email accounts", "Email templates"],
     cta: "Get Started",
     highlighted: false,
   },
   {
     name: "Pro",
-    price: "Pro",
-    period: "",
+    price: "TBD",
+    period: "/mo",
     description: "For growing teams",
-    features: ["More emails/month", "Multiple email accounts", "Knowledge base", "Custom instructions", "Email templates", "Priority support"],
-    cta: "Coming Soon",
+    features: ["500 emails/month", "100 AI questions/month", "50 knowledge base entries", "5 email accounts", "Email templates", "Priority support"],
+    cta: "Get Started",
     highlighted: true,
   },
   {
@@ -29,7 +29,7 @@ const plans = [
     price: "Custom",
     period: "",
     description: "For large organizations",
-    features: ["Unlimited emails", "Unlimited accounts", "Custom integrations", "SLA guarantee", "Dedicated support", "SSO & SAML"],
+    features: ["Unlimited emails", "Unlimited AI questions", "Unlimited KB entries", "Unlimited accounts", "Custom integrations", "SLA guarantee"],
     cta: "Contact Us",
     highlighted: false,
   },
@@ -50,7 +50,7 @@ export function PricingSection() {
         >
           <span className="text-sm font-medium text-indigo-400">Pricing</span>
           <h2 className="mt-2 text-3xl sm:text-4xl font-bold text-white">Simple, transparent pricing</h2>
-          <p className="mt-4 text-zinc-400">Start free. Scale as you grow.</p>
+          <p className="mt-4 text-zinc-400">Choose the plan that fits your needs.</p>
         </motion.div>
 
         <div className="grid md:grid-cols-3 gap-6">

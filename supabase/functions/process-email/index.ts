@@ -73,7 +73,18 @@ serve(async (req) => {
     const emailData: ProcessEmailRequest = await req.json();
     console.log("Processing email:", emailData.subject);
 
-    // Fetch user's knowledge base
+    // Check usage limit
+    const { data: canProcess } = await supabase.rpc("check_usage_limit", {
+      p_user_id: user.id,
+      p_resource_type: "emails",
+    });
+
+    if (!canProcess) {
+      return new Response(
+        JSON.stringify({ error: "Email processing limit reached. Please upgrade your plan." }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
     const { data: knowledgeEntries, error: kbError } = await supabase
       .from("knowledge_base_entries")
       .select("id, title, content, category, extracted_text")
@@ -290,6 +301,12 @@ ${emailData.body}`
       console.error("Error adding to queue:", queueError);
       throw new Error("Failed to add email to queue");
     }
+
+    // Increment usage counter
+    await supabase.rpc("increment_usage", {
+      p_user_id: user.id,
+      p_resource_type: "emails",
+    });
 
     // Log the action
     const logAction = parsedResponse.action === "ignore" ? "ignored" 
