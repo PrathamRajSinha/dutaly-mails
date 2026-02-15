@@ -3,7 +3,8 @@ import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
-import { MagneticButton } from "./LandingNavbar";
+import { ShinyText } from "./ShinyText";
+import { AntigravityDots } from "./AntigravityDots";
 
 const words = ["Stop reading.", "Start replying.", "Automatically."];
 
@@ -19,8 +20,8 @@ export function HeroSection() {
     <>
       <style>{`@keyframes gradient-shift { 0%, 100% { background-position: 0% center; } 50% { background-position: 100% center; } }`}</style>
       <section ref={ref} className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
-      {/* Animated grid background */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:64px_64px]" />
+      {/* Antigravity dots background */}
+      <AntigravityDots count={250} magnetRadius={140} particleSize={1.8} color="180, 180, 255" />
 
       {/* Gradient blobs */}
       <motion.div
@@ -77,9 +78,20 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 40 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: 0.2 + i * 0.15, ease: [0.25, 0.4, 0, 1] }}
-              className={`block ${i === 2 ? "bg-[length:200%_auto] animate-[gradient-shift_4s_ease-in-out_infinite] bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent" : "text-white"}`}
+              className={`block ${i === 2 ? "" : "text-white"}`}
             >
-              {word}
+              {i === 2 ? (
+                <ShinyText
+                  text={word}
+                  speed={3}
+                  shineColor="rgba(255, 255, 255, 0.8)"
+                  color="transparent"
+                  spread={120}
+                  className="bg-[length:200%_auto] animate-[gradient-shift_4s_ease-in-out_infinite] bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent"
+                />
+              ) : (
+                word
+              )}
             </motion.span>
           ))}
         </h1>
