@@ -155,8 +155,7 @@ export function AntigravityDots({
   return (
     <canvas
       ref={canvasRef}
-      className={`absolute inset-0 w-full h-full ${className}`}
-      style={{ pointerEvents: "auto" }}
+      className={`absolute inset-0 w-full h-full z-[1] ${className}`}
     />
   );
 }
