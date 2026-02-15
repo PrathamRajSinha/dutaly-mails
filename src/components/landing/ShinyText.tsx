@@ -5,19 +5,13 @@ interface ShinyTextProps {
   disabled?: boolean;
   speed?: number;
   className?: string;
-  color?: string;
-  shineColor?: string;
-  spread?: number;
 }
 
 export function ShinyText({
   text,
   disabled = false,
-  speed = 2,
+  speed = 3,
   className = "",
-  color = "transparent",
-  shineColor = "rgba(255, 255, 255, 0.6)",
-  spread = 120,
 }: ShinyTextProps) {
   const spanRef = useRef<HTMLSpanElement>(null);
   const animRef = useRef<number>(0);
@@ -31,9 +25,11 @@ export function ShinyText({
       const elapsed = timestamp - startRef.current;
       const duration = speed * 1000;
       const progress = (elapsed % duration) / duration;
-      const position = progress * 200;
 
-      spanRef.current.style.backgroundPosition = `${position}% center`;
+      // Overlay a white shine via mask
+      const pos = progress * 300 - 100;
+      spanRef.current.style.setProperty("--shine-pos", `${pos}%`);
+
       animRef.current = requestAnimationFrame(animate);
     },
     [speed, disabled]
@@ -47,18 +43,24 @@ export function ShinyText({
   }, [animate, disabled]);
 
   return (
-    <span
-      ref={spanRef}
-      className={className}
-      style={{
-        backgroundImage: `linear-gradient(${spread}deg, ${color} 0%, ${color} 35%, ${shineColor} 50%, ${color} 65%, ${color} 100%)`,
-        backgroundSize: "200% auto",
-        WebkitBackgroundClip: "text",
-        backgroundClip: "text",
-        display: "inline-block",
-      }}
-    >
+    <span className={`relative inline-block ${className}`}>
       {text}
+      <span
+        ref={spanRef}
+        aria-hidden
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 45%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.5) 55%, transparent 100%)",
+          backgroundSize: "200% 100%",
+          backgroundPosition: "var(--shine-pos, -100%) center",
+          WebkitBackgroundClip: "text",
+          backgroundClip: "text",
+          color: "transparent",
+          mixBlendMode: "overlay",
+        }}
+      >
+        {text}
+      </span>
     </span>
   );
 }
