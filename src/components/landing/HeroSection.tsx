@@ -24,7 +24,7 @@ export function HeroSection() {
 
       {/* Gradient blobs */}
       <motion.div
-        style={{ y: y1 }}
+        
         animate={{
           x: [0, 60, -40, 20, 0],
           y: [0, -50, 30, -20, 0],
@@ -34,7 +34,7 @@ export function HeroSection() {
         className="absolute top-1/4 -left-32 w-96 h-96 bg-indigo-500/20 rounded-full blur-[128px]"
       />
       <motion.div
-        style={{ y: y2 }}
+        
         animate={{
           x: [0, -50, 40, -30, 0],
           y: [0, 40, -60, 20, 0],
@@ -44,7 +44,7 @@ export function HeroSection() {
         className="absolute bottom-1/4 -right-32 w-96 h-96 bg-purple-500/20 rounded-full blur-[128px]"
       />
       <motion.div
-        style={{ y: y1 }}
+        
         animate={{
           x: [0, 30, -50, 40, 0],
           y: [0, -30, 50, -40, 0],
