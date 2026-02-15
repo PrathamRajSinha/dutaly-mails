@@ -1,14 +1,51 @@
+import { useState } from "react";
 import { Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 export default function ChoosePlan() {
   const { plans, isLoading } = useSubscription();
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [subscribingPlanId, setSubscribingPlanId] = useState<string | null>(null);
+
+  const handleSubscribe = async (planId: string, planName: string) => {
+    if (!user) return;
+    setSubscribingPlanId(planId);
+    try {
+      const now = new Date();
+      const periodEnd = new Date(now);
+      periodEnd.setMonth(periodEnd.getMonth() + 1);
+
+      const { error } = await supabase
+        .from("user_subscriptions")
+        .update({
+          plan_id: planId,
+          status: "active",
+          current_period_start: now.toISOString(),
+          current_period_end: periodEnd.toISOString(),
+        })
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+
+      await queryClient.invalidateQueries({ queryKey: ["user-subscription"] });
+      toast.success(`Subscribed to ${planName}!`);
+      navigate("/dashboard");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to subscribe");
+    } finally {
+      setSubscribingPlanId(null);
+    }
+  };
 
   const planFeatures: Record<string, string[]> = {
     starter: ["100 emails/month", "20 AI questions/month", "10 KB entries", "2 email accounts", "Email templates"],
@@ -69,8 +106,18 @@ export default function ChoosePlan() {
                 <Button
                   className="w-full"
                   variant={isPro ? "default" : "outline"}
-                  onClick={() => toast.info("Payment integration coming soon. Contact us to get started.")}
+                  disabled={!!subscribingPlanId}
+                  onClick={() => {
+                    if (plan.name === "enterprise") {
+                      toast.info("Contact us to get started with Enterprise.");
+                    } else {
+                      handleSubscribe(plan.id, plan.display_name);
+                    }
+                  }}
                 >
+                  {subscribingPlanId === plan.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : null}
                   {plan.name === "enterprise" ? "Contact Us" : "Subscribe"}
                 </Button>
               </CardContent>
