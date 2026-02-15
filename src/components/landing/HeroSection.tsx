@@ -1,73 +1,30 @@
-import { useRef, useMemo } from "react";
+import { useRef } from "react";
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { MagneticButton } from "./LandingNavbar";
 
 const words = ["Stop reading.", "Start replying.", "Automatically."];
-
-function StarField() {
-  const stars = useMemo(() => {
-    return Array.from({ length: 60 }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: Math.random() * 2 + 0.5,
-      duration: Math.random() * 4 + 3,
-      delay: Math.random() * 5,
-      opacity: Math.random() * 0.5 + 0.1,
-    }));
-  }, []);
-
-  return (
-    <div className="absolute inset-0 overflow-hidden">
-      {stars.map((star) => (
-        <motion.div
-          key={star.id}
-          className="absolute rounded-full bg-white"
-          style={{
-            left: `${star.x}%`,
-            top: `${star.y}%`,
-            width: star.size,
-            height: star.size,
-          }}
-          animate={{
-            opacity: [star.opacity, star.opacity * 2.5, star.opacity],
-            scale: [1, 1.4, 1],
-          }}
-          transition={{
-            duration: star.duration,
-            repeat: Infinity,
-            delay: star.delay,
-            ease: "easeInOut",
-          }}
-        />
-      ))}
-    </div>
-  );
-}
 
 export function HeroSection() {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true });
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
+  const y1 = useTransform(scrollYProgress, [0, 1], [0, -100]);
+  const y2 = useTransform(scrollYProgress, [0, 1], [0, -200]);
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
   return (
     <>
-      <style>{`
-        @keyframes gradient-shift { 0%, 100% { background-position: 0% center; } 50% { background-position: 100% center; } }
-        @keyframes btn-shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-      `}</style>
+      <style>{`@keyframes gradient-shift { 0%, 100% { background-position: 0% center; } 50% { background-position: 100% center; } }`}</style>
       <section ref={ref} className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
       {/* Animated grid background */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:64px_64px]" />
 
-      {/* Star field */}
-      <StarField />
-
       {/* Gradient blobs */}
       <motion.div
+        
         animate={{
           x: [0, 60, -40, 20, 0],
           y: [0, -50, 30, -20, 0],
@@ -77,6 +34,7 @@ export function HeroSection() {
         className="absolute top-1/4 -left-32 w-96 h-96 bg-indigo-500/20 rounded-full blur-[128px]"
       />
       <motion.div
+        
         animate={{
           x: [0, -50, 40, -30, 0],
           y: [0, 40, -60, 20, 0],
@@ -86,6 +44,7 @@ export function HeroSection() {
         className="absolute bottom-1/4 -right-32 w-96 h-96 bg-purple-500/20 rounded-full blur-[128px]"
       />
       <motion.div
+        
         animate={{
           x: [0, 30, -50, 40, 0],
           y: [0, -30, 50, -40, 0],
@@ -143,16 +102,10 @@ export function HeroSection() {
           transition={{ duration: 0.6, delay: 0.9 }}
           className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
         >
-          <Link to="/auth" className="group relative">
-            <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 rounded-2xl opacity-0 group-hover:opacity-70 blur-lg transition-all duration-500" />
-            <Button className="relative h-12 px-8 text-base bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white border-0 rounded-2xl shadow-lg shadow-indigo-500/25 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/40 hover:scale-105 overflow-hidden">
-              <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                <span className="absolute inset-0 animate-[btn-shimmer_2s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-              </span>
-              <span className="relative flex items-center">
-                Start Free Trial
-                <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-              </span>
+          <Link to="/auth">
+            <Button className="h-12 px-8 text-base bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white border-0 rounded-2xl shadow-lg shadow-indigo-500/25 transition-shadow hover:shadow-xl hover:shadow-indigo-500/30">
+              Start Free Trial
+              <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
           <a href="#demo">
