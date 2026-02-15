@@ -44,6 +44,19 @@ serve(async (req) => {
       );
     }
 
+    // Check usage limit
+    const { data: canAsk } = await supabase.rpc("check_usage_limit", {
+      p_user_id: user.id,
+      p_resource_type: "ai_questions",
+    });
+
+    if (!canAsk) {
+      return new Response(
+        JSON.stringify({ error: "AI questions limit reached. Please upgrade your plan." }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Fetch emails within date range
     let query = supabase
       .from("email_queue")
@@ -144,6 +157,12 @@ ${emailContext}`,
 
     const aiResult = await aiResponse.json();
     const answer = aiResult.choices?.[0]?.message?.content || "No response generated.";
+
+    // Increment usage counter
+    await supabase.rpc("increment_usage", {
+      p_user_id: user.id,
+      p_resource_type: "ai_questions",
+    });
 
     return new Response(
       JSON.stringify({ answer, email_count: emails.length, emails: emailSummaries }),

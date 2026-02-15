@@ -369,12 +369,126 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_plans: {
+        Row: {
+          ai_questions_per_month: number
+          created_at: string
+          display_name: string
+          email_accounts_limit: number
+          emails_per_month: number
+          id: string
+          is_active: boolean
+          kb_entries_limit: number
+          name: string
+          price_monthly: number
+        }
+        Insert: {
+          ai_questions_per_month?: number
+          created_at?: string
+          display_name: string
+          email_accounts_limit?: number
+          emails_per_month?: number
+          id?: string
+          is_active?: boolean
+          kb_entries_limit?: number
+          name: string
+          price_monthly?: number
+        }
+        Update: {
+          ai_questions_per_month?: number
+          created_at?: string
+          display_name?: string
+          email_accounts_limit?: number
+          emails_per_month?: number
+          id?: string
+          is_active?: boolean
+          kb_entries_limit?: number
+          name?: string
+          price_monthly?: number
+        }
+        Relationships: []
+      }
+      usage_tracking: {
+        Row: {
+          ai_questions_asked: number
+          created_at: string
+          emails_processed: number
+          id: string
+          period_start: string
+          user_id: string
+        }
+        Insert: {
+          ai_questions_asked?: number
+          created_at?: string
+          emails_processed?: number
+          id?: string
+          period_start: string
+          user_id: string
+        }
+        Update: {
+          ai_questions_asked?: number
+          created_at?: string
+          emails_processed?: number
+          id?: string
+          period_start?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          plan_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      check_usage_limit: {
+        Args: { p_resource_type: string; p_user_id: string }
+        Returns: boolean
+      }
+      increment_usage: {
+        Args: { p_resource_type: string; p_user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
