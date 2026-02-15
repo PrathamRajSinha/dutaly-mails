@@ -1,121 +1,133 @@
 
 
-## Rich Email Template System with Attachments
+# Usage Limits and Billing System (No Free Tier)
 
-### What You Get
+## Plan Structure
 
-- A new **Templates** page in the sidebar for creating and managing reusable email templates
-- **Rich styling per template**: font family, font size, text color, accent color, and a customizable footer (text + optional logo)
-- **Placeholder variables** like `{{sender_name}}`, `{{subject}}` that auto-fill when used
-- **File attachments** when composing/editing replies in the Email Queue (upload files to attach to outgoing emails)
-- A **"Use Template"** button when composing replies to pre-fill with a styled template
-- **Live preview** of how the email will look
-- Replies sent with templates go out as **styled HTML emails**
+| | Starter | Pro | Enterprise |
+|---|---|---|---|
+| Price | TBD | TBD | Custom |
+| Emails processed/month | 100 | 500 | Unlimited |
+| AI questions/month | 20 | 100 | Unlimited |
+| Knowledge base entries | 10 | 50 | Unlimited |
+| Email accounts | 2 | 5 | Unlimited |
+| Email templates | Yes | Yes | Yes |
+| Priority support | No | Yes | Yes |
+| Custom integrations | No | No | Yes |
 
-### How It Works
+All users must be on a paid plan to use the app. No free access.
 
-1. Go to the new **Templates** page, click "Create Template"
-2. Set a name, category, body text, and visual styling (font, colors, footer)
-3. A live preview shows how the email will look to recipients
-4. In the **Email Queue**, when composing or editing a reply:
-   - Click **"Use Template"** to pick a template -- the reply fills in with variables replaced
-   - Click **"Attach File"** to upload files (PDFs, images, docs) that will be sent with the email
-5. When sent, the email goes out as a styled HTML email with any attachments included
+## What Gets Built
 
-### Template Styling Options
+### 1. Database tables (migration)
 
-- **Font family**: Sans-serif, Serif, Monospace
-- **Font size**: Small (13px), Medium (15px), Large (17px)
-- **Text color**: Color picker (default: dark gray)
-- **Accent color**: Color picker (default: indigo) -- used for links, dividers
-- **Footer text**: Custom text appended to every email using this template
-- **Footer logo URL**: Optional logo image in the footer
+- **subscription_plans** -- stores the 3 plan tiers with their limits
+- **user_subscriptions** -- tracks which plan each user is on, billing period, status
+- **usage_tracking** -- monthly counters for emails processed and AI questions asked (resets each billing cycle)
+- A database function `check_usage_limit(user_id, resource_type)` that returns whether a user can still use a resource
+- Seed data: insert the 3 plans (Starter, Pro, Enterprise)
+- Trigger on new user signup: auto-create a subscription record with status `pending` (no plan assigned yet -- forces them to pick one)
+
+### 2. Frontend: Plan selection wall
+
+- After signup, if a user has no active subscription, they see a "Choose Your Plan" page instead of the dashboard
+- This page shows the 3 plans with their limits and a "Subscribe" button
+- Since PhonePe integration comes later, the Subscribe button will show a "Contact us" or placeholder flow for now
+
+### 3. Frontend: Usage tracking display
+
+- New `useSubscription` hook -- fetches user's current plan and usage stats
+- Usage indicators on the Dashboard (e.g., "45/100 emails this month")
+- Warning toast when approaching 80% of any limit
+- Block action with a clear "Upgrade your plan" message when limit is hit
+
+### 4. Edge function enforcement
+
+- `process-email` -- check email limit before processing, increment counter after success
+- `ask-about-emails` -- check AI question limit before processing, increment counter after success
+- Knowledge base -- check KB entry limit on the frontend before inserting
+
+### 5. Landing page pricing update
+
+- Update the PricingSection component to reflect the new 3-tier structure with actual limits (no free tier)
+- Change tagline from "Start free. Scale as you grow." to something like "Choose the plan that fits your needs."
 
 ---
 
-### Technical Details
+## Technical Details
 
-**1. Database: New `email_templates` table**
+### Database Migration SQL
 
-```text
-email_templates
-- id (uuid, PK, default gen_random_uuid())
-- user_id (uuid, NOT NULL)
-- name (text, NOT NULL)
-- category (text, default 'general')
-- body (text, NOT NULL)
-- font_family (text, default 'sans-serif')
-- font_size (text, default 'medium')
-- text_color (text, default '#333333')
-- accent_color (text, default '#4F46E5')
-- footer_text (text, default '')
-- footer_logo_url (text, default '')
-- created_at (timestamptz, default now())
-- updated_at (timestamptz, default now())
-```
-
-RLS policies: users can only CRUD their own templates (policy on `user_id = auth.uid()`).
-
-**2. Storage: New `email-attachments` bucket**
-
-A public Supabase Storage bucket for uploaded attachments, with RLS so users can only manage their own files. Files stored under `{user_id}/{uuid}_{filename}`.
-
-**3. New files to create:**
-
-- `src/hooks/useEmailTemplates.ts` -- TanStack Query hook for template CRUD (following `useKnowledgeBase` pattern)
-- `src/pages/Templates.tsx` -- Full management page: list templates, create/edit dialog with styling controls and live preview
-- `src/components/email-templates/TemplatePickerDialog.tsx` -- Dialog for picking a template in Email Queue
-- `src/lib/emailHtml.ts` -- Utility to render template body + styling into an inline-CSS HTML email string
-
-**4. Modified files:**
-
-- `src/components/layout/AppSidebar.tsx` -- Add "Templates" nav item (between Instructions and Email Queue)
-- `src/App.tsx` -- Add `/templates` route
-- `src/pages/EmailQueue.tsx` -- Major changes to EmailCard:
-  - Add "Use Template" button that opens the template picker dialog
-  - Add "Attach File" button with file input (uploads to `email-attachments` bucket)
-  - Show attached files as removable chips below the compose/edit textarea
-  - Pass attachment URLs and HTML body to the send functions
-- `supabase/functions/send-gmail-reply/index.ts` -- Support `html_body` field and file attachments:
-  - When `html_body` is provided, set `Content-Type: multipart/mixed` with `text/html` part
-  - Download attachment files from storage and encode as base64 MIME attachment parts
-  - Build full multipart MIME message with both HTML body and file attachments
-- `supabase/functions/send-imap-reply/index.ts` -- Same changes for SMTP sending:
-  - Support `html_body` field (use `html` content property in denomailer)
-  - Support `attachments` array (download from storage, attach via denomailer's attachment API)
-
-**5. HTML email rendering (`src/lib/emailHtml.ts`)**
-
-Converts template body + styling into inline-CSS HTML suitable for email clients:
+**New tables:**
 
 ```text
-<div style="font-family: {font-stack}; font-size: {size}; color: {textColor}; max-width: 600px;">
-  <div style="white-space: pre-wrap;">{body with variables replaced}</div>
-  <hr style="border-color: {accentColor}; margin: 24px 0;" />
-  <div style="font-size: 12px; color: #999;">
-    {footerLogoUrl ? <img src="..." style="max-height: 40px;" /> : ""}
-    <p>{footerText}</p>
-  </div>
-</div>
+subscription_plans
+  - id (uuid, PK, default gen_random_uuid())
+  - name (text, unique) -- 'starter', 'pro', 'enterprise'
+  - display_name (text)
+  - emails_per_month (integer, -1 = unlimited)
+  - ai_questions_per_month (integer, -1 = unlimited)
+  - kb_entries_limit (integer, -1 = unlimited)
+  - email_accounts_limit (integer, -1 = unlimited)
+  - price_monthly (numeric, default 0)
+  - is_active (boolean, default true)
+  - created_at (timestamptz, default now())
+
+user_subscriptions
+  - id (uuid, PK, default gen_random_uuid())
+  - user_id (uuid, NOT NULL, unique)
+  - plan_id (uuid, references subscription_plans)
+  - status (text) -- 'active', 'pending', 'cancelled', 'expired'
+  - current_period_start (timestamptz)
+  - current_period_end (timestamptz)
+  - created_at (timestamptz, default now())
+  - updated_at (timestamptz, default now())
+
+usage_tracking
+  - id (uuid, PK, default gen_random_uuid())
+  - user_id (uuid, NOT NULL)
+  - period_start (date, NOT NULL)
+  - emails_processed (integer, default 0)
+  - ai_questions_asked (integer, default 0)
+  - created_at (timestamptz, default now())
+  - UNIQUE(user_id, period_start)
 ```
 
-Same renderer used for the live preview on the Templates page and passed to edge functions when sending.
+**RLS policies:**
+- subscription_plans: SELECT for all authenticated users (public catalog)
+- user_subscriptions: users can only SELECT their own row; only service_role can INSERT/UPDATE
+- usage_tracking: users can only SELECT their own row; only service_role can INSERT/UPDATE
 
-**6. Attachment flow**
+**Seed data** (inserted in the same migration):
+- Starter: 100 emails, 20 AI questions, 10 KB entries, 2 email accounts
+- Pro: 500 emails, 100 AI questions, 50 KB entries, 5 email accounts
+- Enterprise: -1 (unlimited) for all
 
-- User clicks "Attach File" in the Email Queue reply area
-- File is uploaded to `email-attachments` bucket under `{user_id}/{uuid}_{filename}`
-- The public URL and filename are stored in local component state as an array
-- When sending, the attachment URLs are passed to the edge function
-- The edge function downloads each file, base64-encodes it, and includes it as a MIME attachment
-- For Gmail: multipart/mixed raw message with attachment parts
-- For IMAP/SMTP: denomailer's built-in attachment support
+**Trigger update:** Modify `handle_new_user()` to also insert a `user_subscriptions` row with status `pending` and no plan assigned.
 
-**7. Variable replacement**
+### New Files
 
-When a template is selected, these placeholders are auto-replaced:
-- `{{sender_name}}` -> `email.from_name` or first part of `email.from_address`
-- `{{subject}}` -> `email.subject`
-- `{{my_name}}` -> user's profile full_name
-- `{{date}}` -> current date formatted
+- `src/hooks/useSubscription.ts` -- fetches plan + usage data, exposes `canUse(resource)`, `usagePercent(resource)`
+- `src/pages/ChoosePlan.tsx` -- plan selection page shown when subscription status is `pending`
+- `src/components/dashboard/UsageCard.tsx` -- usage progress bars for the dashboard
+
+### Modified Files
+
+- `src/components/landing/PricingSection.tsx` -- update plans array with real limits and pricing
+- `src/pages/Dashboard.tsx` -- add UsageCard component
+- `src/components/ProtectedRoute.tsx` -- redirect to ChoosePlan if subscription is pending
+- `src/App.tsx` -- add `/choose-plan` route
+- `src/pages/KnowledgeBase.tsx` -- check KB entry limit before allowing creation
+- `src/pages/Settings.tsx` -- check email account limit before allowing new connections
+- `supabase/functions/process-email/index.ts` -- add usage check and increment
+- `supabase/functions/ask-about-emails/index.ts` -- add usage check and increment
+- `supabase/config.toml` -- no changes needed (edge functions already configured)
+
+### Payment Integration (Phase 2, later)
+
+PhonePe/Razorpay integration will be a separate phase requiring:
+- A new edge function for creating payment orders
+- A webhook edge function to handle payment confirmations
+- Merchant account API keys as secrets
+- Automatic plan activation on successful payment
 
