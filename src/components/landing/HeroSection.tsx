@@ -16,21 +16,41 @@ export function HeroSection() {
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
   return (
-    <section ref={ref} className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
+    <>
+      <style>{`@keyframes gradient-shift { 0%, 100% { background-position: 0% center; } 50% { background-position: 100% center; } }`}</style>
+      <section ref={ref} className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
       {/* Animated grid background */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:64px_64px]" />
 
       {/* Gradient blobs */}
       <motion.div
         style={{ y: y1 }}
+        animate={{
+          x: [0, 60, -40, 20, 0],
+          y: [0, -50, 30, -20, 0],
+          scale: [1, 1.2, 0.9, 1.1, 1],
+        }}
+        transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
         className="absolute top-1/4 -left-32 w-96 h-96 bg-indigo-500/20 rounded-full blur-[128px]"
       />
       <motion.div
         style={{ y: y2 }}
+        animate={{
+          x: [0, -50, 40, -30, 0],
+          y: [0, 40, -60, 20, 0],
+          scale: [1, 0.9, 1.15, 0.95, 1],
+        }}
+        transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
         className="absolute bottom-1/4 -right-32 w-96 h-96 bg-purple-500/20 rounded-full blur-[128px]"
       />
       <motion.div
         style={{ y: y1 }}
+        animate={{
+          x: [0, 30, -50, 40, 0],
+          y: [0, -30, 50, -40, 0],
+          scale: [1, 1.1, 0.85, 1.05, 1],
+        }}
+        transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
         className="absolute top-1/2 left-1/2 -translate-x-1/2 w-64 h-64 bg-cyan-500/10 rounded-full blur-[100px]"
       />
 
@@ -57,7 +77,7 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 40 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: 0.2 + i * 0.15, ease: [0.25, 0.4, 0, 1] }}
-              className={`block ${i === 2 ? "bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent" : "text-white"}`}
+              className={`block ${i === 2 ? "bg-[length:200%_auto] animate-[gradient-shift_4s_ease-in-out_infinite] bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent" : "text-white"}`}
             >
               {word}
             </motion.span>
@@ -149,5 +169,6 @@ export function HeroSection() {
         </motion.div>
       </motion.div>
     </section>
+    </>
   );
 }
