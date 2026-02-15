@@ -27,13 +27,13 @@ export default function ChoosePlan() {
 
       const { error } = await supabase
         .from("user_subscriptions")
-        .update({
+        .upsert({
+          user_id: user.id,
           plan_id: planId,
           status: "active",
           current_period_start: now.toISOString(),
           current_period_end: periodEnd.toISOString(),
-        })
-        .eq("user_id", user.id);
+        }, { onConflict: "user_id" });
 
       if (error) throw error;
 
