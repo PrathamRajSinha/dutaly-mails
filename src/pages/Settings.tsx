@@ -13,6 +13,8 @@ import {
   RefreshCw,
   Server,
   Clock,
+  Webhook,
+  MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +28,7 @@ import { useEmailAccounts } from "@/hooks/useEmailAccounts";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useSlaSettings } from "@/hooks/useSlaSettings";
+import { useIntegrations } from "@/hooks/useIntegrations";
 import type { Session } from "@supabase/supabase-js";
 
 interface EmailAccount {
@@ -441,6 +444,7 @@ export default function Settings() {
   const { session } = useAuth();
   const { accounts, isLoading, disconnectAccount } = useEmailAccounts();
   const { data: slaSettings, isLoading: slaLoading, update: updateSla } = useSlaSettings();
+  const { data: integrations, isLoading: integrationsLoading, addIntegration, updateIntegration, deleteIntegration } = useIntegrations();
   const [searchParams, setSearchParams] = useSearchParams();
   const [newWhitelistEmail, setNewWhitelistEmail] = useState("");
   const [newBlacklistEmail, setNewBlacklistEmail] = useState("");
@@ -449,6 +453,12 @@ export default function Settings() {
   const [isConnecting, setIsConnecting] = useState(false);
   const [slaFirstResponse, setSlaFirstResponse] = useState(4);
   const [slaResolution, setSlaResolution] = useState(24);
+
+  // New integration form state
+  const [newIntProvider, setNewIntProvider] = useState<"webhook" | "slack">("webhook");
+  const [newIntUrl, setNewIntUrl] = useState("");
+  const [newIntSecret, setNewIntSecret] = useState("");
+  const [newIntEvents, setNewIntEvents] = useState<string[]>([]);
   
   // Notification settings
   const [emailNotifications, setEmailNotifications] = useState(true);
@@ -589,6 +599,10 @@ export default function Settings() {
           <TabsTrigger value="sla" className="gap-2">
             <Clock className="h-4 w-4" />
             SLA
+          </TabsTrigger>
+          <TabsTrigger value="integrations" className="gap-2">
+            <Webhook className="h-4 w-4" />
+            Integrations
           </TabsTrigger>
         </TabsList>
 
@@ -912,6 +926,185 @@ export default function Settings() {
               </Button>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Integrations Tab */}
+        <TabsContent value="integrations">
+          <div className="space-y-6">
+            {/* Existing integrations */}
+            {(integrations && integrations.length > 0) && (
+              <div className="space-y-3">
+                <h3 className="text-lg font-medium text-foreground">Active Integrations</h3>
+                {integrations.map((integration) => {
+                  const config = (typeof integration.config_json === "string"
+                    ? JSON.parse(integration.config_json)
+                    : integration.config_json) || {};
+                  return (
+                    <Card key={integration.id} className="border border-border">
+                      <CardContent className="flex items-center justify-between p-4">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary">
+                            {integration.provider === "slack" ? (
+                              <MessageSquare className="h-5 w-5" />
+                            ) : (
+                              <Webhook className="h-5 w-5" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="font-medium text-card-foreground capitalize">{integration.provider}</p>
+                            <p className="text-sm text-muted-foreground truncate max-w-xs">
+                              {integration.provider === "slack"
+                                ? config.webhook_url ? "Webhook configured" : "Not configured"
+                                : config.url || "No URL"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Badge variant={integration.is_active ? "default" : "secondary"}>
+                            {integration.is_active ? "Active" : "Paused"}
+                          </Badge>
+                          <Switch
+                            checked={integration.is_active ?? false}
+                            onCheckedChange={(checked) =>
+                              updateIntegration.mutate({ id: integration.id, is_active: checked })
+                            }
+                          />
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => deleteIntegration.mutate(integration.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Add new integration */}
+            <Card className="border border-border">
+              <CardHeader>
+                <CardTitle>Add Integration</CardTitle>
+                <CardDescription>
+                  Connect a webhook or Slack to receive ticket events in real-time.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Provider</Label>
+                  <div className="flex gap-2">
+                    <Button
+                      variant={newIntProvider === "webhook" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setNewIntProvider("webhook")}
+                    >
+                      <Webhook className="mr-2 h-4 w-4" />
+                      Webhook
+                    </Button>
+                    <Button
+                      variant={newIntProvider === "slack" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setNewIntProvider("slack")}
+                    >
+                      <MessageSquare className="mr-2 h-4 w-4" />
+                      Slack
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>{newIntProvider === "slack" ? "Slack Incoming Webhook URL" : "Webhook URL"}</Label>
+                  <Input
+                    placeholder={newIntProvider === "slack" ? "https://hooks.slack.com/services/..." : "https://your-api.com/webhook"}
+                    value={newIntUrl}
+                    onChange={(e) => setNewIntUrl(e.target.value)}
+                  />
+                </div>
+
+                {newIntProvider === "webhook" && (
+                  <div className="space-y-2">
+                    <Label>Secret (optional)</Label>
+                    <Input
+                      placeholder="Signing secret for verification"
+                      value={newIntSecret}
+                      onChange={(e) => setNewIntSecret(e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Sent as X-Webhook-Secret header with each request.
+                    </p>
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <Label>Events to send</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {["ticket.created", "ticket.updated", "ticket.resolved", "ticket.sla_breached", "ticket.angry_detected"].map((evt) => (
+                      <Button
+                        key={evt}
+                        variant={newIntEvents.includes(evt) ? "default" : "outline"}
+                        size="sm"
+                        onClick={() =>
+                          setNewIntEvents((prev) =>
+                            prev.includes(evt) ? prev.filter((e) => e !== evt) : [...prev, evt]
+                          )
+                        }
+                      >
+                        {evt}
+                      </Button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Leave empty to receive all events.
+                  </p>
+                </div>
+
+                <Button
+                  onClick={() => {
+                    if (!newIntUrl) {
+                      toast.error("Please enter a URL");
+                      return;
+                    }
+                    const config: Record<string, any> = {};
+                    if (newIntProvider === "slack") {
+                      config.webhook_url = newIntUrl;
+                    } else {
+                      config.url = newIntUrl;
+                      if (newIntSecret) config.secret = newIntSecret;
+                    }
+                    if (newIntEvents.length > 0) config.events = newIntEvents;
+
+                    addIntegration.mutate(
+                      { provider: newIntProvider, config_json: config },
+                      {
+                        onSuccess: () => {
+                          setNewIntUrl("");
+                          setNewIntSecret("");
+                          setNewIntEvents([]);
+                        },
+                      }
+                    );
+                  }}
+                  disabled={addIntegration.isPending}
+                  className="w-full"
+                >
+                  {addIntegration.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Adding...
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Integration
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
