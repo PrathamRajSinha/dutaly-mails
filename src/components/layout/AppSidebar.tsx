@@ -10,6 +10,7 @@ import {
   Play,
   LogOut,
   MessageSquare,
+  Ticket,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ const navItems = [
   { icon: BookOpen, label: "Knowledge Base", path: "/knowledge-base" },
   { icon: FileText, label: "Instructions", path: "/instructions" },
   { icon: Mail, label: "Templates", path: "/templates" },
+  { icon: Ticket, label: "Tickets", path: "/tickets" },
   { icon: Inbox, label: "Email Queue", path: "/queue" },
   { icon: MessageSquare, label: "Ask Me Anything", path: "/ask" },
   { icon: Settings, label: "Settings", path: "/settings" },

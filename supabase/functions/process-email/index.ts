@@ -195,7 +195,7 @@ ${aiInstructions.greeting_response_enabled ? `- If the email is a simple greetin
   - Use this greeting template as the reply: "${aiInstructions.greeting_template}"
   - You can personalize the greeting using the sender's name if available
   - This does NOT require knowledge base lookup
-- IMPORTANT: Automated/transactional emails (order confirmations, delivery notifications, account alerts, newsletters, marketing, no-reply addresses) are NOT greetings even if they contain "Hello [Name]". These should be classified as "newsletter", "spam", or their actual intent and IGNORED.` : "- Greeting auto-response is disabled"}
+- IMPORTANT: Automated/transactional emails (order confirmations, delivery updates, account alerts, newsletters, marketing, no-reply addresses) are NOT greetings even if they contain "Hello [Name]". These should be classified as "newsletter", "spam", or their actual intent and IGNORED.` : "- Greeting auto-response is disabled"}
 
 AUTOMATED EMAIL DETECTION:
 - Emails from no-reply, noreply, alerts@, notifications@, care@, support@ (from businesses), marketing@, boom@, info@ (bulk senders) are typically automated
@@ -206,6 +206,9 @@ RESPONSE FORMAT:
 You must respond with a valid JSON object containing:
 {
   "intent": "support" | "sales" | "personal" | "newsletter" | "spam" | "greeting" | "unknown",
+  "category": "refund" | "billing" | "technical_issue" | "complaint" | "feature_request" | "general",
+  "sentiment_score": 0.0 to 1.0 (0 = very negative/angry, 0.5 = neutral, 1.0 = very positive),
+  "escalation_flag": true if the customer sounds angry, threatening, or the issue is risky — false otherwise,
   "action": "reply" | "ignore" | "queue",
   "confidence": 0.0 to 1.0,
   "reason": "Brief explanation of your decision",
@@ -250,12 +253,20 @@ ${emailData.body}`
       console.error("Failed to parse AI response:", aiContent);
       parsedResponse = {
         intent: "unknown",
+        category: "general",
+        sentiment_score: 0.5,
+        escalation_flag: false,
         action: "queue",
         confidence: 0.3,
         reason: "Failed to parse AI response",
         suggested_reply: null,
       };
     }
+
+    // Ensure new fields have defaults if AI didn't return them
+    const category = parsedResponse.category || "general";
+    const sentimentScore = typeof parsedResponse.sentiment_score === "number" ? parsedResponse.sentiment_score : 0.5;
+    const escalationFlag = parsedResponse.escalation_flag === true;
 
     console.log("AI decision:", parsedResponse);
 
@@ -268,18 +279,15 @@ ${emailData.body}`
     if (parsedResponse.action === "ignore") {
       queueStatus = "ignored";
     } else if (shouldAutoSend) {
-      // Will be updated to "sent" after actual send in fetch-gmail-emails
       queueStatus = "sending";
     } else if (parsedResponse.action === "reply") {
-      // Has a draft reply but not auto-sending
       queueStatus = "pending";
     } else {
-      // Queued for review
       queueStatus = "pending";
     }
 
     // Always insert into email_queue for tracking
-    const { error: queueError } = await supabase
+    const { data: insertedEmail, error: queueError } = await supabase
       .from("email_queue")
       .insert({
         user_id: user.id,
@@ -295,11 +303,108 @@ ${emailData.body}`
         intent: parsedResponse.intent === "greeting" ? "personal" : parsedResponse.intent,
         status: queueStatus,
         thread_id: emailData.thread_id || null,
-      });
+      })
+      .select("id")
+      .single();
 
     if (queueError) {
       console.error("Error adding to queue:", queueError);
       throw new Error("Failed to add email to queue");
+    }
+
+    // --- TICKET LOGIC ---
+    let ticketId: string | null = null;
+    let ticketEvent = "ticket.updated";
+
+    try {
+      if (emailData.thread_id) {
+        // Check if a ticket already exists for this thread
+        const { data: existingTicket } = await supabase
+          .from("tickets")
+          .select("id, status")
+          .eq("user_id", user.id)
+          .eq("thread_id", emailData.thread_id)
+          .single();
+
+        if (existingTicket) {
+          ticketId = existingTicket.id;
+          // Re-open if it was resolved/closed
+          const updateData: any = { last_customer_reply_at: new Date().toISOString() };
+          if (existingTicket.status === "resolved" || existingTicket.status === "closed") {
+            updateData.status = "open";
+          }
+          if (escalationFlag) {
+            updateData.priority = "urgent";
+            updateData.escalation_flag = true;
+          }
+          await supabase.from("tickets").update(updateData).eq("id", ticketId);
+          ticketEvent = "ticket.updated";
+        }
+      }
+
+      // No existing ticket found — create one
+      if (!ticketId) {
+        const { data: newTicket, error: ticketError } = await supabase
+          .from("tickets")
+          .insert({
+            user_id: user.id,
+            subject: emailData.subject,
+            customer_email: emailData.from_address,
+            status: "open",
+            priority: escalationFlag ? "urgent" : "medium",
+            category,
+            sentiment_score: sentimentScore,
+            escalation_flag: escalationFlag,
+            thread_id: emailData.thread_id || null,
+            last_customer_reply_at: new Date().toISOString(),
+          })
+          .select("id")
+          .single();
+
+        if (ticketError) {
+          console.error("Error creating ticket:", ticketError);
+        } else if (newTicket) {
+          ticketId = newTicket.id;
+          ticketEvent = "ticket.created";
+        }
+      }
+
+      // Link email_queue row to ticket
+      if (ticketId && insertedEmail) {
+        await supabase
+          .from("email_queue")
+          .update({ ticket_id: ticketId })
+          .eq("id", insertedEmail.id);
+      }
+
+      // Emit integration events
+      if (ticketId) {
+        const eventPayload = {
+          ticket_id: ticketId,
+          subject: emailData.subject,
+          customer_email: emailData.from_address,
+          priority: escalationFlag ? "urgent" : "medium",
+          category,
+          sentiment_score: sentimentScore,
+        };
+
+        await supabase.from("integration_events").insert({
+          user_id: user.id,
+          event_type: ticketEvent,
+          payload_json: eventPayload,
+        });
+
+        if (escalationFlag) {
+          await supabase.from("integration_events").insert({
+            user_id: user.id,
+            event_type: "ticket.angry_detected",
+            payload_json: eventPayload,
+          });
+        }
+      }
+    } catch (ticketErr) {
+      // Ticket logic should not break email processing
+      console.error("Ticket logic error (non-fatal):", ticketErr);
     }
 
     // Increment usage counter
@@ -324,6 +429,10 @@ ${emailData.body}`
         confidence: parsedResponse.confidence,
         intent: parsedResponse.intent,
         auto_send: shouldAutoSend,
+        ticket_id: ticketId,
+        category,
+        sentiment_score: sentimentScore,
+        escalation_flag: escalationFlag,
       },
     });
 
@@ -335,6 +444,10 @@ ${emailData.body}`
         auto_send: shouldAutoSend,
         intent: parsedResponse.intent,
         reason: parsedResponse.reason,
+        ticket_id: ticketId,
+        category,
+        sentiment_score: sentimentScore,
+        escalation_flag: escalationFlag,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

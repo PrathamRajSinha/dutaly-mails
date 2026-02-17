@@ -199,6 +199,7 @@ export type Database = {
           subject: string
           suggested_reply: string | null
           thread_id: string | null
+          ticket_id: string | null
           user_id: string
         }
         Insert: {
@@ -218,6 +219,7 @@ export type Database = {
           subject: string
           suggested_reply?: string | null
           thread_id?: string | null
+          ticket_id?: string | null
           user_id: string
         }
         Update: {
@@ -237,6 +239,7 @@ export type Database = {
           subject?: string
           suggested_reply?: string | null
           thread_id?: string | null
+          ticket_id?: string | null
           user_id?: string
         }
         Relationships: [
@@ -245,6 +248,13 @@ export type Database = {
             columns: ["email_account_id"]
             isOneToOne: false
             referencedRelation: "email_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_queue_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets"
             referencedColumns: ["id"]
           },
         ]
@@ -293,6 +303,60 @@ export type Database = {
           name?: string
           text_color?: string
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      integration_events: {
+        Row: {
+          created_at: string | null
+          delivered: boolean | null
+          event_type: string
+          id: string
+          payload_json: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          delivered?: boolean | null
+          event_type: string
+          id?: string
+          payload_json?: Json
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          delivered?: boolean | null
+          event_type?: string
+          id?: string
+          payload_json?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
+      integrations: {
+        Row: {
+          config_json: Json | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          provider: string
+          user_id: string
+        }
+        Insert: {
+          config_json?: Json | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          provider: string
+          user_id: string
+        }
+        Update: {
+          config_json?: Json | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          provider?: string
           user_id?: string
         }
         Relationships: []
@@ -405,6 +469,92 @@ export type Database = {
           kb_entries_limit?: number
           name?: string
           price_monthly?: number
+        }
+        Relationships: []
+      }
+      ticket_internal_notes: {
+        Row: {
+          created_at: string | null
+          id: string
+          note_text: string
+          ticket_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          note_text: string
+          ticket_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          note_text?: string
+          ticket_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_internal_notes_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tickets: {
+        Row: {
+          assigned_to: string | null
+          category: string | null
+          created_at: string | null
+          customer_email: string
+          escalation_flag: boolean | null
+          id: string
+          last_customer_reply_at: string | null
+          priority: string
+          sentiment_score: number | null
+          sla_due_at: string | null
+          status: string
+          subject: string
+          thread_id: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          category?: string | null
+          created_at?: string | null
+          customer_email: string
+          escalation_flag?: boolean | null
+          id?: string
+          last_customer_reply_at?: string | null
+          priority?: string
+          sentiment_score?: number | null
+          sla_due_at?: string | null
+          status?: string
+          subject: string
+          thread_id?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          assigned_to?: string | null
+          category?: string | null
+          created_at?: string | null
+          customer_email?: string
+          escalation_flag?: boolean | null
+          id?: string
+          last_customer_reply_at?: string | null
+          priority?: string
+          sentiment_score?: number | null
+          sla_due_at?: string | null
+          status?: string
+          subject?: string
+          thread_id?: string | null
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
