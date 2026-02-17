@@ -1,133 +1,164 @@
 
+# Phase 1 -- Database Migrations & Email-to-Ticket Foundation
 
-# Usage Limits and Billing System (No Free Tier)
-
-## Plan Structure
-
-| | Starter | Pro | Enterprise |
-|---|---|---|---|
-| Price | TBD | TBD | Custom |
-| Emails processed/month | 100 | 500 | Unlimited |
-| AI questions/month | 20 | 100 | Unlimited |
-| Knowledge base entries | 10 | 50 | Unlimited |
-| Email accounts | 2 | 5 | Unlimited |
-| Email templates | Yes | Yes | Yes |
-| Priority support | No | Yes | Yes |
-| Custom integrations | No | No | Yes |
-
-All users must be on a paid plan to use the app. No free access.
+This is a large transformation. To keep things safe and testable, we will implement it in batches. This plan covers **Phase 1 (Database)** and **Phase 2 (Email-to-Ticket logic)** -- the foundation everything else builds on.
 
 ## What Gets Built
 
-### 1. Database tables (migration)
+### 1. New Database Tables (Single Migration)
 
-- **subscription_plans** -- stores the 3 plan tiers with their limits
-- **user_subscriptions** -- tracks which plan each user is on, billing period, status
-- **usage_tracking** -- monthly counters for emails processed and AI questions asked (resets each billing cycle)
-- A database function `check_usage_limit(user_id, resource_type)` that returns whether a user can still use a resource
-- Seed data: insert the 3 plans (Starter, Pro, Enterprise)
-- Trigger on new user signup: auto-create a subscription record with status `pending` (no plan assigned yet -- forces them to pick one)
+**tickets** -- Core ticketing table
+- id, user_id, subject, customer_email, status (open/pending/resolved/closed), priority (low/medium/high/urgent), assigned_to, category, sentiment_score, escalation_flag, sla_due_at, last_customer_reply_at, thread_id (links to email threads), created_at, updated_at
+- Note: Using `user_id` instead of `workspace_id` since the app currently has no workspace/team concept. We will add workspace support in a later phase when team_members is built out.
+- RLS: users can only access their own tickets
 
-### 2. Frontend: Plan selection wall
+**ticket_internal_notes** -- Private agent notes on tickets
+- id, ticket_id, user_id, note_text, created_at
+- RLS: users can only access notes on their own tickets
 
-- After signup, if a user has no active subscription, they see a "Choose Your Plan" page instead of the dashboard
-- This page shows the 3 plans with their limits and a "Subscribe" button
-- Since PhonePe integration comes later, the Subscribe button will show a "Contact us" or placeholder flow for now
+**integrations** -- External service connections (Slack, webhooks, etc.)
+- id, user_id, provider, config_json (jsonb), is_active, created_at
+- RLS: user-scoped
 
-### 3. Frontend: Usage tracking display
+**integration_events** -- Event log for dispatching
+- id, user_id, event_type, payload_json (jsonb), delivered, created_at
+- RLS: user-scoped
 
-- New `useSubscription` hook -- fetches user's current plan and usage stats
-- Usage indicators on the Dashboard (e.g., "45/100 emails this month")
-- Warning toast when approaching 80% of any limit
-- Block action with a clear "Upgrade your plan" message when limit is hit
+**email_queue modification** -- Add `ticket_id` column (uuid, nullable, FK to tickets)
 
-### 4. Edge function enforcement
+### 2. Updated process-email Edge Function
 
-- `process-email` -- check email limit before processing, increment counter after success
-- `ask-about-emails` -- check AI question limit before processing, increment counter after success
-- Knowledge base -- check KB entry limit on the frontend before inserting
+Current behavior: classify email, insert into email_queue.
 
-### 5. Landing page pricing update
+New behavior (additive, does not break existing flow):
+1. All existing logic stays intact (KB lookup, AI classification, usage tracking, activity logs)
+2. AI prompt is enhanced to also output `category` (refund/billing/technical_issue/complaint/feature_request/general) and `sentiment_score` (0-1) and `escalation_flag`
+3. After inserting into email_queue:
+   - Check if this `thread_id` already has a ticket (via existing email_queue rows)
+   - If yes: attach the new email to that ticket, update `last_customer_reply_at` and status to "open" if it was resolved
+   - If no: create a new ticket with subject, customer_email, AI-detected category, sentiment, and default priority (medium, or urgent if escalation_flag)
+4. Insert integration events: `ticket.created` or `ticket.updated`
+5. If escalation_flag is true, also emit `ticket.angry_detected`
 
-- Update the PricingSection component to reflect the new 3-tier structure with actual limits (no free tier)
-- Change tagline from "Start free. Scale as you grow." to something like "Choose the plan that fits your needs."
+### 3. New Hook: useTickets
+
+A React Query hook that fetches tickets for the current user with filtering by status. This prepares the frontend for Phase 3 (UI changes).
+
+### 4. Sidebar Navigation Update
+
+Add "Tickets" nav item alongside existing "Email Queue" (keep both for now -- Email Queue becomes a sub-view in a later phase).
 
 ---
 
 ## Technical Details
 
-### Database Migration SQL
-
-**New tables:**
+### Database Migration
 
 ```text
-subscription_plans
-  - id (uuid, PK, default gen_random_uuid())
-  - name (text, unique) -- 'starter', 'pro', 'enterprise'
-  - display_name (text)
-  - emails_per_month (integer, -1 = unlimited)
-  - ai_questions_per_month (integer, -1 = unlimited)
-  - kb_entries_limit (integer, -1 = unlimited)
-  - email_accounts_limit (integer, -1 = unlimited)
-  - price_monthly (numeric, default 0)
-  - is_active (boolean, default true)
-  - created_at (timestamptz, default now())
+-- tickets table
+CREATE TABLE public.tickets (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  subject text NOT NULL,
+  customer_email text NOT NULL,
+  status text NOT NULL DEFAULT 'open'
+    CHECK (status IN ('open', 'pending', 'resolved', 'closed')),
+  priority text NOT NULL DEFAULT 'medium'
+    CHECK (priority IN ('low', 'medium', 'high', 'urgent')),
+  assigned_to uuid,
+  category text,
+  sentiment_score numeric,
+  escalation_flag boolean DEFAULT false,
+  sla_due_at timestamptz,
+  last_customer_reply_at timestamptz,
+  thread_id text,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
 
-user_subscriptions
-  - id (uuid, PK, default gen_random_uuid())
-  - user_id (uuid, NOT NULL, unique)
-  - plan_id (uuid, references subscription_plans)
-  - status (text) -- 'active', 'pending', 'cancelled', 'expired'
-  - current_period_start (timestamptz)
-  - current_period_end (timestamptz)
-  - created_at (timestamptz, default now())
-  - updated_at (timestamptz, default now())
+-- ticket_internal_notes table
+CREATE TABLE public.ticket_internal_notes (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  ticket_id uuid NOT NULL REFERENCES tickets(id) ON DELETE CASCADE,
+  user_id uuid NOT NULL,
+  note_text text NOT NULL,
+  created_at timestamptz DEFAULT now()
+);
 
-usage_tracking
-  - id (uuid, PK, default gen_random_uuid())
-  - user_id (uuid, NOT NULL)
-  - period_start (date, NOT NULL)
-  - emails_processed (integer, default 0)
-  - ai_questions_asked (integer, default 0)
-  - created_at (timestamptz, default now())
-  - UNIQUE(user_id, period_start)
+-- integrations table
+CREATE TABLE public.integrations (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  provider text NOT NULL,
+  config_json jsonb DEFAULT '{}'::jsonb,
+  is_active boolean DEFAULT true,
+  created_at timestamptz DEFAULT now()
+);
+
+-- integration_events table
+CREATE TABLE public.integration_events (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  event_type text NOT NULL,
+  payload_json jsonb NOT NULL DEFAULT '{}'::jsonb,
+  delivered boolean DEFAULT false,
+  created_at timestamptz DEFAULT now()
+);
+
+-- Add ticket_id to email_queue
+ALTER TABLE public.email_queue
+  ADD COLUMN ticket_id uuid REFERENCES tickets(id);
+
+-- RLS for all new tables (user-scoped)
+-- Trigger for updated_at on tickets
+-- Index on tickets(thread_id) and tickets(user_id, status)
 ```
 
-**RLS policies:**
-- subscription_plans: SELECT for all authenticated users (public catalog)
-- user_subscriptions: users can only SELECT their own row; only service_role can INSERT/UPDATE
-- usage_tracking: users can only SELECT their own row; only service_role can INSERT/UPDATE
+### process-email Edge Function Changes
 
-**Seed data** (inserted in the same migration):
-- Starter: 100 emails, 20 AI questions, 10 KB entries, 2 email accounts
-- Pro: 500 emails, 100 AI questions, 50 KB entries, 5 email accounts
-- Enterprise: -1 (unlimited) for all
+The AI prompt gains additional output fields:
 
-**Trigger update:** Modify `handle_new_user()` to also insert a `user_subscriptions` row with status `pending` and no plan assigned.
+```text
+RESPONSE FORMAT (updated):
+{
+  "intent": "support" | "sales" | ... ,
+  "category": "refund" | "billing" | "technical_issue" | "complaint" | "feature_request" | "general",
+  "sentiment_score": 0.0 to 1.0,
+  "escalation_flag": true | false,
+  "action": "reply" | "ignore" | "queue",
+  "confidence": 0.0 to 1.0,
+  "reason": "...",
+  "suggested_reply": "..."
+}
+```
+
+After inserting into email_queue, the function:
+1. Looks up existing ticket by thread_id
+2. Creates or updates ticket
+3. Updates the email_queue row with ticket_id
+4. Inserts integration_events rows
 
 ### New Files
 
-- `src/hooks/useSubscription.ts` -- fetches plan + usage data, exposes `canUse(resource)`, `usagePercent(resource)`
-- `src/pages/ChoosePlan.tsx` -- plan selection page shown when subscription status is `pending`
-- `src/components/dashboard/UsageCard.tsx` -- usage progress bars for the dashboard
+- `src/hooks/useTickets.ts` -- fetches tickets with status filtering
+- `src/pages/Tickets.tsx` -- basic tickets list page (simple table/card view showing open tickets)
 
 ### Modified Files
 
-- `src/components/landing/PricingSection.tsx` -- update plans array with real limits and pricing
-- `src/pages/Dashboard.tsx` -- add UsageCard component
-- `src/components/ProtectedRoute.tsx` -- redirect to ChoosePlan if subscription is pending
-- `src/App.tsx` -- add `/choose-plan` route
-- `src/pages/KnowledgeBase.tsx` -- check KB entry limit before allowing creation
-- `src/pages/Settings.tsx` -- check email account limit before allowing new connections
-- `supabase/functions/process-email/index.ts` -- add usage check and increment
-- `supabase/functions/ask-about-emails/index.ts` -- add usage check and increment
-- `supabase/config.toml` -- no changes needed (edge functions already configured)
+- `supabase/functions/process-email/index.ts` -- add ticket creation and event emission logic
+- `src/components/layout/AppSidebar.tsx` -- add Tickets nav item
+- `src/App.tsx` -- add /tickets route
 
-### Payment Integration (Phase 2, later)
+### What is NOT changed (preserved)
 
-PhonePe/Razorpay integration will be a separate phase requiring:
-- A new edge function for creating payment orders
-- A webhook edge function to handle payment confirmations
-- Merchant account API keys as secrets
-- Automatic plan activation on successful payment
-
+- All existing email_queue logic and UI
+- Usage tracking (check_usage_limit, increment_usage)
+- AI classification (extended, not replaced)
+- Knowledge base
+- All RLS policies on existing tables
+- Email reply functionality (send-gmail-reply, send-imap-reply)
+- Landing page (updated in a later phase)
+- SLA system (Phase 3, later)
+- Webhook dispatch engine (Phase 4, later)
+- Slack integration (Phase 5, later)
+- Full UI overhaul (Phase 6, later)
