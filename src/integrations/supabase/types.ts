@@ -74,6 +74,8 @@ export type Database = {
           logo_url: string | null
           reply_length: string
           signature: string | null
+          sla_first_response_hours: number | null
+          sla_resolution_hours: number | null
           system_prompt: string
           tone: string
           updated_at: string
@@ -97,6 +99,8 @@ export type Database = {
           logo_url?: string | null
           reply_length?: string
           signature?: string | null
+          sla_first_response_hours?: number | null
+          sla_resolution_hours?: number | null
           system_prompt?: string
           tone?: string
           updated_at?: string
@@ -120,6 +124,8 @@ export type Database = {
           logo_url?: string | null
           reply_length?: string
           signature?: string | null
+          sla_first_response_hours?: number | null
+          sla_resolution_hours?: number | null
           system_prompt?: string
           tone?: string
           updated_at?: string

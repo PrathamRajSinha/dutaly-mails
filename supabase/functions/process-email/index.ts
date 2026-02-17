@@ -39,6 +39,8 @@ interface AIInstructions {
   greeting_template: string;
   do_rules: string[];
   do_not_rules: string[];
+  sla_first_response_hours: number;
+  sla_resolution_hours: number;
 }
 
 serve(async (req) => {
@@ -121,6 +123,8 @@ serve(async (req) => {
       greeting_template: "Hello! Thank you for reaching out. How can I assist you today?",
       do_rules: [],
       do_not_rules: [],
+      sla_first_response_hours: 4,
+      sla_resolution_hours: 24,
     };
 
     // Fetch thread history if thread_id is provided
@@ -344,6 +348,10 @@ ${emailData.body}`
 
       // No existing ticket found — create one
       if (!ticketId) {
+        // Calculate SLA due date
+        const slaHours = aiInstructions.sla_resolution_hours || 24;
+        const slaDueAt = new Date(Date.now() + slaHours * 60 * 60 * 1000).toISOString();
+
         const { data: newTicket, error: ticketError } = await supabase
           .from("tickets")
           .insert({
@@ -357,6 +365,7 @@ ${emailData.body}`
             escalation_flag: escalationFlag,
             thread_id: emailData.thread_id || null,
             last_customer_reply_at: new Date().toISOString(),
+            sla_due_at: slaDueAt,
           })
           .select("id")
           .single();

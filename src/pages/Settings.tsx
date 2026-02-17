@@ -12,6 +12,7 @@ import {
   Loader2,
   RefreshCw,
   Server,
+  Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +25,7 @@ import { toast } from "sonner";
 import { useEmailAccounts } from "@/hooks/useEmailAccounts";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useSlaSettings } from "@/hooks/useSlaSettings";
 import type { Session } from "@supabase/supabase-js";
 
 interface EmailAccount {
@@ -438,17 +440,28 @@ function ImapConnectionForm({ session }: { session: Session | null }) {
 export default function Settings() {
   const { session } = useAuth();
   const { accounts, isLoading, disconnectAccount } = useEmailAccounts();
+  const { data: slaSettings, isLoading: slaLoading, update: updateSla } = useSlaSettings();
   const [searchParams, setSearchParams] = useSearchParams();
   const [newWhitelistEmail, setNewWhitelistEmail] = useState("");
   const [newBlacklistEmail, setNewBlacklistEmail] = useState("");
   const [whitelistEmails, setWhitelistEmails] = useState<string[]>([]);
   const [blacklistEmails, setBlacklistEmails] = useState<string[]>([]);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [slaFirstResponse, setSlaFirstResponse] = useState(4);
+  const [slaResolution, setSlaResolution] = useState(24);
   
   // Notification settings
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [queueAlerts, setQueueAlerts] = useState(true);
   const [dailyDigest, setDailyDigest] = useState(true);
+
+  // Sync SLA settings from DB
+  useEffect(() => {
+    if (slaSettings) {
+      setSlaFirstResponse(slaSettings.sla_first_response_hours ?? 4);
+      setSlaResolution(slaSettings.sla_resolution_hours ?? 24);
+    }
+  }, [slaSettings]);
 
   // Handle OAuth callback messages
   useEffect(() => {
@@ -572,6 +585,10 @@ export default function Settings() {
           <TabsTrigger value="notifications" className="gap-2">
             <Bell className="h-4 w-4" />
             Notifications
+          </TabsTrigger>
+          <TabsTrigger value="sla" className="gap-2">
+            <Clock className="h-4 w-4" />
+            SLA
           </TabsTrigger>
         </TabsList>
 
@@ -830,6 +847,69 @@ export default function Settings() {
                 </div>
                 <Switch checked={dailyDigest} onCheckedChange={setDailyDigest} />
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* SLA Tab */}
+        <TabsContent value="sla">
+          <Card className="border border-border">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-primary" />
+                SLA Settings
+              </CardTitle>
+              <CardDescription>
+                Configure Service Level Agreement timelines for ticket resolution. New tickets will automatically have SLA deadlines set based on these values.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid gap-6 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>First Response Time (hours)</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={168}
+                    value={slaFirstResponse}
+                    onChange={(e) => setSlaFirstResponse(parseInt(e.target.value) || 4)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Maximum time to send the first response to a customer.
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label>Resolution Time (hours)</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={720}
+                    value={slaResolution}
+                    onChange={(e) => setSlaResolution(parseInt(e.target.value) || 24)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Maximum time to fully resolve a ticket. Tickets exceeding this are flagged as SLA breaches.
+                  </p>
+                </div>
+              </div>
+              <Button
+                onClick={() =>
+                  updateSla.mutate({
+                    sla_first_response_hours: slaFirstResponse,
+                    sla_resolution_hours: slaResolution,
+                  })
+                }
+                disabled={updateSla.isPending || slaLoading}
+              >
+                {updateSla.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save SLA Settings"
+                )}
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
