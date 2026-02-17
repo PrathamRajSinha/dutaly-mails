@@ -17,6 +17,7 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import Landing from "./pages/Landing";
 import ChoosePlan from "./pages/ChoosePlan";
+import Tickets from "./pages/Tickets";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ const App = () => (
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/knowledge-base" element={<KnowledgeBase />} />
               <Route path="/instructions" element={<Instructions />} />
+              <Route path="/tickets" element={<Tickets />} />
               <Route path="/queue" element={<EmailQueue />} />
               <Route path="/ask" element={<AskEmails />} />
               <Route path="/templates" element={<Templates />} />
