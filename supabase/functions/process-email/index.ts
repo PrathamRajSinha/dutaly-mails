@@ -346,8 +346,8 @@ ${emailData.body}`
         }
       }
 
-      // No existing ticket found — create one
-      if (!ticketId) {
+      // No existing ticket found — create one (only for actionable emails, not ignored/spam)
+      if (!ticketId && parsedResponse.action !== "ignore") {
         // Calculate SLA due date
         const slaHours = aiInstructions.sla_resolution_hours || 24;
         const slaDueAt = new Date(Date.now() + slaHours * 60 * 60 * 1000).toISOString();
