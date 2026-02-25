@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useTickets, TicketStatus } from "@/hooks/useTickets";
+import { useEmailQueue } from "@/hooks/useEmailQueue";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -45,6 +46,7 @@ export default function Tickets() {
   const [searchQuery, setSearchQuery] = useState("");
   const statusFilter = activeTab === "all" ? undefined : activeTab;
   const { data: tickets, isLoading } = useTickets(statusFilter);
+  const { pendingCount } = useEmailQueue();
 
   const filtered = (tickets ?? []).filter(
     (t) =>
@@ -63,7 +65,14 @@ export default function Tickets() {
       >
         {/* List header */}
         <div className="border-b border-border px-4 py-3 space-y-3">
-          <h1 className="text-lg font-semibold text-foreground">Customer Inbox</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg font-semibold text-foreground">Customer Inbox</h1>
+            {pendingCount > 0 && (
+              <Badge className="bg-destructive/10 text-destructive text-xs h-5 px-1.5">
+                {pendingCount} to review
+              </Badge>
+            )}
+          </div>
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <Input

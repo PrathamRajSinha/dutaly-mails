@@ -20,7 +20,6 @@ import { useAuth } from "@/hooks/useAuth";
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
   { icon: Inbox, label: "Customer Inbox", path: "/tickets" },
-  { icon: Mail, label: "Email Queue", path: "/queue" },
   { icon: BookOpen, label: "Knowledge Base", path: "/knowledge-base" },
   { icon: FileText, label: "Instructions", path: "/instructions" },
   { icon: Ticket, label: "Templates", path: "/templates" },
