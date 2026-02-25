@@ -1,66 +1,108 @@
 
-# Fix: Stop Creating Tickets for Ignored/Spam Emails
 
-## Root Cause
+# Plan: Merge Email Queue into Customer Inbox + Instruction Builder
 
-In `supabase/functions/process-email/index.ts`, the ticket creation block (lines 349-379) runs unconditionally for **every email** — including ones where the AI decided `action: "ignore"`. This means newsletters, spam, promotional emails, and automated no-reply messages all get tickets created in the database and appear in the Customer Inbox.
+Two changes: (1) eliminate the separate Email Queue page by integrating its functionality into the Customer Inbox ticket detail, and (2) redesign the Instructions page with structured point-based rules.
 
-The database confirms this: **16 out of 17 tickets are linked to ignored/newsletter/spam emails.**
+---
 
-## The Fix: One Guard Condition
+## Part 1: Merge Email Queue into Customer Inbox
 
-The ticket logic block (starting at line 350) needs a single condition added:
+### Problem
+The Email Queue (`/queue`) and Customer Inbox (`/tickets`) show overlapping data — emails and tickets are linked, but actions like approve/edit/send/ignore/compose/attach/template are only available on the Email Queue page. Users must switch between pages constantly.
 
+### Solution
+Embed the email action workflow directly into the Ticket Detail Panel's conversation thread. Each pending email in the thread gets inline approve/edit/send/ignore buttons, compose area, template picker, and attachment support — exactly what EmailQueue's `EmailCard` component provides today. Then remove Email Queue from the sidebar.
+
+### What Changes
+
+**1. `src/components/tickets/TicketDetailPanel.tsx`** — Major enhancement:
+- Each email in the conversation thread gets action buttons when status is `"pending"`:
+  - Approve & Send, Edit & Send, Compose Reply, Ignore
+  - Template picker button, Attach file button
+- Emails with `status === "sent"` show as read-only (current behavior)
+- Add a "Fetch Emails" button in the header to manually pull new emails
+- Add the auto-fetch polling toggle from EmailQueue
+- Import and use `useEmailQueue`'s `updateEmailStatus` mutation for approve/ignore/edit actions
+- Import send logic (invoke `send-gmail-reply` / `send-imap-reply`) for the send flow
+- Add "Add to Knowledge Base" action per email
+
+**2. `src/pages/Tickets.tsx`** — Minor updates:
+- Add a "Needs Review" count badge on the ticket list showing how many emails across all tickets need action
+- Add a filter to highlight tickets that have pending emails needing review
+
+**3. `src/components/layout/AppSidebar.tsx`**:
+- Remove the "Email Queue" nav item (`/queue`)
+- Customer Inbox becomes the single destination for all email + ticket work
+
+**4. `src/App.tsx`**:
+- Remove the `/queue` route (or redirect it to `/tickets`)
+- Remove the EmailQueue import
+
+**5. `src/pages/EmailQueue.tsx`** — Keep file but add a redirect:
+- Redirect to `/tickets` for any bookmarks or links
+
+### Visual: Updated Ticket Detail Conversation
+
+```text
+┌─────────────────────────────────────────────┐
+│ [← Back]  Ticket: "Refund request for..."  │
+│ [Status ▾] [Priority ▾] [SLA: 2h left]    │
+│ [Fetch Emails 🔄]                           │
+├─────────────────────────────────────────────┤
+│ [Conversation (3)]  [Notes (1)]             │
+├─────────────────────────────────────────────┤
+│ ┌─ Customer Email (pending) ─────────────┐ │
+│ │ From: john@example.com                  │ │
+│ │ "I'd like a refund for order #123..."   │ │
+│ │                                         │ │
+│ │ ── AI Suggested Reply ──                │ │
+│ │ "Thank you for reaching out..."         │ │
+│ │                                         │ │
+│ │ [✓ Approve & Send] [✎ Edit] [✗ Ignore] │ │
+│ │ [📎 Attach] [📄 Template] [+ KB]       │ │
+│ └─────────────────────────────────────────┘ │
+│                                             │
+│ ┌─ Sent Reply ───────────────────────────┐ │
+│ │ "We've processed your refund..."  ✓Sent │ │
+│ └─────────────────────────────────────────┘ │
+└─────────────────────────────────────────────┘
 ```
-// Only create tickets for emails that are NOT ignored
-if (!ticketId && parsedResponse.action !== "ignore") {
-```
 
-This means:
-- `action: "reply"` → ticket IS created (genuine customer support email)
-- `action: "queue"` → ticket IS created (needs human review)
-- `action: "ignore"` → ticket is NOT created (newsletters, spam, automated emails)
+---
 
-The existing ticket update path (for replies to an existing thread) is already fine — it only runs when `emailData.thread_id` matches an existing ticket, so ignored replies on an existing support thread will still correctly update that ticket. Only the creation gate needs the guard.
+## Part 2: Structured Instruction Builder
 
-## Cleanup: Existing Junk Tickets
+(As previously approved — summarized here for completeness)
 
-The 16 bad tickets already in the database need to be cleaned up. We will add a database migration that deletes tickets which are exclusively linked to ignored emails (no real emails attached).
+### What Changes
 
-## What Changes
+**1. New migration**: Create `ai_instruction_rules` table with columns: `id`, `user_id`, `parent_id`, `text`, `priority` (critical/important/normal/low), `condition_type` (if/when/unless/null), `condition_text`, `sort_order`, `is_active`, timestamps. RLS policies scoped to `auth.uid() = user_id`.
 
-### 1. `supabase/functions/process-email/index.ts`
-Add a single condition on line 350:
+**2. New hook**: `src/hooks/useInstructionRules.ts` — CRUD operations for rules, compile-to-prompt function that builds the `system_prompt` string from structured rules.
 
-```typescript
-// Before (broken):
-if (!ticketId) {
+**3. New component**: `src/components/instructions/InstructionBuilder.tsx` — Replaces the textarea with:
+- Condition logic buttons toolbar: IF, WHEN, UNLESS, ALWAYS, NEVER
+- Priority selector per rule (color-coded badges)
+- Parent/child nesting (sub-instructions)
+- Toggle individual rules on/off
+- AI auto-detail "magic wand" button per instruction
+- Add/delete rules inline
 
-// After (fixed):
-if (!ticketId && parsedResponse.action !== "ignore") {
-```
+**4. Modified**: `src/pages/Instructions.tsx` — Swap the "Behavior Instructions" textarea card for the `InstructionBuilder` component. All other cards (Do/Don't, Reply Style, Signature, Automation) remain unchanged.
 
-### 2. New migration: Clean up junk tickets
-```sql
--- Delete tickets that only have ignored emails (newsletters, spam)
--- and no real support emails linked
-DELETE FROM public.tickets
-WHERE id IN (
-  SELECT t.id FROM tickets t
-  WHERE NOT EXISTS (
-    SELECT 1 FROM email_queue eq
-    WHERE eq.ticket_id = t.id
-    AND eq.status != 'ignored'
-  )
-);
-```
+**5. Modified**: `src/hooks/useAIInstructions.ts` — On save, compile structured rules into `system_prompt` string for backward compatibility with `process-email`.
 
-## What Is NOT Changed
-- All existing email_queue logic is preserved
-- Emails with `action: "ignore"` still get inserted into email_queue (for tracking/audit)
-- Thread detection and ticket-update path for existing tickets is untouched
-- SLA calculation, escalation flags, integration events — all preserved
-- No frontend changes needed; the Customer Inbox will automatically show only real tickets once the bad data is purged
+### What Does NOT Change
+- `process-email` edge function (still reads `system_prompt`)
+- `ai_instructions` table structure (keeps `system_prompt` column)
+- Do/Don't rules section, Reply Style, Signature, Automation cards
 
-## Result
-The Customer Inbox will only contain tickets from real customer interactions — support requests, complaints, billing questions, feature requests — not newsletters and automated emails.
+---
+
+## Implementation Order
+1. Instruction Builder (migration → hook → component → page update)
+2. Merge Email Queue into Ticket Detail Panel
+3. Remove Email Queue sidebar item and route
+4. Test end-to-end
+
