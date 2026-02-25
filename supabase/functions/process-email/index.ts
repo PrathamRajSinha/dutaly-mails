@@ -316,6 +316,75 @@ ${emailData.body}`
       throw new Error("Failed to add email to queue");
     }
 
+    // --- AUTO-SEND LOGIC ---
+    if (shouldAutoSend && emailData.email_account_id && parsedResponse.suggested_reply) {
+      try {
+        console.log("Auto-sending reply via provider...");
+
+        // Get the email account to determine provider
+        const { data: emailAccount } = await supabase
+          .from("email_accounts")
+          .select("provider")
+          .eq("id", emailData.email_account_id)
+          .single();
+
+        if (emailAccount) {
+          const sendFunctionName = emailAccount.provider === "gmail" 
+            ? "send-gmail-reply" 
+            : "send-imap-reply";
+
+          const sendPayload: Record<string, unknown> = {
+            email_account_id: emailData.email_account_id,
+            to_address: emailData.from_address,
+            subject: emailData.subject,
+            body: parsedResponse.suggested_reply,
+          };
+
+          if (emailData.thread_id) {
+            sendPayload.thread_id = emailData.thread_id;
+          }
+          if (emailData.email_id) {
+            sendPayload.message_id = emailData.email_id;
+          }
+
+          const sendResponse = await fetch(
+            `${supabaseUrl}/functions/v1/${sendFunctionName}`,
+            {
+              method: "POST",
+              headers: {
+                "Authorization": authHeader,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(sendPayload),
+            }
+          );
+
+          if (sendResponse.ok) {
+            console.log("Auto-reply sent successfully");
+            await supabase
+              .from("email_queue")
+              .update({ status: "sent", reviewed_at: new Date().toISOString() })
+              .eq("id", insertedEmail.id);
+          } else {
+            const errText = await sendResponse.text();
+            console.error("Auto-reply send failed:", errText);
+            // Revert to pending so user can manually review/send
+            await supabase
+              .from("email_queue")
+              .update({ status: "pending" })
+              .eq("id", insertedEmail.id);
+          }
+        }
+      } catch (sendErr) {
+        console.error("Auto-send error (non-fatal):", sendErr);
+        // Revert to pending on failure
+        await supabase
+          .from("email_queue")
+          .update({ status: "pending" })
+          .eq("id", insertedEmail.id);
+      }
+    }
+
     // --- TICKET LOGIC ---
     let ticketId: string | null = null;
     let ticketEvent = "ticket.updated";
