@@ -9,7 +9,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import Dashboard from "./pages/Dashboard";
 import KnowledgeBase from "./pages/KnowledgeBase";
 import Instructions from "./pages/Instructions";
-import EmailQueue from "./pages/EmailQueue";
+// EmailQueue is now merged into Tickets
 import Settings from "./pages/Settings";
 import AskEmails from "./pages/AskEmails";
 import Templates from "./pages/Templates";
@@ -43,7 +43,7 @@ const App = () => (
               <Route path="/knowledge-base" element={<KnowledgeBase />} />
               <Route path="/instructions" element={<Instructions />} />
               <Route path="/tickets" element={<Tickets />} />
-              <Route path="/queue" element={<EmailQueue />} />
+              {/* Email Queue merged into Tickets */}
               <Route path="/ask" element={<AskEmails />} />
               <Route path="/templates" element={<Templates />} />
               <Route path="/settings" element={<Settings />} />

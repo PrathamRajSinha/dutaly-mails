@@ -55,6 +55,56 @@ export type Database = {
           },
         ]
       }
+      ai_instruction_rules: {
+        Row: {
+          condition_text: string | null
+          condition_type: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          parent_id: string | null
+          priority: string
+          rule_text: string
+          sort_order: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          condition_text?: string | null
+          condition_type?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          parent_id?: string | null
+          priority?: string
+          rule_text: string
+          sort_order?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          condition_text?: string | null
+          condition_type?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          parent_id?: string | null
+          priority?: string
+          rule_text?: string
+          sort_order?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_instruction_rules_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_instruction_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_instructions: {
         Row: {
           auto_reply_confidence_threshold: number | null

@@ -16,6 +16,8 @@ import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 import { useAIInstructions } from "@/hooks/useAIInstructions";
+import { InstructionBuilder } from "@/components/instructions/InstructionBuilder";
+import { useInstructionRules, compileRulesToPrompt } from "@/hooks/useInstructionRules";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,6 +38,7 @@ const examplePrompts = [
 
 export default function Instructions() {
   const { instructions, isLoading, updateInstructions, defaultInstructions } = useAIInstructions();
+  const { rules } = useInstructionRules();
   
   const [localInstructions, setLocalInstructions] = useState("");
   const [tone, setTone] = useState<"formal" | "professional" | "friendly" | "concise">("professional");
@@ -104,8 +107,10 @@ export default function Instructions() {
   }, [instructions, defaultInstructions]);
 
   const handleSave = async () => {
+    // Compile structured rules into system_prompt if rules exist, otherwise use local instructions
+    const compiledPrompt = rules.length > 0 ? compileRulesToPrompt(rules) : localInstructions;
     await updateInstructions.mutateAsync({
-      system_prompt: localInstructions,
+      system_prompt: compiledPrompt,
       tone,
       reply_length: replyLength,
       signature,
@@ -165,26 +170,8 @@ export default function Instructions() {
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Column 1 */}
         <div className="space-y-6">
-          {/* Behavior Instructions */}
-          <Card className="border border-border">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-primary" />
-                Behavior Instructions
-              </CardTitle>
-              <CardDescription>
-                Write rules in plain English for how the AI should process emails.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Textarea
-                className="min-h-[220px] font-mono text-sm"
-                value={localInstructions}
-                onChange={(e) => setLocalInstructions(e.target.value)}
-                placeholder="Enter your instructions here..."
-              />
-            </CardContent>
-          </Card>
+          {/* Structured Instruction Builder */}
+          <InstructionBuilder />
 
           {/* Do & Don't Rules */}
           <Card className="border border-border">
