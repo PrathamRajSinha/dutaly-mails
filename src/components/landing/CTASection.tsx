@@ -27,21 +27,25 @@ export function CTASection() {
         className="relative max-w-3xl mx-auto px-6 text-center"
       >
         <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">
-          Ready to automate your inbox?
+          Stop Managing Support in Gmail Alone
         </h2>
         <p className="mt-4 text-lg text-zinc-400">
-          Join hundreds of teams saving hours every day with AI-powered email replies.
+          Upgrade your inbox into an AI-powered helpdesk in minutes.
         </p>
         <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link to="/auth">
             <StarBorder color="hsl(239, 84%, 67%)" speed="5s" thickness={2}>
               <Button className="h-12 px-8 text-base bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white border-0 rounded-2xl shadow-lg shadow-indigo-500/25">
-                Get Started Free
+                Start Free Trial
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </StarBorder>
           </Link>
-          <span className="text-sm text-zinc-500">No credit card required</span>
+          <a href="mailto:hello@mailreplai.com">
+            <Button variant="ghost" className="h-12 px-8 text-base text-zinc-300 hover:text-white hover:bg-white/5 rounded-2xl border border-white/10">
+              Book a Demo
+            </Button>
+          </a>
         </div>
       </motion.div>
     </section>

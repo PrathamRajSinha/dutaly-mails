@@ -1,49 +1,35 @@
 import { useRef, useState, useCallback } from "react";
 import { motion, useInView } from "framer-motion";
-import { Brain, Zap, Shield, BookOpen, Mail, Settings } from "lucide-react";
+import { Brain, MessageSquareReply, Clock, Webhook } from "lucide-react";
 
 const features = [
   {
     icon: Brain,
-    title: "AI-Powered Replies",
-    description: "Understands context and tone to draft perfect responses based on your knowledge base.",
+    title: "AI Classification & Sentiment Detection",
+    description: "Automatically categorize emails by intent and detect urgency so critical issues get immediate attention.",
     spotlightColor: "rgba(129, 140, 248, 0.15)",
     iconBg: "from-indigo-500 to-blue-600",
   },
   {
-    icon: Zap,
-    title: "Instant Processing",
-    description: "Emails are analyzed and replies generated in seconds, not minutes.",
-    spotlightColor: "rgba(251, 191, 36, 0.15)",
-    iconBg: "from-amber-400 to-orange-500",
-  },
-  {
-    icon: Shield,
-    title: "Smart Escalation",
-    description: "Automatically escalates emails that need human attention based on your custom rules.",
-    spotlightColor: "rgba(34, 211, 238, 0.12)",
-    iconBg: "from-cyan-400 to-teal-500",
-  },
-  {
-    icon: BookOpen,
-    title: "Knowledge Base",
-    description: "Upload documents, FAQs, and guides. The AI learns your business inside out.",
+    icon: MessageSquareReply,
+    title: "Smart Reply Generation",
+    description: "Generate accurate responses grounded in your knowledge base and business rules — no hallucinations.",
     spotlightColor: "rgba(168, 85, 247, 0.15)",
     iconBg: "from-purple-500 to-violet-600",
   },
   {
-    icon: Mail,
-    title: "Multi-Account Support",
-    description: "Connect Gmail, Outlook, or any IMAP account. Manage all inboxes in one place.",
-    spotlightColor: "rgba(52, 211, 153, 0.12)",
-    iconBg: "from-emerald-400 to-green-500",
+    icon: Clock,
+    title: "SLA Tracking & Escalation",
+    description: "Track response and resolution deadlines automatically. Get alerts before breaches happen.",
+    spotlightColor: "rgba(251, 191, 36, 0.15)",
+    iconBg: "from-amber-400 to-orange-500",
   },
   {
-    icon: Settings,
-    title: "Custom Instructions",
-    description: "Define tone, rules, and constraints. The AI follows your exact playbook.",
-    spotlightColor: "rgba(251, 113, 133, 0.15)",
-    iconBg: "from-rose-400 to-pink-500",
+    icon: Webhook,
+    title: "Slack & Webhook Integrations",
+    description: "Connect support activity to your existing workflow instantly — Slack, webhooks, and more.",
+    spotlightColor: "rgba(52, 211, 153, 0.12)",
+    iconBg: "from-emerald-400 to-green-500",
   },
 ];
 
@@ -61,20 +47,20 @@ export function FeaturesSection() {
           className="text-center mb-20"
         >
           <span className="inline-block text-sm font-medium text-indigo-400 mb-3 tracking-wider uppercase">
-            Features
+            Solution
           </span>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight">
-            Everything you need to{" "}
+            Meet Your{" "}
             <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-              automate email
+              AI-Powered Customer Inbox
             </span>
           </h2>
           <p className="mt-5 text-zinc-400 max-w-2xl mx-auto text-lg">
-            A complete AI email assistant that learns from your knowledge base and follows your rules.
+            MailReplAI connects directly to Gmail, Outlook, or any IMAP inbox and transforms support emails into structured, trackable tickets — powered by AI.
           </p>
         </motion.div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-1">
+        <div className="grid sm:grid-cols-2 gap-1">
           {features.map((feature, i) => (
             <SpotlightCard key={feature.title} feature={feature} index={i} isInView={isInView} />
           ))}
@@ -119,7 +105,6 @@ function SpotlightCard({
       onMouseLeave={handleMouseLeave}
       className="relative rounded-xl border border-white/[0.06] bg-white/[0.02] p-8 overflow-hidden transition-colors duration-500 hover:border-white/[0.12]"
     >
-      {/* Spotlight radial gradient */}
       <div
         className="pointer-events-none absolute inset-0 transition-opacity duration-500"
         style={{
@@ -127,8 +112,6 @@ function SpotlightCard({
           background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, ${feature.spotlightColor}, transparent 40%)`,
         }}
       />
-
-      {/* Animated border glow on hover */}
       <div
         className="pointer-events-none absolute inset-0 rounded-xl transition-opacity duration-500"
         style={{
@@ -141,11 +124,8 @@ function SpotlightCard({
           padding: "1px",
         }}
       />
-
       <div className="relative z-10">
-        <div
-          className={`w-11 h-11 rounded-lg bg-gradient-to-br ${feature.iconBg} flex items-center justify-center mb-5 shadow-lg`}
-        >
+        <div className={`w-11 h-11 rounded-lg bg-gradient-to-br ${feature.iconBg} flex items-center justify-center mb-5 shadow-lg`}>
           <Icon className="h-5 w-5 text-white" strokeWidth={2} />
         </div>
         <h3 className="text-lg font-semibold text-white mb-2 tracking-tight">{feature.title}</h3>

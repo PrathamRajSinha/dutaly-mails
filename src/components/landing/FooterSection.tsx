@@ -14,7 +14,9 @@ export function FooterSection() {
           </div>
           <div className="flex items-center gap-6 text-sm text-zinc-500">
             <a href="#features" className="hover:text-zinc-300 transition-colors">Features</a>
+            <a href="#demo" className="hover:text-zinc-300 transition-colors">How It Works</a>
             <a href="#pricing" className="hover:text-zinc-300 transition-colors">Pricing</a>
+            <a href="#use-cases" className="hover:text-zinc-300 transition-colors">Use Cases</a>
             <Link to="/auth" className="hover:text-zinc-300 transition-colors">Sign in</Link>
           </div>
           <p className="text-xs text-zinc-600">© 2026 MailReplAI. All rights reserved.</p>
