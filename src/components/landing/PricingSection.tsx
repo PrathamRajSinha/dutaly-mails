@@ -10,26 +10,26 @@ const plans = [
     name: "Starter",
     price: "TBD",
     period: "/mo",
-    description: "For individuals getting started",
-    features: ["100 emails/month", "20 AI questions/month", "10 knowledge base entries", "2 email accounts", "Email templates"],
+    description: "For small teams getting started",
+    features: ["100 tickets/month", "20 AI replies/month", "2 email accounts", "Basic SLA tracking", "Email templates"],
     cta: "Get Started",
     highlighted: false,
   },
   {
-    name: "Pro",
+    name: "Growth",
     price: "TBD",
     period: "/mo",
-    description: "For growing teams",
-    features: ["500 emails/month", "100 AI questions/month", "50 knowledge base entries", "5 email accounts", "Email templates", "Priority support"],
+    description: "For growing teams that need more",
+    features: ["500 tickets/month", "100 AI replies/month", "5 email accounts", "Advanced SLA & escalation", "Slack & webhook integrations", "Priority support"],
     cta: "Get Started",
     highlighted: true,
   },
   {
-    name: "Enterprise",
+    name: "Pro",
     price: "Custom",
     period: "",
-    description: "For large organizations",
-    features: ["Unlimited emails", "Unlimited AI questions", "Unlimited KB entries", "Unlimited accounts", "Custom integrations", "SLA guarantee"],
+    description: "For teams with advanced needs",
+    features: ["Unlimited tickets", "Unlimited AI replies", "Unlimited accounts", "Custom integrations", "SLA guarantee", "Dedicated support"],
     cta: "Contact Us",
     highlighted: false,
   },
@@ -50,7 +50,7 @@ export function PricingSection() {
         >
           <span className="text-sm font-medium text-indigo-400">Pricing</span>
           <h2 className="mt-2 text-3xl sm:text-4xl font-bold text-white">Simple, transparent pricing</h2>
-          <p className="mt-4 text-zinc-400">Choose the plan that fits your needs.</p>
+          <p className="mt-4 text-zinc-400">Designed for growing teams that want structure without enterprise pricing.</p>
         </motion.div>
 
         <div className="grid md:grid-cols-3 gap-6">

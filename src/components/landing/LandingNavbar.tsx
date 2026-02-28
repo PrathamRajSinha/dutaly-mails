@@ -7,9 +7,9 @@ import { StarBorder } from "./StarBorder";
 
 const navLinks = [
   { label: "Features", href: "#features" },
-  { label: "Demo", href: "#demo" },
+  { label: "How It Works", href: "#demo" },
   { label: "Pricing", href: "#pricing" },
-  { label: "Testimonials", href: "#testimonials" },
+  { label: "Use Cases", href: "#use-cases" },
 ];
 
 export function MagneticButton({ children }: { children: React.ReactNode }) {
