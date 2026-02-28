@@ -1,108 +1,78 @@
 
 
-# Plan: Merge Email Queue into Customer Inbox + Instruction Builder
+# Landing Page Repositioning: AI Helpdesk
 
-Two changes: (1) eliminate the separate Email Queue page by integrating its functionality into the Customer Inbox ticket detail, and (2) redesign the Instructions page with structured point-based rules.
+Updating all landing page copy and adding new sections while preserving the existing design system, animations, and layout.
 
----
+## Changes by File
 
-## Part 1: Merge Email Queue into Customer Inbox
+### 1. `src/components/landing/HeroSection.tsx`
+- Badge: "AI-Powered Email Assistant" → "AI-Powered Helpdesk"
+- Headline: Replace 3-word animation with "AI Helpdesk Built for Growing Teams" (keep ShinyText on "Growing Teams")
+- Subtitle: New helpdesk-focused copy
+- Primary CTA: "Start Managing Support Smarter"
+- Secondary CTA: "See How It Works"
+- Add 3 benefit bullets below CTAs (animated, staggered)
+- Update dashboard preview badges to show ticket-related labels ("Ticket Created", "SLA Tracked", "Escalated")
 
-### Problem
-The Email Queue (`/queue`) and Customer Inbox (`/tickets`) show overlapping data — emails and tickets are linked, but actions like approve/edit/send/ignore/compose/attach/template are only available on the Email Queue page. Users must switch between pages constantly.
+### 2. `src/components/landing/TrustedBySection.tsx` → **Problem Section**
+- Currently returns `null`. Repurpose as the "Your Inbox Was Never Built for Customer Support" 3-column problem section
+- Use existing spotlight card pattern from FeaturesSection for visual consistency
+- Add subtext below columns
 
-### Solution
-Embed the email action workflow directly into the Ticket Detail Panel's conversation thread. Each pending email in the thread gets inline approve/edit/send/ignore buttons, compose area, template picker, and attachment support — exactly what EmailQueue's `EmailCard` component provides today. Then remove Email Queue from the sidebar.
+### 3. `src/components/landing/FeaturesSection.tsx` → **Solution Section**
+- Section label: "Solution"
+- Title: "Meet Your AI-Powered Customer Inbox"
+- Description paragraph added
+- Replace 6 feature cards with 4 new ones: AI Classification & Sentiment, Smart Reply Generation, SLA Tracking & Escalation, Slack & Webhook Integrations
+- Keep the SpotlightCard component and all its mouse-tracking effects
 
-### What Changes
+### 4. `src/components/landing/InteractiveDemoSection.tsx` → **How It Works**
+- Title: "From Email to Resolution — Automatically"
+- Replace tab labels with 5 steps: "Email Received", "AI Classifies", "Draft Generated", "You Approve", "SLA Tracked"
+- Update tab content for each step with helpdesk-focused content
+- Keep all animation logic (typing effect, progress bar, auto-cycle)
 
-**1. `src/components/tickets/TicketDetailPanel.tsx`** — Major enhancement:
-- Each email in the conversation thread gets action buttons when status is `"pending"`:
-  - Approve & Send, Edit & Send, Compose Reply, Ignore
-  - Template picker button, Attach file button
-- Emails with `status === "sent"` show as read-only (current behavior)
-- Add a "Fetch Emails" button in the header to manually pull new emails
-- Add the auto-fetch polling toggle from EmailQueue
-- Import and use `useEmailQueue`'s `updateEmailStatus` mutation for approve/ignore/edit actions
-- Import send logic (invoke `send-gmail-reply` / `send-imap-reply`) for the send flow
-- Add "Add to Knowledge Base" action per email
+### 5. `src/components/landing/StatsSection.tsx` → **Differentiation Section**
+- Currently returns `null`. Build "Why Teams Choose MailReplAI" section
+- Two-column comparison: Traditional Helpdesk vs MailReplAI
+- Use motion animations consistent with the rest of the page
 
-**2. `src/pages/Tickets.tsx`** — Minor updates:
-- Add a "Needs Review" count badge on the ticket list showing how many emails across all tickets need action
-- Add a filter to highlight tickets that have pending emails needing review
+### 6. `src/components/landing/TestimonialsSection.tsx` → **Use Cases Section**
+- Currently returns `null`. Build "Built for Modern Growing Teams" section
+- 4 cards: SaaS Startups, D2C Brands, Agencies, Service Businesses
+- Use SpotlightCard-style hover effects
 
-**3. `src/components/layout/AppSidebar.tsx`**:
-- Remove the "Email Queue" nav item (`/queue`)
-- Customer Inbox becomes the single destination for all email + ticket work
+### 7. `src/components/landing/PricingSection.tsx`
+- Rename tiers: Starter, Growth (highlighted), Pro
+- Reframe features around tickets, AI replies, SLA tracking, integrations
+- Add note: "Designed for growing teams that want structure without enterprise pricing."
+- Remove "email automation" language
 
-**4. `src/App.tsx`**:
-- Remove the `/queue` route (or redirect it to `/tickets`)
-- Remove the EmailQueue import
+### 8. `src/components/landing/CTASection.tsx`
+- Headline: "Stop Managing Support in Gmail Alone"
+- Subheadline: "Upgrade your inbox into an AI-powered helpdesk in minutes."
+- Primary CTA: "Start Free Trial"
+- Secondary CTA: "Book a Demo" (mailto link placeholder)
 
-**5. `src/pages/EmailQueue.tsx`** — Keep file but add a redirect:
-- Redirect to `/tickets` for any bookmarks or links
+### 9. New section: **Trust & Security** (add between Pricing and CTA in `Landing.tsx`)
+- Create `src/components/landing/SecuritySection.tsx`
+- Title: "Enterprise-Grade Security, Built on Supabase"
+- 4 items: Secure auth, Encrypted connections, Role-based access, Data isolation via RLS
 
-### Visual: Updated Ticket Detail Conversation
+### 10. `src/pages/Landing.tsx`
+- Add SecuritySection import and place between PricingSection and CTASection
 
-```text
-┌─────────────────────────────────────────────┐
-│ [← Back]  Ticket: "Refund request for..."  │
-│ [Status ▾] [Priority ▾] [SLA: 2h left]    │
-│ [Fetch Emails 🔄]                           │
-├─────────────────────────────────────────────┤
-│ [Conversation (3)]  [Notes (1)]             │
-├─────────────────────────────────────────────┤
-│ ┌─ Customer Email (pending) ─────────────┐ │
-│ │ From: john@example.com                  │ │
-│ │ "I'd like a refund for order #123..."   │ │
-│ │                                         │ │
-│ │ ── AI Suggested Reply ──                │ │
-│ │ "Thank you for reaching out..."         │ │
-│ │                                         │ │
-│ │ [✓ Approve & Send] [✎ Edit] [✗ Ignore] │ │
-│ │ [📎 Attach] [📄 Template] [+ KB]       │ │
-│ └─────────────────────────────────────────┘ │
-│                                             │
-│ ┌─ Sent Reply ───────────────────────────┐ │
-│ │ "We've processed your refund..."  ✓Sent │ │
-│ └─────────────────────────────────────────┘ │
-└─────────────────────────────────────────────┘
-```
+### 11. `src/components/landing/LandingNavbar.tsx`
+- Update nav links: Features → "Features", Demo → "How It Works", Pricing → "Pricing", Testimonials → "Use Cases"
 
----
+### 12. `src/components/landing/FooterSection.tsx`
+- Update nav links to match new section names
 
-## Part 2: Structured Instruction Builder
-
-(As previously approved — summarized here for completeness)
-
-### What Changes
-
-**1. New migration**: Create `ai_instruction_rules` table with columns: `id`, `user_id`, `parent_id`, `text`, `priority` (critical/important/normal/low), `condition_type` (if/when/unless/null), `condition_text`, `sort_order`, `is_active`, timestamps. RLS policies scoped to `auth.uid() = user_id`.
-
-**2. New hook**: `src/hooks/useInstructionRules.ts` — CRUD operations for rules, compile-to-prompt function that builds the `system_prompt` string from structured rules.
-
-**3. New component**: `src/components/instructions/InstructionBuilder.tsx` — Replaces the textarea with:
-- Condition logic buttons toolbar: IF, WHEN, UNLESS, ALWAYS, NEVER
-- Priority selector per rule (color-coded badges)
-- Parent/child nesting (sub-instructions)
-- Toggle individual rules on/off
-- AI auto-detail "magic wand" button per instruction
-- Add/delete rules inline
-
-**4. Modified**: `src/pages/Instructions.tsx` — Swap the "Behavior Instructions" textarea card for the `InstructionBuilder` component. All other cards (Do/Don't, Reply Style, Signature, Automation) remain unchanged.
-
-**5. Modified**: `src/hooks/useAIInstructions.ts` — On save, compile structured rules into `system_prompt` string for backward compatibility with `process-email`.
-
-### What Does NOT Change
-- `process-email` edge function (still reads `system_prompt`)
-- `ai_instructions` table structure (keeps `system_prompt` column)
-- Do/Don't rules section, Reply Style, Signature, Automation cards
-
----
-
-## Implementation Order
-1. Instruction Builder (migration → hook → component → page update)
-2. Merge Email Queue into Ticket Detail Panel
-3. Remove Email Queue sidebar item and route
-4. Test end-to-end
+## What Does NOT Change
+- AntigravityDots, ShinyText, StarBorder, MagneticButton components
+- All Framer Motion animations, gradient blobs, noise overlays
+- Dark theme, Tailwind styling, responsive breakpoints
+- SpotlightCard mouse-tracking hover effect (reused across sections)
+- Overall page layout structure and section ordering
 
