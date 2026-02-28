@@ -5,8 +5,8 @@ const tabs = [
   { label: "Email Received", key: "received" },
   { label: "AI Classifies", key: "classifies" },
   { label: "Draft Generated", key: "draft" },
-  { label: "You Approve", key: "approve" },
-  { label: "SLA Tracked", key: "sla" },
+  { label: "Approve or Send", key: "approve" },
+  { label: "Track Progress", key: "sla" },
 ];
 
 const typingText = "Hi Sarah, thank you for reaching out about your order. I've looked into this and can confirm your refund has been processed — it should appear in your account within 3-5 business days. I've also flagged the packaging issue with our fulfillment team. Let me know if there's anything else I can help with!";
@@ -65,7 +65,7 @@ export function InteractiveDemoSection() {
           className="text-center mb-12"
         >
           <span className="text-sm font-medium text-indigo-400">How it works</span>
-          <h2 className="mt-2 text-3xl sm:text-4xl font-bold text-white">From Email to Resolution — Automatically</h2>
+          <h2 className="mt-2 text-3xl sm:text-4xl font-bold text-white">From Email to Resolution</h2>
         </motion.div>
 
         <motion.div

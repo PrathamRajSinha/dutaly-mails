@@ -9,8 +9,8 @@ import { StarBorder } from "./StarBorder";
 
 const benefits = [
   "Automatically convert emails into tickets",
-  "Detect angry customers in real time",
-  "Never miss an SLA again",
+  "Detect urgency and sentiment instantly",
+  "Track SLAs and escalations in real time",
 ];
 
 export function HeroSection() {
@@ -52,7 +52,7 @@ export function HeroSection() {
           className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-zinc-400 mb-8"
         >
           <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
-          AI-Powered Helpdesk
+          AI-Powered Customer Inbox
         </motion.div>
 
         {/* Headline */}
@@ -63,7 +63,7 @@ export function HeroSection() {
             transition={{ duration: 0.6, delay: 0.2, ease: [0.25, 0.4, 0, 1] }}
             className="block text-white"
           >
-            AI Helpdesk Built for
+            AI Helpdesk for
           </motion.span>
           <motion.span
             initial={{ opacity: 0, y: 40 }}
@@ -72,7 +72,7 @@ export function HeroSection() {
             className="block"
           >
             <ShinyText
-              text="Growing Teams"
+              text="Modern Teams"
               speed={3}
               className="bg-[length:200%_auto] animate-[gradient-shift_4s_ease-in-out_infinite] bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent"
             />
@@ -86,8 +86,8 @@ export function HeroSection() {
           transition={{ duration: 0.6, delay: 0.55 }}
           className="mt-6 text-lg sm:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed"
         >
-          Turn support emails into structured tickets, detect urgent issues instantly, 
-          and reply with AI — all without leaving your inbox.
+          Turn customer emails into structured tickets, respond with AI-powered precision, 
+          and manage support with clarity — all inside your inbox.
         </motion.p>
 
         {/* CTAs */}

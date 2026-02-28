@@ -5,29 +5,29 @@ import { Brain, MessageSquareReply, Clock, Webhook } from "lucide-react";
 const features = [
   {
     icon: Brain,
-    title: "AI Classification & Sentiment Detection",
-    description: "Automatically categorize emails by intent and detect urgency so critical issues get immediate attention.",
+    title: "Intelligent Classification",
+    description: "Automatically categorize emails and detect sentiment.",
     spotlightColor: "rgba(129, 140, 248, 0.15)",
     iconBg: "from-indigo-500 to-blue-600",
   },
   {
     icon: MessageSquareReply,
-    title: "Smart Reply Generation",
-    description: "Generate accurate responses grounded in your knowledge base and business rules — no hallucinations.",
+    title: "AI Reply Engine",
+    description: "Generate accurate responses based on your knowledge base and rules.",
     spotlightColor: "rgba(168, 85, 247, 0.15)",
     iconBg: "from-purple-500 to-violet-600",
   },
   {
     icon: Clock,
-    title: "SLA Tracking & Escalation",
-    description: "Track response and resolution deadlines automatically. Get alerts before breaches happen.",
+    title: "SLA Monitoring",
+    description: "Track response and resolution deadlines automatically.",
     spotlightColor: "rgba(251, 191, 36, 0.15)",
     iconBg: "from-amber-400 to-orange-500",
   },
   {
     icon: Webhook,
-    title: "Slack & Webhook Integrations",
-    description: "Connect support activity to your existing workflow instantly — Slack, webhooks, and more.",
+    title: "Integrations",
+    description: "Connect Slack or external systems via webhooks.",
     spotlightColor: "rgba(52, 211, 153, 0.12)",
     iconBg: "from-emerald-400 to-green-500",
   },
@@ -50,13 +50,13 @@ export function FeaturesSection() {
             Solution
           </span>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight">
-            Meet Your{" "}
+            A Structured,{" "}
             <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
               AI-Powered Customer Inbox
             </span>
           </h2>
           <p className="mt-5 text-zinc-400 max-w-2xl mx-auto text-lg">
-            MailReplAI connects directly to Gmail, Outlook, or any IMAP inbox and transforms support emails into structured, trackable tickets — powered by AI.
+            MailReplAI connects directly to your existing inbox and transforms support emails into structured, trackable tickets — powered by configurable AI.
           </p>
         </motion.div>
 

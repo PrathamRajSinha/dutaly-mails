@@ -10,8 +10,8 @@ const plans = [
     name: "Starter",
     price: "TBD",
     period: "/mo",
-    description: "For small teams getting started",
-    features: ["100 tickets/month", "20 AI replies/month", "2 email accounts", "Basic SLA tracking", "Email templates"],
+    description: "For teams getting started with structured support",
+    features: ["100 tickets/month", "20 AI-powered responses", "2 email accounts", "Basic SLA tracking", "Email templates"],
     cta: "Get Started",
     highlighted: false,
   },
@@ -19,8 +19,8 @@ const plans = [
     name: "Growth",
     price: "TBD",
     period: "/mo",
-    description: "For growing teams that need more",
-    features: ["500 tickets/month", "100 AI replies/month", "5 email accounts", "Advanced SLA & escalation", "Slack & webhook integrations", "Priority support"],
+    description: "For teams scaling their support operations",
+    features: ["500 tickets/month", "100 AI-powered responses", "5 email accounts", "Advanced SLA & escalation", "Slack & webhook integrations", "Priority support"],
     cta: "Get Started",
     highlighted: true,
   },
@@ -28,8 +28,8 @@ const plans = [
     name: "Pro",
     price: "Custom",
     period: "",
-    description: "For teams with advanced needs",
-    features: ["Unlimited tickets", "Unlimited AI replies", "Unlimited accounts", "Custom integrations", "SLA guarantee", "Dedicated support"],
+    description: "For teams with advanced requirements",
+    features: ["Unlimited tickets", "Unlimited AI-powered responses", "Unlimited accounts", "Custom integrations", "SLA guarantee", "Dedicated support"],
     cta: "Contact Us",
     highlighted: false,
   },
@@ -50,7 +50,7 @@ export function PricingSection() {
         >
           <span className="text-sm font-medium text-indigo-400">Pricing</span>
           <h2 className="mt-2 text-3xl sm:text-4xl font-bold text-white">Simple, transparent pricing</h2>
-          <p className="mt-4 text-zinc-400">Designed for growing teams that want structure without enterprise pricing.</p>
+          <p className="mt-4 text-zinc-400">Built for teams that want structured support without operational overhead.</p>
         </motion.div>
 
         <div className="grid md:grid-cols-3 gap-6">

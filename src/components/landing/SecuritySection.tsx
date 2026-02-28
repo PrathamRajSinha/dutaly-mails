@@ -3,10 +3,10 @@ import { motion, useInView } from "framer-motion";
 import { ShieldCheck, Lock, UserCheck, Database } from "lucide-react";
 
 const items = [
-  { icon: ShieldCheck, title: "Secure Authentication", description: "Industry-standard auth with email, OAuth, and MFA support." },
-  { icon: Lock, title: "Encrypted Connections", description: "All email connections use TLS/SSL encryption by default." },
-  { icon: UserCheck, title: "Role-Based Access", description: "Control who can view, approve, and send replies." },
-  { icon: Database, title: "Data Isolation via RLS", description: "Row-level security ensures complete tenant data isolation." },
+  { icon: Lock, title: "Encrypted Connections", description: "All email connections use TLS/SSL encryption." },
+  { icon: ShieldCheck, title: "Secure Authentication", description: "Industry-standard auth with email and OAuth." },
+  { icon: Database, title: "Data Isolation via RLS", description: "Row-level security ensures complete data isolation." },
+  { icon: UserCheck, title: "Controlled AI Automation", description: "Confidence thresholds and rule-based behavioral control." },
 ];
 
 export function SecuritySection() {

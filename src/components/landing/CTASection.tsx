@@ -27,10 +27,10 @@ export function CTASection() {
         className="relative max-w-3xl mx-auto px-6 text-center"
       >
         <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">
-          Stop Managing Support in Gmail Alone
+          Upgrade Your Inbox Into a Structured Helpdesk
         </h2>
         <p className="mt-4 text-lg text-zinc-400">
-          Upgrade your inbox into an AI-powered helpdesk in minutes.
+          Manage customer communication with clarity and AI-powered control.
         </p>
         <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link to="/auth">
