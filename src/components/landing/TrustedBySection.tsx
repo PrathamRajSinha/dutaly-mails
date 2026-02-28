@@ -5,20 +5,20 @@ import { Inbox, BarChart3, Clock } from "lucide-react";
 const problems = [
   {
     icon: Inbox,
-    title: "Emails get buried",
-    description: "Important support emails get lost in shared inboxes with no structure or accountability.",
+    title: "Messages get lost",
+    description: "Shared inboxes create confusion and missed messages.",
     iconBg: "from-rose-400 to-pink-500",
   },
   {
     icon: BarChart3,
-    title: "No ticket tracking",
-    description: "No structured ticket tracking or SLA visibility means issues slip through the cracks.",
+    title: "No status or ownership",
+    description: "There's no structured way to track status or ownership.",
     iconBg: "from-amber-400 to-orange-500",
   },
   {
     icon: Clock,
-    title: "Manual replies slow you down",
-    description: "Writing every response from scratch wastes hours that could be spent growing your business.",
+    title: "Manual replies cause errors",
+    description: "Manual replies slow response time and increase errors.",
     iconBg: "from-cyan-400 to-teal-500",
   },
 ];
@@ -37,12 +37,12 @@ export function TrustedBySection() {
           className="text-center mb-16"
         >
           <span className="inline-block text-sm font-medium text-indigo-400 mb-3 tracking-wider uppercase">
-            The Problem
+            The Challenge
           </span>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight">
-            Your Inbox Was Never Built for{" "}
+            Email Alone Isn't a{" "}
             <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-              Customer Support
+              Support System
             </span>
           </h2>
         </motion.div>
@@ -74,7 +74,7 @@ export function TrustedBySection() {
           transition={{ duration: 0.5, delay: 0.4 }}
           className="mt-10 text-center text-zinc-500 text-sm"
         >
-          Growing businesses need structure — without enterprise complexity.
+          Support requires structure, visibility, and control.
         </motion.p>
       </div>
     </section>

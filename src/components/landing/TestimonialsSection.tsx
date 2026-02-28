@@ -5,29 +5,29 @@ import { Rocket, ShoppingBag, Users, Briefcase } from "lucide-react";
 const useCases = [
   {
     icon: Rocket,
-    title: "SaaS Startups",
-    description: "Manage bug reports, billing issues, and feature requests effortlessly.",
+    title: "SaaS Platforms",
+    description: "Handle bug reports, billing issues, and feature requests with structure.",
     spotlightColor: "rgba(129, 140, 248, 0.15)",
     iconBg: "from-indigo-500 to-blue-600",
   },
   {
     icon: ShoppingBag,
-    title: "D2C Brands",
-    description: "Handle refunds, complaints, and order queries faster.",
+    title: "Digital Brands",
+    description: "Manage refunds and complaints with clarity.",
     spotlightColor: "rgba(251, 191, 36, 0.15)",
     iconBg: "from-amber-400 to-orange-500",
   },
   {
     icon: Users,
     title: "Agencies",
-    description: "Organize client emails across shared inboxes with structure.",
+    description: "Organize shared inboxes and client communications.",
     spotlightColor: "rgba(168, 85, 247, 0.15)",
     iconBg: "from-purple-500 to-violet-600",
   },
   {
     icon: Briefcase,
-    title: "Service Businesses",
-    description: "Turn email chaos into structured workflows that scale.",
+    title: "Service Providers",
+    description: "Convert email traffic into structured workflows.",
     spotlightColor: "rgba(52, 211, 153, 0.12)",
     iconBg: "from-emerald-400 to-green-500",
   },
@@ -50,7 +50,7 @@ export function TestimonialsSection() {
             Use Cases
           </span>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">
-            Built for Modern Growing Teams
+            Designed for Modern Support Operations
           </h2>
         </motion.div>
 

@@ -3,17 +3,17 @@ import { motion, useInView } from "framer-motion";
 import { X, Check } from "lucide-react";
 
 const traditional = [
-  "Complex setup and onboarding",
-  "Heavy configuration required",
-  "Expensive for small teams",
+  "Complex workflows",
+  "Heavy configuration",
+  "AI added later as an afterthought",
   "Separate tools for email and tickets",
 ];
 
 const mailreplai = [
-  "Gmail-native — connect in minutes",
-  "AI-first with rule-based control",
-  "Built for growing teams, not enterprises",
-  "Lightweight and fast to deploy",
+  "Inbox-native — connect in minutes",
+  "AI-first architecture",
+  "Rule-based behavioral control",
+  "Lightweight and focused",
 ];
 
 export function StatsSection() {
@@ -33,7 +33,7 @@ export function StatsSection() {
             Why Us
           </span>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">
-            Why Teams Choose MailReplAI
+            Built Differently
           </h2>
         </motion.div>
 
