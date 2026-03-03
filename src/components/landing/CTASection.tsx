@@ -41,7 +41,7 @@ export function CTASection() {
               </Button>
             </StarBorder>
           </Link>
-          <a href="mailto:hello@mailreplai.com">
+          <a href="mailto:hello@dyuticai.com">
             <Button variant="ghost" className="h-12 px-8 text-base text-zinc-300 hover:text-white hover:bg-white/5 rounded-2xl border border-white/10">
               Book a Demo
             </Button>

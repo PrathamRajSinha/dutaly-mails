@@ -56,7 +56,7 @@ export function FeaturesSection() {
             </span>
           </h2>
           <p className="mt-5 text-zinc-400 max-w-2xl mx-auto text-lg">
-            MailReplAI connects directly to your existing inbox and transforms support emails into structured, trackable tickets — powered by configurable AI.
+            dyuticAI connects directly to your existing inbox and transforms support emails into structured, trackable tickets — powered by configurable AI.
           </p>
         </motion.div>
 

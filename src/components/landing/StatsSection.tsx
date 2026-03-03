@@ -9,7 +9,7 @@ const traditional = [
   "Separate tools for email and tickets",
 ];
 
-const mailreplai = [
+const dyuticai = [
   "Inbox-native — connect in minutes",
   "AI-first architecture",
   "Rule-based behavioral control",
@@ -56,16 +56,16 @@ export function StatsSection() {
             </ul>
           </motion.div>
 
-          {/* MailReplAI */}
+          {/* dyuticAI */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.5, delay: 0.2 }}
             className="rounded-xl border border-indigo-500/20 bg-gradient-to-b from-indigo-500/5 to-transparent p-8"
           >
-            <h3 className="text-lg font-semibold text-white mb-6">MailReplAI</h3>
+            <h3 className="text-lg font-semibold text-white mb-6">dyuticAI</h3>
             <ul className="space-y-4">
-              {mailreplai.map((item) => (
+              {dyuticai.map((item) => (
                 <li key={item} className="flex items-start gap-3 text-sm text-zinc-300">
                   <Check className="h-4 w-4 text-indigo-400 flex-shrink-0 mt-0.5" />
                   {item}

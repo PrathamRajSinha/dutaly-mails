@@ -10,7 +10,7 @@ export function FooterSection() {
             <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
               <Mail className="h-3.5 w-3.5 text-white" />
             </div>
-            <span className="font-bold text-white">MailReplAI</span>
+            <span className="font-bold text-white">dyuticAI</span>
           </div>
           <div className="flex items-center gap-6 text-sm text-zinc-500">
             <a href="#features" className="hover:text-zinc-300 transition-colors">Features</a>
@@ -19,7 +19,7 @@ export function FooterSection() {
             <a href="#use-cases" className="hover:text-zinc-300 transition-colors">Use Cases</a>
             <Link to="/auth" className="hover:text-zinc-300 transition-colors">Sign in</Link>
           </div>
-          <p className="text-xs text-zinc-600">© 2026 MailReplAI. All rights reserved.</p>
+          <p className="text-xs text-zinc-600">© 2026 dyuticAI. All rights reserved.</p>
         </div>
       </div>
     </footer>

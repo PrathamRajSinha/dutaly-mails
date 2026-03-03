@@ -50,7 +50,7 @@ export function LandingNavbar() {
           <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
             <Mail className="h-4 w-4 text-white" />
           </div>
-          <span className="text-lg font-bold text-white">MailReplAI</span>
+          <span className="text-lg font-bold text-white">dyuticAI</span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">

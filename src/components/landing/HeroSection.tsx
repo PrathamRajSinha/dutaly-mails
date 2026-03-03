@@ -146,7 +146,7 @@ export function HeroSection() {
               <div className="w-3 h-3 rounded-full bg-red-400/80" />
               <div className="w-3 h-3 rounded-full bg-yellow-400/80" />
               <div className="w-3 h-3 rounded-full bg-green-400/80" />
-              <span className="ml-3 text-xs text-zinc-500">MailReplAI — Customer Inbox</span>
+              <span className="ml-3 text-xs text-zinc-500">dyuticAI — Customer Inbox</span>
             </div>
             <div className="space-y-3">
               <div className="flex items-center gap-3">
