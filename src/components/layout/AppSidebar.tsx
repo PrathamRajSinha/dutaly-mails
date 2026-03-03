@@ -46,8 +46,8 @@ export function AppSidebar() {
           <Mail className="h-5 w-5 text-primary-foreground" />
         </div>
         <div>
-          <h1 className="font-semibold text-sidebar-foreground">AI Email Agent</h1>
-          <p className="text-xs text-muted-foreground">Inbox Automation</p>
+          <h1 className="font-semibold text-sidebar-foreground">dyuticAI</h1>
+          <p className="text-xs text-muted-foreground">AI Helpdesk</p>
         </div>
       </div>
 
