@@ -3,7 +3,6 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Mail, Menu, X } from "lucide-react";
-import { StarBorder } from "./StarBorder";
 
 const navLinks = [
   { label: "Features", href: "#features" },
@@ -13,44 +12,26 @@ const navLinks = [
 ];
 
 export function MagneticButton({ children }: { children: React.ReactNode }) {
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-
-  const handleMouse = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left - rect.width / 2;
-    const y = e.clientY - rect.top - rect.height / 2;
-    setPosition({ x: x * 0.15, y: y * 0.15 });
-  };
-
-  return (
-    <motion.div
-      onMouseMove={handleMouse}
-      onMouseLeave={() => setPosition({ x: 0, y: 0 })}
-      animate={{ x: position.x, y: position.y }}
-      transition={{ type: "spring", stiffness: 200, damping: 15 }}
-    >
-      {children}
-    </motion.div>
-  );
+  return <>{children}</>;
 }
 
 export function LandingNavbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { scrollY } = useScroll();
-  const bg = useTransform(scrollY, [0, 100], ["rgba(9,9,11,0)", "rgba(9,9,11,0.8)"]);
-  const blur = useTransform(scrollY, [0, 100], ["blur(0px)", "blur(20px)"]);
+  const bg = useTransform(scrollY, [0, 60], ["rgba(9,9,11,0)", "rgba(9,9,11,0.85)"]);
+  const blur = useTransform(scrollY, [0, 60], ["blur(0px)", "blur(16px)"]);
 
   return (
     <motion.header
       className="fixed top-0 left-0 right-0 z-50 border-b border-white/5"
       style={{ backgroundColor: bg, backdropFilter: blur }}
     >
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-            <Mail className="h-4 w-4 text-white" />
+      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        <Link to="/" className="flex items-center gap-2.5">
+          <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center">
+            <Mail className="h-4 w-4 text-zinc-900" />
           </div>
-          <span className="text-lg font-bold text-white">dyuticAI</span>
+          <span className="text-lg font-bold text-white tracking-tight">dyuticAI</span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">
@@ -58,7 +39,7 @@ export function LandingNavbar() {
             <a
               key={link.label}
               href={link.href}
-              className="text-sm text-zinc-400 hover:text-white transition-colors duration-200"
+              className="text-sm text-zinc-500 hover:text-white transition-colors duration-200"
             >
               {link.label}
             </a>
@@ -67,16 +48,14 @@ export function LandingNavbar() {
 
         <div className="hidden md:flex items-center gap-3">
           <Link to="/auth">
-            <Button variant="ghost" className="text-zinc-300 hover:text-white hover:bg-white/10">
+            <Button variant="ghost" className="text-zinc-400 hover:text-white hover:bg-white/5 rounded-full">
               Log in
             </Button>
           </Link>
           <Link to="/auth">
-            <StarBorder color="hsl(239, 84%, 67%)" speed="5s" thickness={2}>
-              <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white border-0 rounded-2xl">
-                Get Started Free
-              </Button>
-            </StarBorder>
+            <Button className="bg-white text-zinc-900 hover:bg-zinc-100 rounded-full font-medium">
+              Get Started
+            </Button>
           </Link>
         </div>
 
@@ -95,15 +74,15 @@ export function LandingNavbar() {
             <a
               key={link.label}
               href={link.href}
-              className="block text-zinc-300 hover:text-white transition-colors"
+              className="block text-zinc-400 hover:text-white transition-colors"
               onClick={() => setMobileOpen(false)}
             >
               {link.label}
             </a>
           ))}
           <Link to="/auth" className="block">
-            <Button className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl">
-              Get Started Free
+            <Button className="w-full bg-white text-zinc-900 hover:bg-zinc-100 rounded-full font-medium">
+              Get Started
             </Button>
           </Link>
         </motion.div>

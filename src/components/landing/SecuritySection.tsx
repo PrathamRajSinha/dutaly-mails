@@ -3,15 +3,15 @@ import { motion, useInView } from "framer-motion";
 import { ShieldCheck, Lock, UserCheck, Database } from "lucide-react";
 
 const items = [
-  { icon: Lock, title: "Encrypted Connections", description: "All email connections use TLS/SSL encryption." },
-  { icon: ShieldCheck, title: "Secure Authentication", description: "Industry-standard auth with email and OAuth." },
-  { icon: Database, title: "Data Isolation via RLS", description: "Row-level security ensures complete data isolation." },
-  { icon: UserCheck, title: "Controlled AI Automation", description: "Confidence thresholds and rule-based behavioral control." },
+  { icon: Lock, title: "Encrypted Connections", description: "All email connections use TLS/SSL encryption end-to-end." },
+  { icon: ShieldCheck, title: "Secure Authentication", description: "Industry-standard auth with email, OAuth, and MFA." },
+  { icon: Database, title: "Data Isolation (RLS)", description: "Row-level security ensures complete tenant data isolation." },
+  { icon: UserCheck, title: "Controlled AI", description: "Confidence thresholds prevent the AI from acting without oversight." },
 ];
 
 export function SecuritySection() {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
     <section className="relative py-24 sm:py-32" ref={ref}>
@@ -20,17 +20,15 @@ export function SecuritySection() {
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5 }}
-          className="text-center mb-12"
+          className="text-center mb-16"
         >
-          <span className="inline-block text-sm font-medium text-indigo-400 mb-3 tracking-wider uppercase">
-            Security
-          </span>
+          <p className="text-sm font-medium tracking-widest uppercase text-indigo-400 mb-4">Security</p>
           <h2 className="text-3xl sm:text-4xl font-bold text-white">
-            Enterprise-Grade Security, Built on Supabase
+            Enterprise-grade security, built in.
           </h2>
         </motion.div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {items.map((item, i) => {
             const Icon = item.icon;
             return (
@@ -38,11 +36,11 @@ export function SecuritySection() {
                 key={item.title}
                 initial={{ opacity: 0, y: 20 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.4, delay: i * 0.1 }}
+                transition={{ duration: 0.4, delay: i * 0.08 }}
                 className="text-center"
               >
-                <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto mb-4">
-                  <Icon className="h-5 w-5 text-indigo-400" />
+                <div className="w-12 h-12 rounded-2xl bg-zinc-800 flex items-center justify-center mx-auto mb-4">
+                  <Icon className="h-5 w-5 text-zinc-400" />
                 </div>
                 <h3 className="text-sm font-semibold text-white mb-1">{item.title}</h3>
                 <p className="text-xs text-zinc-500 leading-relaxed">{item.description}</p>

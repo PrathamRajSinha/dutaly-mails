@@ -1,136 +1,119 @@
-import { useRef, useState, useCallback } from "react";
+import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { Brain, MessageSquareReply, Clock, Webhook } from "lucide-react";
+import screenshotTickets from "@/assets/screenshot-tickets.png";
+import screenshotAiReply from "@/assets/screenshot-ai-reply.png";
 
 const features = [
   {
     icon: Brain,
-    title: "Intelligent Classification",
-    description: "Automatically categorize emails and detect sentiment.",
-    spotlightColor: "rgba(129, 140, 248, 0.15)",
-    iconBg: "from-indigo-500 to-blue-600",
+    title: "Smart Classification",
+    description: "Incoming emails are automatically categorized by intent, urgency, and sentiment — no manual triage needed.",
+    screenshot: screenshotTickets,
+    screenshotAlt: "dyuticAI ticket classification showing priority and status columns",
   },
   {
     icon: MessageSquareReply,
-    title: "AI Reply Engine",
-    description: "Generate accurate responses based on your knowledge base and rules.",
-    spotlightColor: "rgba(168, 85, 247, 0.15)",
-    iconBg: "from-purple-500 to-violet-600",
+    title: "AI-Drafted Replies",
+    description: "Replies are drafted instantly using your knowledge base and custom rules. Review, edit, or auto-send with confidence scores.",
+    screenshot: screenshotAiReply,
+    screenshotAlt: "dyuticAI AI reply drafting interface with confidence score and approve buttons",
   },
+];
+
+const smallFeatures = [
   {
     icon: Clock,
-    title: "SLA Monitoring",
-    description: "Track response and resolution deadlines automatically.",
-    spotlightColor: "rgba(251, 191, 36, 0.15)",
-    iconBg: "from-amber-400 to-orange-500",
+    title: "SLA Tracking",
+    description: "Set response and resolution deadlines. Get alerts before breaches happen.",
   },
   {
     icon: Webhook,
     title: "Integrations",
-    description: "Connect Slack or external systems via webhooks.",
-    spotlightColor: "rgba(52, 211, 153, 0.12)",
-    iconBg: "from-emerald-400 to-green-500",
+    description: "Connect Slack, webhooks, and external systems to your support workflow.",
   },
 ];
 
 export function FeaturesSection() {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section id="features" className="relative py-24 sm:py-32">
-      <div className="max-w-7xl mx-auto px-6" ref={ref}>
+    <section id="features" className="relative py-24 sm:py-32" ref={ref}>
+      <div className="max-w-6xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.5 }}
           className="text-center mb-20"
         >
-          <span className="inline-block text-sm font-medium text-indigo-400 mb-3 tracking-wider uppercase">
-            Solution
-          </span>
+          <p className="text-sm font-medium tracking-widest uppercase text-indigo-400 mb-4">Features</p>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight">
-            A Structured,{" "}
-            <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-              AI-Powered Customer Inbox
-            </span>
+            Everything you need to<br className="hidden sm:block" /> manage support at scale.
           </h2>
-          <p className="mt-5 text-zinc-400 max-w-2xl mx-auto text-lg">
-            dyuticAI connects directly to your existing inbox and transforms support emails into structured, trackable tickets — powered by configurable AI.
-          </p>
         </motion.div>
 
-        <div className="grid sm:grid-cols-2 gap-1">
-          {features.map((feature, i) => (
-            <SpotlightCard key={feature.title} feature={feature} index={i} isInView={isInView} />
-          ))}
+        {/* Large feature blocks with screenshots */}
+        <div className="space-y-24">
+          {features.map((feature, i) => {
+            const Icon = feature.icon;
+            const isReversed = i % 2 !== 0;
+            return (
+              <motion.div
+                key={feature.title}
+                initial={{ opacity: 0, y: 30 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: i * 0.15 }}
+                className={`flex flex-col ${isReversed ? "lg:flex-row-reverse" : "lg:flex-row"} items-center gap-12 lg:gap-16`}
+              >
+                {/* Text */}
+                <div className="flex-1 text-center lg:text-left">
+                  <div className="w-12 h-12 rounded-2xl bg-zinc-800 flex items-center justify-center mb-5 mx-auto lg:mx-0">
+                    <Icon className="h-5 w-5 text-indigo-400" />
+                  </div>
+                  <h3 className="text-2xl sm:text-3xl font-bold text-white mb-4">{feature.title}</h3>
+                  <p className="text-base sm:text-lg text-zinc-400 leading-relaxed max-w-md mx-auto lg:mx-0">
+                    {feature.description}
+                  </p>
+                </div>
+                {/* Screenshot */}
+                <div className="flex-1 w-full">
+                  <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-black/40">
+                    <img
+                      src={feature.screenshot}
+                      alt={feature.screenshotAlt}
+                      className="w-full h-auto"
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+
+        {/* Smaller feature cards */}
+        <div className="grid sm:grid-cols-2 gap-8 mt-24">
+          {smallFeatures.map((f, i) => {
+            const Icon = f.icon;
+            return (
+              <motion.div
+                key={f.title}
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.5, delay: 0.3 + i * 0.1 }}
+                className="p-8 rounded-2xl bg-zinc-900/60 border border-white/5"
+              >
+                <div className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center mb-4">
+                  <Icon className="h-5 w-5 text-indigo-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">{f.title}</h3>
+                <p className="text-[15px] text-zinc-500 leading-relaxed">{f.description}</p>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>
-  );
-}
-
-function SpotlightCard({
-  feature,
-  index,
-  isInView,
-}: {
-  feature: (typeof features)[0];
-  index: number;
-  isInView: boolean;
-}) {
-  const divRef = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [opacity, setOpacity] = useState(0);
-
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!divRef.current) return;
-    const rect = divRef.current.getBoundingClientRect();
-    setPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-  }, []);
-
-  const handleMouseEnter = useCallback(() => setOpacity(1), []);
-  const handleMouseLeave = useCallback(() => setOpacity(0), []);
-
-  const Icon = feature.icon;
-
-  return (
-    <motion.div
-      ref={divRef}
-      initial={{ opacity: 0, y: 40 }}
-      animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.5, delay: index * 0.08, ease: [0.25, 0.46, 0.45, 0.94] }}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      className="relative rounded-xl border border-white/[0.06] bg-white/[0.02] p-8 overflow-hidden transition-colors duration-500 hover:border-white/[0.12]"
-    >
-      <div
-        className="pointer-events-none absolute inset-0 transition-opacity duration-500"
-        style={{
-          opacity,
-          background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, ${feature.spotlightColor}, transparent 40%)`,
-        }}
-      />
-      <div
-        className="pointer-events-none absolute inset-0 rounded-xl transition-opacity duration-500"
-        style={{
-          opacity: opacity * 0.5,
-          background: `radial-gradient(400px circle at ${position.x}px ${position.y}px, ${feature.spotlightColor}, transparent 40%)`,
-          mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-          WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-          maskComposite: "exclude",
-          WebkitMaskComposite: "xor",
-          padding: "1px",
-        }}
-      />
-      <div className="relative z-10">
-        <div className={`w-11 h-11 rounded-lg bg-gradient-to-br ${feature.iconBg} flex items-center justify-center mb-5 shadow-lg`}>
-          <Icon className="h-5 w-5 text-white" strokeWidth={2} />
-        </div>
-        <h3 className="text-lg font-semibold text-white mb-2 tracking-tight">{feature.title}</h3>
-        <p className="text-[15px] text-zinc-400 leading-relaxed">{feature.description}</p>
-      </div>
-    </motion.div>
   );
 }

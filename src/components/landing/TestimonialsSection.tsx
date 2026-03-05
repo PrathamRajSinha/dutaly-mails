@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from "react";
+import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { Rocket, ShoppingBag, Users, Briefcase } from "lucide-react";
 
@@ -6,110 +6,65 @@ const useCases = [
   {
     icon: Rocket,
     title: "SaaS Platforms",
-    description: "Handle bug reports, billing issues, and feature requests with structure.",
-    spotlightColor: "rgba(129, 140, 248, 0.15)",
-    iconBg: "from-indigo-500 to-blue-600",
+    description: "Handle bug reports, billing issues, and feature requests with full traceability.",
   },
   {
     icon: ShoppingBag,
-    title: "Digital Brands",
-    description: "Manage refunds and complaints with clarity.",
-    spotlightColor: "rgba(251, 191, 36, 0.15)",
-    iconBg: "from-amber-400 to-orange-500",
+    title: "E-Commerce Brands",
+    description: "Manage refund requests, complaints, and order inquiries with AI-powered precision.",
   },
   {
     icon: Users,
     title: "Agencies",
-    description: "Organize shared inboxes and client communications.",
-    spotlightColor: "rgba(168, 85, 247, 0.15)",
-    iconBg: "from-purple-500 to-violet-600",
+    description: "Organize shared inboxes and keep client communications structured across teams.",
   },
   {
     icon: Briefcase,
     title: "Service Providers",
-    description: "Convert email traffic into structured workflows.",
-    spotlightColor: "rgba(52, 211, 153, 0.12)",
-    iconBg: "from-emerald-400 to-green-500",
+    description: "Convert email traffic into actionable, trackable support workflows.",
   },
 ];
 
 export function TestimonialsSection() {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
     <section id="use-cases" className="relative py-24 sm:py-32" ref={ref}>
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="max-w-5xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5 }}
           className="text-center mb-16"
         >
-          <span className="inline-block text-sm font-medium text-indigo-400 mb-3 tracking-wider uppercase">
-            Use Cases
-          </span>
+          <p className="text-sm font-medium tracking-widest uppercase text-indigo-400 mb-4">Use Cases</p>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">
-            Designed for Modern Support Operations
+            Built for teams that care<br className="hidden sm:block" /> about their customers.
           </h2>
         </motion.div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-1">
-          {useCases.map((uc, i) => (
-            <UseCaseCard key={uc.title} useCase={uc} index={i} isInView={isInView} />
-          ))}
+        <div className="grid sm:grid-cols-2 gap-6">
+          {useCases.map((uc, i) => {
+            const Icon = uc.icon;
+            return (
+              <motion.div
+                key={uc.title}
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.5, delay: i * 0.08 }}
+                className="p-8 rounded-2xl bg-zinc-900/60 border border-white/5 hover:border-white/10 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center mb-4">
+                  <Icon className="h-5 w-5 text-indigo-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">{uc.title}</h3>
+                <p className="text-[15px] text-zinc-500 leading-relaxed">{uc.description}</p>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>
-  );
-}
-
-function UseCaseCard({
-  useCase,
-  index,
-  isInView,
-}: {
-  useCase: (typeof useCases)[0];
-  index: number;
-  isInView: boolean;
-}) {
-  const divRef = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [opacity, setOpacity] = useState(0);
-
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!divRef.current) return;
-    const rect = divRef.current.getBoundingClientRect();
-    setPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-  }, []);
-
-  const Icon = useCase.icon;
-
-  return (
-    <motion.div
-      ref={divRef}
-      initial={{ opacity: 0, y: 40 }}
-      animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.5, delay: index * 0.08 }}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={() => setOpacity(1)}
-      onMouseLeave={() => setOpacity(0)}
-      className="relative rounded-xl border border-white/[0.06] bg-white/[0.02] p-8 overflow-hidden transition-colors duration-500 hover:border-white/[0.12]"
-    >
-      <div
-        className="pointer-events-none absolute inset-0 transition-opacity duration-500"
-        style={{
-          opacity,
-          background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, ${useCase.spotlightColor}, transparent 40%)`,
-        }}
-      />
-      <div className="relative z-10">
-        <div className={`w-11 h-11 rounded-lg bg-gradient-to-br ${useCase.iconBg} flex items-center justify-center mb-5 shadow-lg`}>
-          <Icon className="h-5 w-5 text-white" strokeWidth={2} />
-        </div>
-        <h3 className="text-lg font-semibold text-white mb-2 tracking-tight">{useCase.title}</h3>
-        <p className="text-[15px] text-zinc-400 leading-relaxed">{useCase.description}</p>
-      </div>
-    </motion.div>
   );
 }
