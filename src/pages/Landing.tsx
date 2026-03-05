@@ -12,7 +12,7 @@ import { FooterSection } from "@/components/landing/FooterSection";
 
 export default function Landing() {
   return (
-    <div className="dark min-h-screen bg-zinc-950 text-white selection:bg-indigo-500/30 overflow-x-hidden">
+    <div className="min-h-screen bg-zinc-950 text-white selection:bg-indigo-500/30 overflow-x-hidden">
       <LandingNavbar />
       <HeroSection />
       <TrustedBySection />
