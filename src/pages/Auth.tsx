@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Mail, Lock, User, ArrowRight, Loader2 } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
 
 const emailSchema = z.string().email("Please enter a valid email address");
@@ -22,6 +23,9 @@ export default function Auth() {
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetLoading, setResetLoading] = useState(false);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -166,7 +170,63 @@ export default function Auth() {
                     )}
                     Sign In
                   </Button>
+                  <button
+                    type="button"
+                    onClick={() => { setShowForgotPassword(true); setResetEmail(email); }}
+                    className="w-full text-center text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    Forgot your password?
+                  </button>
                 </form>
+
+                {showForgotPassword && (
+                  <div className="mt-6 border-t border-border pt-6 space-y-4">
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => setShowForgotPassword(false)} className="text-muted-foreground hover:text-foreground">
+                        <ArrowLeft className="h-4 w-4" />
+                      </button>
+                      <h3 className="font-medium text-foreground">Reset Password</h3>
+                    </div>
+                    <p className="text-sm text-muted-foreground">Enter your email and we'll send you a reset link.</p>
+                    <div className="space-y-2">
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          type="email"
+                          placeholder="you@example.com"
+                          className="pl-10"
+                          value={resetEmail}
+                          onChange={(e) => setResetEmail(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <Button
+                      className="w-full"
+                      disabled={resetLoading}
+                      onClick={async () => {
+                        const emailResult = emailSchema.safeParse(resetEmail);
+                        if (!emailResult.success) {
+                          toast.error(emailResult.error.errors[0].message);
+                          return;
+                        }
+                        setResetLoading(true);
+                        const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+                          redirectTo: `${window.location.origin}/reset-password`,
+                        });
+                        setResetLoading(false);
+                        if (error) {
+                          toast.error(error.message);
+                        } else {
+                          toast.success("Check your email for a password reset link!");
+                          setShowForgotPassword(false);
+                        }
+                      }}
+                    >
+                      {resetLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Mail className="mr-2 h-4 w-4" />}
+                      Send Reset Link
+                    </Button>
+                  </div>
+                )}
               </TabsContent>
 
               <TabsContent value="signup" className="mt-6">
