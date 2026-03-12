@@ -18,6 +18,7 @@ import NotFound from "./pages/NotFound";
 import Landing from "./pages/Landing";
 import ChoosePlan from "./pages/ChoosePlan";
 import Tickets from "./pages/Tickets";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
