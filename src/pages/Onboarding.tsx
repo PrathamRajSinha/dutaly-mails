@@ -110,19 +110,24 @@ export default function Onboarding() {
     setIsSaving(true);
     try {
       // Save confidence threshold
-      await supabase
+      const { error: aiError } = await supabase
         .from("ai_instructions")
         .upsert({
           user_id: user.id,
           auto_reply_confidence_threshold: confidence,
           system_prompt: "You are a helpful email assistant. Only answer questions using the knowledge base. If unsure, do not guess and send the email to the review queue.",
         }, { onConflict: "user_id" });
+      if (aiError) throw aiError;
 
       // Mark onboarding as complete
-      await supabase
+      const { error: profileError } = await supabase
         .from("profiles")
         .update({ onboarding_completed: true })
         .eq("id", user.id);
+      if (profileError) throw profileError;
+
+      // Invalidate cached profile so ProtectedRoute sees the update
+      await queryClient.invalidateQueries({ queryKey: ["profile-onboarding"] });
 
       navigate("/dashboard", { replace: true });
     } catch (error) {

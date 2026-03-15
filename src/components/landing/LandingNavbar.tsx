@@ -93,9 +93,9 @@ export function LandingNavbar() {
               {link.label}
             </a>
           ))}
-          <Link to="/auth" className="block">
+          <Link to={ctaLink} className="block">
             <Button className="w-full bg-white text-zinc-900 hover:bg-zinc-100 rounded-full font-medium">
-              Get Started
+              {user ? "Dashboard" : "Get Started"}
             </Button>
           </Link>
         </motion.div>
