@@ -117,7 +117,7 @@ function ConnectedAccountCard({
     }
   };
 
-  const providerColor = account.provider === "gmail" ? "bg-red-100" : account.provider === "outlook" ? "bg-blue-100" : "bg-purple-100";
+  const providerColor = account.provider === "gmail" ? "bg-red-100" : "bg-purple-100";
 
   return (
     <Card className="border border-border">

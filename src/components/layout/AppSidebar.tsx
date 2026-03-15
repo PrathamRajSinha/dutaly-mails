@@ -9,7 +9,7 @@ import {
   Pause,
   Play,
   LogOut,
-  MessageSquare,
+  
   Ticket,
 } from "lucide-react";
 import { cn } from "@/lib/utils";

@@ -8,8 +8,8 @@ export interface InstructionRule {
   user_id: string;
   parent_id: string | null;
   rule_text: string;
-  priority: "critical" | "important" | "normal" | "low";
-  condition_type: "if" | "when" | "unless" | "always" | "never" | null;
+  priority: string;
+  condition_type: string | null;
   condition_text: string | null;
   sort_order: number;
   is_active: boolean;
@@ -17,58 +17,18 @@ export interface InstructionRule {
   updated_at: string;
 }
 
-const priorityWeight: Record<string, number> = {
-  critical: 0,
-  important: 1,
-  normal: 2,
-  low: 3,
-};
-
 export function compileRulesToPrompt(rules: InstructionRule[]): string {
-  const active = rules.filter((r) => r.is_active);
-  const topLevel = active
-    .filter((r) => !r.parent_id)
-    .sort((a, b) => priorityWeight[a.priority] - priorityWeight[b.priority] || a.sort_order - b.sort_order);
+  const active = rules.filter((r) => r.is_active && !r.parent_id);
 
-  const sections: Record<string, string[]> = {
-    critical: [],
-    important: [],
-    normal: [],
-    low: [],
-  };
-
-  for (const rule of topLevel) {
-    const condPrefix = rule.condition_type
-      ? `${rule.condition_type.toUpperCase()} ${rule.condition_text || ""} → `.trim() + " "
-      : "";
-    let line = `- ${condPrefix}${rule.rule_text}`;
-
-    const children = active
-      .filter((r) => r.parent_id === rule.id)
-      .sort((a, b) => a.sort_order - b.sort_order);
-
-    for (const child of children) {
-      const childCond = child.condition_type
-        ? `${child.condition_type.toUpperCase()} ${child.condition_text || ""} → `.trim() + " "
-        : "";
-      line += `\n  - ${childCond}${child.rule_text}`;
-    }
-
-    sections[rule.priority].push(line);
-  }
+  const critical = active.filter((r) => r.priority === "critical");
+  const normal = active.filter((r) => r.priority !== "critical");
 
   const parts: string[] = [];
-  if (sections.critical.length > 0) {
-    parts.push(`CRITICAL RULES (must always follow):\n${sections.critical.join("\n")}`);
+  if (critical.length > 0) {
+    parts.push(`CRITICAL RULES (must always follow):\n${critical.map((r) => `- ${r.rule_text}`).join("\n")}`);
   }
-  if (sections.important.length > 0) {
-    parts.push(`IMPORTANT RULES:\n${sections.important.join("\n")}`);
-  }
-  if (sections.normal.length > 0) {
-    parts.push(`STANDARD RULES:\n${sections.normal.join("\n")}`);
-  }
-  if (sections.low.length > 0) {
-    parts.push(`LOW PRIORITY:\n${sections.low.join("\n")}`);
+  if (normal.length > 0) {
+    parts.push(`STANDARD RULES:\n${normal.map((r) => `- ${r.rule_text}`).join("\n")}`);
   }
 
   return parts.join("\n\n") || "No instruction rules configured.";
@@ -100,17 +60,16 @@ export function useInstructionRules() {
       condition_text?: string | null;
       parent_id?: string | null;
     }) => {
-      const maxSort = rules.filter((r) => r.parent_id === (rule.parent_id || null))
-        .reduce((max, r) => Math.max(max, r.sort_order), -1);
+      const maxSort = rules.reduce((max, r) => Math.max(max, r.sort_order), -1);
       const { data, error } = await supabase
         .from("ai_instruction_rules")
         .insert({
           user_id: user!.id,
           rule_text: rule.rule_text,
           priority: rule.priority || "normal",
-          condition_type: rule.condition_type || null,
-          condition_text: rule.condition_text || null,
-          parent_id: rule.parent_id || null,
+          condition_type: null,
+          condition_text: null,
+          parent_id: null,
           sort_order: maxSort + 1,
         })
         .select()
@@ -154,9 +113,5 @@ export function useInstructionRules() {
     addRule,
     updateRule,
     deleteRule,
-    topLevelRules: rules.filter((r) => !r.parent_id)
-      .sort((a, b) => priorityWeight[a.priority] - priorityWeight[b.priority] || a.sort_order - b.sort_order),
-    getChildren: (parentId: string) =>
-      rules.filter((r) => r.parent_id === parentId).sort((a, b) => a.sort_order - b.sort_order),
   };
 }

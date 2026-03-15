@@ -259,7 +259,6 @@ export default function Templates() {
                       className="flex-1"
                     />
                   </div>
-                </div>
               </div>
 
               <div>

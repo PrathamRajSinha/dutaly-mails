@@ -12,6 +12,18 @@ import Instructions from "./pages/Instructions";
 // EmailQueue is now merged into Tickets
 import Settings from "./pages/Settings";
 import AskEmails from "./pages/AskEmails";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+
+function AskComingSoon() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    toast.info("Ask Me Anything is coming soon!");
+    navigate("/dashboard", { replace: true });
+  }, [navigate]);
+  return null;
+}
 import Templates from "./pages/Templates";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
