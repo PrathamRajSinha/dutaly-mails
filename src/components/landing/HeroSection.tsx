@@ -9,6 +9,8 @@ import screenshotDashboard from "@/assets/screenshot-dashboard.png";
 export function HeroSection() {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true });
+  const { user } = useAuth();
+  const ctaLink = user ? "/dashboard" : "/auth";
 
   return (
     <section ref={ref} className="relative pt-32 pb-20 sm:pt-40 sm:pb-28 overflow-hidden">
