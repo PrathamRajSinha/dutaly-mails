@@ -179,14 +179,10 @@ export default function Templates() {
                   </div>
                 </div>
                 <p className="text-sm text-muted-foreground line-clamp-3">{t.body}</p>
-                <div className="flex gap-2 text-xs text-muted-foreground">
-                  <span className="capitalize">{t.font_family}</span>
-                  <span>•</span>
-                  <span className="capitalize">{t.font_size}</span>
-                  <span>•</span>
+                <div className="flex gap-2 text-xs text-muted-foreground items-center">
                   <div className="flex items-center gap-1">
-                    <div className="h-3 w-3 rounded-full border border-border" style={{ backgroundColor: t.text_color }} />
                     <div className="h-3 w-3 rounded-full border border-border" style={{ backgroundColor: t.accent_color }} />
+                    <span>Accent</span>
                   </div>
                 </div>
               </CardContent>
