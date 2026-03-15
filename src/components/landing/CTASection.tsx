@@ -8,6 +8,8 @@ import { useAuth } from "@/hooks/useAuth";
 export function CTASection() {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true });
+  const { user } = useAuth();
+  const ctaLink = user ? "/dashboard" : "/auth";
 
   return (
     <section className="relative py-24 sm:py-32" ref={ref}>
