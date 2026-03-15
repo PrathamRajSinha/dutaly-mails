@@ -523,28 +523,6 @@ export default function Settings() {
     }
   };
 
-  const handleConnectOutlook = async () => {
-    if (!session?.access_token) {
-      toast.error("Please sign in to connect your Outlook account");
-      return;
-    }
-
-    setIsConnecting(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("outlook-auth-init", {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
-
-      if (error) throw error;
-      if (data?.url) {
-        window.location.href = data.url;
-      }
-    } catch (error) {
-      console.error("Outlook connection error:", error);
-      toast.error("Failed to start Outlook connection");
-      setIsConnecting(false);
-    }
-  };
 
   const handleAddToWhitelist = () => {
     if (newWhitelistEmail && !whitelistEmails.includes(newWhitelistEmail)) {
