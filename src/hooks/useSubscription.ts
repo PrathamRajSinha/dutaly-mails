@@ -11,6 +11,8 @@ interface SubscriptionPlan {
   kb_entries_limit: number;
   email_accounts_limit: number;
   price_monthly: number;
+  resolutions_limit: number;
+  overage_rate_per_resolution: number;
 }
 
 interface UserSubscription {
@@ -25,6 +27,7 @@ interface UserSubscription {
 interface UsageTracking {
   emails_processed: number;
   ai_questions_asked: number;
+  resolutions_used: number;
 }
 
 export function useSubscription() {
@@ -67,12 +70,12 @@ export function useSubscription() {
 
       const { data, error } = await supabase
         .from("usage_tracking")
-        .select("emails_processed, ai_questions_asked")
+        .select("emails_processed, ai_questions_asked, resolutions_used")
         .eq("user_id", user!.id)
         .eq("period_start", dateStr)
         .maybeSingle();
       if (error) throw error;
-      return (data as UsageTracking) || { emails_processed: 0, ai_questions_asked: 0 };
+      return (data as UsageTracking) || { emails_processed: 0, ai_questions_asked: 0, resolutions_used: 0 };
     },
     enabled: !!user,
   });
@@ -81,11 +84,21 @@ export function useSubscription() {
   const isPending = subscription?.status === "pending" || !subscription?.plan_id;
   const isActive = subscription?.status === "active" && !!subscription?.plan_id;
 
-  const usagePercent = (resource: "emails" | "ai_questions") => {
+  const usagePercent = (resource: "emails" | "ai_questions" | "resolutions") => {
     if (!currentPlan || !usage) return 0;
-    const limit = resource === "emails" ? currentPlan.emails_per_month : currentPlan.ai_questions_per_month;
+    const limitMap: Record<string, number> = {
+      emails: currentPlan.emails_per_month,
+      ai_questions: currentPlan.ai_questions_per_month,
+      resolutions: currentPlan.resolutions_limit ?? -1,
+    };
+    const usedMap: Record<string, number> = {
+      emails: usage.emails_processed,
+      ai_questions: usage.ai_questions_asked,
+      resolutions: usage.resolutions_used ?? 0,
+    };
+    const limit = limitMap[resource];
     if (limit === -1) return 0;
-    const used = resource === "emails" ? usage.emails_processed : usage.ai_questions_asked;
+    const used = usedMap[resource];
     return Math.round((used / limit) * 100);
   };
 
@@ -101,14 +114,14 @@ export function useSubscription() {
     if (limit === -1) return true;
     if (resource === "emails") return (usage?.emails_processed || 0) < limit;
     if (resource === "ai_questions") return (usage?.ai_questions_asked || 0) < limit;
-    return true; // kb_entries and email_accounts are checked via count queries
+    return true;
   };
 
   return {
     subscription,
     currentPlan,
     plans: plans || [],
-    usage: usage || { emails_processed: 0, ai_questions_asked: 0 },
+    usage: usage || { emails_processed: 0, ai_questions_asked: 0, resolutions_used: 0 },
     isPending,
     isActive,
     isLoading: subLoading,

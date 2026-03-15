@@ -122,6 +122,7 @@ export type Database = {
           ignore_promotions: boolean | null
           ignore_spam: boolean | null
           logo_url: string | null
+          manual_only_senders: string[] | null
           reply_length: string
           signature: string | null
           sla_first_response_hours: number | null
@@ -148,6 +149,7 @@ export type Database = {
           ignore_promotions?: boolean | null
           ignore_spam?: boolean | null
           logo_url?: string | null
+          manual_only_senders?: string[] | null
           reply_length?: string
           signature?: string | null
           sla_first_response_hours?: number | null
@@ -174,6 +176,7 @@ export type Database = {
           ignore_promotions?: boolean | null
           ignore_spam?: boolean | null
           logo_url?: string | null
+          manual_only_senders?: string[] | null
           reply_length?: string
           signature?: string | null
           sla_first_response_hours?: number | null
@@ -447,6 +450,44 @@ export type Database = {
         }
         Relationships: []
       }
+      kb_gap_events: {
+        Row: {
+          category: string | null
+          created_at: string
+          detected_topic: string
+          id: string
+          resolved: boolean
+          ticket_id: string | null
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          detected_topic: string
+          id?: string
+          resolved?: boolean
+          ticket_id?: string | null
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          detected_topic?: string
+          id?: string
+          resolved?: boolean
+          ticket_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kb_gap_events_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       knowledge_base_entries: {
         Row: {
           category: string
@@ -533,7 +574,9 @@ export type Database = {
           is_active: boolean
           kb_entries_limit: number
           name: string
+          overage_rate_per_resolution: number
           price_monthly: number
+          resolutions_limit: number
         }
         Insert: {
           ai_questions_per_month?: number
@@ -545,7 +588,9 @@ export type Database = {
           is_active?: boolean
           kb_entries_limit?: number
           name: string
+          overage_rate_per_resolution?: number
           price_monthly?: number
+          resolutions_limit?: number
         }
         Update: {
           ai_questions_per_month?: number
@@ -557,7 +602,9 @@ export type Database = {
           is_active?: boolean
           kb_entries_limit?: number
           name?: string
+          overage_rate_per_resolution?: number
           price_monthly?: number
+          resolutions_limit?: number
         }
         Relationships: []
       }
@@ -654,6 +701,7 @@ export type Database = {
           emails_processed: number
           id: string
           period_start: string
+          resolutions_used: number
           user_id: string
         }
         Insert: {
@@ -662,6 +710,7 @@ export type Database = {
           emails_processed?: number
           id?: string
           period_start: string
+          resolutions_used?: number
           user_id: string
         }
         Update: {
@@ -670,6 +719,7 @@ export type Database = {
           emails_processed?: number
           id?: string
           period_start?: string
+          resolutions_used?: number
           user_id?: string
         }
         Relationships: []
