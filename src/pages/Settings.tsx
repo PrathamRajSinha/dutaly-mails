@@ -481,8 +481,6 @@ export default function Settings() {
     if (success) {
       if (success === "gmail_connected") {
         toast.success("Gmail account connected successfully!");
-      } else if (success === "outlook_connected") {
-        toast.success("Outlook account connected successfully!");
       }
       setSearchParams({});
     }
