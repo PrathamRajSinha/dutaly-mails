@@ -50,16 +50,26 @@ export function LandingNavbar() {
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
-          <Link to="/auth">
-            <Button variant="ghost" className="text-zinc-400 hover:text-white hover:bg-white/5 rounded-full">
-              Log in
-            </Button>
-          </Link>
-          <Link to="/auth">
-            <Button className="bg-white text-zinc-900 hover:bg-zinc-100 rounded-full font-medium">
-              Get Started
-            </Button>
-          </Link>
+          {user ? (
+            <Link to="/dashboard">
+              <Button className="bg-white text-zinc-900 hover:bg-zinc-100 rounded-full font-medium">
+                Dashboard
+              </Button>
+            </Link>
+          ) : (
+            <>
+              <Link to="/auth">
+                <Button variant="ghost" className="text-zinc-400 hover:text-white hover:bg-white/5 rounded-full">
+                  Log in
+                </Button>
+              </Link>
+              <Link to="/auth">
+                <Button className="bg-white text-zinc-900 hover:bg-zinc-100 rounded-full font-medium">
+                  Get Started
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
 
         <button className="md:hidden text-white" onClick={() => setMobileOpen(!mobileOpen)}>
