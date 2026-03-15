@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { UsageCard } from "@/components/dashboard/UsageCard";
+import { ResolutionRateCard } from "@/components/dashboard/ResolutionRateCard";
 
 export default function Dashboard() {
   const { logs, isLoading: logsLoading } = useActivityLogs(10);
