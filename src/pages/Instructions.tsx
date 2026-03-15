@@ -17,6 +17,7 @@ import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 import { useAIInstructions } from "@/hooks/useAIInstructions";
 import { InstructionBuilder } from "@/components/instructions/InstructionBuilder";
+import { CategoryThresholds } from "@/components/instructions/CategoryThresholds";
 import { useInstructionRules, compileRulesToPrompt } from "@/hooks/useInstructionRules";
 import {
   AlertDialog,
