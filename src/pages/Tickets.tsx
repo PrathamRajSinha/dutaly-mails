@@ -28,7 +28,8 @@ import {
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow, format } from "date-fns";
 
-const statusTabs: { value: TicketStatus | "all" | "auto_sent"; label: string; icon: React.ReactNode }[] = [
+type TabValue = TicketStatus | "all" | "auto_sent";
+const statusTabs: { value: TabValue; label: string; icon: React.ReactNode }[] = [
   { value: "all", label: "All", icon: null },
   { value: "open", label: "Open", icon: <AlertCircle className="h-3.5 w-3.5" /> },
   { value: "pending", label: "Pending", icon: <Clock className="h-3.5 w-3.5" /> },
