@@ -3,11 +3,14 @@ import { motion, useInView } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import screenshotDashboard from "@/assets/screenshot-dashboard.png";
 
 export function HeroSection() {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true });
+  const { user } = useAuth();
+  const ctaLink = user ? "/dashboard" : "/auth";
 
   return (
     <section ref={ref} className="relative pt-32 pb-20 sm:pt-40 sm:pb-28 overflow-hidden">
@@ -55,7 +58,7 @@ export function HeroSection() {
           transition={{ duration: 0.5, delay: 0.4 }}
           className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
         >
-          <Link to="/auth">
+          <Link to={ctaLink}>
             <Button className="h-12 px-8 text-base bg-white text-zinc-900 hover:bg-zinc-100 rounded-full font-semibold shadow-lg shadow-white/10 transition-all">
               Get Started Free
               <ArrowRight className="ml-2 h-4 w-4" />

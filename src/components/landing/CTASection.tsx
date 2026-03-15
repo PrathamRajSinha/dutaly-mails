@@ -3,10 +3,13 @@ import { motion, useInView } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 export function CTASection() {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true });
+  const { user } = useAuth();
+  const ctaLink = user ? "/dashboard" : "/auth";
 
   return (
     <section className="relative py-24 sm:py-32" ref={ref}>
@@ -25,7 +28,7 @@ export function CTASection() {
           Start managing customer support with structure, speed, and AI.
         </p>
         <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link to="/auth">
+          <Link to={ctaLink}>
             <Button className="h-12 px-8 text-base bg-white text-zinc-900 hover:bg-zinc-100 rounded-full font-semibold shadow-lg shadow-white/10">
               Get Started Free
               <ArrowRight className="ml-2 h-4 w-4" />

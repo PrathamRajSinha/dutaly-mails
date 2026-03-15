@@ -3,6 +3,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Mail, Menu, X } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const navLinks = [
   { label: "Features", href: "#features" },
@@ -17,6 +18,8 @@ export function MagneticButton({ children }: { children: React.ReactNode }) {
 
 export function LandingNavbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user } = useAuth();
+  const ctaLink = user ? "/dashboard" : "/auth";
   const { scrollY } = useScroll();
   const bg = useTransform(scrollY, [0, 60], ["rgba(9,9,11,0)", "rgba(9,9,11,0.85)"]);
   const blur = useTransform(scrollY, [0, 60], ["blur(0px)", "blur(16px)"]);
@@ -47,16 +50,26 @@ export function LandingNavbar() {
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
-          <Link to="/auth">
-            <Button variant="ghost" className="text-zinc-400 hover:text-white hover:bg-white/5 rounded-full">
-              Log in
-            </Button>
-          </Link>
-          <Link to="/auth">
-            <Button className="bg-white text-zinc-900 hover:bg-zinc-100 rounded-full font-medium">
-              Get Started
-            </Button>
-          </Link>
+          {user ? (
+            <Link to="/dashboard">
+              <Button className="bg-white text-zinc-900 hover:bg-zinc-100 rounded-full font-medium">
+                Dashboard
+              </Button>
+            </Link>
+          ) : (
+            <>
+              <Link to="/auth">
+                <Button variant="ghost" className="text-zinc-400 hover:text-white hover:bg-white/5 rounded-full">
+                  Log in
+                </Button>
+              </Link>
+              <Link to="/auth">
+                <Button className="bg-white text-zinc-900 hover:bg-zinc-100 rounded-full font-medium">
+                  Get Started
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
 
         <button className="md:hidden text-white" onClick={() => setMobileOpen(!mobileOpen)}>
@@ -80,9 +93,9 @@ export function LandingNavbar() {
               {link.label}
             </a>
           ))}
-          <Link to="/auth" className="block">
+          <Link to={ctaLink} className="block">
             <Button className="w-full bg-white text-zinc-900 hover:bg-zinc-100 rounded-full font-medium">
-              Get Started
+              {user ? "Dashboard" : "Get Started"}
             </Button>
           </Link>
         </motion.div>
