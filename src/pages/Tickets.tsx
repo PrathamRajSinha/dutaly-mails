@@ -53,7 +53,7 @@ const statusDot: Record<string, string> = {
 };
 
 export default function Tickets() {
-  const [activeTab, setActiveTab] = useState<TicketStatus | "all" | "auto_sent">("all");
+  const [activeTab, setActiveTab] = useState<TabValue>("all");
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [angryExpanded, setAngryExpanded] = useState(true);
