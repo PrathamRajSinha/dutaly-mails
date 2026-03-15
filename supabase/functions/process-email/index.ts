@@ -41,6 +41,7 @@ interface AIInstructions {
   do_not_rules: string[];
   sla_first_response_hours: number;
   sla_resolution_hours: number;
+  manual_only_senders: string[];
 }
 
 serve(async (req) => {
@@ -125,7 +126,14 @@ serve(async (req) => {
       do_not_rules: [],
       sla_first_response_hours: 4,
       sla_resolution_hours: 24,
+      manual_only_senders: [],
     };
+
+    // Check if sender is on manual-only list
+    const manualOnlySenders: string[] = aiInstructions.manual_only_senders || [];
+    const isSenderBlacklisted = manualOnlySenders.some(
+      (s: string) => s.toLowerCase() === emailData.from_address.toLowerCase()
+    );
 
     // Fetch thread history if thread_id is provided
     let threadContext = "";
@@ -270,7 +278,13 @@ ${emailData.body}`
     // Ensure new fields have defaults if AI didn't return them
     const category = parsedResponse.category || "general";
     const sentimentScore = typeof parsedResponse.sentiment_score === "number" ? parsedResponse.sentiment_score : 0.5;
-    const escalationFlag = parsedResponse.escalation_flag === true;
+    let escalationFlag = parsedResponse.escalation_flag === true;
+
+    // Angry customer detection: force escalation and block auto-reply
+    if (sentimentScore < 0.3 || escalationFlag) {
+      escalationFlag = true;
+      console.log("Angry customer detected — blocking auto-reply for this email");
+    }
 
     console.log("AI decision:", parsedResponse);
 
@@ -290,9 +304,12 @@ ${emailData.body}`
     }
 
     // Determine status for the queue entry
+    // Block auto-send for angry customers or blacklisted senders
     const shouldAutoSend = aiInstructions.auto_reply_enabled && 
       parsedResponse.action === "reply" &&
-      parsedResponse.confidence >= effectiveThreshold;
+      parsedResponse.confidence >= effectiveThreshold &&
+      !escalationFlag &&
+      !isSenderBlacklisted;
 
     let queueStatus: string;
     if (parsedResponse.action === "ignore") {
@@ -332,6 +349,7 @@ ${emailData.body}`
     }
 
     // --- AUTO-SEND LOGIC ---
+    let autoSendSucceeded = false;
     if (shouldAutoSend && emailData.email_account_id && parsedResponse.suggested_reply) {
       try {
         console.log("Auto-sending reply via provider...");
@@ -376,14 +394,43 @@ ${emailData.body}`
 
           if (sendResponse.ok) {
             console.log("Auto-reply sent successfully");
+            autoSendSucceeded = true;
             await supabase
               .from("email_queue")
               .update({ status: "sent", reviewed_at: new Date().toISOString() })
               .eq("id", insertedEmail.id);
+
+            // Increment resolutions_used
+            const periodStart = new Date();
+            periodStart.setDate(1);
+            const periodStr = periodStart.toISOString().split("T")[0];
+            
+            // Ensure usage row exists then increment
+            await supabase.from("usage_tracking").upsert(
+              { user_id: user.id, period_start: periodStr },
+              { onConflict: "user_id,period_start" }
+            );
+            await supabase.rpc("increment_usage", {
+              p_user_id: user.id,
+              p_resource_type: "emails", // also track as email processed
+            });
+            // Direct update for resolutions since no RPC exists yet
+            const { data: currentUsage } = await supabase
+              .from("usage_tracking")
+              .select("resolutions_used")
+              .eq("user_id", user.id)
+              .eq("period_start", periodStr)
+              .single();
+            if (currentUsage) {
+              await supabase
+                .from("usage_tracking")
+                .update({ resolutions_used: (currentUsage.resolutions_used || 0) + 1 })
+                .eq("user_id", user.id)
+                .eq("period_start", periodStr);
+            }
           } else {
             const errText = await sendResponse.text();
             console.error("Auto-reply send failed:", errText);
-            // Revert to pending so user can manually review/send
             await supabase
               .from("email_queue")
               .update({ status: "pending" })
@@ -392,7 +439,6 @@ ${emailData.body}`
         }
       } catch (sendErr) {
         console.error("Auto-send error (non-fatal):", sendErr);
-        // Revert to pending on failure
         await supabase
           .from("email_queue")
           .update({ status: "pending" })
@@ -406,7 +452,6 @@ ${emailData.body}`
 
     try {
       if (emailData.thread_id) {
-        // Check if a ticket already exists for this thread
         const { data: existingTicket } = await supabase
           .from("tickets")
           .select("id, status")
@@ -416,7 +461,6 @@ ${emailData.body}`
 
         if (existingTicket) {
           ticketId = existingTicket.id;
-          // Re-open if it was resolved/closed
           const updateData: any = { last_customer_reply_at: new Date().toISOString() };
           if (existingTicket.status === "resolved" || existingTicket.status === "closed") {
             updateData.status = "open";
@@ -430,9 +474,7 @@ ${emailData.body}`
         }
       }
 
-      // No existing ticket found — create one (only for actionable emails, not ignored/spam)
       if (!ticketId && parsedResponse.action !== "ignore") {
-        // Calculate SLA due date
         const slaHours = aiInstructions.sla_resolution_hours || 24;
         const slaDueAt = new Date(Date.now() + slaHours * 60 * 60 * 1000).toISOString();
 
@@ -495,16 +537,40 @@ ${emailData.body}`
           });
         }
       }
+
+      // --- KB GAP DETECTION ---
+      // If confidence is below threshold and not auto-sent, log a gap event
+      if (
+        parsedResponse.action !== "ignore" &&
+        !shouldAutoSend &&
+        parsedResponse.confidence < effectiveThreshold &&
+        ticketId
+      ) {
+        const detectedTopic = parsedResponse.reason || emailData.subject;
+        try {
+          await supabase.from("kb_gap_events").insert({
+            user_id: user.id,
+            ticket_id: ticketId,
+            detected_topic: detectedTopic.substring(0, 200),
+            category,
+          });
+          console.log("KB gap event logged:", detectedTopic);
+        } catch (gapErr) {
+          console.error("KB gap logging error (non-fatal):", gapErr);
+        }
+      }
     } catch (ticketErr) {
-      // Ticket logic should not break email processing
       console.error("Ticket logic error (non-fatal):", ticketErr);
     }
 
     // Increment usage counter
-    await supabase.rpc("increment_usage", {
-      p_user_id: user.id,
-      p_resource_type: "emails",
-    });
+    if (!autoSendSucceeded) {
+      // Only increment if we didn't already increment during auto-send
+      await supabase.rpc("increment_usage", {
+        p_user_id: user.id,
+        p_resource_type: "emails",
+      });
+    }
 
     // Log the action
     const logAction = parsedResponse.action === "ignore" ? "ignored" 
@@ -526,6 +592,7 @@ ${emailData.body}`
         category,
         sentiment_score: sentimentScore,
         escalation_flag: escalationFlag,
+        sender_blacklisted: isSenderBlacklisted,
       },
     });
 
