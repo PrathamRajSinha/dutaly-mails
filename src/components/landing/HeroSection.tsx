@@ -3,6 +3,7 @@ import { motion, useInView } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import screenshotDashboard from "@/assets/screenshot-dashboard.png";
 
 export function HeroSection() {
