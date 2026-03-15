@@ -274,10 +274,25 @@ ${emailData.body}`
 
     console.log("AI decision:", parsedResponse);
 
+    // Check for per-category threshold override
+    let effectiveThreshold = aiInstructions.auto_reply_confidence_threshold;
+    if (category) {
+      const { data: catThreshold } = await supabase
+        .from("category_thresholds")
+        .select("confidence_threshold")
+        .eq("user_id", user.id)
+        .eq("category", category)
+        .maybeSingle();
+      if (catThreshold) {
+        effectiveThreshold = catThreshold.confidence_threshold;
+        console.log(`Using category threshold for "${category}": ${effectiveThreshold}`);
+      }
+    }
+
     // Determine status for the queue entry
     const shouldAutoSend = aiInstructions.auto_reply_enabled && 
       parsedResponse.action === "reply" &&
-      parsedResponse.confidence >= aiInstructions.auto_reply_confidence_threshold;
+      parsedResponse.confidence >= effectiveThreshold;
 
     let queueStatus: string;
     if (parsedResponse.action === "ignore") {
