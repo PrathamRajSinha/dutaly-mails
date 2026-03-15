@@ -18,6 +18,8 @@ export function MagneticButton({ children }: { children: React.ReactNode }) {
 
 export function LandingNavbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user } = useAuth();
+  const ctaLink = user ? "/dashboard" : "/auth";
   const { scrollY } = useScroll();
   const bg = useTransform(scrollY, [0, 60], ["rgba(9,9,11,0)", "rgba(9,9,11,0.85)"]);
   const blur = useTransform(scrollY, [0, 60], ["blur(0px)", "blur(16px)"]);
