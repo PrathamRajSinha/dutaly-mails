@@ -19,7 +19,11 @@ export interface EmailTemplate {
   updated_at: string;
 }
 
-export type EmailTemplateInput = Omit<EmailTemplate, "id" | "user_id" | "created_at" | "updated_at">;
+export type EmailTemplateInput = Pick<EmailTemplate, "name" | "category" | "body" | "accent_color" | "footer_text" | "footer_logo_url"> & {
+  font_family?: string;
+  font_size?: string;
+  text_color?: string;
+};
 
 export function useEmailTemplates() {
   const { user } = useAuth();

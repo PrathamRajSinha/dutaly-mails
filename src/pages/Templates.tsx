@@ -45,9 +45,6 @@ const defaultTemplate: EmailTemplateInput = {
   name: "",
   category: "general",
   body: "",
-  font_family: "sans-serif",
-  font_size: "medium",
-  text_color: "#333333",
   accent_color: "#4F46E5",
   footer_text: "",
   footer_logo_url: "",
@@ -82,9 +79,6 @@ export default function Templates() {
       name: t.name,
       category: t.category,
       body: t.body,
-      font_family: t.font_family,
-      font_size: t.font_size,
-      text_color: t.text_color,
       accent_color: t.accent_color,
       footer_text: t.footer_text,
       footer_logo_url: t.footer_logo_url,
@@ -185,14 +179,10 @@ export default function Templates() {
                   </div>
                 </div>
                 <p className="text-sm text-muted-foreground line-clamp-3">{t.body}</p>
-                <div className="flex gap-2 text-xs text-muted-foreground">
-                  <span className="capitalize">{t.font_family}</span>
-                  <span>•</span>
-                  <span className="capitalize">{t.font_size}</span>
-                  <span>•</span>
+                <div className="flex gap-2 text-xs text-muted-foreground items-center">
                   <div className="flex items-center gap-1">
-                    <div className="h-3 w-3 rounded-full border border-border" style={{ backgroundColor: t.text_color }} />
                     <div className="h-3 w-3 rounded-full border border-border" style={{ backgroundColor: t.accent_color }} />
+                    <span>Accent</span>
                   </div>
                 </div>
               </CardContent>
@@ -254,50 +244,8 @@ export default function Templates() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label>Font Family</Label>
-                  <Select value={form.font_family} onValueChange={(v) => setForm({ ...form, font_family: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="sans-serif">Sans-serif</SelectItem>
-                      <SelectItem value="serif">Serif</SelectItem>
-                      <SelectItem value="monospace">Monospace</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Font Size</Label>
-                  <Select value={form.font_size} onValueChange={(v) => setForm({ ...form, font_size: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="small">Small (13px)</SelectItem>
-                      <SelectItem value="medium">Medium (15px)</SelectItem>
-                      <SelectItem value="large">Large (17px)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label>Text Color</Label>
-                  <div className="flex gap-2">
-                    <input
-                      type="color"
-                      value={form.text_color}
-                      onChange={(e) => setForm({ ...form, text_color: e.target.value })}
-                      className="h-9 w-12 cursor-pointer rounded border border-border"
-                    />
-                    <Input
-                      value={form.text_color}
-                      onChange={(e) => setForm({ ...form, text_color: e.target.value })}
-                      className="flex-1"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label>Accent Color</Label>
+              <div>
+                <Label>Accent Color</Label>
                   <div className="flex gap-2">
                     <input
                       type="color"
@@ -311,7 +259,6 @@ export default function Templates() {
                       className="flex-1"
                     />
                   </div>
-                </div>
               </div>
 
               <div>

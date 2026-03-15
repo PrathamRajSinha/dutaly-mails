@@ -9,11 +9,6 @@ verify_jwt = false
 [functions.gmail-auth-callback]
 verify_jwt = false
 
-[functions.outlook-auth-init]
-verify_jwt = false
-
-[functions.outlook-auth-callback]
-verify_jwt = false
 
 [functions.fetch-gmail-emails]
 verify_jwt = false
