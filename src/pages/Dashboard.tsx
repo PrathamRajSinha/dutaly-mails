@@ -158,6 +158,11 @@ export default function Dashboard() {
         </Button>
       </div>
 
+      {/* Resolution Rate Hero */}
+      <div className="mb-8">
+        <ResolutionRateCard />
+      </div>
+
       {/* Stats Grid */}
       <div className="mb-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
