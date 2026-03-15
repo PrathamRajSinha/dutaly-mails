@@ -17,6 +17,7 @@ import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 import { useAIInstructions } from "@/hooks/useAIInstructions";
 import { InstructionBuilder } from "@/components/instructions/InstructionBuilder";
+import { CategoryThresholds } from "@/components/instructions/CategoryThresholds";
 import { useInstructionRules, compileRulesToPrompt } from "@/hooks/useInstructionRules";
 import {
   AlertDialog,
@@ -591,6 +592,9 @@ export default function Instructions() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Category Thresholds */}
+          <CategoryThresholds globalThreshold={confidenceThreshold} />
 
           {/* Example Instructions */}
           <Card className="border-primary/20 bg-primary/5">

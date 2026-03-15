@@ -9,9 +9,16 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import Dashboard from "./pages/Dashboard";
 import KnowledgeBase from "./pages/KnowledgeBase";
 import Instructions from "./pages/Instructions";
-// EmailQueue is now merged into Tickets
 import Settings from "./pages/Settings";
 import AskEmails from "./pages/AskEmails";
+import Templates from "./pages/Templates";
+import Auth from "./pages/Auth";
+import NotFound from "./pages/NotFound";
+import Landing from "./pages/Landing";
+import ChoosePlan from "./pages/ChoosePlan";
+import Tickets from "./pages/Tickets";
+import ResetPassword from "./pages/ResetPassword";
+import Onboarding from "./pages/Onboarding";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -24,13 +31,6 @@ function AskComingSoon() {
   }, [navigate]);
   return null;
 }
-import Templates from "./pages/Templates";
-import Auth from "./pages/Auth";
-import NotFound from "./pages/NotFound";
-import Landing from "./pages/Landing";
-import ChoosePlan from "./pages/ChoosePlan";
-import Tickets from "./pages/Tickets";
-import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +46,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/choose-plan" element={<ChoosePlan />} />
+            <Route path="/onboarding" element={<Onboarding />} />
             <Route
               element={
                 <ProtectedRoute>

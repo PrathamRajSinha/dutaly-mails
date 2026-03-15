@@ -22,6 +22,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useEmailAccounts } from "@/hooks/useEmailAccounts";
@@ -662,6 +669,31 @@ export default function Settings() {
 
         {/* Safety & Filters Tab */}
         <TabsContent value="safety">
+          {/* Unsend Window */}
+          <Card className="border border-border mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Clock className="h-5 w-5 text-primary" />
+                Auto-Reply Unsend Window
+              </CardTitle>
+              <CardDescription>
+                How long to wait before sending auto-replies. You can cancel during this window.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Select defaultValue="60">
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">Off (send immediately)</SelectItem>
+                  <SelectItem value="30">30 seconds</SelectItem>
+                  <SelectItem value="60">60 seconds</SelectItem>
+                  <SelectItem value="120">2 minutes</SelectItem>
+                </SelectContent>
+              </Select>
+            </CardContent>
+          </Card>
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Whitelist */}
             <Card className="border border-border">
