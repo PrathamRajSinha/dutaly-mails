@@ -215,7 +215,7 @@ export default function Tickets() {
         </div>
 
         {/* Angry Customer Pinned Section */}
-        {angryTickets.length > 0 && activeTab !== "auto_sent" && (
+        {angryTickets.length > 0 && (
           <div className="border-b border-destructive/20 bg-destructive/5">
             <button
               className="flex w-full items-center justify-between px-4 py-2 text-xs font-medium text-destructive"
