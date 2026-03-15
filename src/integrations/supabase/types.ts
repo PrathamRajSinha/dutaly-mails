@@ -128,6 +128,7 @@ export type Database = {
           sla_resolution_hours: number | null
           system_prompt: string
           tone: string
+          unsend_window_seconds: number
           updated_at: string
           user_id: string
         }
@@ -153,6 +154,7 @@ export type Database = {
           sla_resolution_hours?: number | null
           system_prompt?: string
           tone?: string
+          unsend_window_seconds?: number
           updated_at?: string
           user_id: string
         }
@@ -178,6 +180,34 @@ export type Database = {
           sla_resolution_hours?: number | null
           system_prompt?: string
           tone?: string
+          unsend_window_seconds?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      category_thresholds: {
+        Row: {
+          category: string
+          confidence_threshold: number
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          confidence_threshold?: number
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          confidence_threshold?: number
+          created_at?: string
+          id?: string
           updated_at?: string
           user_id?: string
         }
@@ -469,6 +499,7 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          onboarding_completed: boolean
           updated_at: string
         }
         Insert: {
@@ -477,6 +508,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
+          onboarding_completed?: boolean
           updated_at?: string
         }
         Update: {
@@ -485,6 +517,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          onboarding_completed?: boolean
           updated_at?: string
         }
         Relationships: []
