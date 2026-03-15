@@ -84,11 +84,12 @@ export default function Onboarding() {
     if (!user || draftEntries.length === 0) return;
     setIsSaving(true);
     try {
+      const validCategories = ["faq", "snippet", "document", "policy"];
       const entries = draftEntries.map((e) => ({
         user_id: user.id,
         title: e.title,
         content: e.content,
-        category: e.category,
+        category: validCategories.includes(e.category) ? e.category : "faq",
       }));
       const { error } = await supabase.from("knowledge_base_entries").insert(entries);
       if (error) throw error;
