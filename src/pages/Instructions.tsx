@@ -593,6 +593,9 @@ export default function Instructions() {
             </CardContent>
           </Card>
 
+          {/* Category Thresholds */}
+          <CategoryThresholds globalThreshold={confidenceThreshold} />
+
           {/* Example Instructions */}
           <Card className="border-primary/20 bg-primary/5">
             <CardHeader className="pb-3">
