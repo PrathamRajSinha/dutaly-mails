@@ -1,7 +1,7 @@
 export interface EmailTemplateStyle {
-  font_family: string;
-  font_size: string;
-  text_color: string;
+  font_family?: string;
+  font_size?: string;
+  text_color?: string;
   accent_color: string;
   footer_text: string;
   footer_logo_url: string;
