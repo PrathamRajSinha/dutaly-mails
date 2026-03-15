@@ -660,40 +660,6 @@ export default function Settings() {
               </CardContent>
             </Card>
 
-            {/* Outlook */}
-            <Card className="border border-border">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
-                    <svg className="h-5 w-5" viewBox="0 0 24 24">
-                      <path
-                        fill="#0078D4"
-                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"
-                      />
-                    </svg>
-                  </div>
-                  Outlook
-                </CardTitle>
-                <CardDescription>
-                  Connect your Outlook or Microsoft 365 account
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button onClick={handleConnectOutlook} className="w-full" variant="outline" disabled={isConnecting}>
-                  {isConnecting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Connecting...
-                    </>
-                  ) : (
-                    <>
-                      Connect Outlook
-                      <ExternalLink className="ml-2 h-4 w-4" />
-                    </>
-                  )}
-                </Button>
-              </CardContent>
-            </Card>
 
             {/* IMAP/SMTP */}
             <ImapConnectionForm session={session} />
