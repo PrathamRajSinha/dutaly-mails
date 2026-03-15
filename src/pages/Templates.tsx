@@ -244,50 +244,8 @@ export default function Templates() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label>Font Family</Label>
-                  <Select value={form.font_family} onValueChange={(v) => setForm({ ...form, font_family: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="sans-serif">Sans-serif</SelectItem>
-                      <SelectItem value="serif">Serif</SelectItem>
-                      <SelectItem value="monospace">Monospace</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Font Size</Label>
-                  <Select value={form.font_size} onValueChange={(v) => setForm({ ...form, font_size: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="small">Small (13px)</SelectItem>
-                      <SelectItem value="medium">Medium (15px)</SelectItem>
-                      <SelectItem value="large">Large (17px)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label>Text Color</Label>
-                  <div className="flex gap-2">
-                    <input
-                      type="color"
-                      value={form.text_color}
-                      onChange={(e) => setForm({ ...form, text_color: e.target.value })}
-                      className="h-9 w-12 cursor-pointer rounded border border-border"
-                    />
-                    <Input
-                      value={form.text_color}
-                      onChange={(e) => setForm({ ...form, text_color: e.target.value })}
-                      className="flex-1"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label>Accent Color</Label>
+              <div>
+                <Label>Accent Color</Label>
                   <div className="flex gap-2">
                     <input
                       type="color"
