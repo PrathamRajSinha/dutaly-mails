@@ -79,10 +79,10 @@ serve(async (req) => {
 Each entry should have:
 - "title": A clear question customers might ask (e.g., "What is your return policy?")
 - "content": A comprehensive answer based on the page content. Include specific details, numbers, and policies.
-- "category": One of: general, billing, shipping, returns, technical, pricing, support
+- "category": One of: faq, snippet, document, policy
 
 Respond with a JSON array of entries. Only output valid JSON, no markdown.
-Example: [{"title":"What is your return policy?","content":"We accept returns within 30 days...","category":"returns"}]`,
+Example: [{"title":"What is your return policy?","content":"We accept returns within 30 days...","category":"faq"}]`,
           },
           {
             role: "user",
