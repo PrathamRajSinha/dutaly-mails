@@ -48,6 +48,7 @@ function getConfidenceExplanation(value: number): { text: string; color: string 
 export default function Onboarding() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [currentStep, setCurrentStep] = useState(1);
   const [url, setUrl] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
