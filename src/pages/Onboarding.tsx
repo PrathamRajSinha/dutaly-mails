@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Check, Globe, Sliders, Rocket, Loader2, Trash2, Edit2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,12 +19,46 @@ interface DraftKBEntry {
   category: string;
 }
 
+interface SavedOnboardingState {
+  confidence: number;
+  currentStep: number;
+  draftEntries: DraftKBEntry[];
+  url: string;
+}
+
+const ONBOARDING_STATE_KEY = "onboarding-wizard-state";
+
 const steps = [
   { label: "Inbox Connected", icon: Check },
   { label: "Knowledge Base", icon: Globe },
   { label: "Confidence", icon: Sliders },
   { label: "Done", icon: Rocket },
 ];
+
+function loadSavedOnboardingState(): SavedOnboardingState | null {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const rawState = window.sessionStorage.getItem(ONBOARDING_STATE_KEY);
+    if (!rawState) return null;
+
+    const parsedState = JSON.parse(rawState) as Partial<SavedOnboardingState>;
+    const currentStep =
+      typeof parsedState.currentStep === "number" && parsedState.currentStep >= 1 && parsedState.currentStep <= 3
+        ? parsedState.currentStep
+        : 1;
+
+    return {
+      confidence: typeof parsedState.confidence === "number" ? parsedState.confidence : 0.75,
+      currentStep,
+      draftEntries: Array.isArray(parsedState.draftEntries) ? parsedState.draftEntries : [],
+      url: typeof parsedState.url === "string" ? parsedState.url : "",
+    };
+  } catch {
+    window.sessionStorage.removeItem(ONBOARDING_STATE_KEY);
+    return null;
+  }
+}
 
 function getConfidenceExplanation(value: number): { text: string; color: string } {
   if (value >= 0.85) {
@@ -46,16 +80,31 @@ function getConfidenceExplanation(value: number): { text: string; color: string 
 }
 
 export default function Onboarding() {
+  const savedState = loadSavedOnboardingState();
   const navigate = useNavigate();
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const [currentStep, setCurrentStep] = useState(1);
-  const [url, setUrl] = useState("");
+  const [currentStep, setCurrentStep] = useState(savedState?.currentStep ?? 1);
+  const [url, setUrl] = useState(savedState?.url ?? "");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [draftEntries, setDraftEntries] = useState<DraftKBEntry[]>([]);
+  const [draftEntries, setDraftEntries] = useState<DraftKBEntry[]>(savedState?.draftEntries ?? []);
   const [editIndex, setEditIndex] = useState<number | null>(null);
-  const [confidence, setConfidence] = useState(0.75);
+  const [confidence, setConfidence] = useState(savedState?.confidence ?? 0.75);
   const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    window.sessionStorage.setItem(
+      ONBOARDING_STATE_KEY,
+      JSON.stringify({
+        confidence,
+        currentStep,
+        draftEntries,
+        url,
+      } satisfies SavedOnboardingState)
+    );
+  }, [confidence, currentStep, draftEntries, url]);
 
   const handleGenerateKB = async () => {
     if (!url.trim()) {
@@ -128,6 +177,7 @@ export default function Onboarding() {
 
       // Invalidate cached profile so ProtectedRoute sees the update
       await queryClient.invalidateQueries({ queryKey: ["profile-onboarding"] });
+      window.sessionStorage.removeItem(ONBOARDING_STATE_KEY);
 
       navigate("/dashboard", { replace: true });
     } catch (error) {
