@@ -177,6 +177,7 @@ export default function Onboarding() {
 
       // Invalidate cached profile so ProtectedRoute sees the update
       await queryClient.invalidateQueries({ queryKey: ["profile-onboarding"] });
+      window.sessionStorage.removeItem(ONBOARDING_STATE_KEY);
 
       navigate("/dashboard", { replace: true });
     } catch (error) {
