@@ -1,12 +1,33 @@
 import { motion } from "framer-motion";
+import featureClassification from "@/assets/feature-classification.jpg";
+import featureReply from "@/assets/feature-reply.jpg";
+import featureTickets from "@/assets/feature-tickets.jpg";
 
-const features = [
-  { title: "Automatic classification", text: "Every email is categorized by intent, urgency, and sentiment — before anyone opens it." },
-  { title: "Smart reply generation", text: "AI drafts accurate replies using your knowledge base. Review, edit, or let confident ones send automatically." },
-  { title: "Structured ticket tracking", text: "Each email becomes a trackable ticket with status, priority, SLA deadlines, and full history." },
-  { title: "Intelligent escalation", text: "Low-confidence replies and angry customers are flagged instantly. Nothing slips through." },
-  { title: "Automation with control", text: "Set confidence thresholds per category. Define exactly when AI acts and when it defers to you." },
-  { title: "Slack integration", text: "Get notified in Slack when tickets need attention. Keep your team in the loop without switching tabs." },
+const featureBlocks = [
+  {
+    image: featureClassification,
+    title: "Automatic classification",
+    text: "Every email is categorized by intent, urgency, and sentiment — before anyone opens it.",
+    sub: [
+      "Intelligent escalation — low-confidence replies and angry customers are flagged instantly.",
+    ],
+  },
+  {
+    image: featureReply,
+    title: "Smart reply generation",
+    text: "AI drafts accurate replies using your knowledge base. Review, edit, or let confident ones send automatically.",
+    sub: [
+      "Automation with control — set confidence thresholds per category. Define when AI acts and when it defers.",
+    ],
+  },
+  {
+    image: featureTickets,
+    title: "Structured ticket tracking",
+    text: "Each email becomes a trackable ticket with status, priority, SLA deadlines, and full history.",
+    sub: [
+      "Slack integration — get notified when tickets need attention. Stay in the loop without switching tabs.",
+    ],
+  },
 ];
 
 export function FeaturesSection() {
@@ -18,34 +39,60 @@ export function FeaturesSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.5 }}
-          className="grid md:grid-cols-[1fr_1.2fr] gap-16 mb-20 items-end"
+          className="mb-20"
         >
-          <div>
-            <p className="text-[13px] font-medium tracking-[0.15em] uppercase text-zinc-400 mb-4">Features</p>
-            <h2 className="text-[clamp(1.8rem,3.5vw,2.75rem)] font-semibold tracking-[-0.03em] text-zinc-900 leading-[1.1]">
-              A smarter way to handle customer emails.
-            </h2>
-          </div>
-          <p className="text-[15px] text-zinc-500 leading-[1.8] max-w-[420px] md:ml-auto">
-            Every feature is designed to reduce manual work while keeping you in full control of your customer communication.
-          </p>
+          <p className="text-[13px] font-medium tracking-[0.15em] uppercase text-zinc-400 mb-4">Features</p>
+          <h2 className="text-[clamp(1.8rem,3.5vw,2.75rem)] font-semibold tracking-[-0.03em] text-zinc-900 leading-[1.1] max-w-[500px]">
+            A smarter way to handle customer emails.
+          </h2>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-x-16 gap-y-0">
-          {features.map((f, i) => (
-            <motion.div
-              key={f.title}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.4, delay: (i % 2) * 0.1 }}
-              className="py-8 border-b border-zinc-100 group"
-            >
-              
-              <h3 className="text-[17px] font-semibold text-zinc-900 mb-2 group-hover:text-zinc-600 transition-colors duration-300">{f.title}</h3>
-              <p className="text-[14px] text-zinc-500 leading-[1.7]">{f.text}</p>
-            </motion.div>
-          ))}
+        <div className="space-y-24 sm:space-y-32">
+          {featureBlocks.map((block, i) => {
+            const isReversed = i % 2 !== 0;
+            return (
+              <motion.div
+                key={block.title}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.5 }}
+                className={`grid md:grid-cols-2 gap-12 lg:gap-20 items-center ${
+                  isReversed ? "md:direction-rtl" : ""
+                }`}
+                style={{ direction: isReversed ? "rtl" : "ltr" }}
+              >
+                {/* Image */}
+                <div style={{ direction: "ltr" }} className="relative">
+                  <div className="rounded-xl overflow-hidden shadow-[0_8px_40px_-12px_rgba(0,0,0,0.12)] border border-zinc-200/60">
+                    <img
+                      src={block.image}
+                      alt={block.title}
+                      loading="lazy"
+                      width={800}
+                      height={560}
+                      className="w-full h-auto"
+                    />
+                  </div>
+                </div>
+
+                {/* Text */}
+                <div style={{ direction: "ltr" }} className="space-y-5">
+                  <h3 className="text-[clamp(1.4rem,2.5vw,1.75rem)] font-semibold text-zinc-900 tracking-[-0.02em] leading-[1.2]">
+                    {block.title}
+                  </h3>
+                  <p className="text-[15px] text-zinc-500 leading-[1.8] max-w-[440px]">
+                    {block.text}
+                  </p>
+                  {block.sub.map((s) => (
+                    <p key={s} className="text-[14px] text-zinc-400 leading-[1.7] max-w-[440px] border-l-2 border-zinc-200 pl-4">
+                      {s}
+                    </p>
+                  ))}
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>
