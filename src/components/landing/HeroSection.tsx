@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { motion } from "framer-motion";
 
 export function HeroSection() {
   const { user } = useAuth();
@@ -10,20 +11,35 @@ export function HeroSection() {
   return (
     <section className="pt-32 pb-0 sm:pt-40">
       <div className="max-w-[1200px] mx-auto px-6">
-        <h1 className="text-[clamp(2.8rem,6vw,5rem)] font-semibold tracking-[-0.04em] text-zinc-900 leading-[1.05] max-w-[800px]">
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="text-[clamp(2.8rem,6vw,5rem)] font-semibold tracking-[-0.04em] text-zinc-900 leading-[1.05] max-w-[800px]"
+        >
           Every customer email.
           <br />
           <span className="text-zinc-400">Handled.</span>
-        </h1>
+        </motion.h1>
 
-        <p className="mt-6 text-[18px] text-zinc-500 leading-[1.7] max-w-[520px]">
+        <motion.p
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.15, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="mt-6 text-[18px] text-zinc-500 leading-[1.7] max-w-[520px]"
+        >
           Automatically read incoming emails, create tickets, generate replies,
           and resolve repetitive queries — while keeping your team in control.
-        </p>
+        </motion.p>
 
-        <div className="mt-8 flex items-center gap-4">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="mt-8 flex items-center gap-4"
+        >
           <Link to={ctaLink}>
-            <Button className="h-10 px-5 text-[13px] bg-zinc-900 text-white hover:bg-zinc-800 rounded-md font-medium">
+            <Button className="h-10 px-5 text-[13px] bg-zinc-900 text-white hover:bg-zinc-800 rounded-md font-medium shadow-md hover:shadow-lg transition-shadow duration-200">
               Start free trial
               <ArrowRight className="ml-2 h-3.5 w-3.5" />
             </Button>
@@ -31,12 +47,17 @@ export function HeroSection() {
           <a href="#how-it-works" className="text-[13px] text-zinc-500 hover:text-zinc-900 transition-colors">
             See how it works →
           </a>
-        </div>
+        </motion.div>
       </div>
 
       {/* Product screenshot mockup */}
-      <div className="mt-16 sm:mt-20 max-w-[1200px] mx-auto px-6">
-        <div className="rounded-t-xl border border-b-0 border-zinc-200 bg-zinc-50 overflow-hidden shadow-[0_4px_40px_-12px_rgba(0,0,0,0.1)]">
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.45, ease: [0.25, 0.46, 0.45, 0.94] }}
+        className="mt-16 sm:mt-20 max-w-[1200px] mx-auto px-6"
+      >
+        <div className="rounded-t-xl border border-b-0 border-zinc-200 bg-zinc-50 overflow-hidden shadow-[0_8px_60px_-16px_rgba(0,0,0,0.15)]">
           {/* Window chrome */}
           <div className="flex items-center gap-2 px-4 py-3 border-b border-zinc-200 bg-zinc-100">
             <div className="flex gap-1.5">
@@ -107,7 +128,7 @@ export function HeroSection() {
                 <p>Hi, we've been hitting rate limits on the /v2/messages endpoint. Our integration sends about 500 requests per minute during peak hours. Can you increase our limit or suggest a batching approach?</p>
               </div>
 
-              <div className="p-3 rounded-lg bg-zinc-50 border border-zinc-200">
+              <div className="p-3 rounded-lg bg-zinc-50 border border-zinc-200 shadow-sm">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-4 h-4 rounded bg-indigo-100 flex items-center justify-center">
                     <span className="text-[8px] text-indigo-600 font-semibold">AI</span>
@@ -121,7 +142,7 @@ export function HeroSection() {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }

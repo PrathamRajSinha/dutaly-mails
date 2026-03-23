@@ -1,3 +1,5 @@
+import { motion } from "framer-motion";
+
 export function FeaturesSection() {
   const features = [
     { title: "Automatic classification", text: "Every email is categorized by intent, urgency, and sentiment — before anyone opens it." },
@@ -11,19 +13,32 @@ export function FeaturesSection() {
   return (
     <section id="features" className="py-24 sm:py-32 border-t border-zinc-100">
       <div className="max-w-[1200px] mx-auto px-6">
-        <div className="mb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.5 }}
+          className="mb-16"
+        >
           <p className="text-[13px] font-medium tracking-[0.15em] uppercase text-zinc-400 mb-4">Features</p>
           <h2 className="text-[clamp(1.8rem,3.5vw,2.75rem)] font-semibold tracking-[-0.03em] text-zinc-900 leading-[1.1] max-w-[500px]">
             A smarter way to handle customer emails.
           </h2>
-        </div>
+        </motion.div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-16 gap-y-12">
-          {features.map((f) => (
-            <div key={f.title}>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {features.map((f, i) => (
+            <motion.div
+              key={f.title}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.4, delay: i * 0.06 }}
+              className="p-6 rounded-lg border border-zinc-100 hover:border-zinc-200 hover:shadow-md transition-all duration-300"
+            >
               <h3 className="text-[15px] font-medium text-zinc-900 mb-2">{f.title}</h3>
               <p className="text-[14px] text-zinc-500 leading-[1.7]">{f.text}</p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
