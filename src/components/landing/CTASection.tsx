@@ -1,42 +1,30 @@
-import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { StarBorder } from "@/components/landing/StarBorder";
 
 export function CTASection() {
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true });
   const { user } = useAuth();
   const ctaLink = user ? "/dashboard" : "/auth";
 
   return (
-    <section className="py-28 sm:py-36 border-t border-white/[0.04]" ref={ref}>
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={isInView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.6, ease: [0.25, 0.4, 0, 1] as const }}
-        className="max-w-[560px] mx-auto px-6 text-center"
-      >
-        <h2 className="text-3xl sm:text-[2.5rem] font-bold text-white tracking-[-0.02em] leading-tight">
+    <section className="py-32 sm:py-40 border-t border-white/[0.06]">
+      <div className="max-w-[1200px] mx-auto px-6">
+        <h2 className="text-[clamp(2rem,4vw,3.5rem)] font-semibold tracking-[-0.03em] text-white leading-[1.1] max-w-[600px]">
           Never miss a customer email again.
         </h2>
-        <p className="mt-4 text-zinc-500 text-[15px]">
+        <p className="mt-5 text-[16px] text-zinc-500 max-w-[440px]">
           Turn messy inboxes into structured support. Start in minutes.
         </p>
-        <div className="mt-8 flex items-center justify-center">
+        <div className="mt-8">
           <Link to={ctaLink}>
-            <StarBorder as="div" color="rgba(99,102,241,0.5)" speed="6s" thickness={1} className="rounded-lg">
-              <Button className="h-11 px-7 text-[14px] bg-white text-zinc-900 hover:bg-zinc-200 rounded-lg font-medium">
-                Start free trial
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </StarBorder>
+            <Button className="h-10 px-5 text-[13px] bg-white text-black hover:bg-zinc-200 rounded-md font-medium">
+              Start free trial
+              <ArrowRight className="ml-2 h-3.5 w-3.5" />
+            </Button>
           </Link>
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }

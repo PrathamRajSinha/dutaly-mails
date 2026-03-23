@@ -2,9 +2,9 @@ import { Link } from "react-router-dom";
 
 export function FooterSection() {
   return (
-    <footer className="border-t border-white/[0.04] py-8">
-      <div className="max-w-[1080px] mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
-        <span className="text-[15px] font-semibold text-white tracking-tight">Dutaly</span>
+    <footer className="border-t border-white/[0.06] py-8">
+      <div className="max-w-[1200px] mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <span className="text-[14px] font-medium text-white">Dutaly</span>
         <div className="flex items-center gap-6 text-[13px] text-zinc-600">
           <a href="#features" className="hover:text-zinc-300 transition-colors">Features</a>
           <a href="#how-it-works" className="hover:text-zinc-300 transition-colors">How It Works</a>
