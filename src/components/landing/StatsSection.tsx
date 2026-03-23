@@ -23,16 +23,10 @@ export function StatsSection() {
           ].map((item, i) => (
             <motion.div
               key={item.metric}
-              initial={{ opacity: 0, y: 120, scale: 0.85 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
-              viewport={{ once: true, margin: "-40px" }}
-              transition={{
-                duration: 0.8,
-                delay: i * 0.12,
-                y: { type: "spring", stiffness: 400, damping: 12, delay: i * 0.12 },
-                scale: { type: "spring", stiffness: 400, damping: 12, delay: i * 0.12 },
-                opacity: { duration: 0.25, delay: i * 0.12 },
-              }}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.4, delay: i * 0.08 }}
               className="p-8 rounded-lg border border-zinc-100 hover:border-zinc-200 hover:shadow-md transition-all duration-300"
             >
               <h3 className="text-[20px] font-semibold text-zinc-900 mb-1">{item.metric}</h3>
