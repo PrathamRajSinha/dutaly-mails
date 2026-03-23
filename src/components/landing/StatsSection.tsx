@@ -1,11 +1,34 @@
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useTransform, animate, useInView } from "framer-motion";
+import { useEffect, useRef } from "react";
+
+function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-60px" });
+  const count = useMotionValue(0);
+  const rounded = useTransform(count, (v) => Math.round(v));
+
+  useEffect(() => {
+    if (isInView) {
+      animate(count, value, { duration: 1.8, ease: [0.16, 1, 0.3, 1] });
+    }
+  }, [isInView, count, value]);
+
+  useEffect(() => {
+    const unsubscribe = rounded.on("change", (v) => {
+      if (ref.current) ref.current.textContent = v + suffix;
+    });
+    return unsubscribe;
+  }, [rounded, suffix]);
+
+  return <span ref={ref}>0{suffix}</span>;
+}
 
 export function StatsSection() {
   const metrics = [
-    { number: "10×", label: "faster response times" },
-    { number: "85%", label: "auto-resolved tickets" },
-    { number: "0", label: "emails missed" },
-    { number: "24/7", label: "always-on support" },
+    { number: 10, suffix: "×", label: "faster response times" },
+    { number: 85, suffix: "%", label: "auto-resolved tickets" },
+    { number: 0, suffix: "", label: "emails missed", static: "0" },
+    { number: 24, suffix: "/7", label: "always-on support", static: "24/7" },
   ];
 
   return (
@@ -36,7 +59,7 @@ export function StatsSection() {
               )}
               <div className="sm:pl-8">
                 <span className="text-[clamp(2.5rem,5vw,4rem)] font-bold tracking-[-0.04em] text-zinc-900 leading-none">
-                  {item.number}
+                  {item.static ? item.static : <AnimatedCounter value={item.number} suffix={item.suffix} />}
                 </span>
                 <p className="text-[14px] text-zinc-500 mt-2">{item.label}</p>
               </div>
