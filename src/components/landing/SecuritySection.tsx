@@ -8,7 +8,7 @@ const items = [
   { title: "Controlled AI", text: "Confidence thresholds prevent unsupervised actions." },
 ];
 
-const fade = { duration: 0.5, ease: [0.25, 0.4, 0, 1] };
+const fade = { duration: 0.5, ease: [0.25, 0.4, 0, 1] as const };
 
 export function SecuritySection() {
   const ref = useRef<HTMLDivElement>(null);

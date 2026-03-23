@@ -9,7 +9,7 @@ const steps = [
   { num: "05", title: "Resolved or escalated", text: "High-confidence replies send automatically. The rest come to you." },
 ];
 
-const fade = { duration: 0.5, ease: [0.25, 0.4, 0, 1] };
+const fade = { duration: 0.5, ease: [0.25, 0.4, 0, 1] as const };
 
 export function InteractiveDemoSection() {
   const ref = useRef<HTMLDivElement>(null);

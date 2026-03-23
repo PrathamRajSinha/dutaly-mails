@@ -34,7 +34,7 @@ const plans = [
   },
 ];
 
-const fade = { duration: 0.5, ease: [0.25, 0.4, 0, 1] };
+const fade = { duration: 0.5, ease: [0.25, 0.4, 0, 1] as const };
 
 export function PricingSection() {
   const ref = useRef<HTMLDivElement>(null);

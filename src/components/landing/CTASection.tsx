@@ -16,7 +16,7 @@ export function CTASection() {
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.6, ease: [0.25, 0.4, 0, 1] }}
+        transition={{ duration: 0.6, ease: [0.25, 0.4, 0, 1] as const }}
         className="max-w-[560px] mx-auto px-6 text-center"
       >
         <h2 className="text-3xl sm:text-[2.5rem] font-bold text-white tracking-[-0.02em] leading-tight">

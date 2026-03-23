@@ -10,7 +10,7 @@ const features = [
   { title: "Slack integration", text: "Get notified in Slack when tickets need attention. Keep your team in the loop without switching tabs." },
 ];
 
-const fade = { duration: 0.5, ease: [0.25, 0.4, 0, 1] };
+const fade = { duration: 0.5, ease: [0.25, 0.4, 0, 1] as const };
 
 export function FeaturesSection() {
   const ref = useRef<HTMLDivElement>(null);

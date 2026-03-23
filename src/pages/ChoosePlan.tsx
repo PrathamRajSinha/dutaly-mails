@@ -65,7 +65,7 @@ export default function ChoosePlan() {
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
       <div className="text-center mb-10">
         <h1 className="text-3xl font-bold text-foreground">Choose Your Plan</h1>
-        <p className="mt-2 text-muted-foreground">Select a plan to get started with dyuticAI</p>
+        <p className="mt-2 text-muted-foreground">Select a plan to get started with Dutaly</p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-3 max-w-5xl w-full">

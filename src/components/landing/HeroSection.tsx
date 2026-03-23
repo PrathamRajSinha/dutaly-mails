@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
-const fade = { duration: 0.6, ease: [0.25, 0.4, 0, 1] };
+const fade = { duration: 0.6, ease: [0.25, 0.4, 0, 1] as const };
 
 export function HeroSection() {
   const ref = useRef<HTMLDivElement>(null);

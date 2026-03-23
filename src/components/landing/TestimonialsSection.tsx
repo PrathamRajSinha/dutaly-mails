@@ -7,7 +7,7 @@ const useCases = [
   { title: "Agencies", text: "Manage client communication across shared inboxes. Keep every thread structured and assigned." },
 ];
 
-const fade = { duration: 0.5, ease: [0.25, 0.4, 0, 1] };
+const fade = { duration: 0.5, ease: [0.25, 0.4, 0, 1] as const };
 
 export function TestimonialsSection() {
   const ref = useRef<HTMLDivElement>(null);

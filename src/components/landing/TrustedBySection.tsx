@@ -8,7 +8,7 @@ const problems = [
   { title: "No visibility", text: "Without structure, there's no way to track what was handled — or missed." },
 ];
 
-const fade = { duration: 0.5, ease: [0.25, 0.4, 0, 1] };
+const fade = { duration: 0.5, ease: [0.25, 0.4, 0, 1] as const };
 
 export function TrustedBySection() {
   const ref = useRef<HTMLDivElement>(null);

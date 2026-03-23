@@ -8,7 +8,7 @@ const outcomes = [
   { bold: "Stay in control", rest: "at every step", text: "Set confidence thresholds. Review before sending. Override any AI decision instantly." },
 ];
 
-const fade = { duration: 0.5, ease: [0.25, 0.4, 0, 1] };
+const fade = { duration: 0.5, ease: [0.25, 0.4, 0, 1] as const };
 
 export function StatsSection() {
   const ref = useRef<HTMLDivElement>(null);
