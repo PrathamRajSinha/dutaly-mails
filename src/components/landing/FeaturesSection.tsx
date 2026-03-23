@@ -41,7 +41,7 @@ export function FeaturesSection() {
               transition={{ duration: 0.4, delay: (i % 2) * 0.1 }}
               className="py-8 border-b border-zinc-100 group"
             >
-              <span className="text-[11px] font-mono text-zinc-300 mb-3 block">0{i + 1}</span>
+              
               <h3 className="text-[17px] font-semibold text-zinc-900 mb-2 group-hover:text-zinc-600 transition-colors duration-300">{f.title}</h3>
               <p className="text-[14px] text-zinc-500 leading-[1.7]">{f.text}</p>
             </motion.div>
