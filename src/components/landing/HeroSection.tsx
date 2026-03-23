@@ -20,9 +20,9 @@ function TypedWord({ word, delay = 0.6 }: { word: string; delay?: number }) {
         setDisplayed(word.slice(0, i));
         if (i >= word.length) {
           clearInterval(interval);
-          setTimeout(() => setShowCursor(false), 600);
+          setTimeout(() => setShowCursor(false), 800);
         }
-      }, 90);
+      }, 150);
       return () => clearInterval(interval);
     }, delay * 1000);
     return () => clearTimeout(startTimeout);
@@ -48,18 +48,18 @@ export function HeroSection() {
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+          transition={{ duration: 1, ease: [0.25, 0.46, 0.45, 0.94] }}
           className="text-[clamp(2.8rem,6vw,5rem)] font-semibold tracking-[-0.04em] text-zinc-900 leading-[1.05] max-w-[800px]"
         >
           Every customer email.
           <br />
-          <TypedWord word="Handled." delay={0.7} />
+          <TypedWord word="Handled." delay={1.2} />
         </motion.h1>
 
         <motion.p
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.15, ease: [0.25, 0.46, 0.45, 0.94] }}
+          transition={{ duration: 1, delay: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
           className="mt-6 text-[18px] text-zinc-500 leading-[1.7] max-w-[520px]"
         >
           Automatically read incoming emails, create tickets, generate replies,
@@ -69,7 +69,7 @@ export function HeroSection() {
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+          transition={{ duration: 1, delay: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
           className="mt-8 flex items-center gap-4"
         >
           <Link to={ctaLink}>
@@ -88,7 +88,7 @@ export function HeroSection() {
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.45, ease: [0.25, 0.46, 0.45, 0.94] }}
+        transition={{ duration: 1.2, delay: 1, ease: [0.25, 0.46, 0.45, 0.94] }}
         className="mt-16 sm:mt-20 max-w-[1200px] mx-auto px-6"
       >
         <div className="rounded-t-xl border border-b-0 border-zinc-200 bg-zinc-50 overflow-hidden shadow-[0_8px_60px_-16px_rgba(0,0,0,0.15)]">
