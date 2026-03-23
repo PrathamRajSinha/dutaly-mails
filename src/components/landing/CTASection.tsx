@@ -13,7 +13,7 @@ export function CTASection() {
         <h2 className="text-[clamp(2rem,4vw,3.5rem)] font-semibold tracking-[-0.03em] text-white leading-[1.1] max-w-[600px]">
           Never miss a customer email again.
         </h2>
-        <p className="mt-5 text-[16px] text-zinc-500 max-w-[440px]">
+        <p className="mt-5 text-[16px] text-zinc-400 max-w-[440px]">
           Turn messy inboxes into structured support. Start in minutes.
         </p>
         <div className="mt-8">

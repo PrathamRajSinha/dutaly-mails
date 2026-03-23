@@ -7,7 +7,7 @@ export function TrustedBySection() {
             <h2 className="text-[clamp(1.8rem,3.5vw,2.75rem)] font-semibold tracking-[-0.03em] text-white leading-[1.1]">
               Support becomes harder
               <br />
-              <span className="text-zinc-500">as you grow.</span>
+              <span className="text-zinc-400">as you grow.</span>
             </h2>
           </div>
           <div className="space-y-8">
@@ -17,9 +17,9 @@ export function TrustedBySection() {
               { title: "Responses slow down", text: "As volume grows, response time increases. Customers notice." },
               { title: "No visibility", text: "Without structure, there's no way to track who handled what — or what was missed." },
             ].map((item) => (
-              <div key={item.title} className="border-l-2 border-zinc-800 pl-5">
+              <div key={item.title} className="border-l-2 border-zinc-700 pl-5">
                 <h3 className="text-[15px] font-medium text-white mb-1">{item.title}</h3>
-                <p className="text-[14px] text-zinc-500 leading-relaxed">{item.text}</p>
+                <p className="text-[14px] text-zinc-400 leading-relaxed">{item.text}</p>
               </div>
             ))}
           </div>
