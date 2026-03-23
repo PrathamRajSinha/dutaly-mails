@@ -1,10 +1,10 @@
 import { motion, useMotionValue, useTransform, animate, useInView } from "framer-motion";
 import { useEffect, useRef } from "react";
 
-function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: string }) {
+function AnimatedCounter({ from = 0, value, suffix = "" }: { from?: number; value: number; suffix?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-60px" });
-  const count = useMotionValue(0);
+  const count = useMotionValue(from);
   const rounded = useTransform(count, (v) => Math.round(v));
 
   useEffect(() => {
@@ -20,14 +20,14 @@ function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: strin
     return unsubscribe;
   }, [rounded, suffix]);
 
-  return <span ref={ref}>0{suffix}</span>;
+  return <span ref={ref}>{from}{suffix}</span>;
 }
 
 export function StatsSection() {
   const metrics = [
     { number: 10, suffix: "×", label: "faster response times" },
     { number: 85, suffix: "%", label: "auto-resolved tickets" },
-    { number: 0, suffix: "", label: "emails missed", static: "0" },
+    { number: 0, suffix: "", label: "emails missed", from: 100 },
     { number: 24, suffix: "/7", label: "always-on support", static: "24/7" },
   ];
 
