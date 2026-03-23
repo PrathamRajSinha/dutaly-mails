@@ -37,11 +37,11 @@ export function PricingSection() {
     <section id="pricing" className="py-24 sm:py-32 border-t border-white/[0.06]">
       <div className="max-w-[1200px] mx-auto px-6">
         <div className="mb-16">
-          <p className="text-[13px] font-medium tracking-[0.15em] uppercase text-zinc-500 mb-4">Pricing</p>
+          <p className="text-[13px] font-medium tracking-[0.15em] uppercase text-zinc-400 mb-4">Pricing</p>
           <h2 className="text-[clamp(1.8rem,3.5vw,2.75rem)] font-semibold tracking-[-0.03em] text-white leading-[1.1]">
             Simple, transparent pricing.
           </h2>
-          <p className="mt-3 text-[15px] text-zinc-500">No hidden fees. No surprises.</p>
+          <p className="mt-3 text-[15px] text-zinc-400">No hidden fees. No surprises.</p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-px bg-white/[0.06] rounded-lg overflow-hidden max-w-[960px]">
@@ -51,15 +51,15 @@ export function PricingSection() {
               className={`p-8 ${plan.highlighted ? "bg-[#111113]" : "bg-[#0A0A0B]"}`}
             >
               <h3 className="text-[15px] font-medium text-white">{plan.name}</h3>
-              <p className="text-[12px] text-zinc-600 mt-1">{plan.description}</p>
+              <p className="text-[12px] text-zinc-400 mt-1">{plan.description}</p>
               <div className="mt-6 flex items-baseline gap-1">
                 <span className="text-[28px] font-semibold text-white tracking-tight">{plan.price}</span>
-                <span className="text-[13px] text-zinc-600">{plan.period}</span>
+                <span className="text-[13px] text-zinc-400">{plan.period}</span>
               </div>
               <ul className="mt-6 space-y-2.5">
                 {plan.features.map((f) => (
-                  <li key={f} className="flex items-center gap-2.5 text-[13px] text-zinc-400">
-                    <Check className="h-3 w-3 text-zinc-600 flex-shrink-0" />
+                  <li key={f} className="flex items-center gap-2.5 text-[13px] text-zinc-300">
+                    <Check className="h-3 w-3 text-zinc-400 flex-shrink-0" />
                     {f}
                   </li>
                 ))}

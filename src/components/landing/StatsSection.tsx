@@ -15,7 +15,7 @@ export function StatsSection() {
           ].map((item) => (
             <div key={item.metric} className="bg-[#0A0A0B] p-8">
               <h3 className="text-[20px] font-semibold text-white mb-1">{item.metric}</h3>
-              <p className="text-[14px] text-zinc-500">{item.desc}</p>
+              <p className="text-[14px] text-zinc-400">{item.desc}</p>
             </div>
           ))}
         </div>

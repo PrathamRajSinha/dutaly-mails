@@ -27,7 +27,7 @@ export function LandingNavbar() {
             <a
               key={link.label}
               href={link.href}
-              className="text-[13px] text-zinc-500 hover:text-white transition-colors duration-200"
+              className="text-[13px] text-zinc-400 hover:text-white transition-colors duration-200"
             >
               {link.label}
             </a>
@@ -43,7 +43,7 @@ export function LandingNavbar() {
             </Link>
           ) : (
             <>
-              <Link to="/auth" className="text-[13px] text-zinc-500 hover:text-white transition-colors">
+              <Link to="/auth" className="text-[13px] text-zinc-400 hover:text-white transition-colors">
                 Log in
               </Link>
               <Link to="/auth">
