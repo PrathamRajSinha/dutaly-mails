@@ -53,7 +53,7 @@ export function HeroSection() {
         >
           Every customer email.
           <br />
-          <span className="text-zinc-400">Handled.</span>
+          <TypedWord word="Handled." delay={0.7} />
         </motion.h1>
 
         <motion.p
