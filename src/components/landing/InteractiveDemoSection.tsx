@@ -66,8 +66,8 @@ export function InteractiveDemoSection() {
                 }}
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{
-                  duration: 0.6,
-                  delay: i * 0.12,
+                  duration: 1,
+                  delay: i * 0.25,
                   ease: [0.25, 0.46, 0.45, 0.94],
                 }}
                 className="flex-1 p-6 rounded-xl border border-zinc-200 bg-white shadow-[0_2px_20px_-6px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_30px_-8px_rgba(0,0,0,0.12)] transition-shadow duration-300 relative"
@@ -81,7 +81,7 @@ export function InteractiveDemoSection() {
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 0.3, delay: 0.6 + i * 0.12 }}
+                    transition={{ duration: 0.4, delay: 1.2 + i * 0.25 }}
                     className="absolute top-1/2 -right-3.5 -translate-y-1/2 text-zinc-300 text-lg"
                   >
                     →
