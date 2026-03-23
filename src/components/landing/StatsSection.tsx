@@ -59,7 +59,7 @@ export function StatsSection() {
               )}
               <div className="sm:pl-8">
                 <span className="text-[clamp(2.5rem,5vw,4rem)] font-bold tracking-[-0.04em] text-zinc-900 leading-none">
-                  {item.static ? item.static : <AnimatedCounter value={item.number} suffix={item.suffix} />}
+                  {item.static ? item.static : <AnimatedCounter from={item.from} value={item.number} suffix={item.suffix} />}
                 </span>
                 <p className="text-[14px] text-zinc-500 mt-2">{item.label}</p>
               </div>
