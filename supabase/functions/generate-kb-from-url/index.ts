@@ -25,7 +25,7 @@ serve(async (req) => {
     // Fetch the page content
     const pageResponse = await fetch(url, {
       headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; dyuticAI/1.0)",
+        "User-Agent": "Mozilla/5.0 (compatible; Dutaly/1.0)",
         "Accept": "text/html,application/xhtml+xml,text/plain",
       },
     });

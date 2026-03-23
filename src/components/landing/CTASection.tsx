@@ -12,33 +12,26 @@ export function CTASection() {
   const ctaLink = user ? "/dashboard" : "/auth";
 
   return (
-    <section className="relative py-28 sm:py-36" ref={ref}>
-      <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/50 to-transparent" />
-
+    <section className="py-28 sm:py-36 border-t border-white/[0.04]" ref={ref}>
       <motion.div
-        initial={{ opacity: 0, y: 24 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.7, ease: [0.25, 0.4, 0, 1] }}
-        className="relative max-w-[600px] mx-auto px-6 text-center"
+        transition={{ duration: 0.6, ease: [0.25, 0.4, 0, 1] as const }}
+        className="max-w-[560px] mx-auto px-6 text-center"
       >
-        <h2 className="text-3xl sm:text-4xl md:text-[2.75rem] font-bold text-white tracking-[-0.02em] leading-tight">
-          Never miss a customer<br className="hidden sm:block" /> email again.
+        <h2 className="text-3xl sm:text-[2.5rem] font-bold text-white tracking-[-0.02em] leading-tight">
+          Never miss a customer email again.
         </h2>
-        <p className="mt-5 text-base text-zinc-500 max-w-md mx-auto">
+        <p className="mt-4 text-zinc-500 text-[15px]">
           Turn messy inboxes into structured support. Start in minutes.
         </p>
-        <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3">
+        <div className="mt-8 flex items-center justify-center gap-4">
           <Link to={ctaLink}>
-            <Button className="h-11 px-7 text-[14px] bg-white text-zinc-900 hover:bg-zinc-200 rounded-full font-semibold shadow-lg shadow-white/[0.06] transition-all duration-300">
+            <Button className="h-11 px-7 text-[14px] bg-white text-zinc-900 hover:bg-zinc-200 rounded-lg font-medium">
               Start free trial
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
-          <a href="mailto:hello@dyuticai.com">
-            <Button variant="ghost" className="h-11 px-7 text-[14px] text-zinc-400 hover:text-white hover:bg-white/[0.04] rounded-full transition-all duration-300">
-              Book a demo
-            </Button>
-          </a>
         </div>
       </motion.div>
     </section>
