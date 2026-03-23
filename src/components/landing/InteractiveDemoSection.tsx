@@ -70,7 +70,7 @@ export function InteractiveDemoSection() {
                   delay: i * 0.25,
                   ease: [0.25, 0.46, 0.45, 0.94],
                 }}
-                className="flex-1 p-6 rounded-xl border border-zinc-200 bg-white shadow-[0_2px_20px_-6px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_30px_-8px_rgba(0,0,0,0.12)] transition-shadow duration-300 relative"
+                className="flex-1 min-h-[220px] flex flex-col p-6 rounded-xl border border-zinc-200 bg-white shadow-[0_2px_20px_-6px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_30px_-8px_rgba(0,0,0,0.12)] transition-shadow duration-300 relative"
                 style={{ zIndex: i + 1 }}
               >
                 <span className="text-[48px] font-semibold text-zinc-200 leading-none block mb-3 tracking-tighter">{s.num}</span>
