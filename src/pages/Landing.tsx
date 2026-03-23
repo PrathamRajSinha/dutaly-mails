@@ -6,13 +6,12 @@ import { InteractiveDemoSection } from "@/components/landing/InteractiveDemoSect
 import { StatsSection } from "@/components/landing/StatsSection";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { PricingSection } from "@/components/landing/PricingSection";
-import { SecuritySection } from "@/components/landing/SecuritySection";
 import { CTASection } from "@/components/landing/CTASection";
 import { FooterSection } from "@/components/landing/FooterSection";
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-zinc-950 text-white selection:bg-indigo-500/30 overflow-x-hidden">
+    <div className="min-h-screen bg-[#0A0A0B] text-white overflow-x-hidden">
       <LandingNavbar />
       <HeroSection />
       <TrustedBySection />
@@ -21,7 +20,6 @@ export default function Landing() {
       <StatsSection />
       <TestimonialsSection />
       <PricingSection />
-      <SecuritySection />
       <CTASection />
       <FooterSection />
     </div>
