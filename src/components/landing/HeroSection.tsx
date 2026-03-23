@@ -31,18 +31,6 @@ export function HeroSection() {
 
       <div className="relative z-10 max-w-[1080px] mx-auto px-6">
         <div className="max-w-[720px] mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ ...fade, delay: 0.05 }}
-            className="mb-6"
-          >
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] text-[13px] text-zinc-500">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              AI-powered helpdesk
-            </span>
-          </motion.div>
-
           <motion.h1
             initial={{ opacity: 0, y: 16 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
