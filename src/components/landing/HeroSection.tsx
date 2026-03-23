@@ -2,7 +2,41 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { motion } from "framer-motion";
+import { motion, useInView } from "framer-motion";
+import { useRef, useState, useEffect } from "react";
+
+function TypedWord({ word, delay = 0.6 }: { word: string; delay?: number }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(ref, { once: true });
+  const [displayed, setDisplayed] = useState("");
+  const [showCursor, setShowCursor] = useState(true);
+
+  useEffect(() => {
+    if (!isInView) return;
+    let i = 0;
+    const startTimeout = setTimeout(() => {
+      const interval = setInterval(() => {
+        i++;
+        setDisplayed(word.slice(0, i));
+        if (i >= word.length) {
+          clearInterval(interval);
+          setTimeout(() => setShowCursor(false), 600);
+        }
+      }, 90);
+      return () => clearInterval(interval);
+    }, delay * 1000);
+    return () => clearTimeout(startTimeout);
+  }, [isInView, word, delay]);
+
+  return (
+    <span ref={ref} className="text-zinc-400">
+      {displayed}
+      {showCursor && isInView && (
+        <span className="inline-block w-[3px] h-[0.85em] bg-zinc-400 ml-0.5 align-baseline animate-pulse" />
+      )}
+    </span>
+  );
+}
 
 export function HeroSection() {
   const { user } = useAuth();
