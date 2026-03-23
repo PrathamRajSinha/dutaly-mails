@@ -19,11 +19,11 @@ export function HeroSection() {
     <section ref={ref} className="relative pt-40 pb-24 sm:pt-48 sm:pb-32 overflow-hidden">
       {/* Antigravity dots background */}
       <AntigravityDots
-        count={120}
-        color="140, 140, 180"
-        magnetRadius={100}
-        particleSize={1.5}
-        className="opacity-40"
+        count={250}
+        color="160, 160, 220"
+        magnetRadius={140}
+        particleSize={2.5}
+        className="opacity-70"
       />
 
       {/* Subtle radial glow */}
