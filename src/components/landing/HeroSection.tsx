@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { ShinyText } from "@/components/landing/ShinyText";
+import { AntigravityDots } from "@/components/landing/AntigravityDots";
 
 const fade = { duration: 0.6, ease: [0.25, 0.4, 0, 1] as const };
 
@@ -14,18 +16,46 @@ export function HeroSection() {
   const ctaLink = user ? "/dashboard" : "/auth";
 
   return (
-    <section ref={ref} className="pt-40 pb-24 sm:pt-48 sm:pb-32">
-      <div className="max-w-[1080px] mx-auto px-6">
+    <section ref={ref} className="relative pt-40 pb-24 sm:pt-48 sm:pb-32 overflow-hidden">
+      {/* Antigravity dots background */}
+      <AntigravityDots
+        count={120}
+        color="140, 140, 180"
+        magnetRadius={100}
+        particleSize={1.5}
+        className="opacity-40"
+      />
+
+      {/* Subtle radial glow */}
+      <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-indigo-500/[0.04] rounded-full blur-[150px] pointer-events-none" />
+
+      <div className="relative z-10 max-w-[1080px] mx-auto px-6">
         <div className="max-w-[720px] mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ ...fade, delay: 0.05 }}
+            className="mb-6"
+          >
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] text-[13px] text-zinc-500">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              AI-powered helpdesk
+            </span>
+          </motion.div>
+
           <motion.h1
             initial={{ opacity: 0, y: 16 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ ...fade, delay: 0.1 }}
-            className="text-[clamp(2.5rem,5.5vw,4.25rem)] font-bold tracking-[-0.035em] text-white leading-[1.08]"
+            className="text-[clamp(2.5rem,5.5vw,4.5rem)] font-bold tracking-[-0.035em] text-white leading-[1.08]"
           >
             Every customer email.
             <br />
-            <span className="text-zinc-500">Handled.</span>
+            <ShinyText
+              text="Handled."
+              speed={4}
+              className="text-zinc-400"
+            />
           </motion.h1>
 
           <motion.p
@@ -58,14 +88,14 @@ export function HeroSection() {
           </motion.div>
         </div>
 
-        {/* Simple product mockup */}
+        {/* Product mockup */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ ...fade, delay: 0.55 }}
           className="mt-20 max-w-[780px] mx-auto"
         >
-          <div className="rounded-xl border border-white/[0.08] bg-zinc-900/60 overflow-hidden">
+          <div className="rounded-xl border border-white/[0.08] bg-zinc-900/60 overflow-hidden shadow-2xl shadow-black/30">
             <div className="flex items-center gap-1.5 px-4 py-3 border-b border-white/[0.06]">
               <div className="w-2 h-2 rounded-full bg-zinc-700" />
               <div className="w-2 h-2 rounded-full bg-zinc-700" />
@@ -79,14 +109,20 @@ export function HeroSection() {
                 { from: "lisa@brand.com", subject: "Update billing address", status: "Auto-resolved", color: "text-emerald-500", score: "96%" },
                 { from: "dev@agency.co", subject: "Integration webhook failing", status: "Escalated", color: "text-red-500", score: "41%" },
               ].map((t, i) => (
-                <div key={i} className="flex items-center gap-4 px-4 py-3 rounded-lg bg-zinc-800/40">
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={isInView ? { opacity: 1, x: 0 } : {}}
+                  transition={{ duration: 0.4, delay: 0.7 + i * 0.08, ease: [0.25, 0.4, 0, 1] as const }}
+                  className="flex items-center gap-4 px-4 py-3 rounded-lg bg-zinc-800/40 hover:bg-zinc-800/60 transition-colors"
+                >
                   <div className="flex-1 min-w-0">
                     <span className="text-[13px] text-zinc-300">{t.from}</span>
                     <p className="text-[12px] text-zinc-600 truncate">{t.subject}</p>
                   </div>
                   <span className="text-[11px] text-zinc-600 font-mono">{t.score}</span>
                   <span className={`text-[11px] font-medium ${t.color}`}>{t.status}</span>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>

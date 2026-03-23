@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { StarBorder } from "@/components/landing/StarBorder";
 
 export function CTASection() {
   const ref = useRef<HTMLDivElement>(null);
@@ -25,12 +26,14 @@ export function CTASection() {
         <p className="mt-4 text-zinc-500 text-[15px]">
           Turn messy inboxes into structured support. Start in minutes.
         </p>
-        <div className="mt-8 flex items-center justify-center gap-4">
+        <div className="mt-8 flex items-center justify-center">
           <Link to={ctaLink}>
-            <Button className="h-11 px-7 text-[14px] bg-white text-zinc-900 hover:bg-zinc-200 rounded-lg font-medium">
-              Start free trial
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+            <StarBorder as="div" color="rgba(99,102,241,0.5)" speed="6s" thickness={1} className="rounded-lg">
+              <Button className="h-11 px-7 text-[14px] bg-white text-zinc-900 hover:bg-zinc-200 rounded-lg font-medium">
+                Start free trial
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </StarBorder>
           </Link>
         </div>
       </motion.div>
