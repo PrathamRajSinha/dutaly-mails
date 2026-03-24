@@ -82,7 +82,7 @@ export function TechGrid() {
       preserveAspectRatio="none"
     >
       {/* Layer 0 - slowest parallax */}
-      <g data-parallax="-0.02" opacity="0.03">
+      <g data-parallax="-0.02" opacity="0.15">
         {hexagons
           .filter((h) => h.layer === 0)
           .map((h, i) => (
@@ -98,7 +98,7 @@ export function TechGrid() {
       </g>
 
       {/* Layer 1 - medium parallax */}
-      <g data-parallax="-0.04" opacity="0.04">
+      <g data-parallax="-0.04" opacity="0.2">
         {hexagons
           .filter((h) => h.layer === 1)
           .map((h, i) => (
@@ -128,7 +128,7 @@ export function TechGrid() {
       </g>
 
       {/* Layer 2 - fastest parallax */}
-      <g data-parallax="-0.06" opacity="0.05">
+      <g data-parallax="-0.06" opacity="0.25">
         {hexagons
           .filter((h) => h.layer === 2)
           .map((h, i) => (
