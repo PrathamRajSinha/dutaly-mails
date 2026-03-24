@@ -45,35 +45,25 @@ export function FeaturesSection() {
           </h2>
         </motion.div>
 
-        <ScrollStack
-          useWindowScroll
-          itemDistance={200}
-          itemStackDistance={30}
-          stackPosition="20"
-          baseScale={0.9}
-          itemScale={0.04}
-          scaleDuration={0.4}
-        >
+        <ScrollStack cardHeight={600}>
           {featureBlocks.map((block, i) => {
             const isReversed = i % 2 !== 0;
             return (
               <ScrollStackItem
                 key={block.title}
-                itemClassName="bg-white border border-zinc-200/60 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.1)] p-8 sm:p-12"
+                itemClassName="bg-white border border-zinc-200/60 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.1)] rounded-2xl p-8 sm:p-12"
               >
                 <div
                   className={`grid md:grid-cols-[1.2fr_0.8fr] gap-10 lg:gap-16 items-center ${
                     isReversed ? "md:[direction:rtl]" : ""
                   }`}
                 >
-                  {/* Visual */}
                   <div className="[direction:ltr] relative group">
                     <div className="relative rounded-xl overflow-hidden border border-zinc-200/50">
                       {block.visual}
                     </div>
                   </div>
 
-                  {/* Text */}
                   <div className="[direction:ltr] space-y-5">
                     <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase text-accent-foreground bg-accent px-3 py-1 rounded-full">
                       {block.label}
