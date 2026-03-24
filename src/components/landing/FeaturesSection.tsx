@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import ScrollStack, { ScrollStackItem } from "./ScrollStack";
 import { ClassificationMockup, ReplyMockup, DashboardMockup } from "./FeatureMockups";
 
 const featureBlocks = [
@@ -36,7 +37,7 @@ export function FeaturesSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-24"
+          className="text-center mb-16"
         >
           <p className="text-[13px] font-medium tracking-[0.15em] uppercase text-zinc-400 mb-4">Features</p>
           <h2 className="text-[clamp(2rem,4vw,3.25rem)] font-semibold tracking-[-0.03em] text-zinc-900 leading-[1.1] max-w-[600px] mx-auto">
@@ -44,49 +45,56 @@ export function FeaturesSection() {
           </h2>
         </motion.div>
 
-        <div className="space-y-32 sm:space-y-40">
+        <ScrollStack
+          useWindowScroll
+          itemDistance={200}
+          itemStackDistance={30}
+          stackPosition="20"
+          baseScale={0.9}
+          itemScale={0.04}
+          scaleDuration={0.4}
+        >
           {featureBlocks.map((block, i) => {
             const isReversed = i % 2 !== 0;
             return (
-              <motion.div
+              <ScrollStackItem
                 key={block.title}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.7 }}
-                className={`grid md:grid-cols-[1.2fr_0.8fr] gap-14 lg:gap-24 items-center ${
-                  isReversed ? "md:[direction:rtl]" : ""
-                }`}
+                itemClassName="bg-white border border-zinc-200/60 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.1)] p-8 sm:p-12"
               >
-                {/* Visual */}
-                <div className="[direction:ltr] relative group">
-                  <div className="absolute -inset-4 bg-gradient-to-br from-zinc-100/50 to-zinc-200/30 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                  <div className="relative shadow-[0_12px_48px_-12px_rgba(0,0,0,0.12)] hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.18)] rounded-xl overflow-hidden transition-shadow duration-500 border border-zinc-200/50">
-                    {block.visual}
+                <div
+                  className={`grid md:grid-cols-[1.2fr_0.8fr] gap-10 lg:gap-16 items-center ${
+                    isReversed ? "md:[direction:rtl]" : ""
+                  }`}
+                >
+                  {/* Visual */}
+                  <div className="[direction:ltr] relative group">
+                    <div className="relative rounded-xl overflow-hidden border border-zinc-200/50">
+                      {block.visual}
+                    </div>
                   </div>
-                </div>
 
-                {/* Text */}
-                <div className="[direction:ltr] space-y-5">
-                  <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase text-accent-foreground bg-accent px-3 py-1 rounded-full">
-                    {block.label}
-                  </span>
-                  <h3 className="text-[clamp(1.5rem,2.5vw,2rem)] font-semibold text-zinc-900 tracking-[-0.02em] leading-[1.2]">
-                    {block.title}
-                  </h3>
-                  <p className="text-[15px] text-zinc-500 leading-[1.8] max-w-[440px]">
-                    {block.text}
-                  </p>
-                  <div className="border-l-2 border-zinc-200 pl-4">
-                    <p className="text-[14px] text-zinc-400 leading-[1.7] max-w-[440px]">
-                      {block.sub}
+                  {/* Text */}
+                  <div className="[direction:ltr] space-y-5">
+                    <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase text-accent-foreground bg-accent px-3 py-1 rounded-full">
+                      {block.label}
+                    </span>
+                    <h3 className="text-[clamp(1.5rem,2.5vw,2rem)] font-semibold text-zinc-900 tracking-[-0.02em] leading-[1.2]">
+                      {block.title}
+                    </h3>
+                    <p className="text-[15px] text-zinc-500 leading-[1.8] max-w-[440px]">
+                      {block.text}
                     </p>
+                    <div className="border-l-2 border-zinc-200 pl-4">
+                      <p className="text-[14px] text-zinc-400 leading-[1.7] max-w-[440px]">
+                        {block.sub}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </motion.div>
+              </ScrollStackItem>
             );
           })}
-        </div>
+        </ScrollStack>
       </div>
     </section>
   );
