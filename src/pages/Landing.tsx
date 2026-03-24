@@ -8,10 +8,12 @@ import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { PricingSection } from "@/components/landing/PricingSection";
 import { CTASection } from "@/components/landing/CTASection";
 import { FooterSection } from "@/components/landing/FooterSection";
+import { TechGrid } from "@/components/landing/TechGrid";
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-white text-zinc-900 overflow-x-hidden">
+    <div className="relative min-h-screen bg-white text-zinc-900 overflow-x-hidden">
+      <TechGrid />
       <LandingNavbar />
       <HeroSection />
       <TrustedBySection />
