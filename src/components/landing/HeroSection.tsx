@@ -29,7 +29,7 @@ function TypedWord({ word, delay = 0.6 }: { word: string; delay?: number }) {
   }, [isInView, word, delay]);
 
   return (
-    <span ref={ref} className="bg-gradient-to-r from-zinc-400 to-zinc-500 bg-clip-text text-transparent">
+    <span ref={ref} className="bg-gradient-to-r from-primary to-accent-foreground bg-clip-text text-transparent">
       {displayed}
       {showCursor && isInView && (
         <span className="inline-block w-[3px] h-[0.85em] bg-zinc-400 ml-0.5 align-baseline animate-pulse" />
@@ -90,7 +90,7 @@ export function HeroSection() {
           className="mt-10 flex items-center justify-center gap-5"
         >
           <Link to={ctaLink}>
-            <Button className="h-11 px-6 text-[14px] bg-zinc-900 text-white hover:bg-zinc-800 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300">
+            <Button className="h-11 px-6 text-[14px] bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300">
               Start free trial
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>

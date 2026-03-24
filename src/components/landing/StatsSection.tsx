@@ -46,7 +46,7 @@ export function StatsSection() {
           className="text-center mb-20"
         >
           <h2 className="text-[clamp(2rem,4vw,3.25rem)] font-semibold tracking-[-0.03em] text-white leading-[1.1] max-w-[600px] mx-auto">
-            Support that actually scales.
+            Support that actually <span className="bg-gradient-to-r from-primary to-accent-foreground bg-clip-text text-transparent">scales.</span>
           </h2>
           <p className="mt-4 text-[16px] text-zinc-400 max-w-[440px] mx-auto">
             Numbers that speak for themselves.
