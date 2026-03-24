@@ -46,10 +46,7 @@ export function FeaturesSection() {
         </motion.div>
 
         <ScrollStack
-          useWindowScroll
-          itemDistance={200}
           itemStackDistance={30}
-          stackPosition="20%"
           baseScale={0.9}
           itemScale={0.03}
         >
