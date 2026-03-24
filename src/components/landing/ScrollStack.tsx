@@ -1,5 +1,4 @@
-import React, { ReactNode, useLayoutEffect, useRef, useCallback } from "react";
-import Lenis from "lenis";
+import React, { ReactNode, useEffect, useRef } from "react";
 
 export interface ScrollStackItemProps {
   itemClassName?: string;
@@ -10,9 +9,7 @@ export const ScrollStackItem: React.FC<ScrollStackItemProps> = ({
   children,
   itemClassName = "",
 }) => (
-  <div
-    className={`scroll-stack-card relative w-full my-8 rounded-2xl ${itemClassName}`.trim()}
-  >
+  <div className={`scroll-stack-item ${itemClassName}`.trim()}>
     {children}
   </div>
 );
@@ -20,179 +17,88 @@ export const ScrollStackItem: React.FC<ScrollStackItemProps> = ({
 interface ScrollStackProps {
   className?: string;
   children: ReactNode;
-  itemDistance?: number;
-  itemScale?: number;
-  itemStackDistance?: number;
-  stackPosition?: string;
-  scaleEndPosition?: string;
-  baseScale?: number;
-  scaleDuration?: number;
-  rotationAmount?: number;
-  blurAmount?: number;
-  useWindowScroll?: boolean;
-  onStackComplete?: () => void;
+  cardHeight?: number;
 }
 
 const ScrollStack: React.FC<ScrollStackProps> = ({
   children,
   className = "",
-  itemDistance = 100,
-  itemScale = 0.03,
-  itemStackDistance = 30,
-  stackPosition = "20%",
-  scaleEndPosition = "10%",
-  baseScale = 0.85,
-  scaleDuration = 0.5,
-  rotationAmount = 0,
-  blurAmount = 0,
-  useWindowScroll = false,
-  onStackComplete,
+  cardHeight = 500,
 }) => {
-  const scrollerRef = useRef<HTMLDivElement>(null);
-  const lenisRef = useRef<Lenis | null>(null);
-  const rafRef = useRef<number>(0);
-  const stackCompleteRef = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const updateCards = useCallback(() => {
-    const container = scrollerRef.current;
+  useEffect(() => {
+    const container = containerRef.current;
     if (!container) return;
 
-    const scrollTop = useWindowScroll
-      ? window.scrollY
-      : container.scrollTop;
-
-    const cards = container.querySelectorAll<HTMLDivElement>(".scroll-stack-card");
-    const viewportHeight = window.innerHeight;
-    const stackPos = (parseFloat(stackPosition) / 100) * viewportHeight;
-    const scaleEndPos = (parseFloat(scaleEndPosition) / 100) * viewportHeight;
+    const cards = container.querySelectorAll<HTMLDivElement>(".scroll-stack-item");
     const totalCards = cards.length;
+    if (totalCards === 0) return;
 
-    let allStacked = true;
+    const onScroll = () => {
+      const containerRect = container.getBoundingClientRect();
+      const viewportH = window.innerHeight;
+      // How far the container top has scrolled past the viewport top
+      const scrolled = -containerRect.top;
 
-    cards.forEach((card, index) => {
-      const rect = card.getBoundingClientRect();
-      const cardTop = useWindowScroll
-        ? rect.top
-        : rect.top - container.getBoundingClientRect().top + scrollTop;
-      const actualCardTop = useWindowScroll ? rect.top : cardTop - scrollTop;
-      const distanceFromStack = actualCardTop - stackPos;
-
-      if (distanceFromStack > 0) {
-        allStacked = false;
-        card.style.transform = "translateY(0) scale(1) rotate(0deg)";
-        card.style.filter = "blur(0px)";
-        card.style.position = "relative";
-        card.style.top = "0";
-        card.style.zIndex = `${index}`;
-        return;
-      }
-
-      const stackIndex = totalCards - 1 - index;
-      const targetY = stackIndex * itemStackDistance;
-      const progress = Math.min(
-        1,
-        Math.abs(distanceFromStack) / itemDistance
-      );
-      const currentY = targetY * progress;
-      const targetScale =
-        baseScale + (totalCards - 1 - stackIndex) * itemScale;
-      const scaleProgress = Math.min(
-        1,
-        Math.abs(distanceFromStack) / (scaleEndPos + itemDistance)
-      );
-      const currentScale = 1 - (1 - targetScale) * scaleProgress;
-      const rotation = rotationAmount * stackIndex * progress;
-      const blur = blurAmount * stackIndex * progress;
-
-      card.style.position = "sticky";
-      card.style.top = `${stackPos}px`;
-      card.style.zIndex = `${totalCards - stackIndex}`;
-      card.style.transform = `translateY(${currentY}px) scale(${currentScale}) rotate(${rotation}deg)`;
-      card.style.transition = `transform ${scaleDuration}s ease-out`;
-      card.style.filter = blur > 0 ? `blur(${blur}px)` : "blur(0px)";
-    });
-
-    if (
-      allStacked &&
-      !stackCompleteRef.current &&
-      onStackComplete
-    ) {
-      stackCompleteRef.current = true;
-      onStackComplete();
-    }
-  }, [
-    itemDistance,
-    itemScale,
-    itemStackDistance,
-    stackPosition,
-    scaleEndPosition,
-    baseScale,
-    scaleDuration,
-    rotationAmount,
-    blurAmount,
-    useWindowScroll,
-    onStackComplete,
-  ]);
-
-  useLayoutEffect(() => {
-    const container = scrollerRef.current;
-    if (!container) return;
-
-    if (useWindowScroll) {
-      const onScroll = () => {
-        rafRef.current = requestAnimationFrame(updateCards);
-      };
-      window.addEventListener("scroll", onScroll, { passive: true });
-      updateCards();
-      return () => {
-        window.removeEventListener("scroll", onScroll);
-        cancelAnimationFrame(rafRef.current);
-      };
-    }
-
-    const lenis = new Lenis({
-      wrapper: container,
-      content: container.firstElementChild as HTMLElement,
-      smoothWheel: true,
-      lerp: 0.1,
-    });
-    lenisRef.current = lenis;
-
-    const raf = (time: number) => {
-      lenis.raf(time);
-      updateCards();
-      rafRef.current = requestAnimationFrame(raf);
+      cards.forEach((card, i) => {
+        const cardStart = i * cardHeight;
+        const progress = Math.max(0, Math.min(1, (scrolled - cardStart) / cardHeight));
+        
+        if (scrolled < cardStart) {
+          // Card hasn't reached sticky zone yet — natural position
+          card.style.position = "relative";
+          card.style.top = "0";
+          card.style.zIndex = `${i}`;
+          card.style.transform = "scale(1)";
+          card.style.opacity = "1";
+        } else {
+          // Card is in sticky zone
+          card.style.position = "sticky";
+          card.style.top = `${Math.round(viewportH * 0.15)}px`;
+          card.style.zIndex = `${totalCards + i}`;
+          
+          // Scale down slightly as next card comes in
+          const isLast = i === totalCards - 1;
+          if (!isLast) {
+            const nextCardStart = (i + 1) * cardHeight;
+            const nextProgress = Math.max(0, Math.min(1, (scrolled - nextCardStart) / cardHeight));
+            const scale = 1 - nextProgress * 0.05;
+            const yShift = nextProgress * 20;
+            card.style.transform = `scale(${scale}) translateY(-${yShift}px)`;
+            card.style.opacity = `${1 - nextProgress * 0.3}`;
+          } else {
+            card.style.transform = "scale(1)";
+            card.style.opacity = "1";
+          }
+        }
+      });
     };
-    rafRef.current = requestAnimationFrame(raf);
 
-    return () => {
-      cancelAnimationFrame(rafRef.current);
-      lenis.destroy();
-    };
-  }, [updateCards, useWindowScroll]);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
 
-  if (useWindowScroll) {
-    return (
-      <div ref={scrollerRef} className={className}>
-        {children}
-        <div className="w-full h-px" />
-      </div>
-    );
-  }
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [cardHeight]);
+
+  const childCount = React.Children.count(children);
 
   return (
     <div
-      className={`relative w-full h-full overflow-y-auto overflow-x-visible ${className}`.trim()}
-      ref={scrollerRef}
-      style={{
-        overscrollBehavior: "contain",
-        WebkitOverflowScrolling: "touch",
-      }}
+      ref={containerRef}
+      className={className}
+      style={{ minHeight: `${childCount * cardHeight + window.innerHeight * 0.5}px` }}
     >
-      <div className="pt-[20vh] px-4 sm:px-20 pb-[50rem] min-h-screen">
-        {children}
-        <div className="w-full h-px" />
-      </div>
+      {React.Children.map(children, (child, i) => (
+        <div
+          key={i}
+          style={{
+            height: i < childCount - 1 ? `${cardHeight}px` : "auto",
+          }}
+        >
+          {child}
+        </div>
+      ))}
     </div>
   );
 };
