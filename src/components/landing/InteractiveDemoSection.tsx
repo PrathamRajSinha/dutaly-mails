@@ -24,7 +24,7 @@ export function InteractiveDemoSection() {
         >
           <p className="text-[13px] font-medium tracking-[0.15em] uppercase text-zinc-400 mb-4">How it works</p>
           <h2 className="text-[clamp(2rem,4vw,3.25rem)] font-semibold tracking-[-0.03em] text-zinc-900 leading-[1.1] max-w-[600px] mx-auto">
-            From email to resolution.
+            From email to <span className="text-primary">resolution.</span>
           </h2>
         </motion.div>
 
@@ -44,7 +44,7 @@ export function InteractiveDemoSection() {
                 className="relative text-center lg:text-center"
               >
                 {/* Icon circle */}
-                <div className="mx-auto w-[72px] h-[72px] rounded-2xl bg-white border-2 border-zinc-200 flex items-center justify-center mb-5 shadow-sm text-zinc-500 relative z-10">
+                <div className="mx-auto w-[72px] h-[72px] rounded-2xl bg-white border-2 border-zinc-200 flex items-center justify-center mb-5 shadow-sm text-primary relative z-10">
                   {s.icon}
                 </div>
                 <h3 className="text-[14px] font-semibold text-zinc-900 mb-2">{s.title}</h3>

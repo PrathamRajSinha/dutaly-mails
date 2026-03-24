@@ -40,7 +40,7 @@ export function FeaturesSection() {
         >
           <p className="text-[13px] font-medium tracking-[0.15em] uppercase text-zinc-400 mb-4">Features</p>
           <h2 className="text-[clamp(2rem,4vw,3.25rem)] font-semibold tracking-[-0.03em] text-zinc-900 leading-[1.1] max-w-[600px] mx-auto">
-            A smarter way to handle customer emails.
+            A <span className="text-primary">smarter</span> way to handle customer emails.
           </h2>
         </motion.div>
 
@@ -68,7 +68,7 @@ export function FeaturesSection() {
 
                 {/* Text */}
                 <div className="[direction:ltr] space-y-5">
-                  <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase text-zinc-400 bg-zinc-100 px-3 py-1 rounded-full">
+                  <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase text-accent-foreground bg-accent px-3 py-1 rounded-full">
                     {block.label}
                   </span>
                   <h3 className="text-[clamp(1.5rem,2.5vw,2rem)] font-semibold text-zinc-900 tracking-[-0.02em] leading-[1.2]">
