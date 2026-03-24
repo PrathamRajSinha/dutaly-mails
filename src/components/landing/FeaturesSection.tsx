@@ -45,54 +45,53 @@ export function FeaturesSection() {
           </h2>
         </motion.div>
 
-        <div className="h-[80vh]">
-          <ScrollStack
-            itemDistance={200}
-            itemStackDistance={30}
-            stackPosition="20%"
-            baseScale={0.9}
-            itemScale={0.03}
-          >
-            {featureBlocks.map((block, i) => {
-              const isReversed = i % 2 !== 0;
-              return (
-                <ScrollStackItem
-                  key={block.title}
-                  itemClassName="bg-white border border-zinc-200/60 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.1)] !h-auto !rounded-2xl"
+        <ScrollStack
+          useWindowScroll
+          itemDistance={200}
+          itemStackDistance={30}
+          stackPosition="20%"
+          baseScale={0.9}
+          itemScale={0.03}
+        >
+          {featureBlocks.map((block, i) => {
+            const isReversed = i % 2 !== 0;
+            return (
+              <ScrollStackItem
+                key={block.title}
+                itemClassName="bg-white border border-zinc-200/60 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.1)] !h-auto !rounded-2xl"
+              >
+                <div
+                  className={`grid md:grid-cols-[1.2fr_0.8fr] gap-10 lg:gap-16 items-center ${
+                    isReversed ? "md:[direction:rtl]" : ""
+                  }`}
                 >
-                  <div
-                    className={`grid md:grid-cols-[1.2fr_0.8fr] gap-10 lg:gap-16 items-center ${
-                      isReversed ? "md:[direction:rtl]" : ""
-                    }`}
-                  >
-                    <div className="[direction:ltr] relative group">
-                      <div className="relative rounded-xl overflow-hidden border border-zinc-200/50">
-                        {block.visual}
-                      </div>
-                    </div>
-
-                    <div className="[direction:ltr] space-y-5">
-                      <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase text-accent-foreground bg-accent px-3 py-1 rounded-full">
-                        {block.label}
-                      </span>
-                      <h3 className="text-[clamp(1.5rem,2.5vw,2rem)] font-semibold text-zinc-900 tracking-[-0.02em] leading-[1.2]">
-                        {block.title}
-                      </h3>
-                      <p className="text-[15px] text-zinc-500 leading-[1.8] max-w-[440px]">
-                        {block.text}
-                      </p>
-                      <div className="border-l-2 border-zinc-200 pl-4">
-                        <p className="text-[14px] text-zinc-400 leading-[1.7] max-w-[440px]">
-                          {block.sub}
-                        </p>
-                      </div>
+                  <div className="[direction:ltr] relative group">
+                    <div className="relative rounded-xl overflow-hidden border border-zinc-200/50">
+                      {block.visual}
                     </div>
                   </div>
-                </ScrollStackItem>
-              );
-            })}
-          </ScrollStack>
-        </div>
+
+                  <div className="[direction:ltr] space-y-5">
+                    <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase text-accent-foreground bg-accent px-3 py-1 rounded-full">
+                      {block.label}
+                    </span>
+                    <h3 className="text-[clamp(1.5rem,2.5vw,2rem)] font-semibold text-zinc-900 tracking-[-0.02em] leading-[1.2]">
+                      {block.title}
+                    </h3>
+                    <p className="text-[15px] text-zinc-500 leading-[1.8] max-w-[440px]">
+                      {block.text}
+                    </p>
+                    <div className="border-l-2 border-zinc-200 pl-4">
+                      <p className="text-[14px] text-zinc-400 leading-[1.7] max-w-[440px]">
+                        {block.sub}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </ScrollStackItem>
+            );
+          })}
+        </ScrollStack>
       </div>
     </section>
   );
