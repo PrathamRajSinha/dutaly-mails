@@ -1,92 +1,54 @@
 import { motion } from "framer-motion";
-import { useRef } from "react";
+import { Mail, Brain, Ticket, MessageSquare, CheckCircle } from "lucide-react";
 
 export function InteractiveDemoSection() {
   const steps = [
-    { num: "01", title: "Email received", text: "A customer sends an email to your connected inbox." },
-    { num: "02", title: "AI understands it", text: "Intent, sentiment, and category are detected automatically." },
-    { num: "03", title: "Ticket created", text: "A structured ticket is created with priority and SLA timer." },
-    { num: "04", title: "Reply generated", text: "A confident draft is generated from your knowledge base." },
-    { num: "05", title: "Resolved or escalated", text: "High-confidence replies send automatically. The rest come to you." },
+    { icon: <Mail className="h-5 w-5" />, title: "Email received", text: "A customer sends an email to your connected inbox." },
+    { icon: <Brain className="h-5 w-5" />, title: "AI understands it", text: "Intent, sentiment, and category are detected automatically." },
+    { icon: <Ticket className="h-5 w-5" />, title: "Ticket created", text: "A structured ticket is created with priority and SLA timer." },
+    { icon: <MessageSquare className="h-5 w-5" />, title: "Reply generated", text: "A confident draft is generated from your knowledge base." },
+    { icon: <CheckCircle className="h-5 w-5" />, title: "Resolved or escalated", text: "High-confidence replies send automatically. The rest come to you." },
   ];
 
-  const containerRef = useRef<HTMLDivElement>(null);
-
   return (
-    <section id="how-it-works" className="py-24 sm:py-32 border-t border-zinc-100">
-      <div className="max-w-[1200px] mx-auto px-6">
+    <section id="how-it-works" className="py-28 sm:py-36 relative">
+      <div className="absolute inset-0 bg-gradient-to-b from-white to-zinc-50/50 pointer-events-none" />
+
+      <div className="max-w-[1200px] mx-auto px-6 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.5 }}
-          className="mb-16"
+          className="text-center mb-20"
         >
           <p className="text-[13px] font-medium tracking-[0.15em] uppercase text-zinc-400 mb-4">How it works</p>
-          <h2 className="text-[clamp(1.8rem,3.5vw,2.75rem)] font-semibold tracking-[-0.03em] text-zinc-900 leading-[1.1] max-w-[500px]">
+          <h2 className="text-[clamp(2rem,4vw,3.25rem)] font-semibold tracking-[-0.03em] text-zinc-900 leading-[1.1] max-w-[600px] mx-auto">
             From email to resolution.
           </h2>
         </motion.div>
 
-        <div ref={containerRef} className="relative">
-          {/* Mobile/tablet: stacked cards */}
-          <div className="lg:hidden grid sm:grid-cols-2 gap-6">
+        {/* Horizontal timeline */}
+        <div className="relative max-w-[1000px] mx-auto">
+          {/* Connecting line */}
+          <div className="hidden lg:block absolute top-[36px] left-[40px] right-[40px] h-px bg-gradient-to-r from-zinc-200 via-zinc-300 to-zinc-200" />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-4">
             {steps.map((s, i) => (
               <motion.div
-                key={s.num}
-                initial={{ opacity: 0, y: 40 }}
+                key={s.title}
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-40px" }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="p-6 rounded-xl border border-zinc-200 bg-white shadow-sm"
+                transition={{ duration: 0.6, delay: i * 0.15 }}
+                className="relative text-center lg:text-center"
               >
-                <span className="text-[48px] font-semibold text-zinc-200 leading-none block mb-3 tracking-tighter">{s.num}</span>
-                <h3 className="text-[15px] font-medium text-zinc-900 mb-1.5">{s.title}</h3>
-                <p className="text-[13px] text-zinc-500 leading-relaxed">{s.text}</p>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Desktop: stacked cards that fan out */}
-          <div className="hidden lg:flex gap-5 items-start">
-            {steps.map((s, i) => (
-              <motion.div
-                key={s.num}
-                initial={{
-                  opacity: 0,
-                  x: -60 * i,
-                  scale: 0.92,
-                  rotateZ: -2 + i * 0.5,
-                }}
-                whileInView={{
-                  opacity: 1,
-                  x: 0,
-                  scale: 1,
-                  rotateZ: 0,
-                }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{
-                  duration: 1,
-                  delay: i * 0.25,
-                  ease: [0.25, 0.46, 0.45, 0.94],
-                }}
-                className="flex-1 min-h-[220px] flex flex-col p-6 rounded-xl border border-zinc-200 bg-white shadow-[0_2px_20px_-6px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_30px_-8px_rgba(0,0,0,0.12)] transition-shadow duration-300 relative"
-                style={{ zIndex: i + 1 }}
-              >
-                <span className="text-[48px] font-semibold text-zinc-200 leading-none block mb-3 tracking-tighter">{s.num}</span>
-                <h3 className="text-[15px] font-medium text-zinc-900 mb-1.5">{s.title}</h3>
-                <p className="text-[13px] text-zinc-500 leading-relaxed">{s.text}</p>
-                {i < steps.length - 1 && (
-                  <motion.span
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: 1.2 + i * 0.25 }}
-                    className="absolute top-1/2 -right-3.5 -translate-y-1/2 text-zinc-300 text-lg"
-                  >
-                    →
-                  </motion.span>
-                )}
+                {/* Icon circle */}
+                <div className="mx-auto w-[72px] h-[72px] rounded-2xl bg-white border-2 border-zinc-200 flex items-center justify-center mb-5 shadow-sm text-zinc-500 relative z-10">
+                  {s.icon}
+                </div>
+                <h3 className="text-[14px] font-semibold text-zinc-900 mb-2">{s.title}</h3>
+                <p className="text-[13px] text-zinc-500 leading-relaxed max-w-[180px] mx-auto">{s.text}</p>
               </motion.div>
             ))}
           </div>

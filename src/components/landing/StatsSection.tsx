@@ -25,44 +25,48 @@ function AnimatedCounter({ from = 0, value, suffix = "" }: { from?: number; valu
 
 export function StatsSection() {
   const metrics = [
-    { number: 10, suffix: "×", label: "faster response times" },
-    { number: 85, suffix: "%", label: "auto-resolved tickets" },
+    { number: 10, suffix: "×", label: "faster response times", from: 0 },
+    { number: 85, suffix: "%", label: "auto-resolved tickets", from: 0 },
     { number: 0, suffix: "", label: "emails missed", from: 100 },
     { number: 24, suffix: "/7", label: "always-on support", static: "24/7" },
   ];
 
   return (
-    <section className="py-24 sm:py-32 border-t border-zinc-100">
-      <div className="max-w-[1200px] mx-auto px-6">
-        <motion.h2
+    <section className="py-28 sm:py-36 relative overflow-hidden">
+      {/* Dark gradient background like Superhuman */}
+      <div className="absolute inset-0 bg-zinc-950" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(100,100,120,0.15)_0%,transparent_70%)]" />
+
+      <div className="max-w-[1200px] mx-auto px-6 relative z-10">
+        <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.5 }}
-          className="text-[clamp(1.8rem,3.5vw,2.75rem)] font-semibold tracking-[-0.03em] text-zinc-900 leading-[1.1] max-w-[500px] mb-20"
+          className="text-center mb-20"
         >
-          Support that actually scales.
-        </motion.h2>
+          <h2 className="text-[clamp(2rem,4vw,3.25rem)] font-semibold tracking-[-0.03em] text-white leading-[1.1] max-w-[600px] mx-auto">
+            Support that actually scales.
+          </h2>
+          <p className="mt-4 text-[16px] text-zinc-400 max-w-[440px] mx-auto">
+            Numbers that speak for themselves.
+          </p>
+        </motion.div>
 
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-12 sm:gap-0">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 max-w-[900px] mx-auto">
           {metrics.map((item, i) => (
             <motion.div
               key={item.label}
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.4, delay: i * 0.1 }}
-              className="sm:flex-1 text-center sm:text-left relative"
+              transition={{ duration: 0.5, delay: i * 0.1 }}
+              className="text-center p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm"
             >
-              {i > 0 && (
-                <div className="hidden sm:block absolute left-0 top-0 bottom-0 w-px bg-zinc-200" />
-              )}
-              <div className="sm:pl-8">
-                <span className="text-[clamp(2.5rem,5vw,4rem)] font-bold tracking-[-0.04em] text-zinc-900 leading-none">
-                  {item.static ? item.static : <AnimatedCounter from={item.from} value={item.number} suffix={item.suffix} />}
-                </span>
-                <p className="text-[14px] text-zinc-500 mt-2">{item.label}</p>
-              </div>
+              <span className="text-[clamp(2.5rem,5vw,3.5rem)] font-bold tracking-[-0.04em] text-white leading-none block">
+                {item.static ? item.static : <AnimatedCounter from={item.from} value={item.number} suffix={item.suffix} />}
+              </span>
+              <p className="text-[13px] text-zinc-400 mt-3 leading-relaxed">{item.label}</p>
             </motion.div>
           ))}
         </div>
