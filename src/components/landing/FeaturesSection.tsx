@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import ScrollStack, { ScrollStackItem } from "./ScrollStack";
 import { ClassificationMockup, ReplyMockup, DashboardMockup } from "./FeatureMockups";
 
 const featureBlocks = [
@@ -45,17 +44,18 @@ export function FeaturesSection() {
           </h2>
         </motion.div>
 
-        <ScrollStack
-          itemStackDistance={30}
-          baseScale={0.9}
-          itemScale={0.03}
-        >
+        <div className="space-y-8">
           {featureBlocks.map((block, i) => {
             const isReversed = i % 2 !== 0;
+
             return (
-              <ScrollStackItem
+              <motion.div
                 key={block.title}
-                itemClassName="bg-white border border-zinc-200/60 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.1)] !h-auto !rounded-2xl"
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.5, delay: i * 0.08 }}
+                className="bg-white border border-zinc-200/60 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.1)] rounded-2xl p-6 sm:p-8 lg:p-10"
               >
                 <div
                   className={`grid md:grid-cols-[1.2fr_0.8fr] gap-10 lg:gap-16 items-center ${
@@ -85,10 +85,10 @@ export function FeaturesSection() {
                     </div>
                   </div>
                 </div>
-              </ScrollStackItem>
+              </motion.div>
             );
           })}
-        </ScrollStack>
+        </div>
       </div>
     </section>
   );
