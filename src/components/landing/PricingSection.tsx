@@ -35,46 +35,55 @@ const plans = [
 
 export function PricingSection() {
   return (
-    <section id="pricing" className="py-24 sm:py-32 border-t border-zinc-100">
-      <div className="max-w-[1200px] mx-auto px-6">
+    <section id="pricing" className="py-28 sm:py-36 relative">
+      <div className="absolute inset-0 bg-gradient-to-b from-white to-zinc-50/40 pointer-events-none" />
+
+      <div className="max-w-[1200px] mx-auto px-6 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.5 }}
-          className="mb-16"
+          className="text-center mb-16"
         >
           <p className="text-[13px] font-medium tracking-[0.15em] uppercase text-zinc-400 mb-4">Pricing</p>
-          <h2 className="text-[clamp(1.8rem,3.5vw,2.75rem)] font-semibold tracking-[-0.03em] text-zinc-900 leading-[1.1]">
+          <h2 className="text-[clamp(2rem,4vw,3.25rem)] font-semibold tracking-[-0.03em] text-zinc-900 leading-[1.1]">
             Simple, transparent pricing.
           </h2>
-          <p className="mt-3 text-[15px] text-zinc-500">No hidden fees. No surprises.</p>
+          <p className="mt-4 text-[16px] text-zinc-500">No hidden fees. No surprises.</p>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-6 max-w-[960px]">
+        <div className="grid md:grid-cols-3 gap-6 max-w-[960px] mx-auto">
           {plans.map((plan, i) => (
             <motion.div
               key={plan.name}
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.4, delay: i * 0.08 }}
-              className={`p-8 rounded-lg border transition-all duration-300 ${
+              transition={{ duration: 0.5, delay: i * 0.1 }}
+              className={`p-8 rounded-2xl border transition-all duration-500 ${
                 plan.highlighted
-                  ? "border-zinc-300 shadow-lg hover:shadow-xl bg-white"
-                  : "border-zinc-100 hover:border-zinc-200 hover:shadow-md bg-white"
+                  ? "border-zinc-300 shadow-xl hover:shadow-2xl bg-white relative"
+                  : "border-zinc-200/80 hover:border-zinc-300 hover:shadow-lg bg-white"
               }`}
             >
-              <h3 className="text-[15px] font-medium text-zinc-900">{plan.name}</h3>
-              <p className="text-[12px] text-zinc-500 mt-1">{plan.description}</p>
+              {plan.highlighted && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                  <span className="px-4 py-1 rounded-full bg-zinc-900 text-white text-[11px] font-semibold tracking-wide">
+                    Most popular
+                  </span>
+                </div>
+              )}
+              <h3 className="text-[16px] font-semibold text-zinc-900">{plan.name}</h3>
+              <p className="text-[13px] text-zinc-500 mt-1">{plan.description}</p>
               <div className="mt-6 flex items-baseline gap-1">
-                <span className="text-[28px] font-semibold text-zinc-900 tracking-tight">{plan.price}</span>
-                <span className="text-[13px] text-zinc-400">{plan.period}</span>
+                <span className="text-[32px] font-bold text-zinc-900 tracking-tight">{plan.price}</span>
+                <span className="text-[14px] text-zinc-400">{plan.period}</span>
               </div>
-              <ul className="mt-6 space-y-2.5">
+              <ul className="mt-8 space-y-3">
                 {plan.features.map((f) => (
-                  <li key={f} className="flex items-center gap-2.5 text-[13px] text-zinc-600">
-                    <Check className="h-3 w-3 text-zinc-400 flex-shrink-0" />
+                  <li key={f} className="flex items-center gap-3 text-[13px] text-zinc-600">
+                    <Check className="h-3.5 w-3.5 text-zinc-400 flex-shrink-0" />
                     {f}
                   </li>
                 ))}
@@ -82,9 +91,9 @@ export function PricingSection() {
               <div className="mt-8">
                 <Link to="/auth">
                   <Button
-                    className={`w-full text-[13px] h-9 font-medium rounded-md transition-shadow duration-200 ${
+                    className={`w-full text-[13px] h-10 font-medium rounded-xl transition-all duration-300 ${
                       plan.highlighted
-                        ? "bg-zinc-900 text-white hover:bg-zinc-800 shadow-md hover:shadow-lg"
+                        ? "bg-zinc-900 text-white hover:bg-zinc-800 shadow-lg hover:shadow-xl"
                         : "bg-zinc-100 hover:bg-zinc-200 text-zinc-700"
                     }`}
                   >

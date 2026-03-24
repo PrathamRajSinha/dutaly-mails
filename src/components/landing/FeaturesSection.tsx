@@ -4,18 +4,21 @@ import { ClassificationMockup, ReplyMockup, DashboardMockup } from "./FeatureMoc
 const featureBlocks = [
   {
     visual: <ClassificationMockup />,
+    label: "Classification",
     title: "Automatic classification",
     text: "Every email is categorized by intent, urgency, and sentiment — before anyone opens it.",
     sub: "Intelligent escalation — low-confidence replies and angry customers are flagged instantly.",
   },
   {
     visual: <ReplyMockup />,
+    label: "AI Replies",
     title: "Smart reply generation",
     text: "AI drafts accurate replies using your knowledge base. Review, edit, or let confident ones send automatically.",
     sub: "Automation with control — set confidence thresholds per category. Define when AI acts and when it defers.",
   },
   {
     visual: <DashboardMockup />,
+    label: "Visibility",
     title: "Full visibility & tracking",
     text: "Each email becomes a trackable ticket with status, priority, SLA deadlines, and full history.",
     sub: "Slack integration — get notified when tickets need attention. Stay in the loop without switching tabs.",
@@ -24,53 +27,61 @@ const featureBlocks = [
 
 export function FeaturesSection() {
   return (
-    <section id="features" className="py-24 sm:py-32 border-t border-zinc-100">
-      <div className="max-w-[1200px] mx-auto px-6">
+    <section id="features" className="py-28 sm:py-36 relative">
+      <div className="absolute inset-0 bg-gradient-to-b from-zinc-50 via-white to-zinc-50/30 pointer-events-none" />
+
+      <div className="max-w-[1200px] mx-auto px-6 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.5 }}
-          className="mb-20"
+          className="text-center mb-24"
         >
           <p className="text-[13px] font-medium tracking-[0.15em] uppercase text-zinc-400 mb-4">Features</p>
-          <h2 className="text-[clamp(1.8rem,3.5vw,2.75rem)] font-semibold tracking-[-0.03em] text-zinc-900 leading-[1.1] max-w-[500px]">
+          <h2 className="text-[clamp(2rem,4vw,3.25rem)] font-semibold tracking-[-0.03em] text-zinc-900 leading-[1.1] max-w-[600px] mx-auto">
             A smarter way to handle customer emails.
           </h2>
         </motion.div>
 
-        <div className="space-y-24 sm:space-y-32">
+        <div className="space-y-32 sm:space-y-40">
           {featureBlocks.map((block, i) => {
             const isReversed = i % 2 !== 0;
             return (
               <motion.div
                 key={block.title}
-                initial={{ opacity: 0, y: 24 }}
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.5 }}
-                className={`grid md:grid-cols-[1.15fr_0.85fr] gap-12 lg:gap-20 items-center ${
+                transition={{ duration: 0.7 }}
+                className={`grid md:grid-cols-[1.2fr_0.8fr] gap-14 lg:gap-24 items-center ${
                   isReversed ? "md:[direction:rtl]" : ""
                 }`}
               >
                 {/* Visual */}
-                <div className="[direction:ltr] relative">
-                  <div className="shadow-[0_8px_40px_-12px_rgba(0,0,0,0.1)]  rounded-xl overflow-hidden">
+                <div className="[direction:ltr] relative group">
+                  <div className="absolute -inset-4 bg-gradient-to-br from-zinc-100/50 to-zinc-200/30 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                  <div className="relative shadow-[0_12px_48px_-12px_rgba(0,0,0,0.12)] hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.18)] rounded-xl overflow-hidden transition-shadow duration-500 border border-zinc-200/50">
                     {block.visual}
                   </div>
                 </div>
 
                 {/* Text */}
                 <div className="[direction:ltr] space-y-5">
-                  <h3 className="text-[clamp(1.4rem,2.5vw,1.75rem)] font-semibold text-zinc-900 tracking-[-0.02em] leading-[1.2]">
+                  <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase text-zinc-400 bg-zinc-100 px-3 py-1 rounded-full">
+                    {block.label}
+                  </span>
+                  <h3 className="text-[clamp(1.5rem,2.5vw,2rem)] font-semibold text-zinc-900 tracking-[-0.02em] leading-[1.2]">
                     {block.title}
                   </h3>
                   <p className="text-[15px] text-zinc-500 leading-[1.8] max-w-[440px]">
                     {block.text}
                   </p>
-                  <p className="text-[14px] text-zinc-400 leading-[1.7] max-w-[440px] border-l-2 border-zinc-200 pl-4">
-                    {block.sub}
-                  </p>
+                  <div className="border-l-2 border-zinc-200 pl-4">
+                    <p className="text-[14px] text-zinc-400 leading-[1.7] max-w-[440px]">
+                      {block.sub}
+                    </p>
+                  </div>
                 </div>
               </motion.div>
             );

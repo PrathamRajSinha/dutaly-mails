@@ -29,7 +29,7 @@ function TypedWord({ word, delay = 0.6 }: { word: string; delay?: number }) {
   }, [isInView, word, delay]);
 
   return (
-    <span ref={ref} className="text-zinc-400">
+    <span ref={ref} className="bg-gradient-to-r from-zinc-400 to-zinc-500 bg-clip-text text-transparent">
       {displayed}
       {showCursor && isInView && (
         <span className="inline-block w-[3px] h-[0.85em] bg-zinc-400 ml-0.5 align-baseline animate-pulse" />
@@ -43,13 +43,30 @@ export function HeroSection() {
   const ctaLink = user ? "/dashboard" : "/auth";
 
   return (
-    <section className="pt-32 pb-0 sm:pt-40">
-      <div className="max-w-[1200px] mx-auto px-6">
+    <section className="pt-36 pb-0 sm:pt-44 relative overflow-hidden">
+      {/* Subtle radial gradient behind hero */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[600px] bg-gradient-to-b from-zinc-100/80 via-transparent to-transparent rounded-full blur-3xl" />
+      </div>
+
+      <div className="max-w-[1200px] mx-auto px-6 relative z-10 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="mb-6"
+        >
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-zinc-100 border border-zinc-200 text-[12px] font-medium text-zinc-500 tracking-wide">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            AI-powered email support
+          </span>
+        </motion.div>
+
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="text-[clamp(2.8rem,6vw,5rem)] font-semibold tracking-[-0.04em] text-zinc-900 leading-[1.05] max-w-[800px]"
+          transition={{ duration: 1, delay: 0.15, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="text-[clamp(2.8rem,6.5vw,5.5rem)] font-semibold tracking-[-0.04em] text-zinc-900 leading-[1.05] mx-auto max-w-[900px]"
         >
           Every customer email.
           <br />
@@ -59,8 +76,8 @@ export function HeroSection() {
         <motion.p
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="mt-6 text-[18px] text-zinc-500 leading-[1.7] max-w-[520px]"
+          transition={{ duration: 1, delay: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="mt-6 text-[17px] sm:text-[19px] text-zinc-500 leading-[1.7] max-w-[560px] mx-auto"
         >
           Automatically read incoming emails, create tickets, generate replies,
           and resolve repetitive queries — while keeping your team in control.
@@ -69,16 +86,16 @@ export function HeroSection() {
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="mt-8 flex items-center gap-4"
+          transition={{ duration: 1, delay: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="mt-10 flex items-center justify-center gap-5"
         >
           <Link to={ctaLink}>
-            <Button className="h-10 px-5 text-[13px] bg-zinc-900 text-white hover:bg-zinc-800 rounded-md font-medium shadow-md hover:shadow-lg transition-shadow duration-200">
+            <Button className="h-11 px-6 text-[14px] bg-zinc-900 text-white hover:bg-zinc-800 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300">
               Start free trial
-              <ArrowRight className="ml-2 h-3.5 w-3.5" />
+              <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
-          <a href="#how-it-works" className="text-[13px] text-zinc-500 hover:text-zinc-900 transition-colors">
+          <a href="#how-it-works" className="text-[14px] text-zinc-500 hover:text-zinc-900 transition-colors font-medium">
             See how it works →
           </a>
         </motion.div>
@@ -86,14 +103,14 @@ export function HeroSection() {
 
       {/* Product screenshot mockup */}
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.2, delay: 1, ease: [0.25, 0.46, 0.45, 0.94] }}
-        className="mt-16 sm:mt-20 max-w-[1200px] mx-auto px-6"
+        transition={{ duration: 1.4, delay: 1.1, ease: [0.25, 0.46, 0.45, 0.94] }}
+        className="mt-20 sm:mt-24 max-w-[1100px] mx-auto px-6"
       >
-        <div className="rounded-t-xl border border-b-0 border-zinc-200 bg-zinc-50 overflow-hidden shadow-[0_8px_60px_-16px_rgba(0,0,0,0.15)]">
+        <div className="rounded-t-2xl border border-b-0 border-zinc-200 bg-zinc-50 overflow-hidden shadow-[0_20px_80px_-20px_rgba(0,0,0,0.2)]">
           {/* Window chrome */}
-          <div className="flex items-center gap-2 px-4 py-3 border-b border-zinc-200 bg-zinc-100">
+          <div className="flex items-center gap-2 px-4 py-3 border-b border-zinc-200 bg-zinc-100/80">
             <div className="flex gap-1.5">
               <div className="w-[10px] h-[10px] rounded-full bg-[#FF5F57]" />
               <div className="w-[10px] h-[10px] rounded-full bg-[#FEBC2E]" />
