@@ -13,8 +13,8 @@ const featureBlocks = [
     visual: <ReplyMockup />,
     label: "AI Replies",
     title: "Smart reply generation",
-    text: "AI drafts accurate replies using your knowledge base. Review, edit, or let confident ones send automatically.",
-    sub: "Automation with control — set confidence thresholds per category. Define when AI acts and when it defers.",
+    text: "AI drafts accurate replies using your knowledge base. Review and edit them — or let high-confidence ones send automatically, no human needed.",
+    sub: "Full control over automation — set confidence thresholds per category. Replies above the threshold auto-send; the rest queue for your review.",
   },
   {
     visual: <DashboardMockup />,
