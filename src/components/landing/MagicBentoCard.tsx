@@ -65,8 +65,8 @@ export function MagicBentoCard({
       className={`relative rounded-2xl overflow-hidden ${className}`}
       style={{
         transform: isHovered
-          ? `perspective(800px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) scale(1.015)`
-          : "perspective(800px) rotateX(0deg) rotateY(0deg) scale(1)",
+          ? "scale(1.015)"
+          : "scale(1)",
         transition: "transform 0.25s ease-out",
         willChange: "transform",
       }}
