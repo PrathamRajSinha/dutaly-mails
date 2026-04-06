@@ -15,6 +15,7 @@ import Templates from "./pages/Templates";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import Landing from "./pages/Landing";
+import Pricing from "./pages/Pricing";
 import ChoosePlan from "./pages/ChoosePlan";
 import Inbox from "./pages/Inbox";
 import ResetPassword from "./pages/ResetPassword";
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/pricing" element={<Pricing />} />
             <Route path="/choose-plan" element={<ChoosePlan />} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route
