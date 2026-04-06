@@ -647,9 +647,9 @@ export default function EmailQueue() {
         </div>
       </div>
 
-      {/* Search */}
-      <div className="mb-6">
-        <div className="relative max-w-md">
+      {/* Search & Date Filter */}
+      <div className="mb-6 flex flex-wrap items-center gap-3">
+        <div className="relative max-w-md flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search emails..."
@@ -658,6 +658,74 @@ export default function EmailQueue() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
+
+        {/* Date presets */}
+        <div className="flex items-center gap-1">
+          {[
+            { label: "All", value: "all" },
+            { label: "Today", value: "today" },
+            { label: "7 days", value: "7d" },
+            { label: "30 days", value: "30d" },
+          ].map((p) => (
+            <Button
+              key={p.value}
+              variant={datePreset === p.value ? "default" : "outline"}
+              size="sm"
+              className="h-8 text-xs"
+              onClick={() => applyDatePreset(p.value)}
+            >
+              {p.label}
+            </Button>
+          ))}
+        </div>
+
+        {/* Custom date range */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5">
+              <CalendarIcon className="h-3.5 w-3.5" />
+              {dateFrom ? format(dateFrom, "MMM d") : "From"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={dateFrom}
+              onSelect={(d) => { setDateFrom(d); setDatePreset("custom"); }}
+              initialFocus
+              className="p-3 pointer-events-auto"
+            />
+          </PopoverContent>
+        </Popover>
+        <span className="text-xs text-muted-foreground">–</span>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5">
+              <CalendarIcon className="h-3.5 w-3.5" />
+              {dateTo ? format(dateTo, "MMM d") : "To"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={dateTo}
+              onSelect={(d) => { setDateTo(d); setDatePreset("custom"); }}
+              initialFocus
+              className="p-3 pointer-events-auto"
+            />
+          </PopoverContent>
+        </Popover>
+
+        {(dateFrom || dateTo) && datePreset === "custom" && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 text-xs text-muted-foreground"
+            onClick={() => applyDatePreset("all")}
+          >
+            Clear
+          </Button>
+        )}
       </div>
 
       {/* Tabs */}
