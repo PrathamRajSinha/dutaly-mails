@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ClassificationMockup, ReplyMockup, DashboardMockup } from "./FeatureMockups";
+import { ClassificationMockup, ReplyMockup, DashboardMockup, AskAnythingMockup } from "./FeatureMockups";
 
 const featureBlocks = [
   {
@@ -22,6 +22,13 @@ const featureBlocks = [
     title: "Full visibility & tracking",
     text: "Each email becomes a trackable ticket with status, priority, SLA deadlines, and full history.",
     sub: "Slack integration — get notified when tickets need attention. Stay in the loop without switching tabs.",
+  },
+  {
+    visual: <AskAnythingMockup />,
+    label: "Intelligence",
+    title: "Ask anything about your emails",
+    text: "Chat with AI about your inbox. Ask questions, get instant answers with direct references to the emails behind every insight.",
+    sub: "Filter by date range, click referenced emails to see full details — subject, body, confidence score, and AI-generated reply.",
   },
 ];
 

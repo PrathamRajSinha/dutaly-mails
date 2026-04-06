@@ -23,14 +23,6 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-function AskComingSoon() {
-  const navigate = useNavigate();
-  useEffect(() => {
-    toast.info("Ask Me Anything is coming soon!");
-    navigate("/dashboard", { replace: true });
-  }, [navigate]);
-  return null;
-}
 
 const queryClient = new QueryClient();
 
@@ -59,7 +51,7 @@ const App = () => (
               <Route path="/instructions" element={<Instructions />} />
               <Route path="/tickets" element={<Tickets />} />
               {/* Email Queue merged into Tickets */}
-              <Route path="/ask" element={<AskComingSoon />} />
+              <Route path="/ask" element={<AskEmails />} />
               <Route path="/templates" element={<Templates />} />
               <Route path="/settings" element={<Settings />} />
             </Route>
