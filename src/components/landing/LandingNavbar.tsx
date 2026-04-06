@@ -5,10 +5,10 @@ import { Menu, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 const navLinks = [
-  { label: "Features", href: "#features" },
-  { label: "How It Works", href: "#how-it-works" },
-  { label: "Use Cases", href: "#use-cases" },
-  { label: "Pricing", href: "#pricing" },
+  { label: "features", href: "#features" },
+  { label: "how it works", href: "#how-it-works" },
+  { label: "use cases", href: "#use-cases" },
+  { label: "pricing", href: "#pricing" },
 ];
 
 export function LandingNavbar() {
@@ -17,10 +17,10 @@ export function LandingNavbar() {
   const ctaLink = user ? "/dashboard" : "/auth";
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-xl border-b border-zinc-200/60">
+    <header className="fixed top-0 left-0 right-0 z-50 border-b" style={{ background: "#0A0A0F", borderColor: "rgba(255,255,255,0.08)" }}>
       <div className="max-w-[1200px] mx-auto px-6 h-14 flex items-center justify-between">
-        <Link to="/" className="text-[16px] font-bold text-zinc-900 tracking-tight">
-          Dutaly
+        <Link to="/" className="text-[16px] font-bold tracking-tight" style={{ color: "#E8E4FF" }}>
+          dutaly
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">
@@ -28,7 +28,8 @@ export function LandingNavbar() {
             <a
               key={link.label}
               href={link.href}
-              className="text-[13px] text-zinc-500 hover:text-zinc-900 transition-colors duration-200 font-medium"
+              className="text-[13px] font-medium transition-colors duration-200 hover:opacity-80"
+              style={{ color: "rgba(255,255,255,0.5)" }}
             >
               {link.label}
             </a>
@@ -38,17 +39,17 @@ export function LandingNavbar() {
         <div className="hidden md:flex items-center gap-4">
           {user ? (
             <Link to="/dashboard">
-              <Button className="bg-zinc-900 text-white hover:bg-zinc-800 text-[13px] font-medium h-9 px-5 rounded-lg shadow-sm hover:shadow-md transition-all duration-200">
+              <Button className="text-[13px] font-medium h-9 px-5 text-white border-0" style={{ background: "#7C6FE0", borderRadius: "6px" }}>
                 Dashboard
               </Button>
             </Link>
           ) : (
             <>
-              <Link to="/auth" className="text-[13px] text-zinc-500 hover:text-zinc-900 transition-colors font-medium">
+              <Link to="/auth" className="text-[13px] font-medium transition-colors" style={{ color: "rgba(255,255,255,0.5)" }}>
                 Log in
               </Link>
               <Link to="/auth">
-                <Button className="bg-zinc-900 text-white hover:bg-zinc-800 text-[13px] font-medium h-9 px-5 rounded-lg shadow-sm hover:shadow-md transition-all duration-200">
+                <Button className="text-[13px] font-medium h-9 px-5 text-white border-0" style={{ background: "#7C6FE0", borderRadius: "6px" }}>
                   Sign up
                 </Button>
               </Link>
@@ -56,25 +57,26 @@ export function LandingNavbar() {
           )}
         </div>
 
-        <button className="md:hidden text-zinc-500" onClick={() => setMobileOpen(!mobileOpen)}>
+        <button className="md:hidden" style={{ color: "rgba(255,255,255,0.5)" }} onClick={() => setMobileOpen(!mobileOpen)}>
           {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
 
       {mobileOpen && (
-        <div className="md:hidden bg-white/95 backdrop-blur-xl border-t border-zinc-200 px-6 py-5 space-y-3">
+        <div className="md:hidden px-6 py-5 space-y-3 border-t" style={{ background: "#0A0A0F", borderColor: "rgba(255,255,255,0.08)" }}>
           {navLinks.map((link) => (
             <a
               key={link.label}
               href={link.href}
-              className="block text-[15px] text-zinc-500 hover:text-zinc-900 font-medium"
+              className="block text-[15px] font-medium"
+              style={{ color: "rgba(255,255,255,0.5)" }}
               onClick={() => setMobileOpen(false)}
             >
               {link.label}
             </a>
           ))}
           <Link to={ctaLink} className="block pt-2">
-            <Button className="w-full bg-zinc-900 text-white hover:bg-zinc-800 rounded-lg font-medium">
+            <Button className="w-full text-white font-medium" style={{ background: "#7C6FE0", borderRadius: "6px" }}>
               {user ? "Dashboard" : "Sign up"}
             </Button>
           </Link>

@@ -35,9 +35,7 @@ const plans = [
 
 export function PricingSection() {
   return (
-    <section id="pricing" className="py-28 sm:py-36 relative">
-      <div className="absolute inset-0 bg-gradient-to-b from-white to-zinc-50/40 pointer-events-none" />
-
+    <section id="pricing" className="py-28 sm:py-36 relative" style={{ background: "#F8F7FF" }}>
       <div className="max-w-[1200px] mx-auto px-6 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -69,7 +67,7 @@ export function PricingSection() {
             >
               {plan.highlighted && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="px-4 py-1 rounded-full bg-zinc-900 text-white text-[11px] font-semibold tracking-wide">
+                  <span className="px-4 py-1 rounded-full text-white text-[11px] font-semibold tracking-wide" style={{ background: "#7C6FE0" }}>
                     Most popular
                   </span>
                 </div>
@@ -83,7 +81,7 @@ export function PricingSection() {
               <ul className="mt-8 space-y-3">
                 {plan.features.map((f) => (
                   <li key={f} className="flex items-center gap-3 text-[13px] text-zinc-600">
-                    <Check className="h-3.5 w-3.5 text-zinc-400 flex-shrink-0" />
+                    <Check className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "#7C6FE0" }} />
                     {f}
                   </li>
                 ))}
@@ -91,11 +89,12 @@ export function PricingSection() {
               <div className="mt-8">
                 <Link to="/auth">
                   <Button
-                    className={`w-full text-[13px] h-10 font-medium rounded-xl transition-all duration-300 ${
+                    className={`w-full text-[13px] h-10 font-medium transition-all duration-300 ${
                       plan.highlighted
-                        ? "bg-zinc-900 text-white hover:bg-zinc-800 shadow-lg hover:shadow-xl"
+                        ? "text-white shadow-lg hover:shadow-xl"
                         : "bg-zinc-100 hover:bg-zinc-200 text-zinc-700"
                     }`}
+                    style={plan.highlighted ? { background: "#7C6FE0", borderRadius: "6px" } : { borderRadius: "6px" }}
                   >
                     {plan.cta}
                   </Button>

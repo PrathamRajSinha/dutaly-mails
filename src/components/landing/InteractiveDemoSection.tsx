@@ -11,9 +11,7 @@ export function InteractiveDemoSection() {
   ];
 
   return (
-    <section id="how-it-works" className="py-28 sm:py-36 relative">
-      <div className="absolute inset-0 bg-gradient-to-b from-white to-zinc-50/50 pointer-events-none" />
-
+    <section id="how-it-works" className="py-28 sm:py-36 relative" style={{ background: "#F8F7FF" }}>
       <div className="max-w-[1200px] mx-auto px-6 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -24,14 +22,13 @@ export function InteractiveDemoSection() {
         >
           <p className="text-[13px] font-medium tracking-[0.15em] uppercase text-zinc-400 mb-4">How it works</p>
           <h2 className="text-[clamp(2rem,4vw,3.25rem)] font-semibold tracking-[-0.03em] text-zinc-900 leading-[1.1] max-w-[600px] mx-auto">
-            From email to <span className="text-primary">resolution.</span>
+            From email to <span style={{ color: "#7C6FE0" }}>resolution.</span>
           </h2>
         </motion.div>
 
         {/* Horizontal timeline */}
         <div className="relative max-w-[1000px] mx-auto">
-          {/* Connecting line */}
-          <div className="hidden lg:block absolute top-[36px] left-[40px] right-[40px] h-px bg-gradient-to-r from-zinc-200 via-zinc-300 to-zinc-200" />
+          <div className="hidden lg:block absolute top-[36px] left-[40px] right-[40px] h-px bg-zinc-200" />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-4">
             {steps.map((s, i) => (
@@ -41,10 +38,9 @@ export function InteractiveDemoSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-40px" }}
                 transition={{ duration: 0.6, delay: i * 0.15 }}
-                className="relative text-center lg:text-center"
+                className="relative text-center"
               >
-                {/* Icon circle */}
-                <div className="mx-auto w-[72px] h-[72px] rounded-2xl bg-white border-2 border-zinc-200 flex items-center justify-center mb-5 shadow-sm text-primary relative z-10">
+                <div className="mx-auto w-[72px] h-[72px] rounded-2xl bg-white border-2 border-zinc-200 flex items-center justify-center mb-5 shadow-sm relative z-10" style={{ color: "#7C6FE0" }}>
                   {s.icon}
                 </div>
                 <h3 className="text-[14px] font-semibold text-zinc-900 mb-2">{s.title}</h3>
