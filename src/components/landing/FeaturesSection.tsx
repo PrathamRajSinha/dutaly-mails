@@ -1,98 +1,113 @@
 import { motion } from "framer-motion";
 import { ClassificationMockup, ReplyMockup, DashboardMockup, AskAnythingMockup } from "./FeatureMockups";
 
-const featureBlocks = [
-  {
-    visual: <ClassificationMockup />,
-    label: "Classification",
-    title: "Automatic classification",
-    text: <>Every email is categorized by intent, urgency, and sentiment — before anyone opens it.</>,
-    sub: <>Intelligent escalation — low-confidence replies and angry customers are flagged instantly.</>,
-  },
-  {
-    visual: <ReplyMockup />,
-    label: "AI Replies",
-    title: "Smart reply generation",
-    text: <>AI drafts accurate replies <em>powered by your rules</em>. Review and edit them — or let high-confidence ones send automatically.</>,
-    sub: <>Full control over automation — set confidence thresholds per category. Replies above the threshold auto-send; the rest queue for review.</>,
-  },
-  {
-    visual: <DashboardMockup />,
-    label: "Visibility",
-    title: "Full visibility & tracking",
-    text: <>Each email becomes a trackable ticket with status, priority, SLA deadlines, and full history.</>,
-    sub: <>Slack integration — get notified when tickets need attention. Stay in the loop without switching tabs.</>,
-  },
-  {
-    visual: <AskAnythingMockup />,
-    label: "Intelligence",
-    title: "Ask anything about your emails",
-    text: <>Chat with AI about your inbox. Ask questions, get instant answers with direct references to the emails behind every insight.</>,
-    sub: <>Filter by date range, click referenced emails to see full details — subject, body, confidence score, and AI-generated reply.</>,
-  },
-];
+const fade = {
+  initial: { opacity: 0, y: 20 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, margin: "-60px" },
+  transition: { duration: 0.5 },
+};
 
 export function FeaturesSection() {
   return (
     <section id="features" className="py-28 sm:py-36 relative" style={{ background: "#FFFFFF" }}>
       <div className="max-w-[1200px] mx-auto px-6 relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-16"
-        >
+        <motion.div {...fade} className="text-center mb-16">
           <p className="text-[13px] font-medium tracking-[0.15em] uppercase text-zinc-400 mb-4">Features</p>
           <h2 className="text-[clamp(2rem,4vw,3.25rem)] font-semibold tracking-[-0.03em] text-zinc-900 leading-[1.1] max-w-[600px] mx-auto">
             A <span style={{ color: "#7C6FE0" }}>smarter</span> way to handle customer emails.
           </h2>
         </motion.div>
 
-        <div className="space-y-8">
-          {featureBlocks.map((block, i) => {
-            const isReversed = i % 2 !== 0;
+        {/* Bento grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          {/* Classification — wide */}
+          <motion.div
+            {...fade}
+            transition={{ duration: 0.5, delay: 0.05 }}
+            className="lg:col-span-7 rounded-2xl border border-zinc-200/60 bg-zinc-50/50 p-6 sm:p-8 flex flex-col"
+          >
+            <div className="mb-5">
+              <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full mb-3" style={{ background: "rgba(124,111,224,0.1)", color: "#7C6FE0" }}>
+                Classification
+              </span>
+              <h3 className="text-[clamp(1.25rem,2vw,1.5rem)] font-semibold text-zinc-900 tracking-[-0.02em] leading-[1.2] mb-2">
+                Automatic classification
+              </h3>
+              <p className="text-[14px] text-zinc-500 leading-[1.7] max-w-[440px]">
+                Every email is categorized by intent, urgency, and sentiment — before anyone opens it.
+              </p>
+            </div>
+            <div className="flex-1 rounded-xl overflow-hidden border border-zinc-200/50">
+              <ClassificationMockup />
+            </div>
+          </motion.div>
 
-            return (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.5, delay: i * 0.08 }}
-                className="bg-white border border-zinc-200/60 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.1)] rounded-2xl p-6 sm:p-8 lg:p-10"
-              >
-                <div
-                  className={`grid md:grid-cols-[1.2fr_0.8fr] gap-10 lg:gap-16 items-center ${
-                    isReversed ? "md:[direction:rtl]" : ""
-                  }`}
-                >
-                  <div className="[direction:ltr] relative group">
-                    <div className="relative rounded-xl overflow-hidden border border-zinc-200/50">
-                      {block.visual}
-                    </div>
-                  </div>
+          {/* AI Replies — narrow */}
+          <motion.div
+            {...fade}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="lg:col-span-5 rounded-2xl border border-zinc-200/60 bg-zinc-50/50 p-6 sm:p-8 flex flex-col"
+          >
+            <div className="mb-5">
+              <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full mb-3" style={{ background: "rgba(124,111,224,0.1)", color: "#7C6FE0" }}>
+                AI Replies
+              </span>
+              <h3 className="text-[clamp(1.25rem,2vw,1.5rem)] font-semibold text-zinc-900 tracking-[-0.02em] leading-[1.2] mb-2">
+                Smart reply & auto-send
+              </h3>
+              <p className="text-[14px] text-zinc-500 leading-[1.7] max-w-[440px]">
+                AI drafts replies <em>powered by your rules</em>. High-confidence ones send automatically — the rest queue for review.
+              </p>
+            </div>
+            <div className="flex-1 rounded-xl overflow-hidden border border-zinc-200/50">
+              <ReplyMockup />
+            </div>
+          </motion.div>
 
-                  <div className="[direction:ltr] space-y-5">
-                    <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full" style={{ background: "rgba(124,111,224,0.1)", color: "#7C6FE0" }}>
-                      {block.label}
-                    </span>
-                    <h3 className="text-[clamp(1.5rem,2.5vw,2rem)] font-semibold text-zinc-900 tracking-[-0.02em] leading-[1.2]">
-                      {block.title}
-                    </h3>
-                    <p className="text-[15px] text-zinc-500 leading-[1.8] max-w-[440px]">
-                      {block.text}
-                    </p>
-                    <div className="border-l-2 border-zinc-200 pl-4">
-                      <p className="text-[14px] text-zinc-400 leading-[1.7] max-w-[440px]">
-                        {block.sub}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })}
+          {/* Ask Anything — narrow */}
+          <motion.div
+            {...fade}
+            transition={{ duration: 0.5, delay: 0.15 }}
+            className="lg:col-span-5 rounded-2xl border border-zinc-200/60 bg-zinc-50/50 p-6 sm:p-8 flex flex-col"
+          >
+            <div className="mb-5">
+              <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full mb-3" style={{ background: "rgba(124,111,224,0.1)", color: "#7C6FE0" }}>
+                Intelligence
+              </span>
+              <h3 className="text-[clamp(1.25rem,2vw,1.5rem)] font-semibold text-zinc-900 tracking-[-0.02em] leading-[1.2] mb-2">
+                Ask anything about your emails
+              </h3>
+              <p className="text-[14px] text-zinc-500 leading-[1.7] max-w-[440px]">
+                Chat with AI about your inbox. Get instant answers with direct references to the emails behind every insight.
+              </p>
+            </div>
+            <div className="flex-1 rounded-xl overflow-hidden border border-zinc-200/50">
+              <AskAnythingMockup />
+            </div>
+          </motion.div>
+
+          {/* Dashboard — wide */}
+          <motion.div
+            {...fade}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="lg:col-span-7 rounded-2xl border border-zinc-200/60 bg-zinc-50/50 p-6 sm:p-8 flex flex-col"
+          >
+            <div className="mb-5">
+              <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full mb-3" style={{ background: "rgba(124,111,224,0.1)", color: "#7C6FE0" }}>
+                Visibility
+              </span>
+              <h3 className="text-[clamp(1.25rem,2vw,1.5rem)] font-semibold text-zinc-900 tracking-[-0.02em] leading-[1.2] mb-2">
+                Full visibility & tracking
+              </h3>
+              <p className="text-[14px] text-zinc-500 leading-[1.7] max-w-[440px]">
+                Each email becomes a trackable ticket with status, priority, SLA deadlines, and full history.
+              </p>
+            </div>
+            <div className="flex-1 rounded-xl overflow-hidden border border-zinc-200/50">
+              <DashboardMockup />
+            </div>
+          </motion.div>
         </div>
       </div>
     </section>
