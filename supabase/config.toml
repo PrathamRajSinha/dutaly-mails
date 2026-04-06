@@ -36,3 +36,6 @@ verify_jwt = false
 
 [functions.dispatch-integration-events]
 verify_jwt = false
+
+[functions.generate-reply]
+verify_jwt = false

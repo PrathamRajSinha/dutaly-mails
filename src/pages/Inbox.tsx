@@ -28,6 +28,8 @@ import {
   CheckCircle2,
   Mail,
   Filter,
+  Sparkles,
+  Wand2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -784,8 +786,35 @@ function EmailCard({
   const [activeTemplate, setActiveTemplate] = useState<EmailTemplate | null>(null);
   const [attachments, setAttachments] = useState<{ name: string; url: string }[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { user } = useAuth();
+  const { user, session } = useAuth();
+
+  const handleHelpMeWrite = async () => {
+    setIsGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-reply", {
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+        body: {
+          subject: email.subject,
+          body: email.body,
+          from_name: email.from_name,
+          from_address: email.from_address,
+          intent: email.intent,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const reply = data?.reply || "";
+      if (isEditing) setEditedReply(reply);
+      else { setComposedReply(reply); setIsComposing(true); }
+      toast.success("AI draft generated");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to generate reply");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const confidencePercent = email.confidence_score ? Math.round(email.confidence_score * 100) : null;
   const hasReply = !!email.suggested_reply;
@@ -918,7 +947,13 @@ function EmailCard({
                 {isComposing ? "Compose Reply" : "No AI reply generated"}
               </h4>
               {isComposing ? (
-                <Textarea className="min-h-[120px]" placeholder="Write your reply here..." value={composedReply} onChange={(e) => setComposedReply(e.target.value)} />
+                <div className="space-y-2">
+                  <Textarea className="min-h-[120px]" placeholder="Write your reply here..." value={composedReply} onChange={(e) => setComposedReply(e.target.value)} />
+                  <Button variant="outline" size="sm" onClick={handleHelpMeWrite} disabled={isGenerating} className="gap-1.5">
+                    {isGenerating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" />}
+                    {isGenerating ? "Writing..." : "Help me write"}
+                  </Button>
+                </div>
               ) : (
                 <p className="text-sm text-muted-foreground">No suggested reply. Compose one manually or ignore.</p>
               )}
@@ -982,6 +1017,10 @@ function EmailCard({
                 <>
                   <Button size="sm" onClick={onReopen} disabled={isPending}>
                     <RefreshCw className="mr-1.5 h-3.5 w-3.5" />Reopen
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => { handleHelpMeWrite(); }}>
+                    {isGenerating ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Wand2 className="mr-1.5 h-3.5 w-3.5" />}
+                    {isGenerating ? "Writing..." : "Help me write"}
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => setIsComposing(true)}>
                     <Edit className="mr-1.5 h-3.5 w-3.5" />Reply Anyway
