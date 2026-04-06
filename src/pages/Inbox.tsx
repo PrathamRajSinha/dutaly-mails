@@ -806,6 +806,7 @@ function EmailCard({
   onIgnore,
   onEditSend,
   onAddToKB,
+  onReopen,
   isPending,
   readOnly = false,
 }: {
