@@ -24,16 +24,27 @@ export function LandingNavbar() {
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              className="text-[13px] font-medium transition-colors duration-200 hover:opacity-80"
-              style={{ color: "rgba(255,255,255,0.5)" }}
-            >
-              {link.label}
-            </a>
-          ))}
+          {navLinks.map((link) =>
+            link.href.startsWith("/") ? (
+              <Link
+                key={link.label}
+                to={link.href}
+                className="text-[13px] font-medium transition-colors duration-200 hover:opacity-80"
+                style={{ color: "rgba(255,255,255,0.5)" }}
+              >
+                {link.label}
+              </Link>
+            ) : (
+              <a
+                key={link.label}
+                href={link.href}
+                className="text-[13px] font-medium transition-colors duration-200 hover:opacity-80"
+                style={{ color: "rgba(255,255,255,0.5)" }}
+              >
+                {link.label}
+              </a>
+            )
+          )}
         </nav>
 
         <div className="hidden md:flex items-center gap-4">
