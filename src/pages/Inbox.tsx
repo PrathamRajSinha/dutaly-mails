@@ -763,7 +763,7 @@ function EmailsView({ searchQuery, onSearchChange }: { searchQuery: string; onSe
               <TabsContent value="needs_review" className="mt-0">{renderEmailList(needsReview)}</TabsContent>
               <TabsContent value="drafted" className="mt-0">{renderEmailList(drafted)}</TabsContent>
               <TabsContent value="sent" className="mt-0">{renderEmailList(sent, true)}</TabsContent>
-              <TabsContent value="ignored" className="mt-0">{renderEmailList(ignored, true)}</TabsContent>
+              <TabsContent value="ignored" className="mt-0">{renderEmailList(ignored)}</TabsContent>
             </div>
           </ScrollArea>
         </Tabs>
