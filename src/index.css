@@ -167,3 +167,8 @@ All colors MUST be HSL.
 .animate-marquee {
   animation: marquee 30s linear infinite;
 }
+
+@keyframes magic-ripple {
+  0% { width: 0; height: 0; opacity: 0.5; }
+  100% { width: 300px; height: 300px; opacity: 0; }
+}
