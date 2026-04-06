@@ -435,10 +435,12 @@ function TicketsView({ searchQuery, onSearchChange }: { searchQuery: string; onS
             <div className="text-center">
               <Inbox className="h-12 w-12 mx-auto mb-3 opacity-50" />
               <p className="text-sm">Select a ticket to view details</p>
+              <p className="text-xs mt-2 opacity-50">Press <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px] font-mono">?</kbd> for keyboard shortcuts</p>
             </div>
           </div>
         )}
       </div>
+      <KeyboardShortcutsDialog open={helpOpen} onOpenChange={setHelpOpen} />
     </div>
   );
 }
