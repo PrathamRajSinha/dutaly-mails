@@ -407,6 +407,9 @@ export default function EmailQueue() {
     return params.get("tab") || "needs_review";
   });
   const [autoFetchEnabled, setAutoFetchEnabled] = useState(false);
+  const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
+  const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
+  const [datePreset, setDatePreset] = useState<string>("all");
   const isFetchingRef = useRef(false);
 
   const handleAutoFetch = useCallback(async () => {
