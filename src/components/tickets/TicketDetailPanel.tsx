@@ -47,6 +47,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { TicketStatus, TicketPriority } from "@/hooks/useTickets";
+import { QuickReplyChips } from "@/components/inbox/QuickReplyChips";
+import { SnoozeMenu } from "@/components/inbox/SnoozeMenu";
+import { SendLaterMenu } from "@/components/inbox/SendLaterMenu";
 
 const statusOptions: { value: TicketStatus; label: string; icon: React.ReactNode }[] = [
   { value: "open", label: "Open", icon: <AlertCircle className="h-3.5 w-3.5" /> },
