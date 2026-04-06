@@ -816,6 +816,7 @@ function EmailCard({
   onIgnore: () => void;
   onEditSend: (reply: string) => void;
   onAddToKB: () => void;
+  onReopen: () => void;
   isPending: boolean;
   readOnly?: boolean;
 }) {
