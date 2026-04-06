@@ -49,7 +49,7 @@ export function InteractiveDemoSection() {
   });
 
   return (
-    <section id="how-it-works" ref={sectionRef} className="relative" style={{ background: "#0A0A0F", height: `${(steps.length + 1) * 100}vh` }}>
+    <section id="how-it-works" ref={sectionRef} className="relative" style={{ background: "#0A0A0F", height: `${steps.length * 100}vh` }}>
       {/* Sticky container */}
       <div className="sticky top-0 h-screen flex flex-col overflow-hidden">
         {/* Header */}
