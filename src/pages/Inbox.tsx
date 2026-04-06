@@ -786,8 +786,35 @@ function EmailCard({
   const [activeTemplate, setActiveTemplate] = useState<EmailTemplate | null>(null);
   const [attachments, setAttachments] = useState<{ name: string; url: string }[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { user } = useAuth();
+  const { user, session } = useAuth();
+
+  const handleHelpMeWrite = async () => {
+    setIsGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-reply", {
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+        body: {
+          subject: email.subject,
+          body: email.body,
+          from_name: email.from_name,
+          from_address: email.from_address,
+          intent: email.intent,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const reply = data?.reply || "";
+      if (isEditing) setEditedReply(reply);
+      else { setComposedReply(reply); setIsComposing(true); }
+      toast.success("AI draft generated");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to generate reply");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const confidencePercent = email.confidence_score ? Math.round(email.confidence_score * 100) : null;
   const hasReply = !!email.suggested_reply;
