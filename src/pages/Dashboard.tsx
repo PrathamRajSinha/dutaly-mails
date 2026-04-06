@@ -216,7 +216,7 @@ export default function Dashboard() {
                   <p className="mt-1 text-sm text-amber-700">
                     AI has drafted replies for your review.
                   </p>
-                  <Link to="/tickets?tab=drafted">
+                  <Link to="/inbox?tab=drafted">
                     <Button size="sm" className="mt-3" variant="outline">
                       Review Now
                     </Button>
