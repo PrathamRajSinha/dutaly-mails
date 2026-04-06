@@ -28,9 +28,7 @@ export function TestimonialsSection() {
   const current = useCases[active];
 
   return (
-    <section id="use-cases" className="py-28 sm:py-36 relative">
-      <div className="absolute inset-0 bg-gradient-to-b from-zinc-50/30 to-white pointer-events-none" />
-
+    <section id="use-cases" className="py-28 sm:py-36 relative" style={{ background: "#FFFFFF" }}>
       <div className="max-w-[1200px] mx-auto px-6 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -45,24 +43,23 @@ export function TestimonialsSection() {
           </h2>
         </motion.div>
 
-        {/* Tab switcher - centered */}
         <div className="flex justify-center gap-2 mb-14">
           {useCases.map((uc, i) => (
             <button
               key={uc.tab}
               onClick={() => setActive(i)}
-              className={`px-6 py-2.5 rounded-full text-[13px] font-medium transition-all duration-300 ${
+              className={`px-6 py-2.5 text-[13px] font-medium transition-all duration-300 ${
                 active === i
-                  ? "bg-zinc-900 text-white shadow-lg"
+                  ? "text-white shadow-lg"
                   : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200 hover:text-zinc-700"
               }`}
+              style={active === i ? { background: "#7C6FE0", borderRadius: "6px" } : { borderRadius: "6px" }}
             >
               {uc.tab}
             </button>
           ))}
         </div>
 
-        {/* Content */}
         <motion.div
           key={active}
           initial={{ opacity: 0, y: 12 }}
@@ -88,7 +85,7 @@ export function TestimonialsSection() {
                   transition={{ duration: 0.3, delay: i * 0.1 }}
                   className="flex items-center gap-4 py-4 px-5 rounded-xl bg-white border border-zinc-200/80 shadow-sm"
                 >
-                  <div className="w-7 h-7 rounded-full bg-zinc-900 text-white flex items-center justify-center flex-shrink-0">
+                  <div className="w-7 h-7 rounded-full text-white flex items-center justify-center flex-shrink-0" style={{ background: "#7C6FE0" }}>
                     <Check className="h-3.5 w-3.5" />
                   </div>
                   <span className="text-[14px] font-medium text-zinc-700">{b}</span>

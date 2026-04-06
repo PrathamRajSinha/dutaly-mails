@@ -1,7 +1,7 @@
 import { motion, useMotionValue, useTransform, animate, useInView } from "framer-motion";
 import { useEffect, useRef } from "react";
 
-function AnimatedCounter({ from = 0, value, suffix = "" }: { from?: number; value: number; suffix?: string }) {
+function AnimatedCounter({ from = 0, value, suffix = "", prefix = "" }: { from?: number; value: number; suffix?: string; prefix?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-60px" });
   const count = useMotionValue(from);
@@ -15,28 +15,24 @@ function AnimatedCounter({ from = 0, value, suffix = "" }: { from?: number; valu
 
   useEffect(() => {
     const unsubscribe = rounded.on("change", (v) => {
-      if (ref.current) ref.current.textContent = v + suffix;
+      if (ref.current) ref.current.textContent = prefix + v + suffix;
     });
     return unsubscribe;
-  }, [rounded, suffix]);
+  }, [rounded, suffix, prefix]);
 
-  return <span ref={ref}>{from}{suffix}</span>;
+  return <span ref={ref}>{prefix}{from}{suffix}</span>;
 }
 
 export function StatsSection() {
   const metrics = [
-    { number: 10, suffix: "×", label: "faster response times", from: 0 },
-    { number: 85, suffix: "%", label: "auto-resolved tickets", from: 0 },
+    { number: 2, suffix: " min", prefix: "~", label: "avg AI response time", from: 0 },
+    { number: 80, suffix: "%+", label: "emails auto-handled", from: 0 },
     { number: 0, suffix: "", label: "emails missed", from: 100 },
-    { number: 24, suffix: "/7", label: "always-on support", static: "24/7" },
+    { static: "24/7", label: "coverage" },
   ];
 
   return (
-    <section className="py-28 sm:py-36 relative overflow-hidden">
-      {/* Dark gradient background like Superhuman */}
-      <div className="absolute inset-0 bg-zinc-950" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(100,100,120,0.15)_0%,transparent_70%)]" />
-
+    <section className="py-28 sm:py-36 relative overflow-hidden" style={{ background: "#0A0A0F" }}>
       <div className="max-w-[1200px] mx-auto px-6 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -45,10 +41,11 @@ export function StatsSection() {
           transition={{ duration: 0.5 }}
           className="text-center mb-20"
         >
-          <h2 className="text-[clamp(2rem,4vw,3.25rem)] font-semibold tracking-[-0.03em] text-white leading-[1.1] max-w-[600px] mx-auto">
-            Support that actually <span className="bg-gradient-to-r from-primary to-accent-foreground bg-clip-text text-transparent">scales.</span>
+          <h2 className="text-[clamp(2rem,4vw,3.25rem)] font-semibold tracking-[-0.03em] leading-[1.1] max-w-[600px] mx-auto" style={{ color: "#F0EEF8" }}>
+            Support that <em>actually</em>{" "}
+            <span style={{ color: "#7C6FE0" }}>scales.</span>
           </h2>
-          <p className="mt-4 text-[16px] text-zinc-400 max-w-[440px] mx-auto">
+          <p className="mt-4 text-[16px] max-w-[440px] mx-auto" style={{ color: "rgba(255,255,255,0.4)" }}>
             Numbers that speak for themselves.
           </p>
         </motion.div>
@@ -61,15 +58,20 @@ export function StatsSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="text-center p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm"
+              className="text-center p-6 rounded-2xl"
+              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
             >
-              <span className="text-[clamp(2.5rem,5vw,3.5rem)] font-bold tracking-[-0.04em] text-white leading-none block">
-                {item.static ? item.static : <AnimatedCounter from={item.from} value={item.number} suffix={item.suffix} />}
+              <span className="text-[clamp(2.5rem,5vw,3.5rem)] font-bold tracking-[-0.04em] leading-none block" style={{ color: "#F0EEF8" }}>
+                {item.static ? item.static : <AnimatedCounter from={item.from ?? 0} value={item.number!} suffix={item.suffix} prefix={item.prefix} />}
               </span>
-              <p className="text-[13px] text-zinc-400 mt-3 leading-relaxed">{item.label}</p>
+              <p className="text-[13px] mt-3 leading-relaxed" style={{ color: "rgba(255,255,255,0.4)" }}>{item.label}</p>
             </motion.div>
           ))}
         </div>
+
+        <p className="text-center mt-8 text-[12px]" style={{ color: "rgba(255,255,255,0.25)" }}>
+          Based on internal testing.
+        </p>
       </div>
     </section>
   );

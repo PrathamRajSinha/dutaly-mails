@@ -2,16 +2,23 @@ import { Link } from "react-router-dom";
 
 export function FooterSection() {
   return (
-    <footer className="border-t border-zinc-200 py-10 bg-zinc-50/50">
-      <div className="max-w-[1200px] mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
-        <span className="text-[15px] font-semibold text-zinc-900 tracking-tight">Dutaly</span>
-        <div className="flex items-center gap-8 text-[13px] text-zinc-500">
-          <a href="#features" className="hover:text-zinc-900 transition-colors">Features</a>
-          <a href="#how-it-works" className="hover:text-zinc-900 transition-colors">How It Works</a>
-          <a href="#pricing" className="hover:text-zinc-900 transition-colors">Pricing</a>
-          <Link to="/auth" className="hover:text-zinc-900 transition-colors">Sign in</Link>
+    <footer className="py-10" style={{ background: "#0A0A0F", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+      <div className="max-w-[1200px] mx-auto px-6">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+          <span className="text-[15px] font-semibold tracking-tight" style={{ color: "#E8E4FF" }}>dutaly</span>
+          <div className="flex items-center gap-8 text-[13px]" style={{ color: "rgba(255,255,255,0.4)" }}>
+            <a href="#features" className="hover:opacity-80 transition-opacity">features</a>
+            <a href="#how-it-works" className="hover:opacity-80 transition-opacity">how it works</a>
+            <a href="#pricing" className="hover:opacity-80 transition-opacity">pricing</a>
+            <Link to="/auth" className="hover:opacity-80 transition-opacity">sign in</Link>
+          </div>
+          <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.25)" }}>© 2026 Dutaly. All rights reserved.</p>
         </div>
-        <p className="text-[12px] text-zinc-400">© 2026 Dutaly. All rights reserved.</p>
+        <div className="border-t pt-6 text-center" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+          <p className="text-[12px] max-w-[520px] mx-auto leading-relaxed" style={{ color: "rgba(255,255,255,0.2)" }}>
+            Duta (दूत) means messenger or agent in Sanskrit. We build AI agents that handle your business communication — starting with email.
+          </p>
+        </div>
       </div>
     </footer>
   );
