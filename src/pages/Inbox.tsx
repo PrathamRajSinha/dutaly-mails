@@ -175,18 +175,6 @@ function TicketsView({ searchQuery, onSearchChange }: { searchQuery: string; onS
   const { data: autoSentLogs = [] } = useAutoSentAudit();
   const queryClient = useQueryClient();
 
-  const shortcutActions = useMemo(() => {
-    const ticketList = filtered ?? [];
-    const currentIdx = selectedTicketId ? ticketList.findIndex(t => t.id === selectedTicketId) : -1;
-    return [
-      { key: "j", label: "j", description: "Next ticket", action: () => { if (currentIdx < ticketList.length - 1) setSelectedTicketId(ticketList[currentIdx + 1]?.id); else if (ticketList.length > 0 && currentIdx === -1) setSelectedTicketId(ticketList[0]?.id); } },
-      { key: "k", label: "k", description: "Previous ticket", action: () => { if (currentIdx > 0) setSelectedTicketId(ticketList[currentIdx - 1]?.id); } },
-      { key: "e", label: "e", description: "Resolve ticket", action: () => {} },
-    ];
-  }, [filtered, selectedTicketId]);
-
-  const { helpOpen, setHelpOpen } = useInboxShortcuts(shortcutActions);
-
   const ticketTabs: { value: TicketTabValue; label: string; icon: React.ReactNode; count?: number }[] = [
     { value: "all", label: "All", icon: null, count: tickets?.length },
     { value: "open", label: "Open", icon: <AlertCircle className="h-3 w-3" />, count: tickets?.filter(t => t.status === "open").length },
@@ -205,6 +193,18 @@ function TicketsView({ searchQuery, onSearchChange }: { searchQuery: string; onS
       t.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
       t.customer_email.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const shortcutActions = useMemo(() => {
+    const ticketList = filtered ?? [];
+    const currentIdx = selectedTicketId ? ticketList.findIndex(t => t.id === selectedTicketId) : -1;
+    return [
+      { key: "j", label: "j", description: "Next ticket", action: () => { if (currentIdx < ticketList.length - 1) setSelectedTicketId(ticketList[currentIdx + 1]?.id); else if (ticketList.length > 0 && currentIdx === -1) setSelectedTicketId(ticketList[0]?.id); } },
+      { key: "k", label: "k", description: "Previous ticket", action: () => { if (currentIdx > 0) setSelectedTicketId(ticketList[currentIdx - 1]?.id); } },
+      { key: "e", label: "e", description: "Resolve ticket", action: () => {} },
+    ];
+  }, [filtered, selectedTicketId]);
+
+  const { helpOpen, setHelpOpen } = useInboxShortcuts(shortcutActions);
 
   const handleFlagWrong = async (entry: { customer_email: string; ticket_id: string | null }) => {
     try {
