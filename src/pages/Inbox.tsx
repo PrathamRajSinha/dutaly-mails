@@ -947,7 +947,13 @@ function EmailCard({
                 {isComposing ? "Compose Reply" : "No AI reply generated"}
               </h4>
               {isComposing ? (
-                <Textarea className="min-h-[120px]" placeholder="Write your reply here..." value={composedReply} onChange={(e) => setComposedReply(e.target.value)} />
+                <div className="space-y-2">
+                  <Textarea className="min-h-[120px]" placeholder="Write your reply here..." value={composedReply} onChange={(e) => setComposedReply(e.target.value)} />
+                  <Button variant="outline" size="sm" onClick={handleHelpMeWrite} disabled={isGenerating} className="gap-1.5">
+                    {isGenerating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" />}
+                    {isGenerating ? "Writing..." : "Help me write"}
+                  </Button>
+                </div>
               ) : (
                 <p className="text-sm text-muted-foreground">No suggested reply. Compose one manually or ignore.</p>
               )}
