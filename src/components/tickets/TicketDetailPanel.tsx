@@ -405,6 +405,8 @@ export function TicketDetailPanel({ ticketId, onBack }: { ticketId: string; onBa
                             onApprove={(htmlBody, attachmentUrls) => handleApprove(email.id, htmlBody, attachmentUrls)}
                             onIgnore={() => handleIgnore(email.id)}
                             onEditSend={(reply, htmlBody, attachmentUrls) => handleEditSend(email.id, reply, htmlBody, attachmentUrls)}
+                            onSnooze={(until) => handleSnooze(email.id, until)}
+                            onSchedule={(sendAt, reply) => handleSchedule(email.id, sendAt, reply)}
                             isPending={updateEmailStatus.isPending}
                           />
                         </>
