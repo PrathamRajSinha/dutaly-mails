@@ -731,6 +731,13 @@ export default function EmailQueue() {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-6">
+          <TabsTrigger value="all_emails" className="gap-2">
+            <Eye className="h-4 w-4" />
+            All
+            {allEmails.length > 0 && (
+              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">{allEmails.length}</Badge>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="needs_review" className="gap-2">
             <AlertCircle className="h-4 w-4" />
             Needs Review
@@ -761,6 +768,7 @@ export default function EmailQueue() {
           </TabsTrigger>
         </TabsList>
 
+        <TabsContent value="all_emails">{renderEmailList(allEmails)}</TabsContent>
         <TabsContent value="needs_review">{renderEmailList(needsReview)}</TabsContent>
         <TabsContent value="drafted">{renderEmailList(drafted)}</TabsContent>
         <TabsContent value="sent">{renderEmailList(sent, true)}</TabsContent>
