@@ -1018,6 +1018,10 @@ function EmailCard({
                   <Button size="sm" onClick={onReopen} disabled={isPending}>
                     <RefreshCw className="mr-1.5 h-3.5 w-3.5" />Reopen
                   </Button>
+                  <Button size="sm" variant="outline" onClick={() => { handleHelpMeWrite(); }}>
+                    {isGenerating ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Wand2 className="mr-1.5 h-3.5 w-3.5" />}
+                    {isGenerating ? "Writing..." : "Help me write"}
+                  </Button>
                   <Button size="sm" variant="outline" onClick={() => setIsComposing(true)}>
                     <Edit className="mr-1.5 h-3.5 w-3.5" />Reply Anyway
                   </Button>
