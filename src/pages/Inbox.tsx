@@ -570,6 +570,11 @@ function EmailsView({ searchQuery, onSearchChange }: { searchQuery: string; onSe
     setAddKBDialogOpen(true);
   };
 
+  const handleReopen = async (id: string) => {
+    await updateEmailStatus.mutateAsync({ id, status: "pending" });
+    toast.success("Email reopened");
+  };
+
   const renderEmailList = (emails: QueuedEmail[], readOnly = false) => {
     const filtered = filterEmails(emails);
     if (filtered.length === 0) {
@@ -595,6 +600,7 @@ function EmailsView({ searchQuery, onSearchChange }: { searchQuery: string; onSe
             onIgnore={() => handleIgnore(email.id)}
             onEditSend={(reply) => handleEditSend(email.id, reply)}
             onAddToKB={() => handleAddToKB(email)}
+            onReopen={() => handleReopen(email.id)}
             isPending={updateEmailStatus.isPending}
             readOnly={readOnly}
           />
@@ -757,7 +763,7 @@ function EmailsView({ searchQuery, onSearchChange }: { searchQuery: string; onSe
               <TabsContent value="needs_review" className="mt-0">{renderEmailList(needsReview)}</TabsContent>
               <TabsContent value="drafted" className="mt-0">{renderEmailList(drafted)}</TabsContent>
               <TabsContent value="sent" className="mt-0">{renderEmailList(sent, true)}</TabsContent>
-              <TabsContent value="ignored" className="mt-0">{renderEmailList(ignored, true)}</TabsContent>
+              <TabsContent value="ignored" className="mt-0">{renderEmailList(ignored)}</TabsContent>
             </div>
           </ScrollArea>
         </Tabs>
@@ -800,6 +806,7 @@ function EmailCard({
   onIgnore,
   onEditSend,
   onAddToKB,
+  onReopen,
   isPending,
   readOnly = false,
 }: {
@@ -810,6 +817,7 @@ function EmailCard({
   onIgnore: () => void;
   onEditSend: (reply: string) => void;
   onAddToKB: () => void;
+  onReopen: () => void;
   isPending: boolean;
   readOnly?: boolean;
 }) {
@@ -1014,6 +1022,15 @@ function EmailCard({
                     Attach
                   </Button>
                   <Button variant="ghost" size="sm" onClick={() => setIsComposing(false)}>Cancel</Button>
+                </>
+              ) : email.status === "ignored" ? (
+                <>
+                  <Button size="sm" onClick={onReopen} disabled={isPending}>
+                    <RefreshCw className="mr-1.5 h-3.5 w-3.5" />Reopen
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => setIsComposing(true)}>
+                    <Edit className="mr-1.5 h-3.5 w-3.5" />Reply Anyway
+                  </Button>
                 </>
               ) : (
                 <>
