@@ -61,7 +61,14 @@ export function InteractiveDemoSection() {
                   {/* Content */}
                   <div className="pb-2">
                     <div className="flex items-center gap-3 mb-2">
-                      <Icon className="w-4 h-4" style={{ color: "#7C6FE0" }} />
+                      <motion.div
+                        initial={{ scale: 0, opacity: 0 }}
+                        whileInView={{ scale: 1, opacity: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.3 + i * 0.15 }}
+                      >
+                        <Icon className="w-4 h-4" style={{ color: "#7C6FE0" }} />
+                      </motion.div>
                       <h3 className="text-[17px] sm:text-[19px] font-medium" style={{ color: "#F0EEF8" }}>
                         {step.title}
                       </h3>
