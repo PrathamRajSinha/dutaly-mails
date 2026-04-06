@@ -1023,6 +1023,15 @@ function EmailCard({
                   </Button>
                   <Button variant="ghost" size="sm" onClick={() => setIsComposing(false)}>Cancel</Button>
                 </>
+              ) : email.status === "ignored" ? (
+                <>
+                  <Button size="sm" onClick={onReopen} disabled={isPending}>
+                    <RefreshCw className="mr-1.5 h-3.5 w-3.5" />Reopen
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => setIsComposing(true)}>
+                    <Edit className="mr-1.5 h-3.5 w-3.5" />Reply Anyway
+                  </Button>
+                </>
               ) : (
                 <>
                   {hasReply ? (
@@ -1050,7 +1059,7 @@ function EmailCard({
                     <Plus className="mr-1.5 h-3.5 w-3.5" />Add to KB
                   </Button>
                 </>
-              )}
+              )
             </div>
           )}
         </CardContent>
