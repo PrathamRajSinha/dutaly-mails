@@ -54,7 +54,7 @@ export function MagicBentoCard({
           padding: "1px",
           background:
             intensity > 0
-              ? `radial-gradient(${spotlightRadius * 0.6}px circle at ${localPos.x}px ${localPos.y}px, rgba(${glowColor}, ${0.5 * intensity}), transparent 70%)`
+              ? `radial-gradient(${spotlightRadius * 0.6}px circle at ${localPos.x}px ${localPos.y}px, rgba(${glowColor}, ${0.85 * intensity}), transparent 70%)`
               : "none",
           WebkitMask:
             "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
