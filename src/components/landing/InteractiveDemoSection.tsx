@@ -84,13 +84,13 @@ export function InteractiveDemoSection() {
 
           {/* Active step content */}
           <div className="max-w-[560px] w-full relative" style={{ height: "320px" }}>
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="popLayout">
               <motion.div
                 key={activeStep}
-                initial={{ opacity: 0, y: 25 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.35, ease: "easeOut" }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
                 className="absolute inset-0 flex items-center justify-center"
               >
                 <div className="flex flex-col items-center text-center">
