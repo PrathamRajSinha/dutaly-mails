@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { ClassificationMockup, ReplyMockup, DashboardMockup, AskAnythingMockup } from "./FeatureMockups";
+import { MagicBentoCard } from "./MagicBentoCard";
 
 const fade = {
   initial: { opacity: 0, y: 20 },
@@ -19,98 +20,93 @@ export function FeaturesSection() {
           </h2>
         </motion.div>
 
-        {/* Bento grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Classification — wide */}
-          <motion.div
-            {...fade}
-            transition={{ duration: 0.5, delay: 0.05 }}
-            className="lg:col-span-7 rounded-2xl p-6 sm:p-8 flex flex-col transition-all duration-300 hover:scale-[1.015] hover:shadow-lg"
-            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
-          >
-            <div className="mb-5">
-              <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full mb-3" style={{ background: "rgba(124,111,224,0.15)", color: "#A89EF0" }}>
-                Classification
-              </span>
-              <h3 className="text-[clamp(1.25rem,2vw,1.5rem)] font-semibold tracking-[-0.02em] leading-[1.2] mb-2" style={{ color: "#F0EEF8" }}>
-                Automatic classification
-              </h3>
-              <p className="text-[14px] leading-[1.7] max-w-[440px]" style={{ color: "rgba(255,255,255,0.5)" }}>
-                Every email is categorized by intent, urgency, and sentiment — before anyone opens it.
-              </p>
-            </div>
-            <div className="flex-1 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
-              <ClassificationMockup />
-            </div>
+          <motion.div {...fade} transition={{ duration: 0.5, delay: 0.05 }} className="lg:col-span-7">
+            <MagicBentoCard className="h-full">
+              <div className="p-6 sm:p-8 flex flex-col h-full">
+                <div className="mb-5">
+                  <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full mb-3" style={{ background: "rgba(124,111,224,0.15)", color: "#A89EF0" }}>
+                    Classification
+                  </span>
+                  <h3 className="text-[clamp(1.25rem,2vw,1.5rem)] font-semibold tracking-[-0.02em] leading-[1.2] mb-2" style={{ color: "#F0EEF8" }}>
+                    Automatic classification
+                  </h3>
+                  <p className="text-[14px] leading-[1.7] max-w-[440px]" style={{ color: "rgba(255,255,255,0.5)" }}>
+                    Every email is categorized by intent, urgency, and sentiment — before anyone opens it.
+                  </p>
+                </div>
+                <div className="flex-1 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
+                  <ClassificationMockup />
+                </div>
+              </div>
+            </MagicBentoCard>
           </motion.div>
 
           {/* AI Replies — narrow */}
-          <motion.div
-            {...fade}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="lg:col-span-5 rounded-2xl p-6 sm:p-8 flex flex-col transition-all duration-300 hover:scale-[1.015] hover:shadow-lg"
-            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
-          >
-            <div className="mb-5">
-              <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full mb-3" style={{ background: "rgba(124,111,224,0.15)", color: "#A89EF0" }}>
-                AI Replies
-              </span>
-              <h3 className="text-[clamp(1.25rem,2vw,1.5rem)] font-semibold tracking-[-0.02em] leading-[1.2] mb-2" style={{ color: "#F0EEF8" }}>
-                Smart reply & auto-send
-              </h3>
-              <p className="text-[14px] leading-[1.7] max-w-[440px]" style={{ color: "rgba(255,255,255,0.5)" }}>
-                AI drafts replies <em>powered by your rules</em>. High-confidence ones send automatically — the rest queue for review.
-              </p>
-            </div>
-            <div className="flex-1 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
-              <ReplyMockup />
-            </div>
+          <motion.div {...fade} transition={{ duration: 0.5, delay: 0.1 }} className="lg:col-span-5">
+            <MagicBentoCard className="h-full">
+              <div className="p-6 sm:p-8 flex flex-col h-full">
+                <div className="mb-5">
+                  <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full mb-3" style={{ background: "rgba(124,111,224,0.15)", color: "#A89EF0" }}>
+                    AI Replies
+                  </span>
+                  <h3 className="text-[clamp(1.25rem,2vw,1.5rem)] font-semibold tracking-[-0.02em] leading-[1.2] mb-2" style={{ color: "#F0EEF8" }}>
+                    Smart reply & auto-send
+                  </h3>
+                  <p className="text-[14px] leading-[1.7] max-w-[440px]" style={{ color: "rgba(255,255,255,0.5)" }}>
+                    AI drafts replies <em>powered by your rules</em>. High-confidence ones send automatically — the rest queue for review.
+                  </p>
+                </div>
+                <div className="flex-1 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
+                  <ReplyMockup />
+                </div>
+              </div>
+            </MagicBentoCard>
           </motion.div>
 
           {/* Ask Anything — narrow */}
-          <motion.div
-            {...fade}
-            transition={{ duration: 0.5, delay: 0.15 }}
-            className="lg:col-span-5 rounded-2xl p-6 sm:p-8 flex flex-col transition-all duration-300 hover:scale-[1.015] hover:shadow-lg"
-            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
-          >
-            <div className="mb-5">
-              <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full mb-3" style={{ background: "rgba(124,111,224,0.15)", color: "#A89EF0" }}>
-                Intelligence
-              </span>
-              <h3 className="text-[clamp(1.25rem,2vw,1.5rem)] font-semibold tracking-[-0.02em] leading-[1.2] mb-2" style={{ color: "#F0EEF8" }}>
-                Ask anything about your emails
-              </h3>
-              <p className="text-[14px] leading-[1.7] max-w-[440px]" style={{ color: "rgba(255,255,255,0.5)" }}>
-                Chat with AI about your inbox. Get instant answers with direct references to the emails behind every insight.
-              </p>
-            </div>
-            <div className="flex-1 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
-              <AskAnythingMockup />
-            </div>
+          <motion.div {...fade} transition={{ duration: 0.5, delay: 0.15 }} className="lg:col-span-5">
+            <MagicBentoCard className="h-full">
+              <div className="p-6 sm:p-8 flex flex-col h-full">
+                <div className="mb-5">
+                  <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full mb-3" style={{ background: "rgba(124,111,224,0.15)", color: "#A89EF0" }}>
+                    Intelligence
+                  </span>
+                  <h3 className="text-[clamp(1.25rem,2vw,1.5rem)] font-semibold tracking-[-0.02em] leading-[1.2] mb-2" style={{ color: "#F0EEF8" }}>
+                    Ask anything about your emails
+                  </h3>
+                  <p className="text-[14px] leading-[1.7] max-w-[440px]" style={{ color: "rgba(255,255,255,0.5)" }}>
+                    Chat with AI about your inbox. Get instant answers with direct references to the emails behind every insight.
+                  </p>
+                </div>
+                <div className="flex-1 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
+                  <AskAnythingMockup />
+                </div>
+              </div>
+            </MagicBentoCard>
           </motion.div>
 
           {/* Dashboard — wide */}
-          <motion.div
-            {...fade}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="lg:col-span-7 rounded-2xl p-6 sm:p-8 flex flex-col transition-all duration-300 hover:scale-[1.015] hover:shadow-lg"
-            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
-          >
-            <div className="mb-5">
-              <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full mb-3" style={{ background: "rgba(124,111,224,0.15)", color: "#A89EF0" }}>
-                Visibility
-              </span>
-              <h3 className="text-[clamp(1.25rem,2vw,1.5rem)] font-semibold tracking-[-0.02em] leading-[1.2] mb-2" style={{ color: "#F0EEF8" }}>
-                Full visibility & tracking
-              </h3>
-              <p className="text-[14px] leading-[1.7] max-w-[440px]" style={{ color: "rgba(255,255,255,0.5)" }}>
-                Each email becomes a trackable ticket with status, priority, SLA deadlines, and full history.
-              </p>
-            </div>
-            <div className="flex-1 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
-              <DashboardMockup />
-            </div>
+          <motion.div {...fade} transition={{ duration: 0.5, delay: 0.2 }} className="lg:col-span-7">
+            <MagicBentoCard className="h-full">
+              <div className="p-6 sm:p-8 flex flex-col h-full">
+                <div className="mb-5">
+                  <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full mb-3" style={{ background: "rgba(124,111,224,0.15)", color: "#A89EF0" }}>
+                    Visibility
+                  </span>
+                  <h3 className="text-[clamp(1.25rem,2vw,1.5rem)] font-semibold tracking-[-0.02em] leading-[1.2] mb-2" style={{ color: "#F0EEF8" }}>
+                    Full visibility & tracking
+                  </h3>
+                  <p className="text-[14px] leading-[1.7] max-w-[440px]" style={{ color: "rgba(255,255,255,0.5)" }}>
+                    Each email becomes a trackable ticket with status, priority, SLA deadlines, and full history.
+                  </p>
+                </div>
+                <div className="flex-1 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
+                  <DashboardMockup />
+                </div>
+              </div>
+            </MagicBentoCard>
           </motion.div>
         </div>
       </div>
