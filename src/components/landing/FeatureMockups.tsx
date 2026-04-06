@@ -197,3 +197,69 @@ export function DashboardMockup() {
     </div>
   );
 }
+
+/* ── Mini mockup: Ask Me Anything chat ── */
+export function AskAnythingMockup() {
+  const references = [
+    { from: "sarah@acme.co", subject: "Can't access my account", time: "Mar 2, 09:14" },
+    { from: "dev@techcorp.com", subject: "API rate limiting issue", time: "Mar 2, 10:31" },
+    { from: "mike@startup.io", subject: "Upgrade to Pro plan", time: "Mar 3, 14:02" },
+  ];
+
+  return (
+    <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden text-left select-none pointer-events-none">
+      {/* Header */}
+      <div className="px-5 py-3.5 border-b border-zinc-100 flex items-center gap-2">
+        <Zap className="h-3.5 w-3.5 text-violet-500" />
+        <span className="text-[13px] font-semibold text-zinc-900">Ask Me Anything</span>
+      </div>
+
+      {/* Chat */}
+      <div className="p-4 space-y-3">
+        {/* User bubble */}
+        <div className="flex justify-end">
+          <div className="bg-zinc-900 text-white rounded-xl rounded-br-sm px-3.5 py-2 max-w-[75%]">
+            <p className="text-[11px] leading-relaxed">Which emails had low confidence scores?</p>
+          </div>
+        </div>
+
+        {/* AI bubble */}
+        <div className="flex justify-start">
+          <div className="bg-zinc-50 border border-zinc-100 rounded-xl rounded-bl-sm px-3.5 py-2.5 max-w-[85%]">
+            <p className="text-[11px] text-zinc-700 leading-relaxed mb-2">
+              3 emails had confidence scores below 70%. These were flagged for manual review:
+            </p>
+            {/* References */}
+            <div className="space-y-1">
+              <p className="text-[10px] text-zinc-400 mb-1">Referenced emails:</p>
+              {references.map((ref) => (
+                <div key={ref.subject} className="flex items-center gap-1.5 py-1 px-2 rounded-md bg-white border border-zinc-100">
+                  <Mail className="h-2.5 w-2.5 text-violet-500 flex-shrink-0" />
+                  <span className="text-[10px] font-medium text-violet-600 truncate">{ref.from}</span>
+                  <span className="text-[10px] text-zinc-400 truncate">— {ref.subject}</span>
+                  <span className="text-[9px] text-zinc-300 ml-auto flex-shrink-0">{ref.time}</span>
+                </div>
+              ))}
+            </div>
+            <p className="text-[10px] text-zinc-400 mt-2">Based on 142 emails</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Suggestion chips */}
+      <div className="px-4 pb-2 flex gap-1.5 flex-wrap">
+        {["Summarize all emails", "Unresolved questions", "List all senders"].map((s) => (
+          <span key={s} className="text-[10px] px-2.5 py-1 rounded-full border border-zinc-200 text-zinc-500">{s}</span>
+        ))}
+      </div>
+
+      {/* Input */}
+      <div className="px-4 pb-4">
+        <div className="flex items-center gap-2 border border-zinc-200 rounded-lg px-3 py-2">
+          <span className="text-[11px] text-zinc-400 flex-1">Ask a question about your emails...</span>
+          <Send className="h-3 w-3 text-zinc-300" />
+        </div>
+      </div>
+    </div>
+  );
+}
