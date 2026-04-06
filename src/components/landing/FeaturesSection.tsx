@@ -10,7 +10,7 @@ const fade = {
 
 export function FeaturesSection() {
   return (
-    <section id="features" className="py-28 sm:py-36 relative" style={{ background: "#FFFFFF" }}>
+    <section id="features" className="py-28 sm:py-36 relative" style={{ background: "#0A0A0F" }}>
       <div className="max-w-[1200px] mx-auto px-6 relative z-10">
         <motion.div {...fade} className="text-center mb-16">
           <p className="text-[13px] font-medium tracking-[0.15em] uppercase text-zinc-400 mb-4">Features</p>
