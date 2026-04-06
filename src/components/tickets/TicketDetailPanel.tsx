@@ -223,7 +223,7 @@ export function TicketDetailPanel({ ticketId, onBack }: { ticketId: string; onBa
   const { ticket, emails, notes, isLoading } = useTicketDetail(ticketId);
   const { updateStatus, updatePriority } = useTicketMutations(ticketId);
   const { addNote, deleteNote } = useTicketNotes(ticketId);
-  const { updateEmailStatus } = useEmailQueue();
+  const { updateEmailStatus, snoozeEmail, scheduleEmail } = useEmailQueue();
   const { session } = useAuth();
   const { accounts } = useEmailAccounts();
   const queryClient = useQueryClient();
