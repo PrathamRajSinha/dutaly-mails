@@ -142,8 +142,17 @@ function EmailActions({ email, onApprove, onIgnore, onEditSend, isPending }: {
   const getHtmlBody = (textBody: string) => activeTemplate ? renderEmailHtml(textBody, activeTemplate) : undefined;
   const attachmentUrls = attachments.length > 0 ? attachments.map((a) => a.url) : undefined;
 
+  const handleQuickReply = (text: string) => {
+    setComposedReply(text);
+    setIsComposing(true);
+  };
+
   return (
     <div className="space-y-3 pt-2">
+      {/* Quick Reply Chips */}
+      {!isEditing && !isComposing && (
+        <QuickReplyChips onSelect={handleQuickReply} />
+      )}
       {isEditing && <Textarea className="min-h-[100px]" value={editedReply} onChange={(e) => setEditedReply(e.target.value)} />}
       {!hasReply && isComposing && <Textarea className="min-h-[100px]" placeholder="Write your reply here..." value={composedReply} onChange={(e) => setComposedReply(e.target.value)} />}
       {attachments.length > 0 && (
@@ -169,6 +178,7 @@ function EmailActions({ email, onApprove, onIgnore, onEditSend, isPending }: {
             <Button size="sm" onClick={() => { onEditSend(editedReply, getHtmlBody(editedReply), attachmentUrls); setIsEditing(false); }} disabled={isPending}>
               {isPending ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Send className="mr-1.5 h-3.5 w-3.5" />}Send Edited
             </Button>
+            <SendLaterMenu onSchedule={(sendAt) => onSchedule(sendAt, editedReply)} disabled={isPending} />
             <Button variant="outline" size="sm" onClick={() => setTemplatePickerOpen(true)}><FileText className="mr-1.5 h-3.5 w-3.5" /> Template</Button>
             <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>{isUploading ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Paperclip className="mr-1.5 h-3.5 w-3.5" />}Attach</Button>
             <Button variant="ghost" size="sm" onClick={() => setIsEditing(false)}>Cancel</Button>
@@ -178,6 +188,7 @@ function EmailActions({ email, onApprove, onIgnore, onEditSend, isPending }: {
             <Button size="sm" onClick={() => { onEditSend(composedReply, getHtmlBody(composedReply), attachmentUrls); setIsComposing(false); }} disabled={isPending || !composedReply.trim()}>
               {isPending ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Send className="mr-1.5 h-3.5 w-3.5" />}Send
             </Button>
+            <SendLaterMenu onSchedule={(sendAt) => onSchedule(sendAt, composedReply)} disabled={isPending || !composedReply.trim()} />
             <Button variant="outline" size="sm" onClick={() => setTemplatePickerOpen(true)}><FileText className="mr-1.5 h-3.5 w-3.5" /> Template</Button>
             <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>{isUploading ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Paperclip className="mr-1.5 h-3.5 w-3.5" />}Attach</Button>
             <Button variant="ghost" size="sm" onClick={() => setIsComposing(false)}>Cancel</Button>
@@ -196,6 +207,8 @@ function EmailActions({ email, onApprove, onIgnore, onEditSend, isPending }: {
                 <Edit className="mr-1.5 h-3.5 w-3.5" /> Edit
               </Button>
             )}
+            {hasReply && <SendLaterMenu onSchedule={(sendAt) => onSchedule(sendAt)} disabled={isPending} />}
+            <SnoozeMenu onSnooze={onSnooze} disabled={isPending} />
             <Button variant="outline" size="sm" onClick={() => setTemplatePickerOpen(true)}><FileText className="mr-1.5 h-3.5 w-3.5" /> Template</Button>
             <Button variant="ghost" size="sm" onClick={onIgnore} disabled={isPending}><X className="mr-1.5 h-3.5 w-3.5" /> Ignore</Button>
           </>
