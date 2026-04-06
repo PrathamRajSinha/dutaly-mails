@@ -570,6 +570,11 @@ function EmailsView({ searchQuery, onSearchChange }: { searchQuery: string; onSe
     setAddKBDialogOpen(true);
   };
 
+  const handleReopen = async (id: string) => {
+    await updateEmailStatus.mutateAsync({ id, status: "pending" });
+    toast.success("Email reopened");
+  };
+
   const renderEmailList = (emails: QueuedEmail[], readOnly = false) => {
     const filtered = filterEmails(emails);
     if (filtered.length === 0) {
@@ -595,6 +600,7 @@ function EmailsView({ searchQuery, onSearchChange }: { searchQuery: string; onSe
             onIgnore={() => handleIgnore(email.id)}
             onEditSend={(reply) => handleEditSend(email.id, reply)}
             onAddToKB={() => handleAddToKB(email)}
+            onReopen={() => handleReopen(email.id)}
             isPending={updateEmailStatus.isPending}
             readOnly={readOnly}
           />
