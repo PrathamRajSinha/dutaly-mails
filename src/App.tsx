@@ -17,6 +17,7 @@ import NotFound from "./pages/NotFound";
 import Landing from "./pages/Landing";
 import ChoosePlan from "./pages/ChoosePlan";
 import Tickets from "./pages/Tickets";
+import EmailQueue from "./pages/EmailQueue";
 import ResetPassword from "./pages/ResetPassword";
 import Onboarding from "./pages/Onboarding";
 import { useEffect } from "react";
@@ -50,7 +51,7 @@ const App = () => (
               <Route path="/knowledge-base" element={<KnowledgeBase />} />
               <Route path="/instructions" element={<Instructions />} />
               <Route path="/tickets" element={<Tickets />} />
-              {/* Email Queue merged into Tickets */}
+              <Route path="/emails" element={<EmailQueue />} />
               <Route path="/ask" element={<AskEmails />} />
               <Route path="/templates" element={<Templates />} />
               <Route path="/settings" element={<Settings />} />
