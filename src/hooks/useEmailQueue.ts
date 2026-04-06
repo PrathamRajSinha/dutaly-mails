@@ -16,11 +16,13 @@ export interface QueuedEmail {
   confidence_score: number | null;
   flag_reason: string | null;
   intent: "support" | "sales" | "personal" | "newsletter" | "spam" | "unknown" | null;
-  status: "pending" | "approved" | "edited" | "ignored" | "sent" | "sending";
+  status: "pending" | "approved" | "edited" | "ignored" | "sent" | "sending" | "scheduled" | "snoozed";
   thread_id: string | null;
   queued_at: string;
   reviewed_at: string | null;
   created_at: string;
+  scheduled_send_at: string | null;
+  snoozed_until: string | null;
 }
 
 export type QueueTab = "needs_review" | "drafted" | "sent" | "ignored";
