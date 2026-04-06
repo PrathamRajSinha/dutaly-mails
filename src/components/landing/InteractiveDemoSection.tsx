@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Mail, Brain, Ticket, MessageSquare, CheckCircle } from "lucide-react";
+import { TextPressure } from "./TextPressure";
 
 const steps = [
   { icon: Mail, title: "Email received", text: "A customer sends an email to your connected inbox." },
