@@ -25,7 +25,7 @@ export function FeaturesSection() {
           <motion.div
             {...fade}
             transition={{ duration: 0.5, delay: 0.05 }}
-            className="lg:col-span-7 rounded-2xl border border-zinc-200/60 bg-zinc-50/50 p-6 sm:p-8 flex flex-col"
+            className="lg:col-span-7 rounded-2xl border border-zinc-200/60 bg-zinc-50/50 p-6 sm:p-8 flex flex-col transition-all duration-300 hover:scale-[1.015] hover:shadow-lg hover:border-zinc-300/80"
           >
             <div className="mb-5">
               <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full mb-3" style={{ background: "rgba(124,111,224,0.1)", color: "#7C6FE0" }}>
@@ -47,7 +47,7 @@ export function FeaturesSection() {
           <motion.div
             {...fade}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="lg:col-span-5 rounded-2xl border border-zinc-200/60 bg-zinc-50/50 p-6 sm:p-8 flex flex-col"
+            className="lg:col-span-5 rounded-2xl border border-zinc-200/60 bg-zinc-50/50 p-6 sm:p-8 flex flex-col transition-all duration-300 hover:scale-[1.015] hover:shadow-lg hover:border-zinc-300/80"
           >
             <div className="mb-5">
               <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full mb-3" style={{ background: "rgba(124,111,224,0.1)", color: "#7C6FE0" }}>
@@ -69,7 +69,7 @@ export function FeaturesSection() {
           <motion.div
             {...fade}
             transition={{ duration: 0.5, delay: 0.15 }}
-            className="lg:col-span-5 rounded-2xl border border-zinc-200/60 bg-zinc-50/50 p-6 sm:p-8 flex flex-col"
+            className="lg:col-span-5 rounded-2xl border border-zinc-200/60 bg-zinc-50/50 p-6 sm:p-8 flex flex-col transition-all duration-300 hover:scale-[1.015] hover:shadow-lg hover:border-zinc-300/80"
           >
             <div className="mb-5">
               <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full mb-3" style={{ background: "rgba(124,111,224,0.1)", color: "#7C6FE0" }}>
@@ -91,7 +91,7 @@ export function FeaturesSection() {
           <motion.div
             {...fade}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="lg:col-span-7 rounded-2xl border border-zinc-200/60 bg-zinc-50/50 p-6 sm:p-8 flex flex-col"
+            className="lg:col-span-7 rounded-2xl border border-zinc-200/60 bg-zinc-50/50 p-6 sm:p-8 flex flex-col transition-all duration-300 hover:scale-[1.015] hover:shadow-lg hover:border-zinc-300/80"
           >
             <div className="mb-5">
               <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full mb-3" style={{ background: "rgba(124,111,224,0.1)", color: "#7C6FE0" }}>
