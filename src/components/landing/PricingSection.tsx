@@ -103,6 +103,10 @@ export function PricingSection() {
             </motion.div>
           ))}
         </div>
+
+        <p className="text-center mt-10 text-[13px] text-zinc-400 max-w-[480px] mx-auto">
+          Designed for growing teams that want structure without enterprise pricing.
+        </p>
       </div>
     </section>
   );
