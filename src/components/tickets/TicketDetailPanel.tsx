@@ -96,6 +96,8 @@ function EmailActions({ email, onApprove, onIgnore, onEditSend, isPending }: {
   onApprove: (htmlBody?: string, attachmentUrls?: string[]) => void;
   onIgnore: () => void;
   onEditSend: (reply: string, htmlBody?: string, attachmentUrls?: string[]) => void;
+  onSnooze: (until: Date) => void;
+  onSchedule: (sendAt: Date, reply?: string) => void;
   isPending: boolean;
 }) {
   const [isEditing, setIsEditing] = useState(false);
