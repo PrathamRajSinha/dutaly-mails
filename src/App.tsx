@@ -23,14 +23,6 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-function AskComingSoon() {
-  const navigate = useNavigate();
-  useEffect(() => {
-    toast.info("Ask Me Anything is coming soon!");
-    navigate("/dashboard", { replace: true });
-  }, [navigate]);
-  return null;
-}
 
 const queryClient = new QueryClient();
 

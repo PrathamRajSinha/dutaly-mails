@@ -23,7 +23,7 @@ const navItems = [
   { icon: BookOpen, label: "Knowledge Base", path: "/knowledge-base" },
   { icon: FileText, label: "Instructions", path: "/instructions" },
   { icon: Ticket, label: "Templates", path: "/templates" },
-  
+  { icon: Sparkles, label: "Ask Me Anything", path: "/ask" },
   { icon: Settings, label: "Settings", path: "/settings" },
 ];
 
