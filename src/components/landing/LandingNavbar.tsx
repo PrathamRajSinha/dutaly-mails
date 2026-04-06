@@ -8,7 +8,7 @@ const navLinks = [
   { label: "features", href: "#features" },
   { label: "how it works", href: "#how-it-works" },
   { label: "use cases", href: "#use-cases" },
-  { label: "pricing", href: "#pricing" },
+  { label: "pricing", href: "/pricing" },
 ];
 
 export function LandingNavbar() {

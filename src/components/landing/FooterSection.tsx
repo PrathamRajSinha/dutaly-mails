@@ -9,7 +9,7 @@ export function FooterSection() {
           <div className="flex items-center gap-8 text-[13px]" style={{ color: "rgba(255,255,255,0.4)" }}>
             <a href="#features" className="hover:opacity-80 transition-opacity">features</a>
             <a href="#how-it-works" className="hover:opacity-80 transition-opacity">how it works</a>
-            <a href="#pricing" className="hover:opacity-80 transition-opacity">pricing</a>
+            <Link to="/pricing" className="hover:opacity-80 transition-opacity">pricing</Link>
             <Link to="/auth" className="hover:opacity-80 transition-opacity">sign in</Link>
           </div>
           <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.25)" }}>© 2026 Dutaly. All rights reserved.</p>
