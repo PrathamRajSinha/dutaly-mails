@@ -1,6 +1,72 @@
-import { motion } from "framer-motion";
+import { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Mail, Brain, Ticket, MessageSquare, CheckCircle } from "lucide-react";
 import { TextPressure } from "./TextPressure";
+
+function StepCard({
+  step,
+  index,
+  total,
+}: {
+  step: { icon: React.ReactNode; title: string; text: string; num: string };
+  index: number;
+  total: number;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "start 0.3"],
+  });
+
+  const opacity = useTransform(scrollYProgress, [0, 1], [0.15, 1]);
+  const y = useTransform(scrollYProgress, [0, 1], [60, 0]);
+  const scale = useTransform(scrollYProgress, [0, 1], [0.96, 1]);
+
+  return (
+    <motion.div
+      ref={ref}
+      style={{ opacity, y, scale }}
+      className="sticky rounded-2xl border p-6 sm:p-8"
+      // Each card sticks a bit lower so they stack visually
+      // top offset: 200px base + index * 40px
+      {...{ style: { opacity, y, scale, top: `${200 + index * 48}px`, background: "rgba(255,255,255,0.03)", borderColor: "rgba(124,111,224,0.12)" } }}
+    >
+      <div className="flex items-start gap-5">
+        {/* Number + Icon */}
+        <div className="flex flex-col items-center gap-2 flex-shrink-0">
+          <span className="text-[11px] font-mono tracking-wider" style={{ color: "rgba(124,111,224,0.4)" }}>
+            {step.num}
+          </span>
+          <div
+            className="w-[48px] h-[48px] rounded-xl flex items-center justify-center border"
+            style={{
+              background: "rgba(124,111,224,0.08)",
+              borderColor: "rgba(124,111,224,0.2)",
+              color: "#7C6FE0",
+            }}
+          >
+            {step.icon}
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="pt-1">
+          <h3 className="text-[17px] sm:text-[19px] font-semibold mb-2" style={{ color: "#F0EEF8" }}>
+            {step.title}
+          </h3>
+          <p className="text-[14px] leading-relaxed max-w-[440px]" style={{ color: "rgba(255,255,255,0.45)" }}>
+            {step.text}
+          </p>
+        </div>
+      </div>
+
+      {/* Progress indicator */}
+      {index < total - 1 && (
+        <div className="mt-6 h-px w-full" style={{ background: "rgba(124,111,224,0.08)" }} />
+      )}
+    </motion.div>
+  );
+}
 
 export function InteractiveDemoSection() {
   const steps = [
@@ -41,48 +107,11 @@ export function InteractiveDemoSection() {
           />
         </div>
 
-        {/* Steps - vertical timeline on dark bg */}
-        <div className="relative max-w-[800px] mx-auto">
-          {/* Vertical line */}
-          <div className="absolute left-[23px] sm:left-[27px] top-0 bottom-0 w-px" style={{ background: "rgba(124,111,224,0.15)" }} />
-
-          <div className="flex flex-col gap-0">
-            {steps.map((s, i) => (
-              <motion.div
-                key={s.title}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, margin: "-40px" }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="relative flex items-start gap-6 py-8 group"
-              >
-                {/* Node */}
-                <div
-                  className="relative z-10 flex-shrink-0 w-[48px] h-[48px] sm:w-[56px] sm:h-[56px] rounded-xl flex items-center justify-center border transition-colors duration-300"
-                  style={{
-                    background: "rgba(124,111,224,0.08)",
-                    borderColor: "rgba(124,111,224,0.2)",
-                    color: "#7C6FE0",
-                  }}
-                >
-                  {s.icon}
-                </div>
-
-                {/* Content */}
-                <div className="pt-1">
-                  <span className="text-[11px] font-mono tracking-wider block mb-1.5" style={{ color: "rgba(124,111,224,0.5)" }}>
-                    {s.num}
-                  </span>
-                  <h3 className="text-[16px] sm:text-[18px] font-semibold mb-2" style={{ color: "#F0EEF8" }}>
-                    {s.title}
-                  </h3>
-                  <p className="text-[14px] leading-relaxed max-w-[420px]" style={{ color: "rgba(255,255,255,0.45)" }}>
-                    {s.text}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+        {/* Scroll-stack cards */}
+        <div className="relative max-w-[700px] mx-auto flex flex-col gap-6">
+          {steps.map((s, i) => (
+            <StepCard key={s.title} step={s} index={i} total={steps.length} />
+          ))}
         </div>
       </div>
     </section>
