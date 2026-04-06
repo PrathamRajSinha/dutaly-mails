@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { format, startOfDay, endOfDay, subDays } from "date-fns";
 import {
   Search,
   Check,
@@ -20,6 +21,7 @@ import {
   FileText,
   Paperclip,
   Trash2,
+  CalendarIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +37,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useEmailQueue, type QueuedEmail } from "@/hooks/useEmailQueue";
@@ -399,6 +407,9 @@ export default function EmailQueue() {
     return params.get("tab") || "needs_review";
   });
   const [autoFetchEnabled, setAutoFetchEnabled] = useState(false);
+  const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
+  const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
+  const [datePreset, setDatePreset] = useState<string>("all");
   const isFetchingRef = useRef(false);
 
   const handleAutoFetch = useCallback(async () => {
@@ -491,12 +502,42 @@ export default function EmailQueue() {
     }
   };
 
+  const applyDatePreset = (preset: string) => {
+    setDatePreset(preset);
+    const now = new Date();
+    switch (preset) {
+      case "today":
+        setDateFrom(startOfDay(now));
+        setDateTo(undefined);
+        break;
+      case "7d":
+        setDateFrom(startOfDay(subDays(now, 7)));
+        setDateTo(undefined);
+        break;
+      case "30d":
+        setDateFrom(startOfDay(subDays(now, 30)));
+        setDateTo(undefined);
+        break;
+      case "all":
+      default:
+        setDateFrom(undefined);
+        setDateTo(undefined);
+        break;
+    }
+  };
+
   const filterEmails = (emails: QueuedEmail[]) =>
-    emails.filter(
-      (email) =>
+    emails.filter((email) => {
+      const matchesSearch =
         email.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        email.from_address.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+        email.from_address.toLowerCase().includes(searchQuery.toLowerCase());
+      if (!matchesSearch) return false;
+
+      const emailDate = new Date(email.queued_at);
+      if (dateFrom && emailDate < startOfDay(dateFrom)) return false;
+      if (dateTo && emailDate > endOfDay(dateTo)) return false;
+      return true;
+    });
 
   const handleApprove = async (id: string, _htmlBody?: string, _attachmentUrls?: string[]) => {
     await updateEmailStatus.mutateAsync({ id, status: "approved" });
@@ -606,9 +647,9 @@ export default function EmailQueue() {
         </div>
       </div>
 
-      {/* Search */}
-      <div className="mb-6">
-        <div className="relative max-w-md">
+      {/* Search & Date Filter */}
+      <div className="mb-6 flex flex-wrap items-center gap-3">
+        <div className="relative max-w-md flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search emails..."
@@ -617,6 +658,74 @@ export default function EmailQueue() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
+
+        {/* Date presets */}
+        <div className="flex items-center gap-1">
+          {[
+            { label: "All", value: "all" },
+            { label: "Today", value: "today" },
+            { label: "7 days", value: "7d" },
+            { label: "30 days", value: "30d" },
+          ].map((p) => (
+            <Button
+              key={p.value}
+              variant={datePreset === p.value ? "default" : "outline"}
+              size="sm"
+              className="h-8 text-xs"
+              onClick={() => applyDatePreset(p.value)}
+            >
+              {p.label}
+            </Button>
+          ))}
+        </div>
+
+        {/* Custom date range */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5">
+              <CalendarIcon className="h-3.5 w-3.5" />
+              {dateFrom ? format(dateFrom, "MMM d") : "From"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={dateFrom}
+              onSelect={(d) => { setDateFrom(d); setDatePreset("custom"); }}
+              initialFocus
+              className="p-3 pointer-events-auto"
+            />
+          </PopoverContent>
+        </Popover>
+        <span className="text-xs text-muted-foreground">–</span>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5">
+              <CalendarIcon className="h-3.5 w-3.5" />
+              {dateTo ? format(dateTo, "MMM d") : "To"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={dateTo}
+              onSelect={(d) => { setDateTo(d); setDatePreset("custom"); }}
+              initialFocus
+              className="p-3 pointer-events-auto"
+            />
+          </PopoverContent>
+        </Popover>
+
+        {(dateFrom || dateTo) && datePreset === "custom" && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 text-xs text-muted-foreground"
+            onClick={() => applyDatePreset("all")}
+          >
+            Clear
+          </Button>
+        )}
       </div>
 
       {/* Tabs */}
