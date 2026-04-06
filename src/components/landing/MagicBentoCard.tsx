@@ -33,12 +33,7 @@ export function MagicBentoCard({
       const y = e.clientY - rect.top;
       setMousePos({ x, y });
 
-      // Tilt: max ±6deg
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-      const tiltX = ((y - centerY) / centerY) * -6;
-      const tiltY = ((x - centerX) / centerX) * 6;
-      setTilt({ x: tiltX, y: tiltY });
+      setTilt({ x: 0, y: 0 });
     },
     []
   );
@@ -70,8 +65,8 @@ export function MagicBentoCard({
       className={`relative rounded-2xl overflow-hidden ${className}`}
       style={{
         transform: isHovered
-          ? `perspective(800px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) scale(1.015)`
-          : "perspective(800px) rotateX(0deg) rotateY(0deg) scale(1)",
+          ? "scale(1.015)"
+          : "scale(1)",
         transition: "transform 0.25s ease-out",
         willChange: "transform",
       }}
