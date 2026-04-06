@@ -59,7 +59,7 @@ const App = () => (
               <Route path="/instructions" element={<Instructions />} />
               <Route path="/tickets" element={<Tickets />} />
               {/* Email Queue merged into Tickets */}
-              <Route path="/ask" element={<AskComingSoon />} />
+              <Route path="/ask" element={<AskEmails />} />
               <Route path="/templates" element={<Templates />} />
               <Route path="/settings" element={<Settings />} />
             </Route>
