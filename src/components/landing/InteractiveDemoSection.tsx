@@ -13,13 +13,11 @@ const steps = [
 
 export function InteractiveDemoSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const totalScreens = steps.length + 1;
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end end"],
   });
-
-  // Total scroll height = 1 intro screen + 1 screen per step
-  const totalScreens = steps.length + 1;
 
   return (
     <section
@@ -29,7 +27,6 @@ export function InteractiveDemoSection() {
       style={{ background: "#0A0A0F", height: `${totalScreens * 100}vh` }}
     >
       <div className="sticky top-0 h-screen flex flex-col overflow-hidden">
-        {/* Header */}
         <div className="pt-24 pb-8 px-6 text-center flex-shrink-0">
           <p className="text-[13px] font-medium tracking-[0.15em] uppercase mb-6" style={{ color: "rgba(255,255,255,0.4)" }}>
             How it works
@@ -49,9 +46,7 @@ export function InteractiveDemoSection() {
           </div>
         </div>
 
-        {/* Steps area */}
         <div className="flex-1 flex items-center justify-center px-6 relative">
-          {/* Progress dots */}
           <div className="absolute left-8 top-1/2 -translate-y-1/2 hidden lg:flex">
             <ProgressDots scrollYProgress={scrollYProgress} totalScreens={totalScreens} />
           </div>
@@ -78,7 +73,6 @@ function ProgressDots({ scrollYProgress, totalScreens }: { scrollYProgress: any;
 }
 
 function ProgressDot({ index, scrollYProgress, totalScreens }: { index: number; scrollYProgress: any; totalScreens: number }) {
-  // First screen is intro (no step), steps start at screen 1
   const stepStart = (index + 1) / totalScreens;
   const stepEnd = (index + 2) / totalScreens;
 
@@ -114,58 +108,29 @@ function StepContent({
   totalScreens: number;
 }) {
   const Icon = step.icon;
-  const isLast = index === steps.length - 1;
-  const isFirst = index === 0;
 
-  // Each step gets 1 screen of scroll. Cross-fade overlaps by 15% of segment.
   const seg = 1 / totalScreens;
   const myStart = (index + 1) * seg;
-  const myEnd = (index + 2) * seg;
-  const overlap = seg * 0.15;
+  const fadeInDone = myStart + seg * 0.1;
 
-  // Fade in: starts 'overlap' before myStart (except first step, already visible)
-  // Fade out: ends 'overlap' after myEnd (except last step, stays visible)
-  const fadeInFrom = isFirst ? myStart : myStart - overlap;
-  const fadeInTo = isFirst ? myStart : myStart + overlap * 0.5;
-  const fadeOutFrom = isLast ? myEnd : myEnd - overlap * 0.5;
-  const fadeOutTo = isLast ? myEnd : myEnd + overlap;
-
+  // Each step fades in and then stays visible forever (never fades out).
+  // Higher-index steps render on top via z-index, covering previous ones.
   const opacity = useTransform(
     scrollYProgress,
-    isFirst && isLast
-      ? [myStart, myEnd]
-      : isFirst
-      ? [myStart, fadeOutFrom, fadeOutTo]
-      : isLast
-      ? [fadeInFrom, fadeInTo, myEnd]
-      : [fadeInFrom, fadeInTo, fadeOutFrom, fadeOutTo],
-    isFirst && isLast
-      ? [1, 1]
-      : isFirst
-      ? [1, 1, 0]
-      : isLast
-      ? [0, 1, 1]
-      : [0, 1, 1, 0]
+    [myStart - 0.001, myStart, fadeInDone],
+    [0, 0.2, 1]
   );
 
   const y = useTransform(
     scrollYProgress,
-    isFirst
-      ? [fadeOutFrom, fadeOutTo]
-      : isLast
-      ? [fadeInFrom, fadeInTo]
-      : [fadeInFrom, fadeInTo, fadeOutFrom, fadeOutTo],
-    isFirst
-      ? [0, -20]
-      : isLast
-      ? [30, 0]
-      : [30, 0, 0, -20]
+    [myStart, fadeInDone],
+    [30, 0]
   );
 
   return (
     <motion.div
       className="absolute inset-0 flex items-center justify-center"
-      style={{ opacity, y }}
+      style={{ opacity, y, zIndex: index }}
     >
       <div className="flex flex-col items-center text-center">
         <span
