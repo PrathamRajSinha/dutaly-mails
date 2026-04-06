@@ -240,7 +240,7 @@ export default function Dashboard() {
                   <p className="mt-1 text-sm text-red-700">
                     The AI wasn't confident about these emails.
                   </p>
-                  <Link to="/tickets?tab=needs_review">
+                  <Link to="/inbox?tab=needs_review">
                     <Button size="sm" className="mt-3" variant="outline">
                       Review Now
                     </Button>
