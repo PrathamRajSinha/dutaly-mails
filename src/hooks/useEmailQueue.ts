@@ -106,16 +106,62 @@ export function useEmailQueue(statusFilter?: string) {
     },
   });
 
+  const snoozeEmail = useMutation({
+    mutationFn: async ({ id, until }: { id: string; until: Date }) => {
+      const { error } = await supabase
+        .from("email_queue")
+        .update({ status: "snoozed" as any, snoozed_until: until.toISOString() })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["email-queue"] });
+      toast.success("Email snoozed");
+    },
+    onError: (error) => {
+      toast.error("Failed to snooze: " + error.message);
+    },
+  });
+
+  const scheduleEmail = useMutation({
+    mutationFn: async ({ id, sendAt, reply }: { id: string; sendAt: Date; reply?: string }) => {
+      const updates: any = {
+        status: "scheduled" as any,
+        scheduled_send_at: sendAt.toISOString(),
+      };
+      if (reply) updates.suggested_reply = reply;
+      const { error } = await supabase
+        .from("email_queue")
+        .update(updates)
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["email-queue"] });
+      toast.success("Email scheduled");
+    },
+    onError: (error) => {
+      toast.error("Failed to schedule: " + error.message);
+    },
+  });
+
+  const snoozed = allEmails.filter(e => e.status === "snoozed" as any);
+  const scheduled = allEmails.filter(e => e.status === "scheduled" as any);
+
   return {
     emails: allEmails,
     needsReview,
     drafted,
     sent,
     ignored,
+    snoozed,
+    scheduled,
     isLoading,
     error,
     updateEmailStatus,
     deleteEmail,
+    snoozeEmail,
+    scheduleEmail,
     pendingCount: allEmails.filter(e => e.status === "pending").length,
   };
 }
