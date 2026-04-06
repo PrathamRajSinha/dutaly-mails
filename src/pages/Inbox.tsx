@@ -617,183 +617,138 @@ function EmailsView({ searchQuery, onSearchChange }: { searchQuery: string; onSe
     );
   }
 
-  const emailTabs: { value: EmailTabValue; label: string; icon: React.ReactNode; count: number }[] = [
-    { value: "all_emails", label: "All", icon: <Eye className="h-3.5 w-3.5" />, count: allEmails.length },
-    { value: "needs_review", label: "Review", icon: <AlertCircle className="h-3.5 w-3.5" />, count: needsReview.length },
-    { value: "drafted", label: "Drafted", icon: <FileEdit className="h-3.5 w-3.5" />, count: drafted.length },
-    { value: "sent", label: "Sent", icon: <Send className="h-3.5 w-3.5" />, count: sent.length },
-    { value: "ignored", label: "Ignored", icon: <XCircle className="h-3.5 w-3.5" />, count: ignored.length },
-  ];
-
   return (
-    <div className="flex h-full flex-col">
-      {/* Toolbar */}
-      <div className="border-b border-border px-6 py-3">
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="relative flex-1 min-w-[200px] max-w-sm">
-            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search emails..."
-              className="pl-9 h-8 text-sm"
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
-            />
+    <ScrollArea className="h-full">
+      <div className="p-8">
+        {/* Header */}
+        <div className="mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Email Queue</h1>
+            <p className="mt-1 text-muted-foreground">Review and manage all processed emails</p>
           </div>
+          <div className="flex items-center gap-3">
+            <Button
+              variant={autoFetchEnabled ? "destructive" : "outline"}
+              size="sm"
+              onClick={() => setAutoFetchEnabled(!autoFetchEnabled)}
+            >
+              {autoFetchEnabled ? <><Pause className="mr-2 h-4 w-4" />Stop Auto-Fetch</> : <><Play className="mr-2 h-4 w-4" />Auto-Fetch</>}
+            </Button>
+            {autoFetchEnabled && (
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                Every 10s
+              </span>
+            )}
+            <Button variant="outline" size="sm" onClick={handleFetchEmails} disabled={isFetching}>
+              {isFetching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+              Fetch Now
+            </Button>
+          </div>
+        </div>
 
-          {/* Date presets */}
+        {/* Search & Date Filter */}
+        <div className="mb-6 flex flex-wrap items-center gap-3">
+          <div className="relative max-w-md flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input placeholder="Search emails..." className="pl-10" value={searchQuery} onChange={(e) => onSearchChange(e.target.value)} />
+          </div>
           <div className="flex items-center gap-1">
             {[
               { label: "All", value: "all" },
               { label: "Today", value: "today" },
-              { label: "7d", value: "7d" },
-              { label: "30d", value: "30d" },
+              { label: "7 days", value: "7d" },
+              { label: "30 days", value: "30d" },
             ].map((p) => (
-              <Button
-                key={p.value}
-                variant={datePreset === p.value ? "default" : "outline"}
-                size="sm"
-                className="h-7 text-xs px-2.5"
-                onClick={() => applyDatePreset(p.value)}
-              >
+              <Button key={p.value} variant={datePreset === p.value ? "default" : "outline"} size="sm" className="h-8 text-xs" onClick={() => applyDatePreset(p.value)}>
                 {p.label}
               </Button>
             ))}
           </div>
-
-          {/* Custom date pickers */}
-          <div className="flex items-center gap-1.5">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="h-7 text-xs gap-1">
-                  <CalendarIcon className="h-3 w-3" />
-                  {dateFrom ? format(dateFrom, "MMM d") : "From"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={dateFrom}
-                  onSelect={(d) => { setDateFrom(d); setDatePreset("custom"); }}
-                  initialFocus
-                  className="p-3 pointer-events-auto"
-                />
-              </PopoverContent>
-            </Popover>
-            <span className="text-xs text-muted-foreground">–</span>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="h-7 text-xs gap-1">
-                  <CalendarIcon className="h-3 w-3" />
-                  {dateTo ? format(dateTo, "MMM d") : "To"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={dateTo}
-                  onSelect={(d) => { setDateTo(d); setDatePreset("custom"); }}
-                  initialFocus
-                  className="p-3 pointer-events-auto"
-                />
-              </PopoverContent>
-            </Popover>
-            {datePreset === "custom" && (dateFrom || dateTo) && (
-              <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => applyDatePreset("all")}>
-                Clear
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5">
+                <CalendarIcon className="h-3.5 w-3.5" />
+                {dateFrom ? format(dateFrom, "MMM d") : "From"}
               </Button>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2 ml-auto">
-            <Button
-              variant={autoFetchEnabled ? "destructive" : "outline"}
-              size="sm"
-              className="h-7 text-xs"
-              onClick={() => setAutoFetchEnabled(!autoFetchEnabled)}
-            >
-              {autoFetchEnabled ? <Pause className="mr-1.5 h-3 w-3" /> : <Play className="mr-1.5 h-3 w-3" />}
-              {autoFetchEnabled ? "Stop" : "Auto-Fetch"}
-            </Button>
-            {autoFetchEnabled && (
-              <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-                10s
-              </span>
-            )}
-            <Button variant="outline" size="sm" className="h-7 text-xs" onClick={handleFetchEmails} disabled={isFetching}>
-              {isFetching ? <Loader2 className="mr-1.5 h-3 w-3 animate-spin" /> : <RefreshCw className="mr-1.5 h-3 w-3" />}
-              Fetch
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Email Tabs + Content */}
-      <div className="flex-1 overflow-hidden">
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as EmailTabValue)} className="flex h-full flex-col">
-          <div className="border-b border-border px-6 pt-2">
-            <TabsList className="h-9 bg-transparent p-0 gap-0">
-              {emailTabs.map((tab) => (
-                <TabsTrigger
-                  key={tab.value}
-                  value={tab.value}
-                  className="gap-1.5 rounded-none border-b-2 border-transparent px-3 pb-2.5 pt-2 text-xs font-medium data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
-                >
-                  {tab.icon}
-                  {tab.label}
-                  {tab.count > 0 && (
-                    <Badge
-                      variant="secondary"
-                      className={cn(
-                        "ml-0.5 h-4 min-w-[16px] px-1 text-[10px]",
-                        tab.value === "needs_review" && tab.count > 0 && "bg-destructive/10 text-destructive"
-                      )}
-                    >
-                      {tab.count}
-                    </Badge>
-                  )}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </div>
-
-          <ScrollArea className="flex-1">
-            <div className="p-6">
-              <TabsContent value="all_emails" className="mt-0">{renderEmailList(allEmails)}</TabsContent>
-              <TabsContent value="needs_review" className="mt-0">{renderEmailList(needsReview)}</TabsContent>
-              <TabsContent value="drafted" className="mt-0">{renderEmailList(drafted)}</TabsContent>
-              <TabsContent value="sent" className="mt-0">{renderEmailList(sent, true)}</TabsContent>
-              <TabsContent value="ignored" className="mt-0">{renderEmailList(ignored)}</TabsContent>
-            </div>
-          </ScrollArea>
-        </Tabs>
-      </div>
-
-      {/* Add to KB Dialog */}
-      <Dialog open={addKBDialogOpen} onOpenChange={setAddKBDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add to Knowledge Base</DialogTitle>
-            <DialogDescription>Create a new knowledge entry based on this email interaction.</DialogDescription>
-          </DialogHeader>
-          {selectedEmailForKB && (
-            <div className="space-y-4 py-4">
-              <div>
-                <p className="text-sm font-medium">Email Subject</p>
-                <p className="text-sm text-muted-foreground">{selectedEmailForKB.subject}</p>
-              </div>
-              <Textarea placeholder="What knowledge should be added from this interaction?" rows={4} />
-            </div>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar mode="single" selected={dateFrom} onSelect={(d) => { setDateFrom(d); setDatePreset("custom"); }} initialFocus className="p-3 pointer-events-auto" />
+            </PopoverContent>
+          </Popover>
+          <span className="text-xs text-muted-foreground">–</span>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5">
+                <CalendarIcon className="h-3.5 w-3.5" />
+                {dateTo ? format(dateTo, "MMM d") : "To"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar mode="single" selected={dateTo} onSelect={(d) => { setDateTo(d); setDatePreset("custom"); }} initialFocus className="p-3 pointer-events-auto" />
+            </PopoverContent>
+          </Popover>
+          {(dateFrom || dateTo) && datePreset === "custom" && (
+            <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground" onClick={() => applyDatePreset("all")}>Clear</Button>
           )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setAddKBDialogOpen(false)}>Cancel</Button>
-            <Button onClick={() => { setAddKBDialogOpen(false); toast.success("Added to knowledge base"); }}>
-              Add Entry
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+        </div>
+
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as EmailTabValue)}>
+          <TabsList className="mb-6">
+            <TabsTrigger value="all_emails" className="gap-2">
+              <Eye className="h-4 w-4" />All
+              {allEmails.length > 0 && <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">{allEmails.length}</Badge>}
+            </TabsTrigger>
+            <TabsTrigger value="needs_review" className="gap-2">
+              <AlertCircle className="h-4 w-4" />Needs Review
+              {needsReview.length > 0 && <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">{needsReview.length}</Badge>}
+            </TabsTrigger>
+            <TabsTrigger value="drafted" className="gap-2">
+              <FileEdit className="h-4 w-4" />Drafted
+              {drafted.length > 0 && <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">{drafted.length}</Badge>}
+            </TabsTrigger>
+            <TabsTrigger value="sent" className="gap-2">
+              <Send className="h-4 w-4" />Sent
+              {sent.length > 0 && <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">{sent.length}</Badge>}
+            </TabsTrigger>
+            <TabsTrigger value="ignored" className="gap-2">
+              <XCircle className="h-4 w-4" />Ignored
+              {ignored.length > 0 && <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">{ignored.length}</Badge>}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="all_emails">{renderEmailList(allEmails)}</TabsContent>
+          <TabsContent value="needs_review">{renderEmailList(needsReview)}</TabsContent>
+          <TabsContent value="drafted">{renderEmailList(drafted)}</TabsContent>
+          <TabsContent value="sent">{renderEmailList(sent, true)}</TabsContent>
+          <TabsContent value="ignored">{renderEmailList(ignored)}</TabsContent>
+        </Tabs>
+
+        {/* Add to KB Dialog */}
+        <Dialog open={addKBDialogOpen} onOpenChange={setAddKBDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add to Knowledge Base</DialogTitle>
+              <DialogDescription>Create a new knowledge entry based on this email interaction.</DialogDescription>
+            </DialogHeader>
+            {selectedEmailForKB && (
+              <div className="space-y-4 py-4">
+                <div>
+                  <p className="text-sm font-medium">Email Subject</p>
+                  <p className="text-sm text-muted-foreground">{selectedEmailForKB.subject}</p>
+                </div>
+                <Textarea placeholder="What knowledge should be added from this interaction?" rows={4} />
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setAddKBDialogOpen(false)}>Cancel</Button>
+              <Button onClick={() => { setAddKBDialogOpen(false); toast.success("Added to knowledge base"); }}>Add Entry</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </ScrollArea>
   );
 }
 
