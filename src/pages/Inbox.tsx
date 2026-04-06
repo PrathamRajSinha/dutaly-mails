@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { format, formatDistanceToNow, startOfDay, endOfDay, subDays } from "date-fns";
 import {
   Search,
@@ -64,7 +64,8 @@ import { TemplatePickerDialog } from "@/components/email-templates/TemplatePicke
 import { type EmailTemplate } from "@/hooks/useEmailTemplates";
 import { replaceVariables, renderEmailHtml } from "@/lib/emailHtml";
 import { TicketDetailPanel } from "@/components/tickets/TicketDetailPanel";
-
+import { useInboxShortcuts } from "@/hooks/useInboxShortcuts";
+import { KeyboardShortcutsDialog } from "@/components/inbox/KeyboardShortcutsDialog";
 // ─── Helpers ────────────────────────────────────────────────
 const getConfidenceColor = (confidence: number | null) => {
   if (!confidence) return "text-muted-foreground bg-muted";
@@ -192,6 +193,18 @@ function TicketsView({ searchQuery, onSearchChange }: { searchQuery: string; onS
       t.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
       t.customer_email.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const shortcutActions = useMemo(() => {
+    const ticketList = filtered ?? [];
+    const currentIdx = selectedTicketId ? ticketList.findIndex(t => t.id === selectedTicketId) : -1;
+    return [
+      { key: "j", label: "j", description: "Next ticket", action: () => { if (currentIdx < ticketList.length - 1) setSelectedTicketId(ticketList[currentIdx + 1]?.id); else if (ticketList.length > 0 && currentIdx === -1) setSelectedTicketId(ticketList[0]?.id); } },
+      { key: "k", label: "k", description: "Previous ticket", action: () => { if (currentIdx > 0) setSelectedTicketId(ticketList[currentIdx - 1]?.id); } },
+      { key: "e", label: "e", description: "Resolve ticket", action: () => {} },
+    ];
+  }, [filtered, selectedTicketId]);
+
+  const { helpOpen, setHelpOpen } = useInboxShortcuts(shortcutActions);
 
   const handleFlagWrong = async (entry: { customer_email: string; ticket_id: string | null }) => {
     try {
@@ -422,10 +435,12 @@ function TicketsView({ searchQuery, onSearchChange }: { searchQuery: string; onS
             <div className="text-center">
               <Inbox className="h-12 w-12 mx-auto mb-3 opacity-50" />
               <p className="text-sm">Select a ticket to view details</p>
+              <p className="text-xs mt-2 opacity-50">Press <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px] font-mono">?</kbd> for keyboard shortcuts</p>
             </div>
           </div>
         )}
       </div>
+      <KeyboardShortcutsDialog open={helpOpen} onOpenChange={setHelpOpen} />
     </div>
   );
 }

@@ -284,6 +284,8 @@ export type Database = {
           intent: string | null
           queued_at: string
           reviewed_at: string | null
+          scheduled_send_at: string | null
+          snoozed_until: string | null
           status: string
           subject: string
           suggested_reply: string | null
@@ -304,6 +306,8 @@ export type Database = {
           intent?: string | null
           queued_at?: string
           reviewed_at?: string | null
+          scheduled_send_at?: string | null
+          snoozed_until?: string | null
           status?: string
           subject: string
           suggested_reply?: string | null
@@ -324,6 +328,8 @@ export type Database = {
           intent?: string | null
           queued_at?: string
           reviewed_at?: string | null
+          scheduled_send_at?: string | null
+          snoozed_until?: string | null
           status?: string
           subject?: string
           suggested_reply?: string | null

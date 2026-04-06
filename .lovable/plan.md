@@ -1,78 +1,27 @@
+## Features to Add
 
+### 1. Send Later
+- **DB**: Add `scheduled_send_at` (timestamptz, nullable) to `email_queue` table
+- **UI**: In the Inbox reply composer, add a "Send Later" button with a date/time picker
+- **Logic**: Emails with `scheduled_send_at` in the future get status `scheduled`; the existing send flow checks this before dispatching
 
-# Landing Page Repositioning: AI Helpdesk
+### 2. Instant Reply (Quick Reply Templates)
+- **UI**: In the Inbox detail panel, add quick-reply chips (e.g., "Reviewing", "Need time", "Thank you") above the compose area
+- **Logic**: Clicking a chip populates the reply textarea with a pre-written response; user can edit before sending
+- **No DB change needed** — uses hardcoded quick replies initially (can extend to user-customizable later)
 
-Updating all landing page copy and adding new sections while preserving the existing design system, animations, and layout.
+### 3. Snooze Emails
+- **DB**: Add `snoozed_until` (timestamptz, nullable) to `email_queue` table
+- **UI**: Add a "Snooze" button in the Inbox detail panel with preset options (1 hour, 3 hours, tomorrow, next week)
+- **Logic**: Snoozed emails are hidden from the inbox until `snoozed_until` passes
 
-## Changes by File
+### 4. Keyboard Shortcuts
+- **UI**: Global keyboard shortcut handler in the Inbox page
+- **Shortcuts**: `e` = archive/resolve, `r` = reply, `s` = snooze, `j/k` = navigate up/down in list, `?` = show shortcut help modal
+- **No DB change needed**
 
-### 1. `src/components/landing/HeroSection.tsx`
-- Badge: "AI-Powered Email Assistant" → "AI-Powered Helpdesk"
-- Headline: Replace 3-word animation with "AI Helpdesk Built for Growing Teams" (keep ShinyText on "Growing Teams")
-- Subtitle: New helpdesk-focused copy
-- Primary CTA: "Start Managing Support Smarter"
-- Secondary CTA: "See How It Works"
-- Add 3 benefit bullets below CTAs (animated, staggered)
-- Update dashboard preview badges to show ticket-related labels ("Ticket Created", "SLA Tracked", "Escalated")
+### 5. Landing Page Bento Cards
+- Update the FeaturesSection bento grid to include cards for all 4 features with mockup visuals matching the reference image style
 
-### 2. `src/components/landing/TrustedBySection.tsx` → **Problem Section**
-- Currently returns `null`. Repurpose as the "Your Inbox Was Never Built for Customer Support" 3-column problem section
-- Use existing spotlight card pattern from FeaturesSection for visual consistency
-- Add subtext below columns
-
-### 3. `src/components/landing/FeaturesSection.tsx` → **Solution Section**
-- Section label: "Solution"
-- Title: "Meet Your AI-Powered Customer Inbox"
-- Description paragraph added
-- Replace 6 feature cards with 4 new ones: AI Classification & Sentiment, Smart Reply Generation, SLA Tracking & Escalation, Slack & Webhook Integrations
-- Keep the SpotlightCard component and all its mouse-tracking effects
-
-### 4. `src/components/landing/InteractiveDemoSection.tsx` → **How It Works**
-- Title: "From Email to Resolution — Automatically"
-- Replace tab labels with 5 steps: "Email Received", "AI Classifies", "Draft Generated", "You Approve", "SLA Tracked"
-- Update tab content for each step with helpdesk-focused content
-- Keep all animation logic (typing effect, progress bar, auto-cycle)
-
-### 5. `src/components/landing/StatsSection.tsx` → **Differentiation Section**
-- Currently returns `null`. Build "Why Teams Choose MailReplAI" section
-- Two-column comparison: Traditional Helpdesk vs MailReplAI
-- Use motion animations consistent with the rest of the page
-
-### 6. `src/components/landing/TestimonialsSection.tsx` → **Use Cases Section**
-- Currently returns `null`. Build "Built for Modern Growing Teams" section
-- 4 cards: SaaS Startups, D2C Brands, Agencies, Service Businesses
-- Use SpotlightCard-style hover effects
-
-### 7. `src/components/landing/PricingSection.tsx`
-- Rename tiers: Starter, Growth (highlighted), Pro
-- Reframe features around tickets, AI replies, SLA tracking, integrations
-- Add note: "Designed for growing teams that want structure without enterprise pricing."
-- Remove "email automation" language
-
-### 8. `src/components/landing/CTASection.tsx`
-- Headline: "Stop Managing Support in Gmail Alone"
-- Subheadline: "Upgrade your inbox into an AI-powered helpdesk in minutes."
-- Primary CTA: "Start Free Trial"
-- Secondary CTA: "Book a Demo" (mailto link placeholder)
-
-### 9. New section: **Trust & Security** (add between Pricing and CTA in `Landing.tsx`)
-- Create `src/components/landing/SecuritySection.tsx`
-- Title: "Enterprise-Grade Security, Built on Supabase"
-- 4 items: Secure auth, Encrypted connections, Role-based access, Data isolation via RLS
-
-### 10. `src/pages/Landing.tsx`
-- Add SecuritySection import and place between PricingSection and CTASection
-
-### 11. `src/components/landing/LandingNavbar.tsx`
-- Update nav links: Features → "Features", Demo → "How It Works", Pricing → "Pricing", Testimonials → "Use Cases"
-
-### 12. `src/components/landing/FooterSection.tsx`
-- Update nav links to match new section names
-
-## What Does NOT Change
-- AntigravityDots, ShinyText, StarBorder, MagneticButton components
-- All Framer Motion animations, gradient blobs, noise overlays
-- Dark theme, Tailwind styling, responsive breakpoints
-- SpotlightCard mouse-tracking hover effect (reused across sections)
-- Overall page layout structure and section ordering
-
+### Migration needed
+- Add `scheduled_send_at` and `snoozed_until` columns to `email_queue`
