@@ -283,6 +283,14 @@ export function TicketDetailPanel({ ticketId, onBack }: { ticketId: string; onBa
     await updateEmailStatus.mutateAsync({ id: emailId, status: "edited", editedReply: reply });
     queryClient.invalidateQueries({ queryKey: ["ticket-emails"] });
   };
+  const handleSnooze = async (emailId: string, until: Date) => {
+    await snoozeEmail.mutateAsync({ id: emailId, until });
+    queryClient.invalidateQueries({ queryKey: ["ticket-emails"] });
+  };
+  const handleSchedule = async (emailId: string, sendAt: Date, reply?: string) => {
+    await scheduleEmail.mutateAsync({ id: emailId, sendAt, reply });
+    queryClient.invalidateQueries({ queryKey: ["ticket-emails"] });
+  };
 
   if (isLoading || !ticket) {
     return <div className="flex h-full items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
