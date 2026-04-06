@@ -117,30 +117,32 @@ function StepContent({
   const isLast = index === steps.length - 1;
   const isFirst = index === 0;
 
-  // Each step occupies 1 screen worth of scroll.
-  // Screen 0 = intro (headline only). Steps start at screen 1.
-  const screenStart = (index + 1) / totalScreens;
-  const screenEnd = (index + 2) / totalScreens;
-  const dur = screenEnd - screenStart;
+  // Each step gets 1 screen of scroll. Cross-fade overlaps by 15% of segment.
+  const seg = 1 / totalScreens;
+  const myStart = (index + 1) * seg;
+  const myEnd = (index + 2) * seg;
+  const overlap = seg * 0.15;
 
-  // Overlap: fade in from 0-15%, visible 15-85%, fade out 85-100%
-  // First step starts already visible (no fade-in needed from intro)
-  const fadeInEnd = screenStart + dur * 0.12;
-  const fadeOutStart = screenEnd - dur * 0.12;
+  // Fade in: starts 'overlap' before myStart (except first step, already visible)
+  // Fade out: ends 'overlap' after myEnd (except last step, stays visible)
+  const fadeInFrom = isFirst ? myStart : myStart - overlap;
+  const fadeInTo = isFirst ? myStart : myStart + overlap * 0.5;
+  const fadeOutFrom = isLast ? myEnd : myEnd - overlap * 0.5;
+  const fadeOutTo = isLast ? myEnd : myEnd + overlap;
 
   const opacity = useTransform(
     scrollYProgress,
     isFirst && isLast
-      ? [screenStart, fadeInEnd]
+      ? [myStart, myEnd]
       : isFirst
-      ? [screenStart, fadeInEnd, fadeOutStart, screenEnd]
+      ? [myStart, fadeOutFrom, fadeOutTo]
       : isLast
-      ? [screenStart, fadeInEnd, screenEnd]
-      : [screenStart, fadeInEnd, fadeOutStart, screenEnd],
+      ? [fadeInFrom, fadeInTo, myEnd]
+      : [fadeInFrom, fadeInTo, fadeOutFrom, fadeOutTo],
     isFirst && isLast
       ? [1, 1]
       : isFirst
-      ? [1, 1, 1, 0]
+      ? [1, 1, 0]
       : isLast
       ? [0, 1, 1]
       : [0, 1, 1, 0]
@@ -149,10 +151,10 @@ function StepContent({
   const y = useTransform(
     scrollYProgress,
     isFirst
-      ? [fadeOutStart, screenEnd]
+      ? [fadeOutFrom, fadeOutTo]
       : isLast
-      ? [screenStart, fadeInEnd]
-      : [screenStart, fadeInEnd, fadeOutStart, screenEnd],
+      ? [fadeInFrom, fadeInTo]
+      : [fadeInFrom, fadeInTo, fadeOutFrom, fadeOutTo],
     isFirst
       ? [0, -20]
       : isLast
