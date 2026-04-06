@@ -33,12 +33,7 @@ export function MagicBentoCard({
       const y = e.clientY - rect.top;
       setMousePos({ x, y });
 
-      // Tilt: max ±6deg
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-      const tiltX = ((y - centerY) / centerY) * -6;
-      const tiltY = ((x - centerX) / centerX) * 6;
-      setTilt({ x: tiltX, y: tiltY });
+      setTilt({ x: 0, y: 0 });
     },
     []
   );
