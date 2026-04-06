@@ -17,9 +17,19 @@ export function InteractiveDemoSection() {
         <p className="text-[13px] font-medium tracking-[0.15em] uppercase mb-4 text-center" style={{ color: "rgba(255,255,255,0.4)" }}>
           How it works
         </p>
-        <h2 className="text-[32px] sm:text-[40px] font-semibold tracking-[-0.02em] text-center mb-16" style={{ color: "#E8E4FF" }}>
-          Through thick &amp; thin.
-        </h2>
+        <div className="w-full max-w-[900px] mx-auto h-[100px] sm:h-[130px] lg:h-[160px] mb-16">
+          <TextPressure
+            text="through thick & thin."
+            textColor="#E8E4FF"
+            weight={true}
+            width={true}
+            italic={true}
+            alpha={false}
+            flex={true}
+            stroke={false}
+            minFontSize={24}
+          />
+        </div>
 
         <div className="relative">
           {/* Vertical line */}
