@@ -19,7 +19,7 @@ export default function Landing() {
       <InteractiveDemoSection />
       <StatsSection />
       <TestimonialsSection />
-      <PricingSection />
+      
       <CTASection />
       <FooterSection />
     </div>
