@@ -91,7 +91,7 @@ function SlaCountdown({ slaDueAt }: { slaDueAt: string | null }) {
   );
 }
 
-function EmailActions({ email, onApprove, onIgnore, onEditSend, isPending }: {
+function EmailActions({ email, onApprove, onIgnore, onEditSend, onSnooze, onSchedule, isPending }: {
   email: QueuedEmail;
   onApprove: (htmlBody?: string, attachmentUrls?: string[]) => void;
   onIgnore: () => void;
