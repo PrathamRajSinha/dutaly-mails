@@ -75,17 +75,29 @@ export function LandingNavbar() {
 
       {mobileOpen && (
         <div className="md:hidden px-6 py-5 space-y-3 border-t" style={{ background: "#0A0A0F", borderColor: "rgba(255,255,255,0.08)" }}>
-          {navLinks.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              className="block text-[15px] font-medium"
-              style={{ color: "rgba(255,255,255,0.5)" }}
-              onClick={() => setMobileOpen(false)}
-            >
-              {link.label}
-            </a>
-          ))}
+          {navLinks.map((link) =>
+            link.href.startsWith("/") ? (
+              <Link
+                key={link.label}
+                to={link.href}
+                className="block text-[15px] font-medium"
+                style={{ color: "rgba(255,255,255,0.5)" }}
+                onClick={() => setMobileOpen(false)}
+              >
+                {link.label}
+              </Link>
+            ) : (
+              <a
+                key={link.label}
+                href={link.href}
+                className="block text-[15px] font-medium"
+                style={{ color: "rgba(255,255,255,0.5)" }}
+                onClick={() => setMobileOpen(false)}
+              >
+                {link.label}
+              </a>
+            )
+          )}
           <Link to={ctaLink} className="block pt-2">
             <Button className="w-full text-white font-medium" style={{ background: "#7C6FE0", borderRadius: "6px" }}>
               {user ? "Dashboard" : "Sign up"}
