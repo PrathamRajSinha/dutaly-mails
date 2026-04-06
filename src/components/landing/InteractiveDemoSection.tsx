@@ -115,39 +115,49 @@ function StepContent({
 }) {
   const Icon = step.icon;
   const isLast = index === steps.length - 1;
+  const isFirst = index === 0;
 
   // Each step occupies 1 screen worth of scroll.
-  // Screen 0 = intro (just the headline). Steps start at screen 1.
+  // Screen 0 = intro (headline only). Steps start at screen 1.
   const screenStart = (index + 1) / totalScreens;
   const screenEnd = (index + 2) / totalScreens;
   const dur = screenEnd - screenStart;
 
-  // Fade in during first 20% of the step's screen
-  const fadeInStart = screenStart;
-  const fadeInEnd = screenStart + dur * 0.2;
-
-  // Fade out during last 20% (except last step stays visible)
-  const fadeOutStart = screenEnd - dur * 0.2;
-  const fadeOutEnd = screenEnd;
+  // Overlap: fade in from 0-15%, visible 15-85%, fade out 85-100%
+  // First step starts already visible (no fade-in needed from intro)
+  const fadeInEnd = screenStart + dur * 0.12;
+  const fadeOutStart = screenEnd - dur * 0.12;
 
   const opacity = useTransform(
     scrollYProgress,
-    isLast
-      ? [fadeInStart, fadeInEnd, fadeOutEnd]
-      : [fadeInStart, fadeInEnd, fadeOutStart, fadeOutEnd],
-    isLast
+    isFirst && isLast
+      ? [screenStart, fadeInEnd]
+      : isFirst
+      ? [screenStart, fadeInEnd, fadeOutStart, screenEnd]
+      : isLast
+      ? [screenStart, fadeInEnd, screenEnd]
+      : [screenStart, fadeInEnd, fadeOutStart, screenEnd],
+    isFirst && isLast
+      ? [1, 1]
+      : isFirst
+      ? [1, 1, 1, 0]
+      : isLast
       ? [0, 1, 1]
       : [0, 1, 1, 0]
   );
 
   const y = useTransform(
     scrollYProgress,
-    isLast
-      ? [fadeInStart, fadeInEnd, fadeOutEnd]
-      : [fadeInStart, fadeInEnd, fadeOutStart, fadeOutEnd],
-    isLast
-      ? [40, 0, 0]
-      : [40, 0, 0, -20]
+    isFirst
+      ? [fadeOutStart, screenEnd]
+      : isLast
+      ? [screenStart, fadeInEnd]
+      : [screenStart, fadeInEnd, fadeOutStart, screenEnd],
+    isFirst
+      ? [0, -20]
+      : isLast
+      ? [30, 0]
+      : [30, 0, 0, -20]
   );
 
   return (
