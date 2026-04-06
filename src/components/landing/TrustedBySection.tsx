@@ -8,7 +8,7 @@ export function TrustedBySection() {
   ];
 
   return (
-    <section className="py-28 sm:py-36 relative" style={{ background: "#FFFFFF" }}>
+    <section className="py-28 sm:py-36 relative" style={{ background: "#F8F7FF" }}>
       <div className="max-w-[1200px] mx-auto px-6 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
