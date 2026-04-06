@@ -179,7 +179,7 @@ export default function Dashboard() {
               <CardTitle className="text-lg font-semibold text-card-foreground">
                 Recent Activity
               </CardTitle>
-              <Link to="/emails">
+              <Link to="/inbox">
                 <Button variant="ghost" size="sm" className="text-primary">
                   View all
                 </Button>
