@@ -396,7 +396,7 @@ export default function EmailQueue() {
   const { session } = useAuth();
   const queryClient = useQueryClient();
   const { accounts } = useEmailAccounts();
-  const { needsReview, drafted, sent, ignored, isLoading, updateEmailStatus, pendingCount } = useEmailQueue();
+  const { emails: allEmails, needsReview, drafted, sent, ignored, isLoading, updateEmailStatus, pendingCount } = useEmailQueue();
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [addKBDialogOpen, setAddKBDialogOpen] = useState(false);
