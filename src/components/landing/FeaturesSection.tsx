@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ClassificationMockup, ReplyMockup, DashboardMockup } from "./FeatureMockups";
+import { ClassificationMockup, ReplyMockup, DashboardMockup, AskAnythingMockup } from "./FeatureMockups";
 
 const featureBlocks = [
   {
