@@ -147,8 +147,8 @@ export function TextPressure({
 
           const d = dist(mouseRef.current, charCenter);
 
-          const wdth = width ? Math.floor(getAttr(d, maxDist, 60, 150)) : 100;
-          const wght = weight ? Math.floor(getAttr(d, maxDist, 300, 700)) : 400;
+          const wdth = width ? Math.floor(getAttr(d, maxDist, 85, 80)) : 100;
+          const wght = weight ? Math.floor(getAttr(d, maxDist, 500, 400)) : 400;
           const italVal = italic ? getAttr(d, maxDist, 0, 1).toFixed(2) : '0';
           const alphaVal = alpha ? getAttr(d, maxDist, 0, 1).toFixed(2) : '1';
 
