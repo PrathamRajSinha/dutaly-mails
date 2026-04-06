@@ -502,12 +502,42 @@ export default function EmailQueue() {
     }
   };
 
+  const applyDatePreset = (preset: string) => {
+    setDatePreset(preset);
+    const now = new Date();
+    switch (preset) {
+      case "today":
+        setDateFrom(startOfDay(now));
+        setDateTo(undefined);
+        break;
+      case "7d":
+        setDateFrom(startOfDay(subDays(now, 7)));
+        setDateTo(undefined);
+        break;
+      case "30d":
+        setDateFrom(startOfDay(subDays(now, 30)));
+        setDateTo(undefined);
+        break;
+      case "all":
+      default:
+        setDateFrom(undefined);
+        setDateTo(undefined);
+        break;
+    }
+  };
+
   const filterEmails = (emails: QueuedEmail[]) =>
-    emails.filter(
-      (email) =>
+    emails.filter((email) => {
+      const matchesSearch =
         email.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        email.from_address.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+        email.from_address.toLowerCase().includes(searchQuery.toLowerCase());
+      if (!matchesSearch) return false;
+
+      const emailDate = new Date(email.queued_at);
+      if (dateFrom && emailDate < startOfDay(dateFrom)) return false;
+      if (dateTo && emailDate > endOfDay(dateTo)) return false;
+      return true;
+    });
 
   const handleApprove = async (id: string, _htmlBody?: string, _attachmentUrls?: string[]) => {
     await updateEmailStatus.mutateAsync({ id, status: "approved" });
