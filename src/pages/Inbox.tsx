@@ -1,0 +1,1114 @@
+import { useState, useEffect, useRef, useCallback } from "react";
+import { format, formatDistanceToNow, startOfDay, endOfDay, subDays } from "date-fns";
+import {
+  Search,
+  Check,
+  X,
+  Edit,
+  ChevronDown,
+  ChevronUp,
+  AlertCircle,
+  Send,
+  Plus,
+  Clock,
+  Loader2,
+  RefreshCw,
+  FileEdit,
+  XCircle,
+  Eye,
+  Play,
+  Pause,
+  FileText,
+  Paperclip,
+  Trash2,
+  CalendarIcon,
+  Inbox,
+  Flame,
+  Flag,
+  CheckCircle2,
+  Mail,
+  Filter,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { useEmailQueue, type QueuedEmail } from "@/hooks/useEmailQueue";
+import { useTickets, type TicketStatus, type Ticket } from "@/hooks/useTickets";
+import { useAutoSentAudit } from "@/hooks/useAutoSentAudit";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
+import { useEmailAccounts } from "@/hooks/useEmailAccounts";
+import { TemplatePickerDialog } from "@/components/email-templates/TemplatePickerDialog";
+import { type EmailTemplate } from "@/hooks/useEmailTemplates";
+import { replaceVariables, renderEmailHtml } from "@/lib/emailHtml";
+import { TicketDetailPanel } from "@/components/tickets/TicketDetailPanel";
+
+// ─── Helpers ────────────────────────────────────────────────
+const getConfidenceColor = (confidence: number | null) => {
+  if (!confidence) return "text-muted-foreground bg-muted";
+  if (confidence >= 0.7) return "text-green-600 bg-green-500/10";
+  if (confidence >= 0.5) return "text-amber-600 bg-amber-500/10";
+  return "text-red-600 bg-red-500/10";
+};
+
+const formatTimeAgo = (date: string) => {
+  const now = new Date();
+  const then = new Date(date);
+  const diffMs = now.getTime() - then.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`;
+  return `${Math.floor(diffMins / 1440)}d ago`;
+};
+
+const priorityColors: Record<string, string> = {
+  low: "bg-muted text-muted-foreground",
+  medium: "bg-primary/10 text-primary",
+  high: "bg-orange-500/10 text-orange-600",
+  urgent: "bg-destructive/10 text-destructive",
+};
+
+const statusDot: Record<string, string> = {
+  open: "bg-primary",
+  pending: "bg-yellow-500",
+  resolved: "bg-green-500",
+  closed: "bg-muted-foreground",
+};
+
+type ViewMode = "tickets" | "emails";
+type TicketTabValue = TicketStatus | "all" | "auto_sent";
+type EmailTabValue = "all_emails" | "needs_review" | "drafted" | "sent" | "ignored";
+
+// ─── Main Component ─────────────────────────────────────────
+export default function UnifiedInbox() {
+  const [viewMode, setViewMode] = useState<ViewMode>("tickets");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  return (
+    <div className="flex h-full flex-col">
+      {/* Unified Header */}
+      <div className="border-b border-border bg-card px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div>
+              <h1 className="text-xl font-semibold text-foreground">Inbox</h1>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Manage tickets and email conversations
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            {/* View mode toggle */}
+            <div className="flex items-center rounded-lg border border-border bg-muted/50 p-0.5">
+              <button
+                onClick={() => setViewMode("tickets")}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all",
+                  viewMode === "tickets"
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <Inbox className="h-3.5 w-3.5" />
+                Tickets
+              </button>
+              <button
+                onClick={() => setViewMode("emails")}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all",
+                  viewMode === "emails"
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <Mail className="h-3.5 w-3.5" />
+                Emails
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-hidden">
+        {viewMode === "tickets" ? (
+          <TicketsView searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+        ) : (
+          <EmailsView searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Tickets View ───────────────────────────────────────────
+function TicketsView({ searchQuery, onSearchChange }: { searchQuery: string; onSearchChange: (v: string) => void }) {
+  const [activeTab, setActiveTab] = useState<TicketTabValue>("all");
+  const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
+  const [angryExpanded, setAngryExpanded] = useState(true);
+  const statusFilter = activeTab === "all" || activeTab === "auto_sent" ? undefined : activeTab;
+  const { data: tickets, isLoading } = useTickets(statusFilter);
+  const { pendingCount } = useEmailQueue();
+  const { data: autoSentLogs = [] } = useAutoSentAudit();
+  const queryClient = useQueryClient();
+
+  const ticketTabs: { value: TicketTabValue; label: string; icon: React.ReactNode; count?: number }[] = [
+    { value: "all", label: "All", icon: null, count: tickets?.length },
+    { value: "open", label: "Open", icon: <AlertCircle className="h-3 w-3" />, count: tickets?.filter(t => t.status === "open").length },
+    { value: "pending", label: "Pending", icon: <Clock className="h-3 w-3" />, count: tickets?.filter(t => t.status === "pending").length },
+    { value: "resolved", label: "Resolved", icon: <CheckCircle2 className="h-3 w-3" /> },
+    { value: "closed", label: "Closed", icon: <XCircle className="h-3 w-3" /> },
+    { value: "auto_sent", label: "Auto-Sent", icon: <Send className="h-3 w-3" /> },
+  ];
+
+  const angryTickets = (tickets ?? []).filter(
+    (t) => t.escalation_flag && t.status !== "resolved" && t.status !== "closed"
+  );
+
+  const filtered = (tickets ?? []).filter(
+    (t) =>
+      t.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      t.customer_email.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleFlagWrong = async (entry: { customer_email: string; ticket_id: string | null }) => {
+    try {
+      const { data: instructions } = await supabase
+        .from("ai_instructions")
+        .select("id, manual_only_senders")
+        .single();
+      if (instructions) {
+        const current = (instructions.manual_only_senders as string[]) || [];
+        if (!current.includes(entry.customer_email)) {
+          await supabase
+            .from("ai_instructions")
+            .update({ manual_only_senders: [...current, entry.customer_email] })
+            .eq("id", instructions.id);
+        }
+      }
+      if (entry.ticket_id) {
+        await supabase.from("tickets").update({ status: "open", priority: "high" }).eq("id", entry.ticket_id);
+      }
+      queryClient.invalidateQueries({ queryKey: ["tickets"] });
+      queryClient.invalidateQueries({ queryKey: ["auto-sent-audit"] });
+      toast.success("Sender added to manual-only list.");
+    } catch {
+      toast.error("Failed to flag reply");
+    }
+  };
+
+  // Auto-sent audit view
+  if (activeTab === "auto_sent") {
+    return (
+      <div className="flex h-full flex-col">
+        <div className="border-b border-border px-4 py-3">
+          <div className="flex gap-1 overflow-x-auto">
+            {ticketTabs.map((tab) => (
+              <button
+                key={tab.value}
+                onClick={() => setActiveTab(tab.value)}
+                className={cn(
+                  "flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium whitespace-nowrap transition-colors",
+                  activeTab === tab.value
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                )}
+              >
+                {tab.icon}
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <ScrollArea className="flex-1">
+          <div className="p-4 space-y-3">
+            {autoSentLogs.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <Send className="h-10 w-10 text-muted-foreground mb-3" />
+                <p className="text-sm text-muted-foreground">No auto-sent replies yet</p>
+              </div>
+            ) : (
+              autoSentLogs.map((entry) => (
+                <AutoSentCard
+                  key={entry.id}
+                  entry={entry}
+                  onFlagWrong={() =>
+                    handleFlagWrong({ customer_email: entry.customer_email, ticket_id: entry.ticket_id })
+                  }
+                  onViewTicket={() => {
+                    if (entry.ticket_id) {
+                      setActiveTab("all");
+                      setSelectedTicketId(entry.ticket_id);
+                    }
+                  }}
+                />
+              ))
+            )}
+          </div>
+        </ScrollArea>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex h-full">
+      {/* Left: Ticket List */}
+      <div
+        className={cn(
+          "flex flex-col border-r border-border w-full lg:w-[380px] lg:min-w-[380px] shrink-0",
+          selectedTicketId && "hidden lg:flex"
+        )}
+      >
+        <div className="px-4 py-3 space-y-3 border-b border-border">
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search tickets..."
+                className="pl-8 h-8 text-sm"
+                value={searchQuery}
+                onChange={(e) => onSearchChange(e.target.value)}
+              />
+            </div>
+            {pendingCount > 0 && (
+              <Badge className="bg-destructive/10 text-destructive text-xs h-6 px-2 shrink-0">
+                {pendingCount} to review
+              </Badge>
+            )}
+          </div>
+          <div className="flex gap-1 overflow-x-auto">
+            {ticketTabs.map((tab) => (
+              <button
+                key={tab.value}
+                onClick={() => setActiveTab(tab.value)}
+                className={cn(
+                  "flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium whitespace-nowrap transition-colors",
+                  activeTab === tab.value
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                )}
+              >
+                {tab.icon}
+                {tab.label}
+                {tab.count != null && tab.count > 0 && activeTab !== tab.value && (
+                  <span className="ml-0.5 text-[10px] opacity-70">{tab.count}</span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Angry Customer Pinned Section */}
+        {angryTickets.length > 0 && (
+          <div className="border-b border-destructive/20 bg-destructive/5">
+            <button
+              className="flex w-full items-center justify-between px-4 py-2 text-xs font-medium text-destructive"
+              onClick={() => setAngryExpanded(!angryExpanded)}
+            >
+              <span className="flex items-center gap-1.5">
+                <Flame className="h-3.5 w-3.5" />
+                Needs Immediate Attention ({angryTickets.length})
+              </span>
+              {angryExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+            </button>
+            {angryExpanded && (
+              <div className="divide-y divide-destructive/10">
+                {angryTickets.map((ticket) => (
+                  <button
+                    key={ticket.id}
+                    onClick={() => setSelectedTicketId(ticket.id)}
+                    className={cn(
+                      "w-full text-left px-4 py-2.5 transition-colors hover:bg-destructive/10",
+                      selectedTicketId === ticket.id && "bg-destructive/10"
+                    )}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Flame className="h-3.5 w-3.5 text-destructive shrink-0" />
+                      <Badge variant="destructive" className="text-[10px] h-4 px-1.5 shrink-0">
+                        Escalated
+                      </Badge>
+                      <p className="text-sm font-medium text-foreground truncate flex-1">{ticket.subject}</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5 pl-5">{ticket.customer_email}</p>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        <ScrollArea className="flex-1">
+          {isLoading ? (
+            <div className="p-4 space-y-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="h-16 w-full rounded-lg" />
+              ))}
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center px-4">
+              <Inbox className="h-10 w-10 text-muted-foreground mb-3" />
+              <p className="text-sm text-muted-foreground">No tickets found</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-border">
+              {filtered.map((ticket) => (
+                <button
+                  key={ticket.id}
+                  onClick={() => setSelectedTicketId(ticket.id)}
+                  className={cn(
+                    "w-full text-left px-4 py-3 transition-colors hover:bg-accent/50",
+                    selectedTicketId === ticket.id && "bg-accent"
+                  )}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className={cn("mt-1.5 h-2 w-2 rounded-full shrink-0", statusDot[ticket.status])} />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        {ticket.escalation_flag && <Flame className="h-3.5 w-3.5 text-destructive shrink-0" />}
+                        <p className="text-sm font-medium text-foreground truncate">{ticket.subject}</p>
+                      </div>
+                      <p className="text-xs text-muted-foreground truncate mt-0.5">{ticket.customer_email}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="secondary" className={cn("text-[10px] h-4 px-1.5", priorityColors[ticket.priority])}>
+                          {ticket.priority}
+                        </Badge>
+                        {ticket.escalation_flag && (
+                          <Badge variant="destructive" className="text-[10px] h-4 px-1.5">Escalated</Badge>
+                        )}
+                        {ticket.category && (
+                          <span className="text-[10px] text-muted-foreground capitalize">{ticket.category.replace("_", " ")}</span>
+                        )}
+                        <span className="text-[10px] text-muted-foreground ml-auto">
+                          {formatDistanceToNow(new Date(ticket.created_at), { addSuffix: true })}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </ScrollArea>
+      </div>
+
+      {/* Right: Detail Panel */}
+      <div className={cn("flex-1 min-w-0", !selectedTicketId && "hidden lg:flex")}>
+        {selectedTicketId ? (
+          <TicketDetailPanel ticketId={selectedTicketId} onBack={() => setSelectedTicketId(null)} />
+        ) : (
+          <div className="flex h-full items-center justify-center text-muted-foreground">
+            <div className="text-center">
+              <Inbox className="h-12 w-12 mx-auto mb-3 opacity-50" />
+              <p className="text-sm">Select a ticket to view details</p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Emails View ────────────────────────────────────────────
+function EmailsView({ searchQuery, onSearchChange }: { searchQuery: string; onSearchChange: (v: string) => void }) {
+  const { session } = useAuth();
+  const queryClient = useQueryClient();
+  const { accounts } = useEmailAccounts();
+  const { emails: allEmails, needsReview, drafted, sent, ignored, isLoading, updateEmailStatus, pendingCount } = useEmailQueue();
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [addKBDialogOpen, setAddKBDialogOpen] = useState(false);
+  const [selectedEmailForKB, setSelectedEmailForKB] = useState<QueuedEmail | null>(null);
+  const [isFetching, setIsFetching] = useState(false);
+  const [activeTab, setActiveTab] = useState<EmailTabValue>(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get("tab");
+    if (tab === "needs_review" || tab === "drafted" || tab === "sent" || tab === "ignored") return tab;
+    return "all_emails";
+  });
+  const [autoFetchEnabled, setAutoFetchEnabled] = useState(false);
+  const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
+  const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
+  const [datePreset, setDatePreset] = useState<string>("all");
+  const isFetchingRef = useRef(false);
+
+  const handleAutoFetch = useCallback(async () => {
+    if (!session?.access_token || isFetchingRef.current) return;
+    isFetchingRef.current = true;
+    try {
+      const hasGmail = accounts.some((a) => a.provider === "gmail" && a.is_active);
+      const hasImap = accounts.some((a) => a.provider === "imap" && a.is_active);
+      const fetches: Promise<{ data: any; error: any }>[] = [];
+      if (hasGmail) fetches.push(supabase.functions.invoke("fetch-gmail-emails", { headers: { Authorization: `Bearer ${session.access_token}` } }));
+      if (hasImap) fetches.push(supabase.functions.invoke("fetch-imap-emails", { headers: { Authorization: `Bearer ${session.access_token}` } }));
+      if (fetches.length === 0) return;
+      await Promise.allSettled(fetches);
+      await queryClient.invalidateQueries({ queryKey: ["email-queue"] });
+    } catch (error) {
+      console.error("Auto-fetch error:", error);
+    } finally {
+      isFetchingRef.current = false;
+    }
+  }, [session?.access_token, accounts, queryClient]);
+
+  useEffect(() => {
+    if (!autoFetchEnabled) return;
+    const interval = setInterval(handleAutoFetch, 10000);
+    return () => clearInterval(interval);
+  }, [autoFetchEnabled, handleAutoFetch]);
+
+  const handleFetchEmails = async () => {
+    if (!session?.access_token) {
+      toast.error("Please sign in to fetch emails");
+      return;
+    }
+    setIsFetching(true);
+    try {
+      const hasGmail = accounts.some((a) => a.provider === "gmail" && a.is_active);
+      const hasImap = accounts.some((a) => a.provider === "imap" && a.is_active);
+      const fetches: Promise<{ data: any; error: any }>[] = [];
+      if (hasGmail) fetches.push(supabase.functions.invoke("fetch-gmail-emails", { headers: { Authorization: `Bearer ${session.access_token}` } }));
+      if (hasImap) fetches.push(supabase.functions.invoke("fetch-imap-emails", { headers: { Authorization: `Bearer ${session.access_token}` } }));
+      if (fetches.length === 0) {
+        toast.info("No active email accounts connected");
+        setIsFetching(false);
+        return;
+      }
+      const results = await Promise.allSettled(fetches);
+      let totalProcessed = 0;
+      let totalSkipped = 0;
+      let totalTotal = 0;
+      for (const result of results) {
+        if (result.status === "fulfilled" && !result.value.error) {
+          const data = result.value.data;
+          totalProcessed += data.processed || 0;
+          totalSkipped += data.skipped || 0;
+          totalTotal += data.total || 0;
+        }
+      }
+      await queryClient.invalidateQueries({ queryKey: ["email-queue"] });
+      if (totalProcessed > 0) toast.success(`Fetched ${totalProcessed} new email(s)`);
+      else if (totalTotal === 0) toast.info("No unread emails found");
+      else toast.info(`No new emails (${totalSkipped} already processed)`);
+    } catch (error) {
+      console.error("Fetch emails error:", error);
+      toast.error("Failed to fetch emails");
+    } finally {
+      setIsFetching(false);
+    }
+  };
+
+  const applyDatePreset = (preset: string) => {
+    setDatePreset(preset);
+    const now = new Date();
+    switch (preset) {
+      case "today": setDateFrom(startOfDay(now)); setDateTo(undefined); break;
+      case "7d": setDateFrom(startOfDay(subDays(now, 7))); setDateTo(undefined); break;
+      case "30d": setDateFrom(startOfDay(subDays(now, 30))); setDateTo(undefined); break;
+      default: setDateFrom(undefined); setDateTo(undefined); break;
+    }
+  };
+
+  const filterEmails = (emails: QueuedEmail[]) =>
+    emails.filter((email) => {
+      const matchesSearch =
+        email.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        email.from_address.toLowerCase().includes(searchQuery.toLowerCase());
+      if (!matchesSearch) return false;
+      const emailDate = new Date(email.queued_at);
+      if (dateFrom && emailDate < startOfDay(dateFrom)) return false;
+      if (dateTo && emailDate > endOfDay(dateTo)) return false;
+      return true;
+    });
+
+  const handleApprove = async (id: string) => {
+    await updateEmailStatus.mutateAsync({ id, status: "approved" });
+  };
+  const handleIgnore = async (id: string) => {
+    await updateEmailStatus.mutateAsync({ id, status: "ignored" });
+  };
+  const handleEditSend = async (id: string, editedReply: string) => {
+    await updateEmailStatus.mutateAsync({ id, status: "edited", editedReply });
+  };
+  const handleAddToKB = (email: QueuedEmail) => {
+    setSelectedEmailForKB(email);
+    setAddKBDialogOpen(true);
+  };
+
+  const renderEmailList = (emails: QueuedEmail[], readOnly = false) => {
+    const filtered = filterEmails(emails);
+    if (filtered.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="rounded-full bg-muted p-4">
+            <Check className="h-8 w-8 text-muted-foreground" />
+          </div>
+          <h3 className="mt-4 text-lg font-medium text-foreground">Nothing here</h3>
+          <p className="mt-1 text-muted-foreground">No emails in this category</p>
+        </div>
+      );
+    }
+    return (
+      <div className="space-y-3">
+        {filtered.map((email) => (
+          <EmailCard
+            key={email.id}
+            email={email}
+            isExpanded={expandedId === email.id}
+            onToggle={() => setExpandedId(expandedId === email.id ? null : email.id)}
+            onApprove={() => handleApprove(email.id)}
+            onIgnore={() => handleIgnore(email.id)}
+            onEditSend={(reply) => handleEditSend(email.id, reply)}
+            onAddToKB={() => handleAddToKB(email)}
+            isPending={updateEmailStatus.isPending}
+            readOnly={readOnly}
+          />
+        ))}
+      </div>
+    );
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const emailTabs: { value: EmailTabValue; label: string; icon: React.ReactNode; count: number }[] = [
+    { value: "all_emails", label: "All", icon: <Eye className="h-3.5 w-3.5" />, count: allEmails.length },
+    { value: "needs_review", label: "Review", icon: <AlertCircle className="h-3.5 w-3.5" />, count: needsReview.length },
+    { value: "drafted", label: "Drafted", icon: <FileEdit className="h-3.5 w-3.5" />, count: drafted.length },
+    { value: "sent", label: "Sent", icon: <Send className="h-3.5 w-3.5" />, count: sent.length },
+    { value: "ignored", label: "Ignored", icon: <XCircle className="h-3.5 w-3.5" />, count: ignored.length },
+  ];
+
+  return (
+    <div className="flex h-full flex-col">
+      {/* Toolbar */}
+      <div className="border-b border-border px-6 py-3">
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="relative flex-1 min-w-[200px] max-w-sm">
+            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search emails..."
+              className="pl-9 h-8 text-sm"
+              value={searchQuery}
+              onChange={(e) => onSearchChange(e.target.value)}
+            />
+          </div>
+
+          {/* Date presets */}
+          <div className="flex items-center gap-1">
+            {[
+              { label: "All", value: "all" },
+              { label: "Today", value: "today" },
+              { label: "7d", value: "7d" },
+              { label: "30d", value: "30d" },
+            ].map((p) => (
+              <Button
+                key={p.value}
+                variant={datePreset === p.value ? "default" : "outline"}
+                size="sm"
+                className="h-7 text-xs px-2.5"
+                onClick={() => applyDatePreset(p.value)}
+              >
+                {p.label}
+              </Button>
+            ))}
+          </div>
+
+          {/* Custom date pickers */}
+          <div className="flex items-center gap-1.5">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="h-7 text-xs gap-1">
+                  <CalendarIcon className="h-3 w-3" />
+                  {dateFrom ? format(dateFrom, "MMM d") : "From"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={dateFrom}
+                  onSelect={(d) => { setDateFrom(d); setDatePreset("custom"); }}
+                  initialFocus
+                  className="p-3 pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+            <span className="text-xs text-muted-foreground">–</span>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="h-7 text-xs gap-1">
+                  <CalendarIcon className="h-3 w-3" />
+                  {dateTo ? format(dateTo, "MMM d") : "To"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={dateTo}
+                  onSelect={(d) => { setDateTo(d); setDatePreset("custom"); }}
+                  initialFocus
+                  className="p-3 pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+            {datePreset === "custom" && (dateFrom || dateTo) && (
+              <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => applyDatePreset("all")}>
+                Clear
+              </Button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2 ml-auto">
+            <Button
+              variant={autoFetchEnabled ? "destructive" : "outline"}
+              size="sm"
+              className="h-7 text-xs"
+              onClick={() => setAutoFetchEnabled(!autoFetchEnabled)}
+            >
+              {autoFetchEnabled ? <Pause className="mr-1.5 h-3 w-3" /> : <Play className="mr-1.5 h-3 w-3" />}
+              {autoFetchEnabled ? "Stop" : "Auto-Fetch"}
+            </Button>
+            {autoFetchEnabled && (
+              <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                10s
+              </span>
+            )}
+            <Button variant="outline" size="sm" className="h-7 text-xs" onClick={handleFetchEmails} disabled={isFetching}>
+              {isFetching ? <Loader2 className="mr-1.5 h-3 w-3 animate-spin" /> : <RefreshCw className="mr-1.5 h-3 w-3" />}
+              Fetch
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Email Tabs + Content */}
+      <div className="flex-1 overflow-hidden">
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as EmailTabValue)} className="flex h-full flex-col">
+          <div className="border-b border-border px-6 pt-2">
+            <TabsList className="h-9 bg-transparent p-0 gap-0">
+              {emailTabs.map((tab) => (
+                <TabsTrigger
+                  key={tab.value}
+                  value={tab.value}
+                  className="gap-1.5 rounded-none border-b-2 border-transparent px-3 pb-2.5 pt-2 text-xs font-medium data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+                >
+                  {tab.icon}
+                  {tab.label}
+                  {tab.count > 0 && (
+                    <Badge
+                      variant="secondary"
+                      className={cn(
+                        "ml-0.5 h-4 min-w-[16px] px-1 text-[10px]",
+                        tab.value === "needs_review" && tab.count > 0 && "bg-destructive/10 text-destructive"
+                      )}
+                    >
+                      {tab.count}
+                    </Badge>
+                  )}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
+
+          <ScrollArea className="flex-1">
+            <div className="p-6">
+              <TabsContent value="all_emails" className="mt-0">{renderEmailList(allEmails)}</TabsContent>
+              <TabsContent value="needs_review" className="mt-0">{renderEmailList(needsReview)}</TabsContent>
+              <TabsContent value="drafted" className="mt-0">{renderEmailList(drafted)}</TabsContent>
+              <TabsContent value="sent" className="mt-0">{renderEmailList(sent, true)}</TabsContent>
+              <TabsContent value="ignored" className="mt-0">{renderEmailList(ignored, true)}</TabsContent>
+            </div>
+          </ScrollArea>
+        </Tabs>
+      </div>
+
+      {/* Add to KB Dialog */}
+      <Dialog open={addKBDialogOpen} onOpenChange={setAddKBDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add to Knowledge Base</DialogTitle>
+            <DialogDescription>Create a new knowledge entry based on this email interaction.</DialogDescription>
+          </DialogHeader>
+          {selectedEmailForKB && (
+            <div className="space-y-4 py-4">
+              <div>
+                <p className="text-sm font-medium">Email Subject</p>
+                <p className="text-sm text-muted-foreground">{selectedEmailForKB.subject}</p>
+              </div>
+              <Textarea placeholder="What knowledge should be added from this interaction?" rows={4} />
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddKBDialogOpen(false)}>Cancel</Button>
+            <Button onClick={() => { setAddKBDialogOpen(false); toast.success("Added to knowledge base"); }}>
+              Add Entry
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+// ─── EmailCard ──────────────────────────────────────────────
+function EmailCard({
+  email,
+  isExpanded,
+  onToggle,
+  onApprove,
+  onIgnore,
+  onEditSend,
+  onAddToKB,
+  isPending,
+  readOnly = false,
+}: {
+  email: QueuedEmail;
+  isExpanded: boolean;
+  onToggle: () => void;
+  onApprove: () => void;
+  onIgnore: () => void;
+  onEditSend: (reply: string) => void;
+  onAddToKB: () => void;
+  isPending: boolean;
+  readOnly?: boolean;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [isComposing, setIsComposing] = useState(false);
+  const [editedReply, setEditedReply] = useState(email.suggested_reply || "");
+  const [composedReply, setComposedReply] = useState("");
+  const [templatePickerOpen, setTemplatePickerOpen] = useState(false);
+  const [activeTemplate, setActiveTemplate] = useState<EmailTemplate | null>(null);
+  const [attachments, setAttachments] = useState<{ name: string; url: string }[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { user } = useAuth();
+
+  const confidencePercent = email.confidence_score ? Math.round(email.confidence_score * 100) : null;
+  const hasReply = !!email.suggested_reply;
+
+  const handleTemplateSelect = (template: EmailTemplate) => {
+    const replaced = replaceVariables(template.body, {
+      sender_name: email.from_name || email.from_address.split("@")[0],
+      subject: email.subject,
+    });
+    if (isEditing) setEditedReply(replaced);
+    else { setComposedReply(replaced); setIsComposing(true); }
+    setActiveTemplate(template);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || !user) return;
+    setIsUploading(true);
+    try {
+      for (const file of Array.from(files)) {
+        const filePath = `${user.id}/${crypto.randomUUID()}_${file.name}`;
+        const { error } = await supabase.storage.from("email-attachments").upload(filePath, file);
+        if (error) throw error;
+        const { data: urlData } = supabase.storage.from("email-attachments").getPublicUrl(filePath);
+        setAttachments((prev) => [...prev, { name: file.name, url: urlData.publicUrl }]);
+      }
+    } catch (err: any) {
+      toast.error("Upload failed: " + err.message);
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const removeAttachment = (url: string) => {
+    setAttachments((prev) => prev.filter((a) => a.url !== url));
+  };
+
+  const statusBadge = () => {
+    switch (email.status) {
+      case "sent": case "sending":
+        return <Badge className="bg-green-500/10 text-green-600 border-0 font-medium text-[10px] h-5">Sent</Badge>;
+      case "approved":
+        return <Badge className="bg-green-500/10 text-green-600 border-0 font-medium text-[10px] h-5">Approved</Badge>;
+      case "ignored":
+        return <Badge className="bg-muted text-muted-foreground border-0 font-medium text-[10px] h-5">Ignored</Badge>;
+      case "edited":
+        return <Badge className="bg-blue-500/10 text-blue-600 border-0 font-medium text-[10px] h-5">Edited</Badge>;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <Card className="border border-border overflow-hidden transition-shadow hover:shadow-sm">
+      <div className="flex cursor-pointer items-center gap-4 p-4" onClick={onToggle}>
+        <div className={cn(
+          "flex h-9 w-9 items-center justify-center rounded-full shrink-0",
+          email.status === "sent" || email.status === "approved" || email.status === "sending"
+            ? "bg-green-500/10"
+            : email.status === "ignored" ? "bg-muted"
+            : email.suggested_reply ? "bg-primary/10" : "bg-amber-500/10"
+        )}>
+          {email.status === "sent" || email.status === "approved" || email.status === "sending" ? (
+            <Check className="h-4 w-4 text-green-600" />
+          ) : email.status === "ignored" ? (
+            <XCircle className="h-4 w-4 text-muted-foreground" />
+          ) : email.suggested_reply ? (
+            <FileEdit className="h-4 w-4 text-primary" />
+          ) : (
+            <AlertCircle className="h-4 w-4 text-amber-600" />
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-medium text-card-foreground truncate">{email.subject}</h3>
+            {statusBadge()}
+          </div>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {email.from_name || email.from_address} · {formatTimeAgo(email.queued_at)}
+          </p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {confidencePercent !== null && (
+            <Badge className={cn("font-medium text-[10px] h-5 border-0", getConfidenceColor(email.confidence_score))}>
+              {confidencePercent}%
+            </Badge>
+          )}
+          {email.intent && (
+            <Badge variant="outline" className="capitalize text-[10px] h-5">{email.intent}</Badge>
+          )}
+          {isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+        </div>
+      </div>
+
+      {isExpanded && (
+        <CardContent className="border-t border-border bg-muted/20 px-4 pb-4 pt-4 space-y-4">
+          {email.flag_reason && (
+            <div className="flex items-start gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 p-3">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+              <p className="text-sm text-amber-800">{email.flag_reason}</p>
+            </div>
+          )}
+
+          <div>
+            <h4 className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Original Email</h4>
+            <div className="rounded-lg border border-border bg-background p-4">
+              <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{email.body}</p>
+            </div>
+          </div>
+
+          {hasReply && (
+            <div>
+              <h4 className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                {readOnly ? "Reply Sent" : "AI Suggested Reply"}
+              </h4>
+              {isEditing ? (
+                <Textarea className="min-h-[120px]" value={editedReply} onChange={(e) => setEditedReply(e.target.value)} />
+              ) : (
+                <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{email.suggested_reply}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {!hasReply && !readOnly && (
+            <div>
+              <h4 className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                {isComposing ? "Compose Reply" : "No AI reply generated"}
+              </h4>
+              {isComposing ? (
+                <Textarea className="min-h-[120px]" placeholder="Write your reply here..." value={composedReply} onChange={(e) => setComposedReply(e.target.value)} />
+              ) : (
+                <p className="text-sm text-muted-foreground">No suggested reply. Compose one manually or ignore.</p>
+              )}
+            </div>
+          )}
+
+          {attachments.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {attachments.map((a) => (
+                <Badge key={a.url} variant="secondary" className="gap-1 pr-1">
+                  <Paperclip className="h-3 w-3" />{a.name}
+                  <button onClick={() => removeAttachment(a.url)} className="ml-1 rounded-full p-0.5 hover:bg-destructive/20"><Trash2 className="h-3 w-3" /></button>
+                </Badge>
+              ))}
+            </div>
+          )}
+
+          {activeTemplate && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <FileText className="h-3.5 w-3.5" />
+              Template: <span className="font-medium">{activeTemplate.name}</span>
+              <button onClick={() => setActiveTemplate(null)} className="text-destructive hover:underline">Remove</button>
+            </div>
+          )}
+
+          <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleFileUpload} />
+
+          {!readOnly && (
+            <div className="flex flex-wrap gap-2">
+              {isEditing ? (
+                <>
+                  <Button size="sm" onClick={() => { onEditSend(editedReply); setIsEditing(false); }} disabled={isPending}>
+                    {isPending ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Send className="mr-1.5 h-3.5 w-3.5" />}
+                    Send Edited
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => setTemplatePickerOpen(true)}>
+                    <FileText className="mr-1.5 h-3.5 w-3.5" />Template
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
+                    {isUploading ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Paperclip className="mr-1.5 h-3.5 w-3.5" />}
+                    Attach
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => setIsEditing(false)}>Cancel</Button>
+                </>
+              ) : isComposing ? (
+                <>
+                  <Button size="sm" onClick={() => { onEditSend(composedReply); setIsComposing(false); }} disabled={isPending || !composedReply.trim()}>
+                    {isPending ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Send className="mr-1.5 h-3.5 w-3.5" />}
+                    Send
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => setTemplatePickerOpen(true)}>
+                    <FileText className="mr-1.5 h-3.5 w-3.5" />Template
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
+                    {isUploading ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Paperclip className="mr-1.5 h-3.5 w-3.5" />}
+                    Attach
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => setIsComposing(false)}>Cancel</Button>
+                </>
+              ) : (
+                <>
+                  {hasReply ? (
+                    <Button size="sm" onClick={onApprove} disabled={isPending}>
+                      {isPending ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Check className="mr-1.5 h-3.5 w-3.5" />}
+                      Approve & Send
+                    </Button>
+                  ) : (
+                    <Button size="sm" onClick={() => setIsComposing(true)}>
+                      <Edit className="mr-1.5 h-3.5 w-3.5" />Compose
+                    </Button>
+                  )}
+                  {hasReply && (
+                    <Button variant="outline" size="sm" onClick={() => { setIsEditing(true); setEditedReply(email.suggested_reply || ""); }}>
+                      <Edit className="mr-1.5 h-3.5 w-3.5" />Edit
+                    </Button>
+                  )}
+                  <Button variant="outline" size="sm" onClick={() => setTemplatePickerOpen(true)}>
+                    <FileText className="mr-1.5 h-3.5 w-3.5" />Template
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={onIgnore} disabled={isPending}>
+                    <X className="mr-1.5 h-3.5 w-3.5" />Ignore
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={onAddToKB}>
+                    <Plus className="mr-1.5 h-3.5 w-3.5" />Add to KB
+                  </Button>
+                </>
+              )}
+            </div>
+          )}
+        </CardContent>
+      )}
+
+      <TemplatePickerDialog open={templatePickerOpen} onOpenChange={setTemplatePickerOpen} onSelect={handleTemplateSelect} />
+    </Card>
+  );
+}
+
+// ─── AutoSentCard ───────────────────────────────────────────
+function AutoSentCard({
+  entry,
+  onFlagWrong,
+  onViewTicket,
+}: {
+  entry: {
+    id: string;
+    customer_email: string;
+    subject: string;
+    sent_at: string;
+    confidence_score: number | null;
+    details: Record<string, unknown> | null;
+    ticket_id: string | null;
+  };
+  onFlagWrong: () => void;
+  onViewTicket: () => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <Card className="border border-border">
+      <CardContent className="p-4 space-y-2">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-foreground truncate">{entry.subject}</p>
+            <p className="text-xs text-muted-foreground">{entry.customer_email}</p>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            {entry.confidence_score !== null && (
+              <Badge variant="secondary" className="text-xs">{Math.round(entry.confidence_score * 100)}%</Badge>
+            )}
+            <Badge variant="outline" className="text-xs">{format(new Date(entry.sent_at), "MMM d, h:mm a")}</Badge>
+          </div>
+        </div>
+
+        {entry.details?.category && (
+          <div className="flex items-center gap-1.5">
+            <Badge variant="outline" className="text-xs capitalize">{String(entry.details.category).replace("_", " ")}</Badge>
+            {entry.details?.kb_entry_title && (
+              <span className="text-xs text-muted-foreground">KB: {String(entry.details.kb_entry_title)}</span>
+            )}
+          </div>
+        )}
+
+        <div className="flex items-center gap-2">
+          {entry.ticket_id && (
+            <Button variant="outline" size="sm" className="h-7 text-xs" onClick={onViewTicket}>View Ticket</Button>
+          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
+            onClick={onFlagWrong}
+          >
+            <Flag className="mr-1 h-3 w-3" />This was wrong
+          </Button>
+          <Button variant="ghost" size="sm" className="h-7 text-xs ml-auto" onClick={() => setExpanded(!expanded)}>
+            {expanded ? "Hide" : "Details"}
+          </Button>
+        </div>
+
+        {expanded && entry.details && (
+          <div className="rounded-md border border-border bg-muted/30 p-3 text-xs space-y-1">
+            <p><strong>Intent:</strong> {String(entry.details.intent || "unknown")}</p>
+            <p><strong>Category:</strong> {String(entry.details.category || "general")}</p>
+            <p><strong>Sentiment:</strong> {entry.details.sentiment_score != null ? `${Math.round(Number(entry.details.sentiment_score) * 100)}%` : "N/A"}</p>
+            <p><strong>Reason:</strong> {String(entry.details.reason || "N/A")}</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}

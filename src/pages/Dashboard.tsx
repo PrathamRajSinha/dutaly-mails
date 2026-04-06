@@ -179,7 +179,7 @@ export default function Dashboard() {
               <CardTitle className="text-lg font-semibold text-card-foreground">
                 Recent Activity
               </CardTitle>
-              <Link to="/emails">
+              <Link to="/inbox">
                 <Button variant="ghost" size="sm" className="text-primary">
                   View all
                 </Button>
@@ -216,7 +216,7 @@ export default function Dashboard() {
                   <p className="mt-1 text-sm text-amber-700">
                     AI has drafted replies for your review.
                   </p>
-                  <Link to="/tickets?tab=drafted">
+                  <Link to="/inbox?tab=drafted">
                     <Button size="sm" className="mt-3" variant="outline">
                       Review Now
                     </Button>
@@ -240,7 +240,7 @@ export default function Dashboard() {
                   <p className="mt-1 text-sm text-red-700">
                     The AI wasn't confident about these emails.
                   </p>
-                  <Link to="/tickets?tab=needs_review">
+                  <Link to="/inbox?tab=needs_review">
                     <Button size="sm" className="mt-3" variant="outline">
                       Review Now
                     </Button>

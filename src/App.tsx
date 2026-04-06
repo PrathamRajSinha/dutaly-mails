@@ -16,14 +16,9 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import Landing from "./pages/Landing";
 import ChoosePlan from "./pages/ChoosePlan";
-import Tickets from "./pages/Tickets";
-import EmailQueue from "./pages/EmailQueue";
+import Inbox from "./pages/Inbox";
 import ResetPassword from "./pages/ResetPassword";
 import Onboarding from "./pages/Onboarding";
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
-
 
 const queryClient = new QueryClient();
 
@@ -50,13 +45,11 @@ const App = () => (
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/knowledge-base" element={<KnowledgeBase />} />
               <Route path="/instructions" element={<Instructions />} />
-              <Route path="/tickets" element={<Tickets />} />
-              <Route path="/emails" element={<EmailQueue />} />
+              <Route path="/inbox" element={<Inbox />} />
               <Route path="/ask" element={<AskEmails />} />
               <Route path="/templates" element={<Templates />} />
               <Route path="/settings" element={<Settings />} />
             </Route>
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
