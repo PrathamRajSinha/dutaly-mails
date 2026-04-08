@@ -91,12 +91,6 @@ const priorityColors: Record<string, string> = {
   urgent: "bg-destructive/10 text-destructive",
 };
 
-const statusDot: Record<string, string> = {
-  open: "bg-primary",
-  pending: "bg-yellow-500",
-  resolved: "bg-green-500",
-  closed: "bg-muted-foreground",
-};
 
 type ViewMode = "tickets" | "emails";
 type TicketTabValue = TicketStatus | "all" | "auto_sent";
