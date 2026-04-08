@@ -66,8 +66,6 @@ import { TemplatePickerDialog } from "@/components/email-templates/TemplatePicke
 import { type EmailTemplate } from "@/hooks/useEmailTemplates";
 import { replaceVariables, renderEmailHtml } from "@/lib/emailHtml";
 import { TicketDetailPanel } from "@/components/tickets/TicketDetailPanel";
-import { useInboxShortcuts } from "@/hooks/useInboxShortcuts";
-import { KeyboardShortcutsDialog } from "@/components/inbox/KeyboardShortcutsDialog";
 // ─── Helpers ────────────────────────────────────────────────
 const getConfidenceColor = (confidence: number | null) => {
   if (!confidence) return "text-muted-foreground bg-muted";
