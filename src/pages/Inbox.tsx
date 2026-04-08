@@ -66,8 +66,6 @@ import { TemplatePickerDialog } from "@/components/email-templates/TemplatePicke
 import { type EmailTemplate } from "@/hooks/useEmailTemplates";
 import { replaceVariables, renderEmailHtml } from "@/lib/emailHtml";
 import { TicketDetailPanel } from "@/components/tickets/TicketDetailPanel";
-import { useInboxShortcuts } from "@/hooks/useInboxShortcuts";
-import { KeyboardShortcutsDialog } from "@/components/inbox/KeyboardShortcutsDialog";
 // ─── Helpers ────────────────────────────────────────────────
 const getConfidenceColor = (confidence: number | null) => {
   if (!confidence) return "text-muted-foreground bg-muted";
@@ -93,12 +91,6 @@ const priorityColors: Record<string, string> = {
   urgent: "bg-destructive/10 text-destructive",
 };
 
-const statusDot: Record<string, string> = {
-  open: "bg-primary",
-  pending: "bg-yellow-500",
-  resolved: "bg-green-500",
-  closed: "bg-muted-foreground",
-};
 
 type ViewMode = "tickets" | "emails";
 type TicketTabValue = TicketStatus | "all" | "auto_sent";
@@ -169,8 +161,7 @@ export default function UnifiedInbox() {
 // ─── Tickets View ───────────────────────────────────────────
 function TicketsView({ searchQuery, onSearchChange }: { searchQuery: string; onSearchChange: (v: string) => void }) {
   const [activeTab, setActiveTab] = useState<TicketTabValue>("all");
-  const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
-  const [angryExpanded, setAngryExpanded] = useState(true);
+  const [expandedTicketId, setExpandedTicketId] = useState<string | null>(null);
   const statusFilter = activeTab === "all" || activeTab === "auto_sent" ? undefined : activeTab;
   const { data: tickets, isLoading } = useTickets(statusFilter);
   const { pendingCount } = useEmailQueue();
@@ -178,35 +169,13 @@ function TicketsView({ searchQuery, onSearchChange }: { searchQuery: string; onS
   const queryClient = useQueryClient();
 
   const ticketTabs: { value: TicketTabValue; label: string; icon: React.ReactNode; count?: number }[] = [
-    { value: "all", label: "All", icon: null, count: tickets?.length },
-    { value: "open", label: "Open", icon: <AlertCircle className="h-3 w-3" />, count: tickets?.filter(t => t.status === "open").length },
-    { value: "pending", label: "Pending", icon: <Clock className="h-3 w-3" />, count: tickets?.filter(t => t.status === "pending").length },
-    { value: "resolved", label: "Resolved", icon: <CheckCircle2 className="h-3 w-3" /> },
-    { value: "closed", label: "Closed", icon: <XCircle className="h-3 w-3" /> },
-    { value: "auto_sent", label: "Auto-Sent", icon: <Send className="h-3 w-3" /> },
+    { value: "all", label: "All", icon: <Eye className="h-4 w-4" />, count: tickets?.length },
+    { value: "open", label: "Open", icon: <AlertCircle className="h-4 w-4" />, count: tickets?.filter(t => t.status === "open").length },
+    { value: "pending", label: "Pending", icon: <Clock className="h-4 w-4" />, count: tickets?.filter(t => t.status === "pending").length },
+    { value: "resolved", label: "Resolved", icon: <CheckCircle2 className="h-4 w-4" /> },
+    { value: "closed", label: "Closed", icon: <XCircle className="h-4 w-4" /> },
+    { value: "auto_sent", label: "Auto-Sent", icon: <Send className="h-4 w-4" /> },
   ];
-
-  const angryTickets = (tickets ?? []).filter(
-    (t) => t.escalation_flag && t.status !== "resolved" && t.status !== "closed"
-  );
-
-  const filtered = (tickets ?? []).filter(
-    (t) =>
-      t.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.customer_email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const shortcutActions = useMemo(() => {
-    const ticketList = filtered ?? [];
-    const currentIdx = selectedTicketId ? ticketList.findIndex(t => t.id === selectedTicketId) : -1;
-    return [
-      { key: "j", label: "j", description: "Next ticket", action: () => { if (currentIdx < ticketList.length - 1) setSelectedTicketId(ticketList[currentIdx + 1]?.id); else if (ticketList.length > 0 && currentIdx === -1) setSelectedTicketId(ticketList[0]?.id); } },
-      { key: "k", label: "k", description: "Previous ticket", action: () => { if (currentIdx > 0) setSelectedTicketId(ticketList[currentIdx - 1]?.id); } },
-      { key: "e", label: "e", description: "Resolve ticket", action: () => {} },
-    ];
-  }, [filtered, selectedTicketId]);
-
-  const { helpOpen, setHelpOpen } = useInboxShortcuts(shortcutActions);
 
   const handleFlagWrong = async (entry: { customer_email: string; ticket_id: string | null }) => {
     try {
@@ -234,216 +203,218 @@ function TicketsView({ searchQuery, onSearchChange }: { searchQuery: string; onS
     }
   };
 
-  // Auto-sent audit view
-  if (activeTab === "auto_sent") {
+  const filtered = (tickets ?? []).filter(
+    (t) =>
+      t.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      t.customer_email.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const angryTickets = filtered.filter(
+    (t) => t.escalation_flag && t.status !== "resolved" && t.status !== "closed"
+  );
+
+  if (isLoading) {
     return (
-      <div className="flex h-full flex-col">
-        <div className="border-b border-border px-4 py-3">
-          <div className="flex gap-1 overflow-x-auto">
-            {ticketTabs.map((tab) => (
-              <button
-                key={tab.value}
-                onClick={() => setActiveTab(tab.value)}
-                className={cn(
-                  "flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium whitespace-nowrap transition-colors",
-                  activeTab === tab.value
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                )}
-              >
-                {tab.icon}
-                {tab.label}
-              </button>
-            ))}
-          </div>
-        </div>
-        <ScrollArea className="flex-1">
-          <div className="p-4 space-y-3">
-            {autoSentLogs.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-center">
-                <Send className="h-10 w-10 text-muted-foreground mb-3" />
-                <p className="text-sm text-muted-foreground">No auto-sent replies yet</p>
-              </div>
-            ) : (
-              autoSentLogs.map((entry) => (
-                <AutoSentCard
-                  key={entry.id}
-                  entry={entry}
-                  onFlagWrong={() =>
-                    handleFlagWrong({ customer_email: entry.customer_email, ticket_id: entry.ticket_id })
-                  }
-                  onViewTicket={() => {
-                    if (entry.ticket_id) {
-                      setActiveTab("all");
-                      setSelectedTicketId(entry.ticket_id);
-                    }
-                  }}
-                />
-              ))
-            )}
-          </div>
-        </ScrollArea>
+      <div className="flex h-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="flex h-full">
-      {/* Left: Ticket List */}
-      <div
-        className={cn(
-          "flex flex-col border-r border-border w-full lg:w-[380px] lg:min-w-[380px] shrink-0",
-          selectedTicketId && "hidden lg:flex"
-        )}
-      >
-        <div className="px-4 py-3 space-y-3 border-b border-border">
-          <div className="flex items-center gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search tickets..."
-                className="pl-8 h-8 text-sm"
-                value={searchQuery}
-                onChange={(e) => onSearchChange(e.target.value)}
-              />
-            </div>
-            {pendingCount > 0 && (
-              <Badge className="bg-destructive/10 text-destructive text-xs h-6 px-2 shrink-0">
-                {pendingCount} to review
-              </Badge>
-            )}
+    <ScrollArea className="h-full">
+      <div className="p-8">
+        {/* Header */}
+        <div className="mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Tickets</h1>
+            <p className="mt-1 text-muted-foreground">Review and manage support tickets</p>
           </div>
-          <div className="flex gap-1 overflow-x-auto">
-            {ticketTabs.map((tab) => (
-              <button
-                key={tab.value}
-                onClick={() => setActiveTab(tab.value)}
-                className={cn(
-                  "flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium whitespace-nowrap transition-colors",
-                  activeTab === tab.value
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                )}
-              >
-                {tab.icon}
-                {tab.label}
-                {tab.count != null && tab.count > 0 && activeTab !== tab.value && (
-                  <span className="ml-0.5 text-[10px] opacity-70">{tab.count}</span>
-                )}
-              </button>
-            ))}
+          {pendingCount > 0 && (
+            <Badge className="bg-destructive/10 text-destructive text-xs h-6 px-2 shrink-0">
+              {pendingCount} emails to review
+            </Badge>
+          )}
+        </div>
+
+        {/* Search */}
+        <div className="mb-6 flex flex-wrap items-center gap-3">
+          <div className="relative max-w-md flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input placeholder="Search tickets..." className="pl-10" value={searchQuery} onChange={(e) => onSearchChange(e.target.value)} />
           </div>
         </div>
 
-        {/* Angry Customer Pinned Section */}
+        {/* Escalated Banner */}
         {angryTickets.length > 0 && (
-          <div className="border-b border-destructive/20 bg-destructive/5">
-            <button
-              className="flex w-full items-center justify-between px-4 py-2 text-xs font-medium text-destructive"
-              onClick={() => setAngryExpanded(!angryExpanded)}
-            >
-              <span className="flex items-center gap-1.5">
-                <Flame className="h-3.5 w-3.5" />
-                Needs Immediate Attention ({angryTickets.length})
-              </span>
-              {angryExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-            </button>
-            {angryExpanded && (
-              <div className="divide-y divide-destructive/10">
-                {angryTickets.map((ticket) => (
-                  <button
-                    key={ticket.id}
-                    onClick={() => setSelectedTicketId(ticket.id)}
-                    className={cn(
-                      "w-full text-left px-4 py-2.5 transition-colors hover:bg-destructive/10",
-                      selectedTicketId === ticket.id && "bg-destructive/10"
-                    )}
-                  >
-                    <div className="flex items-center gap-2">
-                      <Flame className="h-3.5 w-3.5 text-destructive shrink-0" />
-                      <Badge variant="destructive" className="text-[10px] h-4 px-1.5 shrink-0">
-                        Escalated
-                      </Badge>
-                      <p className="text-sm font-medium text-foreground truncate flex-1">{ticket.subject}</p>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-0.5 pl-5">{ticket.customer_email}</p>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        <ScrollArea className="flex-1">
-          {isLoading ? (
-            <div className="p-4 space-y-3">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <Skeleton key={i} className="h-16 w-full rounded-lg" />
-              ))}
+          <div className="mb-6 rounded-lg border border-destructive/20 bg-destructive/5 p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Flame className="h-4 w-4 text-destructive" />
+              <span className="text-sm font-semibold text-destructive">Needs Immediate Attention ({angryTickets.length})</span>
             </div>
-          ) : filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center px-4">
-              <Inbox className="h-10 w-10 text-muted-foreground mb-3" />
-              <p className="text-sm text-muted-foreground">No tickets found</p>
-            </div>
-          ) : (
-            <div className="divide-y divide-border">
-              {filtered.map((ticket) => (
+            <div className="space-y-2">
+              {angryTickets.map((ticket) => (
                 <button
                   key={ticket.id}
-                  onClick={() => setSelectedTicketId(ticket.id)}
-                  className={cn(
-                    "w-full text-left px-4 py-3 transition-colors hover:bg-accent/50",
-                    selectedTicketId === ticket.id && "bg-accent"
-                  )}
+                  onClick={() => setExpandedTicketId(expandedTicketId === ticket.id ? null : ticket.id)}
+                  className="w-full text-left flex items-center gap-2 rounded-md px-3 py-2 hover:bg-destructive/10 transition-colors"
                 >
-                  <div className="flex items-start gap-3">
-                    <div className={cn("mt-1.5 h-2 w-2 rounded-full shrink-0", statusDot[ticket.status])} />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        {ticket.escalation_flag && <Flame className="h-3.5 w-3.5 text-destructive shrink-0" />}
-                        <p className="text-sm font-medium text-foreground truncate">{ticket.subject}</p>
-                      </div>
-                      <p className="text-xs text-muted-foreground truncate mt-0.5">{ticket.customer_email}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Badge variant="secondary" className={cn("text-[10px] h-4 px-1.5", priorityColors[ticket.priority])}>
-                          {ticket.priority}
-                        </Badge>
-                        {ticket.escalation_flag && (
-                          <Badge variant="destructive" className="text-[10px] h-4 px-1.5">Escalated</Badge>
-                        )}
-                        {ticket.category && (
-                          <span className="text-[10px] text-muted-foreground capitalize">{ticket.category.replace("_", " ")}</span>
-                        )}
-                        <span className="text-[10px] text-muted-foreground ml-auto">
-                          {formatDistanceToNow(new Date(ticket.created_at), { addSuffix: true })}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+                  <Badge variant="destructive" className="text-[10px] h-4 px-1.5 shrink-0">Escalated</Badge>
+                  <p className="text-sm font-medium text-foreground truncate flex-1">{ticket.subject}</p>
+                  <span className="text-xs text-muted-foreground shrink-0">{ticket.customer_email}</span>
                 </button>
               ))}
             </div>
-          )}
-        </ScrollArea>
-      </div>
-
-      {/* Right: Detail Panel */}
-      <div className={cn("flex-1 min-w-0", !selectedTicketId && "hidden lg:flex")}>
-        {selectedTicketId ? (
-          <TicketDetailPanel ticketId={selectedTicketId} onBack={() => setSelectedTicketId(null)} />
-        ) : (
-          <div className="flex h-full items-center justify-center text-muted-foreground">
-            <div className="text-center">
-              <Inbox className="h-12 w-12 mx-auto mb-3 opacity-50" />
-              <p className="text-sm">Select a ticket to view details</p>
-              <p className="text-xs mt-2 opacity-50">Press <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px] font-mono">?</kbd> for keyboard shortcuts</p>
-            </div>
           </div>
         )}
+
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TicketTabValue)}>
+          <TabsList className="mb-6">
+            {ticketTabs.map((tab) => (
+              <TabsTrigger key={tab.value} value={tab.value} className="gap-2">
+                {tab.icon}
+                {tab.label}
+                {tab.count != null && tab.count > 0 && (
+                  <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">{tab.count}</Badge>
+                )}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+
+          {activeTab === "auto_sent" ? (
+            <TabsContent value="auto_sent">
+              {autoSentLogs.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <Send className="h-10 w-10 text-muted-foreground mb-3" />
+                  <p className="text-sm text-muted-foreground">No auto-sent replies yet</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {autoSentLogs.map((entry) => (
+                    <AutoSentCard
+                      key={entry.id}
+                      entry={entry}
+                      onFlagWrong={() => handleFlagWrong({ customer_email: entry.customer_email, ticket_id: entry.ticket_id })}
+                      onViewTicket={() => {
+                        if (entry.ticket_id) {
+                          setActiveTab("all");
+                          setExpandedTicketId(entry.ticket_id);
+                        }
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          ) : (
+            <>
+              {ticketTabs.filter(t => t.value !== "auto_sent").map((tab) => (
+                <TabsContent key={tab.value} value={tab.value}>
+                  {filtered.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-16 text-center">
+                      <div className="rounded-full bg-muted p-4">
+                        <Inbox className="h-8 w-8 text-muted-foreground" />
+                      </div>
+                      <h3 className="mt-4 text-lg font-medium text-foreground">No tickets found</h3>
+                      <p className="mt-1 text-muted-foreground">No tickets in this category</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {filtered.map((ticket) => (
+                        <TicketCard
+                          key={ticket.id}
+                          ticket={ticket}
+                          isExpanded={expandedTicketId === ticket.id}
+                          onToggle={() => setExpandedTicketId(expandedTicketId === ticket.id ? null : ticket.id)}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </TabsContent>
+              ))}
+            </>
+          )}
+        </Tabs>
       </div>
-      <KeyboardShortcutsDialog open={helpOpen} onOpenChange={setHelpOpen} />
-    </div>
+    </ScrollArea>
+  );
+}
+
+// ─── TicketCard ──────────────────────────────────────────────
+function TicketCard({ ticket, isExpanded, onToggle }: { ticket: Ticket; isExpanded: boolean; onToggle: () => void }) {
+  const statusIcon = () => {
+    switch (ticket.status) {
+      case "open": return <AlertCircle className="h-4 w-4 text-primary" />;
+      case "pending": return <Clock className="h-4 w-4 text-yellow-600" />;
+      case "resolved": return <CheckCircle2 className="h-4 w-4 text-green-600" />;
+      case "closed": return <XCircle className="h-4 w-4 text-muted-foreground" />;
+      default: return <AlertCircle className="h-4 w-4 text-primary" />;
+    }
+  };
+
+  const statusBgColor = () => {
+    switch (ticket.status) {
+      case "open": return "bg-primary/10";
+      case "pending": return "bg-yellow-500/10";
+      case "resolved": return "bg-green-500/10";
+      case "closed": return "bg-muted";
+      default: return "bg-primary/10";
+    }
+  };
+
+  const statusBadge = () => {
+    const colors: Record<string, string> = {
+      open: "bg-primary/10 text-primary",
+      pending: "bg-yellow-500/10 text-yellow-600",
+      resolved: "bg-green-500/10 text-green-600",
+      closed: "bg-muted text-muted-foreground",
+    };
+    return (
+      <Badge className={cn("border-0 font-medium text-[10px] h-5", colors[ticket.status] || colors.open)}>
+        {ticket.status.charAt(0).toUpperCase() + ticket.status.slice(1)}
+      </Badge>
+    );
+  };
+
+  return (
+    <Card className="border border-border overflow-hidden transition-shadow hover:shadow-sm">
+      <div className="flex cursor-pointer items-center gap-4 p-4" onClick={onToggle}>
+        <div className={cn("flex h-9 w-9 items-center justify-center rounded-full shrink-0", statusBgColor())}>
+          {statusIcon()}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            {ticket.escalation_flag && <Flame className="h-3.5 w-3.5 text-destructive shrink-0" />}
+            <h3 className="text-sm font-medium text-card-foreground truncate">{ticket.subject}</h3>
+            {statusBadge()}
+          </div>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {ticket.customer_email} · {formatTimeAgo(ticket.created_at)}
+          </p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <Badge variant="secondary" className={cn("text-[10px] h-5 border-0", priorityColors[ticket.priority])}>
+            {ticket.priority}
+          </Badge>
+          {ticket.category && (
+            <Badge variant="outline" className="capitalize text-[10px] h-5">{ticket.category.replace("_", " ")}</Badge>
+          )}
+          {ticket.sentiment_score !== null && (
+            <Badge className={cn("font-medium text-[10px] h-5 border-0", getConfidenceColor(ticket.sentiment_score))}>
+              {Math.round(ticket.sentiment_score * 100)}%
+            </Badge>
+          )}
+          {isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+        </div>
+      </div>
+
+      {isExpanded && (
+        <CardContent className="border-t border-border bg-muted/20 px-0 pb-0 pt-0">
+          <TicketDetailPanel ticketId={ticket.id} onBack={onToggle} />
+        </CardContent>
+      )}
+    </Card>
   );
 }
 
