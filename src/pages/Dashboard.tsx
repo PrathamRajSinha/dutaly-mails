@@ -171,17 +171,33 @@ export default function Dashboard() {
         </Button>
       </div>
 
+      {/* Onboarding Banner */}
+      {showOnboarding && (
+        <OnboardingBanner
+          hasEmailAccount={hasEmailAccount}
+          hasKbEntry={hasKbEntry}
+          hasProcessedEmails={totalActions > 0}
+          onFetchEmails={handleFetchEmails}
+          isFetching={isFetching}
+          onDismiss={handleDismissOnboarding}
+        />
+      )}
+
       {/* Resolution Rate Hero */}
-      <div className="mb-6">
-        <ResolutionRateCard />
-      </div>
+      {!showOnboarding && (
+        <div className="mb-6">
+          <ResolutionRateCard />
+        </div>
+      )}
 
       {/* Stats Grid */}
-      <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => (
-          <StatCard key={stat.title} {...stat} />
-        ))}
-      </div>
+      {!showOnboarding && (
+        <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {stats.map((stat) => (
+            <StatCard key={stat.title} {...stat} />
+          ))}
+        </div>
+      )}
 
       {/* Main Content */}
       <div className="grid gap-6 lg:grid-cols-3">
