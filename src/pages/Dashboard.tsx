@@ -83,6 +83,14 @@ export default function Dashboard() {
   const repliedCount = logs.filter(l => l.action === "replied" || l.action === "auto_replied" || l.action === "auto_sent").length;
   const ignoredCount = logs.filter(l => l.action === "ignored").length;
   const totalActions = logs.length;
+  const hasEmailAccount = accounts.some((a) => a.is_active);
+  const hasKbEntry = kbEntries.length > 0;
+  const showOnboarding = totalActions === 0 && !onboardingDismissed;
+
+  const handleDismissOnboarding = () => {
+    setOnboardingDismissed(true);
+    localStorage.setItem("onboarding-banner-dismissed", "true");
+  };
 
   const stats = [
     {
