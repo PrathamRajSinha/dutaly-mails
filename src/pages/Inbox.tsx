@@ -1028,7 +1028,7 @@ function EmailCard({
       )}
 
       <TemplatePickerDialog open={templatePickerOpen} onOpenChange={setTemplatePickerOpen} onSelect={handleTemplateSelect} />
-    </Card>
+    </div>
   );
 }
 
