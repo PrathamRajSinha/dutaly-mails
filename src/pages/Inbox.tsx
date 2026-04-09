@@ -364,8 +364,8 @@ function TicketsView({ searchQuery, onSearchChange }: { searchQuery: string; onS
               <TabsTrigger key={tab.value} value={tab.value} className="gap-2">
                 {tab.icon}
                 {tab.label}
-                {tab.count != null && tab.count > 0 && (
-                  <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">{tab.count}</Badge>
+                {tab.count != null && (
+                  <Badge variant="secondary" className="ml-1 h-5 min-w-[20px] px-1.5 text-xs">{tab.count}</Badge>
                 )}
               </TabsTrigger>
             ))}
