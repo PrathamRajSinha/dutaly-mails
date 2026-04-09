@@ -361,10 +361,10 @@ function TicketsView({ searchQuery, onSearchChange }: { searchQuery: string; onS
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TicketTabValue)}>
           <TabsList className="mb-6">
             {ticketTabs.map((tab) => (
-              <TabsTrigger key={tab.value} value={tab.value} className="gap-2">
+              <TabsTrigger key={tab.value} value={tab.value} className="gap-2 min-w-[100px] justify-center">
                 {tab.icon}
                 {tab.label}
-                {tab.count != null && (
+                {tab.count != null && tab.count > 0 && (
                   <Badge variant="secondary" className="ml-1 h-5 min-w-[20px] px-1.5 text-xs">{tab.count}</Badge>
                 )}
               </TabsTrigger>
@@ -677,25 +677,25 @@ function EmailsView({ searchQuery, onSearchChange }: { searchQuery: string; onSe
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as EmailTabValue)}>
           <TabsList className="mb-6">
-            <TabsTrigger value="all_emails" className="gap-2">
+            <TabsTrigger value="all_emails" className="gap-2 min-w-[80px] justify-center">
               <Eye className="h-4 w-4" />All
-              <Badge variant="secondary" className="ml-1 h-5 min-w-[20px] px-1.5 text-xs">{allEmails.length}</Badge>
+              {allEmails.length > 0 && <Badge variant="secondary" className="ml-1 h-5 min-w-[20px] px-1.5 text-xs">{allEmails.length}</Badge>}
             </TabsTrigger>
-            <TabsTrigger value="needs_review" className="gap-2">
+            <TabsTrigger value="needs_review" className="gap-2 min-w-[120px] justify-center">
               <AlertCircle className="h-4 w-4" />Needs Review
-              <Badge variant="secondary" className="ml-1 h-5 min-w-[20px] px-1.5 text-xs">{needsReview.length}</Badge>
+              {needsReview.length > 0 && <Badge variant="secondary" className="ml-1 h-5 min-w-[20px] px-1.5 text-xs">{needsReview.length}</Badge>}
             </TabsTrigger>
-            <TabsTrigger value="drafted" className="gap-2">
+            <TabsTrigger value="drafted" className="gap-2 min-w-[100px] justify-center">
               <FileEdit className="h-4 w-4" />Drafted
-              <Badge variant="secondary" className="ml-1 h-5 min-w-[20px] px-1.5 text-xs">{drafted.length}</Badge>
+              {drafted.length > 0 && <Badge variant="secondary" className="ml-1 h-5 min-w-[20px] px-1.5 text-xs">{drafted.length}</Badge>}
             </TabsTrigger>
-            <TabsTrigger value="sent" className="gap-2">
+            <TabsTrigger value="sent" className="gap-2 min-w-[80px] justify-center">
               <Send className="h-4 w-4" />Sent
-              <Badge variant="secondary" className="ml-1 h-5 min-w-[20px] px-1.5 text-xs">{sent.length}</Badge>
+              {sent.length > 0 && <Badge variant="secondary" className="ml-1 h-5 min-w-[20px] px-1.5 text-xs">{sent.length}</Badge>}
             </TabsTrigger>
-            <TabsTrigger value="ignored" className="gap-2">
+            <TabsTrigger value="ignored" className="gap-2 min-w-[100px] justify-center">
               <XCircle className="h-4 w-4" />Ignored
-              <Badge variant="secondary" className="ml-1 h-5 min-w-[20px] px-1.5 text-xs">{ignored.length}</Badge>
+              {ignored.length > 0 && <Badge variant="secondary" className="ml-1 h-5 min-w-[20px] px-1.5 text-xs">{ignored.length}</Badge>}
             </TabsTrigger>
           </TabsList>
 
