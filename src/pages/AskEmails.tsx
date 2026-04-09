@@ -91,8 +91,8 @@ export default function AskEmails() {
       {/* Header */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-medium text-[#1A1730]">Inbox Intelligence</h1>
-          <p className="mt-1 text-[13px] text-[#9490B8]">
+          <h1 className="text-[20px] font-medium text-[#1A1730]">Inbox Intelligence</h1>
+          <p className="mt-0.5 text-[13px] text-[#9490B8]">
             Ask the AI questions about your emails within a date range
           </p>
         </div>

@@ -558,9 +558,9 @@ export default function Settings() {
   return (
     <div className="p-8">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">Settings</h1>
-        <p className="mt-1 text-muted-foreground">
+      <div className="mb-6">
+        <h1 className="text-[20px] font-medium text-[#1A1730]">Settings</h1>
+        <p className="mt-0.5 text-[13px] text-[#9490B8]">
           Connect your inbox and configure automation settings
         </p>
       </div>

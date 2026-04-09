@@ -145,10 +145,10 @@ export default function Instructions() {
   return (
     <div className="p-8">
       {/* Header */}
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-medium text-[#1A1730]">AI Instructions</h1>
-          <p className="mt-1 text-[13px] text-[#9490B8]">
+          <h1 className="text-[20px] font-medium text-[#1A1730]">AI Instructions</h1>
+          <p className="mt-0.5 text-[13px] text-[#9490B8]">
             Tell the AI how to handle your emails in plain English
           </p>
         </div>

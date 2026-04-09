@@ -149,7 +149,7 @@ export default function Dashboard() {
   return (
     <div className="p-8">
       {/* Header */}
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-[20px] font-medium" style={{ color: '#1A1730' }}>Dashboard</h1>
           <p className="mt-0.5 text-[13px]" style={{ color: '#9490B8' }}>
