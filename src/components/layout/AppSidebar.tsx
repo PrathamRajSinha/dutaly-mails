@@ -13,7 +13,6 @@ import {
   Ticket,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -30,7 +29,7 @@ const navItems = [
 export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { signOut } = useAuth();
   const [isAutomationActive, setIsAutomationActive] = useState(true);
 
   const handleSignOut = async () => {
@@ -39,20 +38,19 @@ export function AppSidebar() {
   };
 
   return (
-    <aside className="flex h-screen w-64 flex-col border-r border-border bg-sidebar">
+    <aside className="flex h-screen w-[220px] shrink-0 flex-col" style={{ backgroundColor: '#0A0A0F' }}>
       {/* Logo */}
-      <div className="flex items-center gap-3 border-b border-border px-6 py-5">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-          <Mail className="h-5 w-5 text-primary-foreground" />
+      <div className="flex items-center gap-2.5 px-5 py-5">
+        <div className="flex h-7 w-7 items-center justify-center rounded-md" style={{ backgroundColor: '#7C6FE0' }}>
+          <Mail className="h-3.5 w-3.5 text-white" />
         </div>
-        <div>
-          <h1 className="font-semibold text-sidebar-foreground">Dutaly</h1>
-          <p className="text-xs text-muted-foreground">AI Helpdesk</p>
-        </div>
+        <span className="text-[15px] font-medium" style={{ color: '#E8E4FF' }}>
+          dutaly
+        </span>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 px-3 py-4">
+      <nav className="flex-1 space-y-0.5 px-3 py-2">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
@@ -60,13 +58,16 @@ export function AppSidebar() {
               key={item.path}
               to={item.path}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-primary text-primary-foreground"
-                  : "text-sidebar-foreground hover:bg-accent hover:text-accent-foreground"
+                "flex items-center gap-2.5 rounded-md px-3 text-[13px] font-normal transition-colors",
+                "h-9"
               )}
+              style={{
+                backgroundColor: isActive ? '#7C6FE0' : 'transparent',
+                color: isActive ? '#FFFFFF' : 'rgba(255,255,255,0.55)',
+                borderRadius: '8px',
+              }}
             >
-              <item.icon className="h-5 w-5" />
+              <item.icon className="h-4 w-4 shrink-0" />
               {item.label}
             </Link>
           );
@@ -74,51 +75,45 @@ export function AppSidebar() {
       </nav>
 
       {/* Automation Control */}
-      <div className="border-t border-border p-4">
-        <div className="rounded-lg bg-card p-4">
-          <div className="mb-3 flex items-center justify-between">
-            <span className="text-sm font-medium text-card-foreground">
+      <div className="px-3 pb-2">
+        <div className="rounded-lg px-3 py-3" style={{ backgroundColor: 'rgba(255,255,255,0.04)' }}>
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-[11px] font-medium uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.4)' }}>
               Automation
             </span>
             <span
               className={cn(
-                "text-xs font-medium",
-                isAutomationActive ? "text-green-600" : "text-muted-foreground"
+                "text-[11px] font-medium",
+                isAutomationActive ? "text-green-400" : "text-gray-500"
               )}
             >
               {isAutomationActive ? "Active" : "Paused"}
             </span>
           </div>
-          <Button
-            variant={isAutomationActive ? "destructive" : "default"}
-            size="sm"
-            className="w-full"
+          <button
+            className="flex w-full items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-[12px] font-medium text-white transition-colors"
+            style={{ backgroundColor: '#7C6FE0' }}
             onClick={() => setIsAutomationActive(!isAutomationActive)}
           >
             {isAutomationActive ? (
-              <>
-                <Pause className="mr-2 h-4 w-4" />
-                Pause
-              </>
+              <><Pause className="h-3 w-3" /> Pause</>
             ) : (
-              <>
-                <Play className="mr-2 h-4 w-4" />
-                Resume
-              </>
+              <><Play className="h-3 w-3" /> Resume</>
             )}
-          </Button>
+          </button>
         </div>
-        
-        {/* Sign Out */}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="mt-3 w-full justify-start text-muted-foreground"
+      </div>
+
+      {/* Sign Out Icon */}
+      <div className="flex items-center justify-center border-t px-3 py-3" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+        <button
           onClick={handleSignOut}
+          className="flex h-8 w-8 items-center justify-center rounded-md transition-colors hover:bg-white/10"
+          style={{ color: 'rgba(255,255,255,0.35)' }}
+          title="Sign Out"
         >
-          <LogOut className="mr-2 h-4 w-4" />
-          Sign Out
-        </Button>
+          <LogOut className="h-4 w-4" />
+        </button>
       </div>
     </aside>
   );
