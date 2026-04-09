@@ -11,53 +11,80 @@ interface ActivityItemProps {
   };
 }
 
-const actionConfig: Record<string, { icon: typeof Check; label: string; className: string }> = {
+const actionConfig: Record<string, { icon: typeof Check; label: string; badgeBg: string; badgeColor: string; iconBg: string; iconColor: string }> = {
   replied: {
     icon: Check,
-    label: "Auto-replied",
-    className: "text-green-600 bg-green-50",
+    label: "Auto-resolved",
+    badgeBg: "#E1F5EE",
+    badgeColor: "#0F6E56",
+    iconBg: "#E1F5EE",
+    iconColor: "#1D9E75",
   },
   auto_replied: {
     icon: Send,
-    label: "Auto-replied",
-    className: "text-green-600 bg-green-50",
+    label: "Auto-resolved",
+    badgeBg: "#E1F5EE",
+    badgeColor: "#0F6E56",
+    iconBg: "#E1F5EE",
+    iconColor: "#1D9E75",
   },
   auto_sent: {
     icon: Send,
     label: "Sent",
-    className: "text-green-600 bg-green-50",
+    badgeBg: "#E1F5EE",
+    badgeColor: "#0F6E56",
+    iconBg: "#E1F5EE",
+    iconColor: "#1D9E75",
   },
   drafted: {
     icon: FileEdit,
     label: "Drafted",
-    className: "text-primary bg-primary/10",
+    badgeBg: "#EBE9FF",
+    badgeColor: "#7C6FE0",
+    iconBg: "#EBE9FF",
+    iconColor: "#7C6FE0",
   },
   ignored: {
     icon: XCircle,
     label: "Ignored",
-    className: "text-muted-foreground bg-muted/50",
+    badgeBg: "#F1EFE8",
+    badgeColor: "#5F5E5A",
+    iconBg: "#F1EFE8",
+    iconColor: "#5F5E5A",
   },
   queued: {
     icon: Clock,
     label: "Queued for review",
-    className: "text-amber-600 bg-amber-50",
+    badgeBg: "#FAEEDA",
+    badgeColor: "#BA7517",
+    iconBg: "#FAEEDA",
+    iconColor: "#BA7517",
   },
   forwarded: {
     icon: Forward,
     label: "Forwarded",
-    className: "text-primary bg-primary/10",
+    badgeBg: "#EBE9FF",
+    badgeColor: "#7C6FE0",
+    iconBg: "#EBE9FF",
+    iconColor: "#7C6FE0",
   },
   labeled: {
     icon: Check,
     label: "Labeled",
-    className: "text-blue-600 bg-blue-50",
+    badgeBg: "#E6F1FB",
+    badgeColor: "#185FA5",
+    iconBg: "#E6F1FB",
+    iconColor: "#185FA5",
   },
 };
 
 const defaultConfig = {
   icon: AlertCircle,
   label: "Unknown",
-  className: "text-muted-foreground bg-muted/50",
+  badgeBg: "#F1EFE8",
+  badgeColor: "#5F5E5A",
+  iconBg: "#F1EFE8",
+  iconColor: "#5F5E5A",
 };
 
 export function ActivityItem({ email }: ActivityItemProps) {
@@ -65,28 +92,34 @@ export function ActivityItem({ email }: ActivityItemProps) {
   const Icon = config.icon;
 
   return (
-    <div className="flex items-start gap-4 rounded-lg border border-border bg-card p-4 transition-colors hover:bg-accent/30">
-      <div className={cn("rounded-full p-2", config.className)}>
-        <Icon className="h-4 w-4" />
+    <div className="flex items-start gap-3 rounded-[10px] bg-card p-3 px-4 border border-border">
+      <div
+        className="flex h-8 w-8 items-center justify-center rounded-full shrink-0"
+        style={{ backgroundColor: config.iconBg }}
+      >
+        <Icon className="h-3.5 w-3.5" style={{ color: config.iconColor }} />
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="truncate font-medium text-card-foreground">
+            <p className="truncate text-[13px] font-medium" style={{ color: '#1A1730' }}>
               {email.subject}
             </p>
-            <p className="text-sm text-muted-foreground">From: {email.from}</p>
+            <p className="text-[11px]" style={{ color: '#9490B8' }}>From: {email.from}</p>
           </div>
-          <span className="whitespace-nowrap text-xs text-muted-foreground">
+          <span className="whitespace-nowrap text-[11px]" style={{ color: '#9490B8' }}>
             {email.time}
           </span>
         </div>
-        <div className="mt-2 flex items-center gap-2">
-          <span className={cn("rounded-full px-2 py-0.5 text-xs font-medium", config.className)}>
+        <div className="mt-1.5 flex items-center gap-2">
+          <span
+            className="rounded-full px-2 py-0.5 text-[11px] font-medium"
+            style={{ backgroundColor: config.badgeBg, color: config.badgeColor }}
+          >
             {config.label}
           </span>
           {email.confidence !== undefined && email.confidence > 0 && (
-            <span className="text-xs text-muted-foreground">
+            <span className="text-[11px]" style={{ color: '#9490B8' }}>
               {email.confidence}% confidence
             </span>
           )}
