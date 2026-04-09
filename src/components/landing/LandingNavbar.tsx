@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
+import logoDarkBg from "@/assets/logo-dark-bg.png";
 import { useAuth } from "@/hooks/useAuth";
 
 const navLinks = [
@@ -19,8 +20,8 @@ export function LandingNavbar() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b" style={{ background: "#0A0A0F", borderColor: "rgba(255,255,255,0.08)" }}>
       <div className="max-w-[1200px] mx-auto px-6 h-14 flex items-center justify-between">
-        <Link to="/" className="text-[16px] font-bold tracking-tight" style={{ color: "#E8E4FF" }}>
-          dutaly
+        <Link to="/">
+          <img src={logoDarkBg} alt="Dutaly" className="h-6 w-auto" />
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">
