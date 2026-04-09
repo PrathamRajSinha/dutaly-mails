@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
+import logoDarkBg from "@/assets/logo-dark-bg.png";
 
 export function FooterSection() {
   return (
     <footer className="py-10" style={{ background: "#0A0A0F", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
       <div className="max-w-[1200px] mx-auto px-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
-          <span className="text-[15px] font-semibold tracking-tight" style={{ color: "#E8E4FF" }}>dutaly</span>
+          <img src={logoDarkBg} alt="Dutaly" className="h-6 w-auto" />
           <div className="flex items-center gap-8 text-[13px]" style={{ color: "rgba(255,255,255,0.4)" }}>
             <a href="#features" className="hover:opacity-80 transition-opacity">features</a>
             <a href="#how-it-works" className="hover:opacity-80 transition-opacity">how it works</a>

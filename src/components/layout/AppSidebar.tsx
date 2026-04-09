@@ -5,13 +5,13 @@ import {
   FileText,
   Inbox,
   Settings,
-  Mail,
   Pause,
   Play,
   LogOut,
   Sparkles,
   Ticket,
 } from "lucide-react";
+import logoDarkBg from "@/assets/logo-dark-bg.png";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -40,13 +40,8 @@ export function AppSidebar() {
   return (
     <aside className="flex h-screen w-[220px] shrink-0 flex-col" style={{ backgroundColor: '#0A0A0F' }}>
       {/* Logo */}
-      <div className="flex items-center gap-2.5 px-5 py-5">
-        <div className="flex h-7 w-7 items-center justify-center rounded-md" style={{ backgroundColor: '#7C6FE0' }}>
-          <Mail className="h-3.5 w-3.5 text-white" />
-        </div>
-        <span className="text-[15px] font-medium" style={{ color: '#E8E4FF' }}>
-          dutaly
-        </span>
+      <div className="flex items-center px-5 py-5">
+        <img src={logoDarkBg} alt="Dutaly" className="h-7 w-auto" />
       </div>
 
       {/* Navigation */}
