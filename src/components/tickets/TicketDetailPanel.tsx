@@ -311,15 +311,6 @@ export function TicketDetailPanel({ ticketId, onBack }: { ticketId: string; onBa
             </div>
             <p className="text-sm text-muted-foreground">{ticket.customer_email}</p>
           </div>
-          <div className="flex items-center gap-1.5 shrink-0">
-            <Button variant={autoFetchEnabled ? "destructive" : "outline"} size="sm" className="h-7 text-xs" onClick={() => setAutoFetchEnabled(!autoFetchEnabled)}>
-              {autoFetchEnabled ? <Pause className="mr-1 h-3 w-3" /> : <Play className="mr-1 h-3 w-3" />}{autoFetchEnabled ? "Stop" : "Auto"}
-            </Button>
-            {autoFetchEnabled && <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />}
-            <Button variant="outline" size="sm" className="h-7 text-xs" onClick={handleFetchEmails} disabled={isFetching}>
-              {isFetching ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <RefreshCw className="mr-1 h-3 w-3" />}Fetch
-            </Button>
-          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
