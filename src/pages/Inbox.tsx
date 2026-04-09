@@ -84,11 +84,11 @@ const formatTimeAgo = (date: string) => {
   return `${Math.floor(diffMins / 1440)}d ago`;
 };
 
-const priorityColors: Record<string, string> = {
-  low: "bg-muted text-muted-foreground",
-  medium: "bg-primary/10 text-primary",
-  high: "bg-orange-500/10 text-orange-600",
-  urgent: "bg-destructive/10 text-destructive",
+const priorityStyles: Record<string, { bg: string; color: string }> = {
+  low: { bg: '#F1EFE8', color: '#5F5E5A' },
+  medium: { bg: '#E6F1FB', color: '#185FA5' },
+  high: { bg: '#FAEEDA', color: '#854F0B' },
+  urgent: { bg: '#FCEBEB', color: '#A32D2D' },
 };
 
 
@@ -178,43 +178,41 @@ export default function UnifiedInbox() {
       {/* Unified Header */}
       <div className="border-b border-border bg-card px-6 py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div>
-              <h1 className="text-xl font-semibold text-foreground">Inbox</h1>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Manage tickets and email conversations
-              </p>
-            </div>
+          <div>
+            <h1 className="text-[20px] font-medium" style={{ color: '#1A1730' }}>Inbox</h1>
+            <p className="text-[13px] mt-0.5" style={{ color: '#9490B8' }}>
+              Manage tickets and email conversations
+            </p>
           </div>
           <div className="flex items-center gap-3">
             {/* Fetch controls */}
             <Button
-              variant={autoFetchEnabled ? "destructive" : "outline"}
+              variant={autoFetchEnabled ? "destructive" : "secondary"}
               size="sm"
               onClick={() => setAutoFetchEnabled(!autoFetchEnabled)}
             >
-              {autoFetchEnabled ? <><Pause className="mr-2 h-4 w-4" />Stop Auto-Fetch</> : <><Play className="mr-2 h-4 w-4" />Auto-Fetch</>}
+              {autoFetchEnabled ? <><Pause className="mr-2 h-4 w-4" />Stop</> : <><Play className="mr-2 h-4 w-4" />Auto-Fetch</>}
             </Button>
             {autoFetchEnabled && (
-              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1.5 text-[11px]" style={{ color: '#9490B8' }}>
                 <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
                 Every 10s
               </span>
             )}
-            <Button variant="outline" size="sm" onClick={handleFetchEmails} disabled={isFetching}>
+            <Button variant="secondary" size="sm" onClick={handleFetchEmails} disabled={isFetching}>
               {isFetching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
               Fetch Now
             </Button>
 
-            {/* View mode toggle */}
-            <div className="flex items-center rounded-lg border border-border bg-muted/50 p-0.5">
+            {/* Segmented control */}
+            <div className="flex items-center rounded-full p-1" style={{ backgroundColor: '#EBE9FF' }}>
               <button
                 onClick={() => setViewMode("tickets")}
                 className={cn(
-                  "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all",
+                  "flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-all",
                   viewMode === "tickets"
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
+                    ? "bg-white text-foreground shadow-sm"
+                    : "text-[#9490B8] hover:text-foreground"
                 )}
               >
                 <Inbox className="h-3.5 w-3.5" />
@@ -223,10 +221,10 @@ export default function UnifiedInbox() {
               <button
                 onClick={() => setViewMode("emails")}
                 className={cn(
-                  "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all",
+                  "flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-all",
                   viewMode === "emails"
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
+                    ? "bg-white text-foreground shadow-sm"
+                    : "text-[#9490B8] hover:text-foreground"
                 )}
               >
                 <Mail className="h-3.5 w-3.5" />
@@ -316,10 +314,10 @@ function TicketsView({ searchQuery, onSearchChange }: { searchQuery: string; onS
     <ScrollArea className="h-full">
       <div className="p-8">
         {/* Header */}
-        <div className="mb-8 flex items-start justify-between">
+        <div className="mb-6 flex items-start justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Tickets</h1>
-            <p className="mt-1 text-muted-foreground">Review and manage support tickets</p>
+            <h1 className="text-[20px] font-medium" style={{ color: '#1A1730' }}>Tickets</h1>
+            <p className="mt-0.5 text-[13px]" style={{ color: '#9490B8' }}>Review and manage support tickets</p>
           </div>
           {pendingCount > 0 && (
             <Badge className="bg-destructive/10 text-destructive text-xs h-6 px-2 shrink-0">
@@ -468,40 +466,53 @@ function TicketCard({ ticket, isExpanded, onToggle }: { ticket: Ticket; isExpand
     );
   };
 
+  const pStyle = priorityStyles[ticket.priority] || priorityStyles.low;
+  const sentimentDot = () => {
+    if (ticket.sentiment_score === null) return null;
+    const pct = ticket.sentiment_score * 100;
+    const dotColor = pct > 60 ? '#1D9E75' : pct > 30 ? '#BA7517' : '#DC2626';
+    return <span className="inline-block h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: dotColor }} title={`Sentiment: ${Math.round(pct)}%`} />;
+  };
+
   return (
-    <Card className="border border-border overflow-hidden transition-shadow hover:shadow-sm">
-      <div className="flex cursor-pointer items-center gap-4 p-4" onClick={onToggle}>
+    <Card className="border border-border overflow-hidden">
+      <div
+        className="flex cursor-pointer items-center gap-4 p-4 transition-colors"
+        style={{ backgroundColor: 'transparent' }}
+        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#F4F3FF')}
+        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+        onClick={onToggle}
+      >
         <div className={cn("flex h-9 w-9 items-center justify-center rounded-full shrink-0", statusBgColor())}>
           {statusIcon()}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             {ticket.escalation_flag && <Flame className="h-3.5 w-3.5 text-destructive shrink-0" />}
-            <h3 className="text-sm font-medium text-card-foreground truncate">{ticket.subject}</h3>
+            <h3 className="text-[13px] font-medium truncate" style={{ color: '#1A1730' }}>{ticket.subject}</h3>
             {statusBadge()}
           </div>
-          <p className="text-xs text-muted-foreground mt-0.5">
+          <p className="text-[11px] mt-0.5" style={{ color: '#9490B8' }}>
             {ticket.customer_email} · {formatTimeAgo(ticket.created_at)}
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <Badge variant="secondary" className={cn("text-[10px] h-5 border-0", priorityColors[ticket.priority])}>
+          <span
+            className="rounded-full px-2 py-0.5 text-[10px] font-medium capitalize"
+            style={{ backgroundColor: pStyle.bg, color: pStyle.color }}
+          >
             {ticket.priority}
-          </Badge>
+          </span>
           {ticket.category && (
             <Badge variant="outline" className="capitalize text-[10px] h-5">{ticket.category.replace("_", " ")}</Badge>
           )}
-          {ticket.sentiment_score !== null && (
-            <Badge className={cn("font-medium text-[10px] h-5 border-0", getConfidenceColor(ticket.sentiment_score))}>
-              {Math.round(ticket.sentiment_score * 100)}%
-            </Badge>
-          )}
+          {sentimentDot()}
           {isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
         </div>
       </div>
 
       {isExpanded && (
-        <CardContent className="border-t border-border bg-muted/20 px-0 pb-0 pt-0">
+        <CardContent className="border-t border-border px-0 pb-0 pt-0" style={{ backgroundColor: '#F4F3FF' }}>
           <TicketDetailPanel ticketId={ticket.id} onBack={onToggle} />
         </CardContent>
       )}
@@ -612,9 +623,9 @@ function EmailsView({ searchQuery, onSearchChange }: { searchQuery: string; onSe
     <ScrollArea className="h-full">
       <div className="p-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">Email Queue</h1>
-          <p className="mt-1 text-muted-foreground">Review and manage all processed emails</p>
+        <div className="mb-6">
+          <h1 className="text-[20px] font-medium" style={{ color: '#1A1730' }}>Email Queue</h1>
+          <p className="mt-0.5 text-[13px]" style={{ color: '#9490B8' }}>Review and manage all processed emails</p>
         </div>
 
         {/* Search & Date Filter */}
@@ -837,7 +848,12 @@ function EmailCard({
   };
 
   return (
-    <div className="overflow-hidden transition-colors hover:bg-muted/30">
+    <div
+      className="overflow-hidden transition-colors"
+      style={{ backgroundColor: 'transparent' }}
+      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#F4F3FF')}
+      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+    >
       <div className="flex cursor-pointer items-center gap-4 p-4" onClick={onToggle}>
         <div className={cn(
           "flex h-9 w-9 items-center justify-center rounded-full shrink-0",
@@ -879,7 +895,7 @@ function EmailCard({
       </div>
 
       {isExpanded && (
-        <CardContent className="border-t border-border bg-muted/20 px-4 pb-4 pt-4 space-y-4">
+        <CardContent className="border-t border-border px-4 pb-4 pt-4 space-y-4" style={{ backgroundColor: '#F4F3FF' }}>
           {email.flag_reason && (
             <div className="flex items-start gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 p-3">
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
@@ -889,7 +905,7 @@ function EmailCard({
 
           <div>
             <h4 className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Original Email</h4>
-            <div className="rounded-lg border border-border bg-background p-4">
+            <div className="rounded-xl bg-white p-4" style={{ borderLeft: '3px solid rgba(124,111,224,0.3)' }}>
               <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{email.body}</p>
             </div>
           </div>
@@ -902,8 +918,8 @@ function EmailCard({
               {isEditing ? (
                 <Textarea className="min-h-[120px]" value={editedReply} onChange={(e) => setEditedReply(e.target.value)} />
               ) : (
-                <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
-                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{email.suggested_reply}</p>
+                <div className="rounded-xl p-4" style={{ backgroundColor: '#F4F3FF', borderLeft: '3px solid #7C6FE0' }}>
+                  <p className="whitespace-pre-wrap text-[13px] leading-relaxed text-foreground">{email.suggested_reply}</p>
                 </div>
               )}
             </div>
