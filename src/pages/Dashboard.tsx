@@ -25,6 +25,10 @@ export default function Dashboard() {
   const { session } = useAuth();
   const queryClient = useQueryClient();
   const [isFetching, setIsFetching] = useState(false);
+  const [onboardingDismissed, setOnboardingDismissed] = useState(
+    () => localStorage.getItem("onboarding-banner-dismissed") === "true"
+  );
+  const { entries: kbEntries } = useKnowledgeBase();
 
   const isLoading = logsLoading || queueLoading;
 
