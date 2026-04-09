@@ -14,6 +14,8 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { UsageCard } from "@/components/dashboard/UsageCard";
 import { ResolutionRateCard } from "@/components/dashboard/ResolutionRateCard";
+import { OnboardingBanner } from "@/components/dashboard/OnboardingBanner";
+import { useKnowledgeBase } from "@/hooks/useKnowledgeBase";
 
 export default function Dashboard() {
   const { logs, isLoading: logsLoading } = useActivityLogs(10);
@@ -23,6 +25,10 @@ export default function Dashboard() {
   const { session } = useAuth();
   const queryClient = useQueryClient();
   const [isFetching, setIsFetching] = useState(false);
+  const [onboardingDismissed, setOnboardingDismissed] = useState(
+    () => localStorage.getItem("onboarding-banner-dismissed") === "true"
+  );
+  const { entries: kbEntries } = useKnowledgeBase();
 
   const isLoading = logsLoading || queueLoading;
 
@@ -77,6 +83,14 @@ export default function Dashboard() {
   const repliedCount = logs.filter(l => l.action === "replied" || l.action === "auto_replied" || l.action === "auto_sent").length;
   const ignoredCount = logs.filter(l => l.action === "ignored").length;
   const totalActions = logs.length;
+  const hasEmailAccount = accounts.some((a) => a.is_active);
+  const hasKbEntry = kbEntries.length > 0;
+  const showOnboarding = totalActions === 0 && !onboardingDismissed;
+
+  const handleDismissOnboarding = () => {
+    setOnboardingDismissed(true);
+    localStorage.setItem("onboarding-banner-dismissed", "true");
+  };
 
   const stats = [
     {
@@ -157,17 +171,33 @@ export default function Dashboard() {
         </Button>
       </div>
 
+      {/* Onboarding Banner */}
+      {showOnboarding && (
+        <OnboardingBanner
+          hasEmailAccount={hasEmailAccount}
+          hasKbEntry={hasKbEntry}
+          hasProcessedEmails={totalActions > 0}
+          onFetchEmails={handleFetchEmails}
+          isFetching={isFetching}
+          onDismiss={handleDismissOnboarding}
+        />
+      )}
+
       {/* Resolution Rate Hero */}
-      <div className="mb-6">
-        <ResolutionRateCard />
-      </div>
+      {!showOnboarding && (
+        <div className="mb-6">
+          <ResolutionRateCard />
+        </div>
+      )}
 
       {/* Stats Grid */}
-      <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => (
-          <StatCard key={stat.title} {...stat} />
-        ))}
-      </div>
+      {!showOnboarding && (
+        <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {stats.map((stat) => (
+            <StatCard key={stat.title} {...stat} />
+          ))}
+        </div>
+      )}
 
       {/* Main Content */}
       <div className="grid gap-6 lg:grid-cols-3">
@@ -248,24 +278,8 @@ export default function Dashboard() {
             </Card>
           )}
 
-          {totalActions === 0 && (
-            <Card className="border-primary/20">
-              <CardContent className="p-4">
-                <h3 className="text-[13px] font-medium" style={{ color: '#1A1730' }}>Getting Started</h3>
-                <p className="mt-1 text-[11px] leading-relaxed" style={{ color: '#9490B8' }}>
-                  1. Connect your email in Settings<br />
-                  2. Add knowledge to the Knowledge Base<br />
-                  3. Configure AI instructions<br />
-                  4. Enable automation
-                </p>
-                <Link to="/settings">
-                  <Button size="sm" className="mt-3 h-7 text-[11px]">
-                    Go to Settings
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          )}
+
+
 
           {/* Performance */}
           <Card>
