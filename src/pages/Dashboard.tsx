@@ -278,24 +278,8 @@ export default function Dashboard() {
             </Card>
           )}
 
-          {totalActions === 0 && (
-            <Card className="border-primary/20">
-              <CardContent className="p-4">
-                <h3 className="text-[13px] font-medium" style={{ color: '#1A1730' }}>Getting Started</h3>
-                <p className="mt-1 text-[11px] leading-relaxed" style={{ color: '#9490B8' }}>
-                  1. Connect your email in Settings<br />
-                  2. Add knowledge to the Knowledge Base<br />
-                  3. Configure AI instructions<br />
-                  4. Enable automation
-                </p>
-                <Link to="/settings">
-                  <Button size="sm" className="mt-3 h-7 text-[11px]">
-                    Go to Settings
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          )}
+
+
 
           {/* Performance */}
           <Card>
