@@ -178,43 +178,41 @@ export default function UnifiedInbox() {
       {/* Unified Header */}
       <div className="border-b border-border bg-card px-6 py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div>
-              <h1 className="text-xl font-semibold text-foreground">Inbox</h1>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Manage tickets and email conversations
-              </p>
-            </div>
+          <div>
+            <h1 className="text-[20px] font-medium" style={{ color: '#1A1730' }}>Inbox</h1>
+            <p className="text-[13px] mt-0.5" style={{ color: '#9490B8' }}>
+              Manage tickets and email conversations
+            </p>
           </div>
           <div className="flex items-center gap-3">
             {/* Fetch controls */}
             <Button
-              variant={autoFetchEnabled ? "destructive" : "outline"}
+              variant={autoFetchEnabled ? "destructive" : "secondary"}
               size="sm"
               onClick={() => setAutoFetchEnabled(!autoFetchEnabled)}
             >
-              {autoFetchEnabled ? <><Pause className="mr-2 h-4 w-4" />Stop Auto-Fetch</> : <><Play className="mr-2 h-4 w-4" />Auto-Fetch</>}
+              {autoFetchEnabled ? <><Pause className="mr-2 h-4 w-4" />Stop</> : <><Play className="mr-2 h-4 w-4" />Auto-Fetch</>}
             </Button>
             {autoFetchEnabled && (
-              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1.5 text-[11px]" style={{ color: '#9490B8' }}>
                 <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
                 Every 10s
               </span>
             )}
-            <Button variant="outline" size="sm" onClick={handleFetchEmails} disabled={isFetching}>
+            <Button variant="secondary" size="sm" onClick={handleFetchEmails} disabled={isFetching}>
               {isFetching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
               Fetch Now
             </Button>
 
-            {/* View mode toggle */}
-            <div className="flex items-center rounded-lg border border-border bg-muted/50 p-0.5">
+            {/* Segmented control */}
+            <div className="flex items-center rounded-full p-1" style={{ backgroundColor: '#EBE9FF' }}>
               <button
                 onClick={() => setViewMode("tickets")}
                 className={cn(
-                  "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all",
+                  "flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-all",
                   viewMode === "tickets"
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
+                    ? "bg-white text-foreground shadow-sm"
+                    : "text-[#9490B8] hover:text-foreground"
                 )}
               >
                 <Inbox className="h-3.5 w-3.5" />
@@ -223,10 +221,10 @@ export default function UnifiedInbox() {
               <button
                 onClick={() => setViewMode("emails")}
                 className={cn(
-                  "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all",
+                  "flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-all",
                   viewMode === "emails"
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
+                    ? "bg-white text-foreground shadow-sm"
+                    : "text-[#9490B8] hover:text-foreground"
                 )}
               >
                 <Mail className="h-3.5 w-3.5" />
