@@ -84,11 +84,11 @@ const formatTimeAgo = (date: string) => {
   return `${Math.floor(diffMins / 1440)}d ago`;
 };
 
-const priorityColors: Record<string, string> = {
-  low: "bg-muted text-muted-foreground",
-  medium: "bg-primary/10 text-primary",
-  high: "bg-orange-500/10 text-orange-600",
-  urgent: "bg-destructive/10 text-destructive",
+const priorityStyles: Record<string, { bg: string; color: string }> = {
+  low: { bg: '#F1EFE8', color: '#5F5E5A' },
+  medium: { bg: '#E6F1FB', color: '#185FA5' },
+  high: { bg: '#FAEEDA', color: '#854F0B' },
+  urgent: { bg: '#FCEBEB', color: '#A32D2D' },
 };
 
 
