@@ -17,9 +17,6 @@ import {
   Edit,
   FileText,
   Paperclip,
-  RefreshCw,
-  Play,
-  Pause,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -229,47 +226,8 @@ export function TicketDetailPanel({ ticketId, onBack }: { ticketId: string; onBa
   const queryClient = useQueryClient();
   const [newNote, setNewNote] = useState("");
   const [activeSection, setActiveSection] = useState<"conversation" | "notes">("conversation");
-  const [isFetching, setIsFetching] = useState(false);
-  const [autoFetchEnabled, setAutoFetchEnabled] = useState(false);
-  const isFetchingRef = useRef(false);
 
   const pendingCount = emails.filter((e) => e.status === "pending").length;
-
-  const handleAutoFetch = useCallback(async () => {
-    if (!session?.access_token || isFetchingRef.current) return;
-    isFetchingRef.current = true;
-    try {
-      const fetches: Promise<any>[] = [];
-      if (accounts.some((a) => a.provider === "gmail" && a.is_active)) fetches.push(supabase.functions.invoke("fetch-gmail-emails", { headers: { Authorization: `Bearer ${session.access_token}` } }));
-      if (accounts.some((a) => a.provider === "imap" && a.is_active)) fetches.push(supabase.functions.invoke("fetch-imap-emails", { headers: { Authorization: `Bearer ${session.access_token}` } }));
-      if (fetches.length > 0) await Promise.allSettled(fetches);
-      await queryClient.invalidateQueries({ queryKey: ["ticket-emails"] });
-      await queryClient.invalidateQueries({ queryKey: ["email-queue"] });
-    } finally { isFetchingRef.current = false; }
-  }, [session?.access_token, accounts, queryClient]);
-
-  useEffect(() => {
-    if (!autoFetchEnabled) return;
-    const interval = setInterval(handleAutoFetch, 10000);
-    return () => clearInterval(interval);
-  }, [autoFetchEnabled, handleAutoFetch]);
-
-  const handleFetchEmails = async () => {
-    if (!session?.access_token) return;
-    setIsFetching(true);
-    try {
-      const fetches: Promise<{ data: any; error: any }>[] = [];
-      if (accounts.some((a) => a.provider === "gmail" && a.is_active)) fetches.push(supabase.functions.invoke("fetch-gmail-emails", { headers: { Authorization: `Bearer ${session.access_token}` } }));
-      if (accounts.some((a) => a.provider === "imap" && a.is_active)) fetches.push(supabase.functions.invoke("fetch-imap-emails", { headers: { Authorization: `Bearer ${session.access_token}` } }));
-      if (fetches.length === 0) { toast.info("No active email accounts connected"); return; }
-      const results = await Promise.allSettled(fetches);
-      let totalProcessed = 0;
-      for (const result of results) { if (result.status === "fulfilled" && !result.value.error) totalProcessed += result.value.data?.processed || 0; }
-      await queryClient.invalidateQueries({ queryKey: ["ticket-emails"] });
-      await queryClient.invalidateQueries({ queryKey: ["email-queue"] });
-      if (totalProcessed > 0) toast.success(`Fetched ${totalProcessed} new email(s)`); else toast.info("No new emails found");
-    } catch { toast.error("Failed to fetch emails"); } finally { setIsFetching(false); }
-  };
 
   const handleApprove = async (emailId: string, _htmlBody?: string, _attachmentUrls?: string[]) => {
     await updateEmailStatus.mutateAsync({ id: emailId, status: "approved" });
@@ -310,15 +268,6 @@ export function TicketDetailPanel({ ticketId, onBack }: { ticketId: string; onBa
               <h2 className="text-lg font-semibold text-foreground truncate">{ticket.subject}</h2>
             </div>
             <p className="text-sm text-muted-foreground">{ticket.customer_email}</p>
-          </div>
-          <div className="flex items-center gap-1.5 shrink-0">
-            <Button variant={autoFetchEnabled ? "destructive" : "outline"} size="sm" className="h-7 text-xs" onClick={() => setAutoFetchEnabled(!autoFetchEnabled)}>
-              {autoFetchEnabled ? <Pause className="mr-1 h-3 w-3" /> : <Play className="mr-1 h-3 w-3" />}{autoFetchEnabled ? "Stop" : "Auto"}
-            </Button>
-            {autoFetchEnabled && <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />}
-            <Button variant="outline" size="sm" className="h-7 text-xs" onClick={handleFetchEmails} disabled={isFetching}>
-              {isFetching ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <RefreshCw className="mr-1 h-3 w-3" />}Fetch
-            </Button>
           </div>
         </div>
 
