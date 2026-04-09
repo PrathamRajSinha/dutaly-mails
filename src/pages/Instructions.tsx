@@ -147,8 +147,8 @@ export default function Instructions() {
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">AI Instructions</h1>
-          <p className="mt-1 text-muted-foreground">
+          <h1 className="text-xl font-medium text-[#1A1730]">AI Instructions</h1>
+          <p className="mt-1 text-[13px] text-[#9490B8]">
             Tell the AI how to handle your emails in plain English
           </p>
         </div>
@@ -191,7 +191,7 @@ export default function Instructions() {
                 </Label>
                 <div className="space-y-2">
                   {doRules.map((rule, i) => (
-                    <div key={i} className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2">
+                    <div key={i} className="flex items-center gap-2 rounded-[10px] border-l-[3px] border-l-[#1D9E75] bg-[#F6FFF9] px-3 py-2">
                       <span className="flex-1 text-sm text-foreground">{rule}</span>
                       <button
                         onClick={() => setDoRules(doRules.filter((_, idx) => idx !== i))}
@@ -237,7 +237,7 @@ export default function Instructions() {
                 </Label>
                 <div className="space-y-2">
                   {doNotRules.map((rule, i) => (
-                    <div key={i} className="flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2">
+                    <div key={i} className="flex items-center gap-2 rounded-[10px] border-l-[3px] border-l-[#DC2626] bg-[#FFF5F5] px-3 py-2">
                       <span className="flex-1 text-sm text-foreground">{rule}</span>
                       <button
                         onClick={() => setDoNotRules(doNotRules.filter((_, idx) => idx !== i))}
@@ -375,7 +375,7 @@ export default function Instructions() {
                 <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-3">
                   <div className="flex items-center justify-between mb-1">
                     <Label className="text-sm">Confidence Threshold</Label>
-                    <span className="text-sm font-medium text-primary">{Math.round(confidenceThreshold * 100)}%</span>
+                    <span className="text-sm font-medium text-[#7C6FE0]">{Math.round(confidenceThreshold * 100)}%</span>
                   </div>
                   <Slider
                     value={[confidenceThreshold]}

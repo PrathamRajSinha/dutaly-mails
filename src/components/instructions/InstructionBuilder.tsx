@@ -88,20 +88,22 @@ export function InstructionBuilder() {
               <div
                 key={rule.id}
                 className={cn(
-                  "group flex items-center gap-3 rounded-lg border p-3 transition-colors",
+                  "group flex items-center gap-3 rounded-[10px] bg-white p-3 px-4 transition-colors",
                   rule.is_active
-                    ? rule.priority === "critical"
-                      ? "border-destructive/20 bg-destructive/5"
-                      : "border-border bg-background"
-                    : "border-border bg-muted/50 opacity-60"
+                    ? "border border-[rgba(124,111,224,0.1)]"
+                    : "border border-[rgba(124,111,224,0.06)] opacity-60"
                 )}
               >
                 <div className="flex-1 min-w-0">
-                  <p className={cn("text-sm", !rule.is_active && "line-through")}>{rule.rule_text}</p>
+                  <p className={cn("text-sm text-[#3D3A5C]", !rule.is_active && "line-through")}>{rule.rule_text}</p>
                 </div>
                 <Badge
-                  variant={rule.priority === "critical" ? "destructive" : "secondary"}
-                  className="shrink-0 text-xs"
+                  className={cn(
+                    "shrink-0 text-xs border-none rounded-full",
+                    rule.priority === "critical"
+                      ? "bg-[#FCEBEB] text-[#A32D2D]"
+                      : "bg-[#EBE9FF] text-[#534AB7]"
+                  )}
                 >
                   {rule.priority === "critical" ? "Critical" : "Normal"}
                 </Badge>

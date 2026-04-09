@@ -55,7 +55,7 @@ export function CategoryThresholds({ globalThreshold }: Props) {
             <div key={category} className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Label className="text-sm">{formatCategory(category)}</Label>
+                  <Label className="text-xs text-[#3D3A5C]">{formatCategory(category)}</Label>
                   {isOverridden && (
                     <Badge variant="outline" className="text-[10px] h-4 px-1.5">
                       Custom
@@ -63,7 +63,7 @@ export function CategoryThresholds({ globalThreshold }: Props) {
                   )}
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-primary w-10 text-right">
+                  <span className="text-xs font-medium text-[#7C6FE0] w-10 text-right">
                     {Math.round(value * 100)}%
                   </span>
                   {isOverridden && (
