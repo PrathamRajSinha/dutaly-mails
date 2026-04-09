@@ -39,8 +39,8 @@
     --destructive-foreground: 0 84% 50%;
 
     /* rgba(124,111,224,0.12) → use a light violet */
-    --border: 248 64% 66% / 0.12;
-    --input: 248 64% 66% / 0.2;
+    --border: 248 64% 66% / 0.22;
+    --input: 248 64% 66% / 0.3;
     --ring: 248 64% 66%;
 
     --radius: 0.75rem;
