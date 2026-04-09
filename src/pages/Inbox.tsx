@@ -580,7 +580,7 @@ function EmailsView({ searchQuery, onSearchChange }: { searchQuery: string; onSe
       );
     }
     return (
-      <div className="space-y-3">
+      <div className="divide-y divide-border space-y-0 rounded-xl border border-border bg-card overflow-hidden">
         {filtered.map((email) => (
           <EmailCard
             key={email.id}
