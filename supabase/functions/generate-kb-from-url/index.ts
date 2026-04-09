@@ -12,7 +12,77 @@ serve(async (req) => {
   }
 
   try {
-    const { url } = await req.json();
+    const body = await req.json();
+    const { url, topic, category } = body;
+
+    // Support two modes: URL-based extraction OR topic-based generation
+    let textContent: string;
+
+    if (topic && typeof topic === "string") {
+      // Topic-based generation (from KB gaps)
+      console.log("Generating KB entry for topic:", topic);
+      textContent = `Topic: ${topic}${category ? `\nCategory: ${category}` : ""}`;
+
+      const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${Deno.env.get("LOVABLE_API_KEY")}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-3-flash-preview",
+          messages: [
+            {
+              role: "system",
+              content: `You are a knowledge base builder. Given a topic that customers frequently ask about, generate a helpful KB entry.
+
+Create one entry with:
+- "title": A clear question customers might ask about this topic
+- "content": A comprehensive, helpful answer template. Use placeholders like [YOUR POLICY] where specific business info is needed.
+- "category": One of: faq, snippet, document, policy
+
+Respond with a JSON array containing one entry. Only output valid JSON, no markdown.
+Example: [{"title":"What is your return policy?","content":"We accept returns within [X] days...","category":"faq"}]`,
+            },
+            {
+              role: "user",
+              content: `Generate a knowledge base entry for this frequently asked topic: "${topic}"${category ? ` (category: ${category})` : ""}`,
+            },
+          ],
+          temperature: 0.3,
+        }),
+      });
+
+      if (!aiResponse.ok) {
+        const errorText = await aiResponse.text();
+        console.error("AI Gateway error:", aiResponse.status, errorText);
+        return new Response(
+          JSON.stringify({ error: "Failed to generate entry" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const aiResult = await aiResponse.json();
+      const content = aiResult.choices?.[0]?.message?.content || "";
+
+      let entries;
+      try {
+        const jsonMatch = content.match(/\[[\s\S]*\]/);
+        entries = JSON.parse(jsonMatch ? jsonMatch[0] : content);
+      } catch {
+        console.error("Failed to parse AI response:", content);
+        return new Response(
+          JSON.stringify({ error: "Failed to parse generated entries" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      return new Response(
+        JSON.stringify({ entries }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     if (!url || typeof url !== "string") {
       return new Response(
         JSON.stringify({ error: "Missing or invalid URL" }),
@@ -39,8 +109,7 @@ serve(async (req) => {
 
     const htmlContent = await pageResponse.text();
 
-    // Strip HTML tags to get text content (basic extraction)
-    const textContent = htmlContent
+    textContent = htmlContent
       .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
       .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
       .replace(/<[^>]+>/g, " ")
@@ -51,7 +120,7 @@ serve(async (req) => {
       .replace(/&quot;/g, '"')
       .replace(/\s+/g, " ")
       .trim()
-      .slice(0, 15000); // Limit to avoid token overflow
+      .slice(0, 15000);
 
     if (textContent.length < 50) {
       return new Response(
