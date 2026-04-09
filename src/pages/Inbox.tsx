@@ -895,7 +895,7 @@ function EmailCard({
       </div>
 
       {isExpanded && (
-        <CardContent className="border-t border-border bg-muted/20 px-4 pb-4 pt-4 space-y-4">
+        <CardContent className="border-t border-border px-4 pb-4 pt-4 space-y-4" style={{ backgroundColor: '#F4F3FF' }}>
           {email.flag_reason && (
             <div className="flex items-start gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 p-3">
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
@@ -905,7 +905,7 @@ function EmailCard({
 
           <div>
             <h4 className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Original Email</h4>
-            <div className="rounded-lg border border-border bg-background p-4">
+            <div className="rounded-xl bg-white p-4" style={{ borderLeft: '3px solid rgba(124,111,224,0.3)' }}>
               <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{email.body}</p>
             </div>
           </div>
@@ -918,8 +918,8 @@ function EmailCard({
               {isEditing ? (
                 <Textarea className="min-h-[120px]" value={editedReply} onChange={(e) => setEditedReply(e.target.value)} />
               ) : (
-                <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
-                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{email.suggested_reply}</p>
+                <div className="rounded-xl p-4" style={{ backgroundColor: '#F4F3FF', borderLeft: '3px solid #7C6FE0' }}>
+                  <p className="whitespace-pre-wrap text-[13px] leading-relaxed text-foreground">{email.suggested_reply}</p>
                 </div>
               )}
             </div>
