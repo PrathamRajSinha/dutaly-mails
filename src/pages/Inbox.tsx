@@ -314,10 +314,10 @@ function TicketsView({ searchQuery, onSearchChange }: { searchQuery: string; onS
     <ScrollArea className="h-full">
       <div className="p-8">
         {/* Header */}
-        <div className="mb-8 flex items-start justify-between">
+        <div className="mb-6 flex items-start justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Tickets</h1>
-            <p className="mt-1 text-muted-foreground">Review and manage support tickets</p>
+            <h1 className="text-[20px] font-medium" style={{ color: '#1A1730' }}>Tickets</h1>
+            <p className="mt-0.5 text-[13px]" style={{ color: '#9490B8' }}>Review and manage support tickets</p>
           </div>
           {pendingCount > 0 && (
             <Badge className="bg-destructive/10 text-destructive text-xs h-6 px-2 shrink-0">
@@ -466,40 +466,53 @@ function TicketCard({ ticket, isExpanded, onToggle }: { ticket: Ticket; isExpand
     );
   };
 
+  const pStyle = priorityStyles[ticket.priority] || priorityStyles.low;
+  const sentimentDot = () => {
+    if (ticket.sentiment_score === null) return null;
+    const pct = ticket.sentiment_score * 100;
+    const dotColor = pct > 60 ? '#1D9E75' : pct > 30 ? '#BA7517' : '#DC2626';
+    return <span className="inline-block h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: dotColor }} title={`Sentiment: ${Math.round(pct)}%`} />;
+  };
+
   return (
-    <Card className="border border-border overflow-hidden transition-shadow hover:shadow-sm">
-      <div className="flex cursor-pointer items-center gap-4 p-4" onClick={onToggle}>
+    <Card className="border border-border overflow-hidden">
+      <div
+        className="flex cursor-pointer items-center gap-4 p-4 transition-colors"
+        style={{ backgroundColor: 'transparent' }}
+        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#F4F3FF')}
+        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+        onClick={onToggle}
+      >
         <div className={cn("flex h-9 w-9 items-center justify-center rounded-full shrink-0", statusBgColor())}>
           {statusIcon()}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             {ticket.escalation_flag && <Flame className="h-3.5 w-3.5 text-destructive shrink-0" />}
-            <h3 className="text-sm font-medium text-card-foreground truncate">{ticket.subject}</h3>
+            <h3 className="text-[13px] font-medium truncate" style={{ color: '#1A1730' }}>{ticket.subject}</h3>
             {statusBadge()}
           </div>
-          <p className="text-xs text-muted-foreground mt-0.5">
+          <p className="text-[11px] mt-0.5" style={{ color: '#9490B8' }}>
             {ticket.customer_email} · {formatTimeAgo(ticket.created_at)}
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <Badge variant="secondary" className={cn("text-[10px] h-5 border-0", priorityColors[ticket.priority])}>
+          <span
+            className="rounded-full px-2 py-0.5 text-[10px] font-medium capitalize"
+            style={{ backgroundColor: pStyle.bg, color: pStyle.color }}
+          >
             {ticket.priority}
-          </Badge>
+          </span>
           {ticket.category && (
             <Badge variant="outline" className="capitalize text-[10px] h-5">{ticket.category.replace("_", " ")}</Badge>
           )}
-          {ticket.sentiment_score !== null && (
-            <Badge className={cn("font-medium text-[10px] h-5 border-0", getConfidenceColor(ticket.sentiment_score))}>
-              {Math.round(ticket.sentiment_score * 100)}%
-            </Badge>
-          )}
+          {sentimentDot()}
           {isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
         </div>
       </div>
 
       {isExpanded && (
-        <CardContent className="border-t border-border bg-muted/20 px-0 pb-0 pt-0">
+        <CardContent className="border-t border-border px-0 pb-0 pt-0" style={{ backgroundColor: '#F4F3FF' }}>
           <TicketDetailPanel ticketId={ticket.id} onBack={onToggle} />
         </CardContent>
       )}
@@ -610,9 +623,9 @@ function EmailsView({ searchQuery, onSearchChange }: { searchQuery: string; onSe
     <ScrollArea className="h-full">
       <div className="p-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">Email Queue</h1>
-          <p className="mt-1 text-muted-foreground">Review and manage all processed emails</p>
+        <div className="mb-6">
+          <h1 className="text-[20px] font-medium" style={{ color: '#1A1730' }}>Email Queue</h1>
+          <p className="mt-0.5 text-[13px]" style={{ color: '#9490B8' }}>Review and manage all processed emails</p>
         </div>
 
         {/* Search & Date Filter */}
