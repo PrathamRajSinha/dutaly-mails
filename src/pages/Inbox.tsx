@@ -511,92 +511,19 @@ function TicketCard({ ticket, isExpanded, onToggle }: { ticket: Ticket; isExpand
 
 // ─── Emails View ────────────────────────────────────────────
 function EmailsView({ searchQuery, onSearchChange }: { searchQuery: string; onSearchChange: (v: string) => void }) {
-  const { session } = useAuth();
-  const queryClient = useQueryClient();
-  const { accounts } = useEmailAccounts();
   const { emails: allEmails, needsReview, drafted, sent, ignored, isLoading, updateEmailStatus, pendingCount } = useEmailQueue();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [addKBDialogOpen, setAddKBDialogOpen] = useState(false);
   const [selectedEmailForKB, setSelectedEmailForKB] = useState<QueuedEmail | null>(null);
-  const [isFetching, setIsFetching] = useState(false);
   const [activeTab, setActiveTab] = useState<EmailTabValue>(() => {
     const params = new URLSearchParams(window.location.search);
     const tab = params.get("tab");
     if (tab === "needs_review" || tab === "drafted" || tab === "sent" || tab === "ignored") return tab;
     return "all_emails";
   });
-  const [autoFetchEnabled, setAutoFetchEnabled] = useState(false);
   const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
   const [datePreset, setDatePreset] = useState<string>("all");
-  const isFetchingRef = useRef(false);
-
-  const handleAutoFetch = useCallback(async () => {
-    if (!session?.access_token || isFetchingRef.current) return;
-    isFetchingRef.current = true;
-    try {
-      const hasGmail = accounts.some((a) => a.provider === "gmail" && a.is_active);
-      const hasImap = accounts.some((a) => a.provider === "imap" && a.is_active);
-      const fetches: Promise<{ data: any; error: any }>[] = [];
-      if (hasGmail) fetches.push(supabase.functions.invoke("fetch-gmail-emails", { headers: { Authorization: `Bearer ${session.access_token}` } }));
-      if (hasImap) fetches.push(supabase.functions.invoke("fetch-imap-emails", { headers: { Authorization: `Bearer ${session.access_token}` } }));
-      if (fetches.length === 0) return;
-      await Promise.allSettled(fetches);
-      await queryClient.invalidateQueries({ queryKey: ["email-queue"] });
-    } catch (error) {
-      console.error("Auto-fetch error:", error);
-    } finally {
-      isFetchingRef.current = false;
-    }
-  }, [session?.access_token, accounts, queryClient]);
-
-  useEffect(() => {
-    if (!autoFetchEnabled) return;
-    const interval = setInterval(handleAutoFetch, 10000);
-    return () => clearInterval(interval);
-  }, [autoFetchEnabled, handleAutoFetch]);
-
-  const handleFetchEmails = async () => {
-    if (!session?.access_token) {
-      toast.error("Please sign in to fetch emails");
-      return;
-    }
-    setIsFetching(true);
-    try {
-      const hasGmail = accounts.some((a) => a.provider === "gmail" && a.is_active);
-      const hasImap = accounts.some((a) => a.provider === "imap" && a.is_active);
-      const fetches: Promise<{ data: any; error: any }>[] = [];
-      if (hasGmail) fetches.push(supabase.functions.invoke("fetch-gmail-emails", { headers: { Authorization: `Bearer ${session.access_token}` } }));
-      if (hasImap) fetches.push(supabase.functions.invoke("fetch-imap-emails", { headers: { Authorization: `Bearer ${session.access_token}` } }));
-      if (fetches.length === 0) {
-        toast.info("No active email accounts connected");
-        setIsFetching(false);
-        return;
-      }
-      const results = await Promise.allSettled(fetches);
-      let totalProcessed = 0;
-      let totalSkipped = 0;
-      let totalTotal = 0;
-      for (const result of results) {
-        if (result.status === "fulfilled" && !result.value.error) {
-          const data = result.value.data;
-          totalProcessed += data.processed || 0;
-          totalSkipped += data.skipped || 0;
-          totalTotal += data.total || 0;
-        }
-      }
-      await queryClient.invalidateQueries({ queryKey: ["email-queue"] });
-      if (totalProcessed > 0) toast.success(`Fetched ${totalProcessed} new email(s)`);
-      else if (totalTotal === 0) toast.info("No unread emails found");
-      else toast.info(`No new emails (${totalSkipped} already processed)`);
-    } catch (error) {
-      console.error("Fetch emails error:", error);
-      toast.error("Failed to fetch emails");
-    } finally {
-      setIsFetching(false);
-    }
-  };
-
   const applyDatePreset = (preset: string) => {
     setDatePreset(preset);
     const now = new Date();
