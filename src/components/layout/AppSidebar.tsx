@@ -41,7 +41,7 @@ export function AppSidebar() {
     <aside className="flex h-screen w-[220px] shrink-0 flex-col" style={{ backgroundColor: '#0A0A0F' }}>
       {/* Logo */}
       <div className="flex items-center px-5 py-5">
-        <img src={logoDarkBg} alt="Dutaly" className="h-7 w-auto" />
+        <img src={logoDarkBg} alt="Dutaly" className="h-[42px] w-auto" />
       </div>
 
       {/* Navigation */}
