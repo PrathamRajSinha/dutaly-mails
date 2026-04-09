@@ -46,10 +46,10 @@ import { useKbGaps, type GroupedGap } from "@/hooks/useKbGaps";
 import { useQueryClient } from "@tanstack/react-query";
 
 const typeConfig = {
-  faq: { icon: MessageSquare, label: "FAQ", color: "bg-green-100 text-green-700" },
-  snippet: { icon: FileText, label: "Snippet", color: "bg-purple-100 text-purple-700" },
-  document: { icon: File, label: "Document", color: "bg-amber-100 text-amber-700" },
-  policy: { icon: FileText, label: "Policy", color: "bg-primary/10 text-primary" },
+  faq: { icon: MessageSquare, label: "FAQ", color: "bg-[#E6F1FB] text-[#185FA5]", badgeClass: "bg-[#E6F1FB] text-[#185FA5] rounded-full" },
+  snippet: { icon: FileText, label: "Snippet", color: "bg-[#EBE9FF] text-[#534AB7]", badgeClass: "bg-[#EBE9FF] text-[#534AB7] rounded-full" },
+  document: { icon: File, label: "Document", color: "bg-[#FAEEDA] text-[#854F0B]", badgeClass: "bg-[#FAEEDA] text-[#854F0B] rounded-full" },
+  policy: { icon: FileText, label: "Policy", color: "bg-[#E1F5EE] text-[#0F6E56]", badgeClass: "bg-[#E1F5EE] text-[#0F6E56] rounded-full" },
 };
 
 const fileTypeIcons: Record<string, typeof FileText> = {
@@ -243,8 +243,8 @@ export default function KnowledgeBase() {
       {/* Header */}
       <div className="mb-8 flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Knowledge Base</h1>
-          <p className="mt-1 text-muted-foreground">
+          <h1 className="text-xl font-medium text-[#1A1730]">Knowledge Base</h1>
+          <p className="mt-1 text-[13px] text-[#9490B8]">
             Add information the AI should use when replying to emails
           </p>
         </div>
@@ -373,15 +373,15 @@ export default function KnowledgeBase() {
             className={cn(
               "px-4 py-2.5 text-sm font-medium transition-colors flex items-center gap-1.5",
               mainTab === "gaps"
-                ? "border-b-2 border-primary text-foreground"
+                ? "border-b-2 border-[#BA7517] text-[#BA7517]"
                 : "text-muted-foreground hover:text-foreground"
             )}
             onClick={() => setMainTab("gaps")}
           >
-            <AlertTriangle className="h-3.5 w-3.5" />
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#EF9F27]" />
             Gaps Detected
             {totalGaps > 0 && (
-              <Badge variant="secondary" className="h-5 px-1.5 text-[10px] bg-destructive/10 text-destructive">
+              <Badge variant="secondary" className="h-5 px-1.5 text-[10px] bg-[#FAEEDA] text-[#854F0B] border-none">
                 {totalGaps}
               </Badge>
             )}
@@ -395,7 +395,7 @@ export default function KnowledgeBase() {
           <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Search knowledge base..." className="pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+              <Input placeholder="Search knowledge base..." className="pl-10 border-[rgba(124,111,224,0.2)] focus-visible:ring-primary focus-visible:border-primary" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
             </div>
             <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0">
               {categories.map((cat) => (
@@ -413,14 +413,14 @@ export default function KnowledgeBase() {
               const FileIcon = entry.file_type ? (fileTypeIcons[entry.file_type] || File) : null;
               const Icon = FileIcon || config?.icon || FileText;
               return (
-                <Card key={entry.id} className="group border border-border transition-shadow hover:shadow-md">
+                <Card key={entry.id} className="group border border-[rgba(124,111,224,0.1)] transition-all hover:border-[rgba(124,111,224,0.3)] hover:bg-[#FDFCFF]">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-2">
                         <div className={cn("rounded-lg p-2", config?.color || "bg-muted")}>
                           <Icon className="h-4 w-4" />
                         </div>
-                        <Badge variant="secondary" className="text-xs capitalize">{entry.category}</Badge>
+                        <Badge className={cn("text-xs capitalize border-none", config?.badgeClass)}>{entry.category}</Badge>
                         {entry.file_name && <Badge variant="outline" className="text-xs">{entry.file_type?.toUpperCase()}</Badge>}
                       </div>
                       <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
