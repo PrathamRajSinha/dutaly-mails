@@ -100,6 +100,78 @@ type EmailTabValue = "all_emails" | "needs_review" | "drafted" | "sent" | "ignor
 export default function UnifiedInbox() {
   const [viewMode, setViewMode] = useState<ViewMode>("tickets");
   const [searchQuery, setSearchQuery] = useState("");
+  const [autoFetchEnabled, setAutoFetchEnabled] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
+  const isFetchingRef = useRef(false);
+  const { session } = useAuth();
+  const { accounts } = useEmailAccounts();
+  const queryClient = useQueryClient();
+
+  const handleAutoFetch = useCallback(async () => {
+    if (!session?.access_token || isFetchingRef.current) return;
+    isFetchingRef.current = true;
+    try {
+      const hasGmail = accounts.some((a) => a.provider === "gmail" && a.is_active);
+      const hasImap = accounts.some((a) => a.provider === "imap" && a.is_active);
+      const fetches: Promise<{ data: any; error: any }>[] = [];
+      if (hasGmail) fetches.push(supabase.functions.invoke("fetch-gmail-emails", { headers: { Authorization: `Bearer ${session.access_token}` } }));
+      if (hasImap) fetches.push(supabase.functions.invoke("fetch-imap-emails", { headers: { Authorization: `Bearer ${session.access_token}` } }));
+      if (fetches.length === 0) return;
+      await Promise.allSettled(fetches);
+      await queryClient.invalidateQueries({ queryKey: ["email-queue"] });
+    } catch (error) {
+      console.error("Auto-fetch error:", error);
+    } finally {
+      isFetchingRef.current = false;
+    }
+  }, [session?.access_token, accounts, queryClient]);
+
+  useEffect(() => {
+    if (!autoFetchEnabled) return;
+    const interval = setInterval(handleAutoFetch, 10000);
+    return () => clearInterval(interval);
+  }, [autoFetchEnabled, handleAutoFetch]);
+
+  const handleFetchEmails = async () => {
+    if (!session?.access_token) {
+      toast.error("Please sign in to fetch emails");
+      return;
+    }
+    setIsFetching(true);
+    try {
+      const hasGmail = accounts.some((a) => a.provider === "gmail" && a.is_active);
+      const hasImap = accounts.some((a) => a.provider === "imap" && a.is_active);
+      const fetches: Promise<{ data: any; error: any }>[] = [];
+      if (hasGmail) fetches.push(supabase.functions.invoke("fetch-gmail-emails", { headers: { Authorization: `Bearer ${session.access_token}` } }));
+      if (hasImap) fetches.push(supabase.functions.invoke("fetch-imap-emails", { headers: { Authorization: `Bearer ${session.access_token}` } }));
+      if (fetches.length === 0) {
+        toast.info("No active email accounts connected");
+        setIsFetching(false);
+        return;
+      }
+      const results = await Promise.allSettled(fetches);
+      let totalProcessed = 0;
+      let totalSkipped = 0;
+      let totalTotal = 0;
+      for (const result of results) {
+        if (result.status === "fulfilled" && !result.value.error) {
+          const data = result.value.data;
+          totalProcessed += data.processed || 0;
+          totalSkipped += data.skipped || 0;
+          totalTotal += data.total || 0;
+        }
+      }
+      await queryClient.invalidateQueries({ queryKey: ["email-queue"] });
+      if (totalProcessed > 0) toast.success(`Fetched ${totalProcessed} new email(s)`);
+      else if (totalTotal === 0) toast.info("No unread emails found");
+      else toast.info(`No new emails (${totalSkipped} already processed)`);
+    } catch (error) {
+      console.error("Fetch emails error:", error);
+      toast.error("Failed to fetch emails");
+    } finally {
+      setIsFetching(false);
+    }
+  };
 
   return (
     <div className="flex h-full flex-col">
@@ -115,6 +187,25 @@ export default function UnifiedInbox() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            {/* Fetch controls */}
+            <Button
+              variant={autoFetchEnabled ? "destructive" : "outline"}
+              size="sm"
+              onClick={() => setAutoFetchEnabled(!autoFetchEnabled)}
+            >
+              {autoFetchEnabled ? <><Pause className="mr-2 h-4 w-4" />Stop Auto-Fetch</> : <><Play className="mr-2 h-4 w-4" />Auto-Fetch</>}
+            </Button>
+            {autoFetchEnabled && (
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                Every 10s
+              </span>
+            )}
+            <Button variant="outline" size="sm" onClick={handleFetchEmails} disabled={isFetching}>
+              {isFetching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+              Fetch Now
+            </Button>
+
             {/* View mode toggle */}
             <div className="flex items-center rounded-lg border border-border bg-muted/50 p-0.5">
               <button
@@ -420,92 +511,19 @@ function TicketCard({ ticket, isExpanded, onToggle }: { ticket: Ticket; isExpand
 
 // ─── Emails View ────────────────────────────────────────────
 function EmailsView({ searchQuery, onSearchChange }: { searchQuery: string; onSearchChange: (v: string) => void }) {
-  const { session } = useAuth();
-  const queryClient = useQueryClient();
-  const { accounts } = useEmailAccounts();
   const { emails: allEmails, needsReview, drafted, sent, ignored, isLoading, updateEmailStatus, pendingCount } = useEmailQueue();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [addKBDialogOpen, setAddKBDialogOpen] = useState(false);
   const [selectedEmailForKB, setSelectedEmailForKB] = useState<QueuedEmail | null>(null);
-  const [isFetching, setIsFetching] = useState(false);
   const [activeTab, setActiveTab] = useState<EmailTabValue>(() => {
     const params = new URLSearchParams(window.location.search);
     const tab = params.get("tab");
     if (tab === "needs_review" || tab === "drafted" || tab === "sent" || tab === "ignored") return tab;
     return "all_emails";
   });
-  const [autoFetchEnabled, setAutoFetchEnabled] = useState(false);
   const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
   const [datePreset, setDatePreset] = useState<string>("all");
-  const isFetchingRef = useRef(false);
-
-  const handleAutoFetch = useCallback(async () => {
-    if (!session?.access_token || isFetchingRef.current) return;
-    isFetchingRef.current = true;
-    try {
-      const hasGmail = accounts.some((a) => a.provider === "gmail" && a.is_active);
-      const hasImap = accounts.some((a) => a.provider === "imap" && a.is_active);
-      const fetches: Promise<{ data: any; error: any }>[] = [];
-      if (hasGmail) fetches.push(supabase.functions.invoke("fetch-gmail-emails", { headers: { Authorization: `Bearer ${session.access_token}` } }));
-      if (hasImap) fetches.push(supabase.functions.invoke("fetch-imap-emails", { headers: { Authorization: `Bearer ${session.access_token}` } }));
-      if (fetches.length === 0) return;
-      await Promise.allSettled(fetches);
-      await queryClient.invalidateQueries({ queryKey: ["email-queue"] });
-    } catch (error) {
-      console.error("Auto-fetch error:", error);
-    } finally {
-      isFetchingRef.current = false;
-    }
-  }, [session?.access_token, accounts, queryClient]);
-
-  useEffect(() => {
-    if (!autoFetchEnabled) return;
-    const interval = setInterval(handleAutoFetch, 10000);
-    return () => clearInterval(interval);
-  }, [autoFetchEnabled, handleAutoFetch]);
-
-  const handleFetchEmails = async () => {
-    if (!session?.access_token) {
-      toast.error("Please sign in to fetch emails");
-      return;
-    }
-    setIsFetching(true);
-    try {
-      const hasGmail = accounts.some((a) => a.provider === "gmail" && a.is_active);
-      const hasImap = accounts.some((a) => a.provider === "imap" && a.is_active);
-      const fetches: Promise<{ data: any; error: any }>[] = [];
-      if (hasGmail) fetches.push(supabase.functions.invoke("fetch-gmail-emails", { headers: { Authorization: `Bearer ${session.access_token}` } }));
-      if (hasImap) fetches.push(supabase.functions.invoke("fetch-imap-emails", { headers: { Authorization: `Bearer ${session.access_token}` } }));
-      if (fetches.length === 0) {
-        toast.info("No active email accounts connected");
-        setIsFetching(false);
-        return;
-      }
-      const results = await Promise.allSettled(fetches);
-      let totalProcessed = 0;
-      let totalSkipped = 0;
-      let totalTotal = 0;
-      for (const result of results) {
-        if (result.status === "fulfilled" && !result.value.error) {
-          const data = result.value.data;
-          totalProcessed += data.processed || 0;
-          totalSkipped += data.skipped || 0;
-          totalTotal += data.total || 0;
-        }
-      }
-      await queryClient.invalidateQueries({ queryKey: ["email-queue"] });
-      if (totalProcessed > 0) toast.success(`Fetched ${totalProcessed} new email(s)`);
-      else if (totalTotal === 0) toast.info("No unread emails found");
-      else toast.info(`No new emails (${totalSkipped} already processed)`);
-    } catch (error) {
-      console.error("Fetch emails error:", error);
-      toast.error("Failed to fetch emails");
-    } finally {
-      setIsFetching(false);
-    }
-  };
-
   const applyDatePreset = (preset: string) => {
     setDatePreset(preset);
     const now = new Date();
@@ -594,30 +612,9 @@ function EmailsView({ searchQuery, onSearchChange }: { searchQuery: string; onSe
     <ScrollArea className="h-full">
       <div className="p-8">
         {/* Header */}
-        <div className="mb-8 flex items-start justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Email Queue</h1>
-            <p className="mt-1 text-muted-foreground">Review and manage all processed emails</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Button
-              variant={autoFetchEnabled ? "destructive" : "outline"}
-              size="sm"
-              onClick={() => setAutoFetchEnabled(!autoFetchEnabled)}
-            >
-              {autoFetchEnabled ? <><Pause className="mr-2 h-4 w-4" />Stop Auto-Fetch</> : <><Play className="mr-2 h-4 w-4" />Auto-Fetch</>}
-            </Button>
-            {autoFetchEnabled && (
-              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                Every 10s
-              </span>
-            )}
-            <Button variant="outline" size="sm" onClick={handleFetchEmails} disabled={isFetching}>
-              {isFetching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
-              Fetch Now
-            </Button>
-          </div>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground">Email Queue</h1>
+          <p className="mt-1 text-muted-foreground">Review and manage all processed emails</p>
         </div>
 
         {/* Search & Date Filter */}
