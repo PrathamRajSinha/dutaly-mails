@@ -612,30 +612,9 @@ function EmailsView({ searchQuery, onSearchChange }: { searchQuery: string; onSe
     <ScrollArea className="h-full">
       <div className="p-8">
         {/* Header */}
-        <div className="mb-8 flex items-start justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Email Queue</h1>
-            <p className="mt-1 text-muted-foreground">Review and manage all processed emails</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Button
-              variant={autoFetchEnabled ? "destructive" : "outline"}
-              size="sm"
-              onClick={() => setAutoFetchEnabled(!autoFetchEnabled)}
-            >
-              {autoFetchEnabled ? <><Pause className="mr-2 h-4 w-4" />Stop Auto-Fetch</> : <><Play className="mr-2 h-4 w-4" />Auto-Fetch</>}
-            </Button>
-            {autoFetchEnabled && (
-              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                Every 10s
-              </span>
-            )}
-            <Button variant="outline" size="sm" onClick={handleFetchEmails} disabled={isFetching}>
-              {isFetching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
-              Fetch Now
-            </Button>
-          </div>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground">Email Queue</h1>
+          <p className="mt-1 text-muted-foreground">Review and manage all processed emails</p>
         </div>
 
         {/* Search & Date Filter */}
