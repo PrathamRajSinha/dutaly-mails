@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState } from "react";
 import { format, formatDistanceToNow, isPast } from "date-fns";
 import {
   AlertCircle,
@@ -17,9 +17,6 @@ import {
   Edit,
   FileText,
   Paperclip,
-  RefreshCw,
-  Play,
-  Pause,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
