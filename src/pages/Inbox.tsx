@@ -364,8 +364,13 @@ function TicketsView({ searchQuery, onSearchChange }: { searchQuery: string; onS
               <TabsTrigger key={tab.value} value={tab.value} className="gap-2 min-w-[100px] justify-center">
                 {tab.icon}
                 {tab.label}
-                {tab.count != null && tab.count > 0 && (
-                  <Badge variant="secondary" className="ml-1 h-5 min-w-[20px] px-1.5 text-xs">{tab.count}</Badge>
+                {tab.count != null && (
+                  <Badge
+                    variant="secondary"
+                    className={cn("ml-1 h-5 min-w-[20px] px-1.5 text-xs", tab.count > 0 ? "" : "invisible")}
+                  >
+                    {tab.count}
+                  </Badge>
                 )}
               </TabsTrigger>
             ))}
@@ -679,23 +684,23 @@ function EmailsView({ searchQuery, onSearchChange }: { searchQuery: string; onSe
           <TabsList className="mb-6">
             <TabsTrigger value="all_emails" className="gap-2 min-w-[80px] justify-center">
               <Eye className="h-4 w-4" />All
-              {allEmails.length > 0 && <Badge variant="secondary" className="ml-1 h-5 min-w-[20px] px-1.5 text-xs">{allEmails.length}</Badge>}
+              <Badge variant="secondary" className={cn("ml-1 h-5 min-w-[20px] px-1.5 text-xs", allEmails.length > 0 ? "" : "invisible")}>{allEmails.length}</Badge>
             </TabsTrigger>
             <TabsTrigger value="needs_review" className="gap-2 min-w-[120px] justify-center">
               <AlertCircle className="h-4 w-4" />Needs Review
-              {needsReview.length > 0 && <Badge variant="secondary" className="ml-1 h-5 min-w-[20px] px-1.5 text-xs">{needsReview.length}</Badge>}
+              <Badge variant="secondary" className={cn("ml-1 h-5 min-w-[20px] px-1.5 text-xs", needsReview.length > 0 ? "" : "invisible")}>{needsReview.length}</Badge>
             </TabsTrigger>
             <TabsTrigger value="drafted" className="gap-2 min-w-[100px] justify-center">
               <FileEdit className="h-4 w-4" />Drafted
-              {drafted.length > 0 && <Badge variant="secondary" className="ml-1 h-5 min-w-[20px] px-1.5 text-xs">{drafted.length}</Badge>}
+              <Badge variant="secondary" className={cn("ml-1 h-5 min-w-[20px] px-1.5 text-xs", drafted.length > 0 ? "" : "invisible")}>{drafted.length}</Badge>
             </TabsTrigger>
             <TabsTrigger value="sent" className="gap-2 min-w-[80px] justify-center">
               <Send className="h-4 w-4" />Sent
-              {sent.length > 0 && <Badge variant="secondary" className="ml-1 h-5 min-w-[20px] px-1.5 text-xs">{sent.length}</Badge>}
+              <Badge variant="secondary" className={cn("ml-1 h-5 min-w-[20px] px-1.5 text-xs", sent.length > 0 ? "" : "invisible")}>{sent.length}</Badge>
             </TabsTrigger>
             <TabsTrigger value="ignored" className="gap-2 min-w-[100px] justify-center">
               <XCircle className="h-4 w-4" />Ignored
-              {ignored.length > 0 && <Badge variant="secondary" className="ml-1 h-5 min-w-[20px] px-1.5 text-xs">{ignored.length}</Badge>}
+              <Badge variant="secondary" className={cn("ml-1 h-5 min-w-[20px] px-1.5 text-xs", ignored.length > 0 ? "" : "invisible")}>{ignored.length}</Badge>
             </TabsTrigger>
           </TabsList>
 
