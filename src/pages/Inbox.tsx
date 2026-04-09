@@ -837,7 +837,7 @@ function EmailCard({
   };
 
   return (
-    <Card className="border border-border overflow-hidden transition-shadow hover:shadow-sm">
+    <div className="overflow-hidden transition-colors hover:bg-muted/30">
       <div className="flex cursor-pointer items-center gap-4 p-4" onClick={onToggle}>
         <div className={cn(
           "flex h-9 w-9 items-center justify-center rounded-full shrink-0",
