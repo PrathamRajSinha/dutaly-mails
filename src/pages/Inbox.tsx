@@ -176,7 +176,7 @@ export default function UnifiedInbox() {
   return (
     <div className="flex h-full flex-col">
       {/* Unified Header */}
-      <div className="border-b border-border bg-card px-6 py-4">
+      <div className="border-b border-border bg-card px-8 py-5">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-[20px] font-medium" style={{ color: '#1A1730' }}>Inbox</h1>
