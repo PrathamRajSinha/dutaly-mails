@@ -14,6 +14,8 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { UsageCard } from "@/components/dashboard/UsageCard";
 import { ResolutionRateCard } from "@/components/dashboard/ResolutionRateCard";
+import { OnboardingBanner } from "@/components/dashboard/OnboardingBanner";
+import { useKnowledgeBase } from "@/hooks/useKnowledgeBase";
 
 export default function Dashboard() {
   const { logs, isLoading: logsLoading } = useActivityLogs(10);
