@@ -117,10 +117,10 @@ export default function Templates() {
 
   return (
     <div className="p-8">
-      <div className="mb-8 flex items-start justify-between">
+      <div className="mb-6 flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Email Templates</h1>
-          <p className="mt-1 text-muted-foreground">
+          <h1 className="text-[20px] font-medium text-[#1A1730]">Email Templates</h1>
+          <p className="mt-0.5 text-[13px] text-[#9490B8]">
             Create reusable styled email templates with custom fonts, colors, and footers.
           </p>
         </div>
