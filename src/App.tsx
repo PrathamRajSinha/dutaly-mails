@@ -13,12 +13,14 @@ import Settings from "./pages/Settings";
 import AskEmails from "./pages/AskEmails";
 import Templates from "./pages/Templates";
 import Auth from "./pages/Auth";
+import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import Landing from "./pages/Landing";
 import Pricing from "./pages/Pricing";
 import ChoosePlan from "./pages/ChoosePlan";
 import Inbox from "./pages/Inbox";
 import ResetPassword from "./pages/ResetPassword";
+import ForgotPassword from "./pages/ForgotPassword";
 import Onboarding from "./pages/Onboarding";
 import Signup from "./pages/Signup";
 
