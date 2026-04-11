@@ -37,7 +37,9 @@ const App = () => (
             <Route path="/" element={<Navigate to="/mails" replace />} />
             <Route path="/mails" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/choose-plan" element={<ChoosePlan />} />
