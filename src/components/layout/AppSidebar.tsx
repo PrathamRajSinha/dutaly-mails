@@ -7,11 +7,9 @@ import {
   Settings,
   Pause,
   Play,
-  LogOut,
   Sparkles,
   Ticket,
 } from "lucide-react";
-import logoDarkBg from "@/assets/logo-dark-bg.png";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -41,7 +39,7 @@ export function AppSidebar() {
     <aside className="flex h-screen w-[220px] shrink-0 flex-col" style={{ backgroundColor: '#0A0A0F' }}>
       {/* Logo */}
       <div className="flex items-center px-5 py-5">
-        <img src={logoDarkBg} alt="Dutaly" className="h-8 w-auto" />
+        <span style={{ color: '#E8E4FF', fontSize: '18px', fontWeight: 500 }}>dutaly</span>
       </div>
 
       {/* Navigation */}
@@ -52,14 +50,14 @@ export function AppSidebar() {
             <Link
               key={item.path}
               to={item.path}
-              className={cn(
-                "flex items-center gap-2.5 rounded-md px-3 text-[13px] font-normal transition-colors",
-                "h-9"
-              )}
+              className="flex items-center gap-2.5 transition-colors"
               style={{
                 backgroundColor: isActive ? '#7C6FE0' : 'transparent',
-                color: isActive ? '#FFFFFF' : 'rgba(255,255,255,0.55)',
-                borderRadius: '8px',
+                color: isActive ? '#FFFFFF' : 'rgba(255,255,255,0.5)',
+                borderRadius: '6px',
+                fontSize: '13px',
+                height: '36px',
+                padding: '0 12px',
               }}
             >
               <item.icon className="h-4 w-4 shrink-0" />
@@ -73,21 +71,17 @@ export function AppSidebar() {
       <div className="px-3 pb-2">
         <div className="rounded-lg px-3 py-3" style={{ backgroundColor: 'rgba(255,255,255,0.04)' }}>
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-[11px] font-medium uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.4)' }}>
+            <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
               Automation
             </span>
-            <span
-              className={cn(
-                "text-[11px] font-medium",
-                isAutomationActive ? "text-green-400" : "text-gray-500"
-              )}
-            >
+            <span className="flex items-center gap-1.5" style={{ fontSize: '11px', fontWeight: 500, color: isAutomationActive ? '#34D399' : '#6B7280' }}>
+              {isAutomationActive && <span className="inline-block h-1.5 w-1.5 rounded-full bg-green-400" />}
               {isAutomationActive ? "Active" : "Paused"}
             </span>
           </div>
           <button
-            className="flex w-full items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-[12px] font-medium text-white transition-colors"
-            style={{ backgroundColor: '#7C6FE0' }}
+            className="flex w-full items-center justify-center gap-1.5 text-white transition-colors"
+            style={{ backgroundColor: '#7C6FE0', borderRadius: '8px', fontSize: '12px', fontWeight: 500, padding: '6px 12px' }}
             onClick={() => setIsAutomationActive(!isAutomationActive)}
           >
             {isAutomationActive ? (
@@ -99,15 +93,14 @@ export function AppSidebar() {
         </div>
       </div>
 
-      {/* Sign Out Icon */}
-      <div className="flex items-center justify-center border-t px-3 py-3" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+      {/* Sign Out */}
+      <div className="flex items-center justify-center py-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <button
           onClick={handleSignOut}
-          className="flex h-8 w-8 items-center justify-center rounded-md transition-colors hover:bg-white/10"
-          style={{ color: 'rgba(255,255,255,0.35)' }}
-          title="Sign Out"
+          style={{ color: 'rgba(255,255,255,0.35)', fontSize: '12px' }}
+          className="transition-colors hover:text-white/60"
         >
-          <LogOut className="h-4 w-4" />
+          Sign out
         </button>
       </div>
     </aside>
