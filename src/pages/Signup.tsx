@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, Mail } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -17,6 +17,14 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState("");
+
+  // OTP verification state
+  const [step, setStep] = useState<"form" | "otp">("form");
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [otpError, setOtpError] = useState("");
+  const [verifying, setVerifying] = useState(false);
+  const [resending, setResending] = useState(false);
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -59,7 +67,6 @@ export default function Signup() {
       password,
       options: {
         data: { full_name: fullName },
-        emailRedirectTo: `${window.location.origin}/onboarding/plan`,
       },
     });
     setLoading(false);
@@ -67,7 +74,77 @@ export default function Signup() {
     if (error) {
       setFormError(error.message);
     } else if (data.user) {
-      navigate("/onboarding/plan", { replace: true });
+      // If email confirmation is required, user won't have a confirmed session yet
+      // Show OTP step
+      setStep("otp");
+    }
+  };
+
+  const handleOtpChange = (index: number, value: string) => {
+    if (!/^\d*$/.test(value)) return;
+    const newOtp = [...otp];
+    newOtp[index] = value.slice(-1);
+    setOtp(newOtp);
+    setOtpError("");
+
+    if (value && index < 5) {
+      inputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleOtpPaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (!pasted) return;
+    const newOtp = [...otp];
+    for (let i = 0; i < 6; i++) {
+      newOtp[i] = pasted[i] || "";
+    }
+    setOtp(newOtp);
+    const focusIdx = Math.min(pasted.length, 5);
+    inputRefs.current[focusIdx]?.focus();
+  };
+
+  const handleVerifyOtp = async () => {
+    const token = otp.join("");
+    if (token.length < 6) {
+      setOtpError("Please enter the full 6-digit code");
+      return;
+    }
+
+    setVerifying(true);
+    setOtpError("");
+
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: "signup",
+    });
+
+    setVerifying(false);
+
+    if (error) {
+      setOtpError("Invalid or expired code. Please try again.");
+    }
+    // On success, the auth state listener will pick up the session and redirect
+  };
+
+  const handleResendOtp = async () => {
+    setResending(true);
+    setOtpError("");
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+    });
+    setResending(false);
+    if (error) {
+      setOtpError(error.message);
     }
   };
 
@@ -79,238 +156,208 @@ export default function Signup() {
     );
   }
 
+  const fieldStyle = (hasError: boolean) => ({
+    width: "100%",
+    background: "#F4F3FF",
+    border: hasError ? "1px solid #DC2626" : "1px solid rgba(124,111,224,0.2)",
+    borderRadius: 8,
+    padding: "10px 14px",
+    fontSize: 14,
+    color: "#1A1730",
+    outline: "none",
+    boxSizing: "border-box" as const,
+  });
+
   return (
-    <div
-      className="flex min-h-screen items-center justify-center p-4"
-      style={{ background: "#0A0A0F" }}
-    >
+    <div className="flex min-h-screen items-center justify-center p-4" style={{ background: "#0A0A0F" }}>
       <div className="w-full" style={{ maxWidth: 420 }}>
-        {/* Logo area on dark bg */}
         <div className="mb-6 text-center">
           <h1 style={{ color: "#7C6FE0", fontSize: 22, fontWeight: 500 }}>dutaly</h1>
-          <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 13, marginTop: 4 }}>
-            AI agent for your inbox
-          </p>
+          <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 13, marginTop: 4 }}>AI agent for your inbox</p>
         </div>
 
-        {/* Card */}
-        <div
-          style={{
-            background: "#FFFFFF",
-            borderRadius: 16,
-            padding: 40,
-          }}
-        >
-          <h2
-            style={{
-              color: "#1A1730",
-              fontSize: 20,
-              fontWeight: 500,
-              marginBottom: 24,
-              textAlign: "center",
-            }}
-          >
-            Create your account
-          </h2>
+        <div style={{ background: "#FFFFFF", borderRadius: 16, padding: 40 }}>
+          {step === "otp" ? (
+            <>
+              <div style={{ textAlign: "center", marginBottom: 24 }}>
+                <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#F4F3FF", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+                  <Mail size={24} style={{ color: "#7C6FE0" }} />
+                </div>
+                <h2 style={{ color: "#1A1730", fontSize: 20, fontWeight: 500, marginBottom: 8 }}>Verify your email</h2>
+                <p style={{ color: "#9490B8", fontSize: 13, lineHeight: 1.5 }}>
+                  Enter the 6-digit code sent to<br />
+                  <strong style={{ color: "#1A1730" }}>{email}</strong>
+                </p>
+              </div>
 
-          <form onSubmit={handleSubmit} className="flex flex-col" style={{ gap: 12 }}>
-            {/* Full Name */}
-            <div>
-              <label style={{ display: "block", fontSize: 12, color: "#9490B8", marginBottom: 4 }}>
-                Full Name
-              </label>
-              <input
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
+              <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 16 }}>
+                {otp.map((digit, i) => (
+                  <input
+                    key={i}
+                    ref={(el) => { inputRefs.current[i] = el; }}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => handleOtpChange(i, e.target.value)}
+                    onKeyDown={(e) => handleOtpKeyDown(i, e)}
+                    onPaste={i === 0 ? handleOtpPaste : undefined}
+                    style={{
+                      width: 48,
+                      height: 52,
+                      textAlign: "center",
+                      fontSize: 20,
+                      fontWeight: 600,
+                      color: "#1A1730",
+                      background: "#F4F3FF",
+                      border: otpError ? "1px solid #DC2626" : "1px solid rgba(124,111,224,0.2)",
+                      borderRadius: 8,
+                      outline: "none",
+                    }}
+                    onFocus={(e) => (e.target.style.borderColor = "#7C6FE0")}
+                    onBlur={(e) => (e.target.style.borderColor = otpError ? "#DC2626" : "rgba(124,111,224,0.2)")}
+                  />
+                ))}
+              </div>
+
+              {otpError && <p style={{ fontSize: 13, color: "#DC2626", textAlign: "center", marginBottom: 12 }}>{otpError}</p>}
+
+              <button
+                onClick={handleVerifyOtp}
+                disabled={verifying}
                 style={{
                   width: "100%",
-                  background: "#F4F3FF",
-                  border: errors.fullName ? "1px solid #DC2626" : "1px solid rgba(124,111,224,0.2)",
+                  background: verifying ? "#9d94e8" : "#7C6FE0",
+                  color: "#FFFFFF",
                   borderRadius: 8,
-                  padding: "10px 14px",
+                  height: 44,
                   fontSize: 14,
-                  color: "#1A1730",
-                  outline: "none",
-                  boxSizing: "border-box",
+                  fontWeight: 500,
+                  border: "none",
+                  cursor: verifying ? "not-allowed" : "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
                 }}
-                onFocus={(e) => (e.target.style.borderColor = "#7C6FE0")}
-                onBlur={(e) => (e.target.style.borderColor = errors.fullName ? "#DC2626" : "rgba(124,111,224,0.2)")}
-              />
-              {errors.fullName && (
-                <p style={{ fontSize: 12, color: "#DC2626", marginTop: 4 }}>{errors.fullName}</p>
-              )}
-            </div>
+              >
+                {verifying && <Loader2 size={16} className="animate-spin" />}
+                Verify →
+              </button>
 
-            {/* Email */}
-            <div>
-              <label style={{ display: "block", fontSize: 12, color: "#9490B8", marginBottom: 4 }}>
-                Email address
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                style={{
-                  width: "100%",
-                  background: "#F4F3FF",
-                  border: errors.email ? "1px solid #DC2626" : "1px solid rgba(124,111,224,0.2)",
-                  borderRadius: 8,
-                  padding: "10px 14px",
-                  fontSize: 14,
-                  color: "#1A1730",
-                  outline: "none",
-                  boxSizing: "border-box",
-                }}
-                onFocus={(e) => (e.target.style.borderColor = "#7C6FE0")}
-                onBlur={(e) => (e.target.style.borderColor = errors.email ? "#DC2626" : "rgba(124,111,224,0.2)")}
-              />
-              {errors.email && (
-                <p style={{ fontSize: 12, color: "#DC2626", marginTop: 4 }}>{errors.email}</p>
-              )}
-            </div>
+              <p style={{ textAlign: "center", fontSize: 13, color: "#9490B8", marginTop: 16 }}>
+                Didn't receive the code?{" "}
+                <button
+                  onClick={handleResendOtp}
+                  disabled={resending}
+                  style={{ color: "#7C6FE0", background: "none", border: "none", cursor: "pointer", fontSize: 13, textDecoration: "underline", padding: 0 }}
+                >
+                  {resending ? "Sending..." : "Resend"}
+                </button>
+              </p>
+            </>
+          ) : (
+            <>
+              <h2 style={{ color: "#1A1730", fontSize: 20, fontWeight: 500, marginBottom: 24, textAlign: "center" }}>
+                Create your account
+              </h2>
 
-            {/* Password */}
-            <div>
-              <label style={{ display: "block", fontSize: 12, color: "#9490B8", marginBottom: 4 }}>
-                Password
-              </label>
-              <div style={{ position: "relative" }}>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+              <form onSubmit={handleSubmit} className="flex flex-col" style={{ gap: 12 }}>
+                <div>
+                  <label style={{ display: "block", fontSize: 12, color: "#9490B8", marginBottom: 4 }}>Full Name</label>
+                  <input
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    style={fieldStyle(!!errors.fullName)}
+                    onFocus={(e) => (e.target.style.borderColor = "#7C6FE0")}
+                    onBlur={(e) => (e.target.style.borderColor = errors.fullName ? "#DC2626" : "rgba(124,111,224,0.2)")}
+                  />
+                  {errors.fullName && <p style={{ fontSize: 12, color: "#DC2626", marginTop: 4 }}>{errors.fullName}</p>}
+                </div>
+
+                <div>
+                  <label style={{ display: "block", fontSize: 12, color: "#9490B8", marginBottom: 4 }}>Email address</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    style={fieldStyle(!!errors.email)}
+                    onFocus={(e) => (e.target.style.borderColor = "#7C6FE0")}
+                    onBlur={(e) => (e.target.style.borderColor = errors.email ? "#DC2626" : "rgba(124,111,224,0.2)")}
+                  />
+                  {errors.email && <p style={{ fontSize: 12, color: "#DC2626", marginTop: 4 }}>{errors.email}</p>}
+                </div>
+
+                <div>
+                  <label style={{ display: "block", fontSize: 12, color: "#9490B8", marginBottom: 4 }}>Password</label>
+                  <div style={{ position: "relative" }}>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      style={{ ...fieldStyle(!!errors.password), paddingRight: 42 }}
+                      onFocus={(e) => (e.target.style.borderColor = "#7C6FE0")}
+                      onBlur={(e) => (e.target.style.borderColor = errors.password ? "#DC2626" : "rgba(124,111,224,0.2)")}
+                    />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: 0, color: "#9490B8" }}>
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                  {errors.password && <p style={{ fontSize: 12, color: "#DC2626", marginTop: 4 }}>{errors.password}</p>}
+                </div>
+
+                <div>
+                  <label style={{ display: "block", fontSize: 12, color: "#9490B8", marginBottom: 4 }}>Confirm Password</label>
+                  <div style={{ position: "relative" }}>
+                    <input
+                      type={showConfirm ? "text" : "password"}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      style={{ ...fieldStyle(!!errors.confirmPassword), paddingRight: 42 }}
+                      onFocus={(e) => (e.target.style.borderColor = "#7C6FE0")}
+                      onBlur={(e) => (e.target.style.borderColor = errors.confirmPassword ? "#DC2626" : "rgba(124,111,224,0.2)")}
+                    />
+                    <button type="button" onClick={() => setShowConfirm(!showConfirm)} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: 0, color: "#9490B8" }}>
+                      {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                  {errors.confirmPassword && <p style={{ fontSize: 12, color: "#DC2626", marginTop: 4 }}>{errors.confirmPassword}</p>}
+                </div>
+
+                {formError && <p style={{ fontSize: 13, color: "#DC2626", textAlign: "center" }}>{formError}</p>}
+
+                <button
+                  type="submit"
+                  disabled={loading}
                   style={{
                     width: "100%",
-                    background: "#F4F3FF",
-                    border: errors.password ? "1px solid #DC2626" : "1px solid rgba(124,111,224,0.2)",
+                    background: loading ? "#9d94e8" : "#7C6FE0",
+                    color: "#FFFFFF",
                     borderRadius: 8,
-                    padding: "10px 14px",
-                    paddingRight: 42,
+                    height: 44,
                     fontSize: 14,
-                    color: "#1A1730",
-                    outline: "none",
-                    boxSizing: "border-box",
-                  }}
-                  onFocus={(e) => (e.target.style.borderColor = "#7C6FE0")}
-                  onBlur={(e) => (e.target.style.borderColor = errors.password ? "#DC2626" : "rgba(124,111,224,0.2)")}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  style={{
-                    position: "absolute",
-                    right: 12,
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    background: "none",
+                    fontWeight: 500,
                     border: "none",
-                    cursor: "pointer",
-                    padding: 0,
-                    color: "#9490B8",
+                    cursor: loading ? "not-allowed" : "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 8,
+                    marginTop: 8,
                   }}
                 >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  {loading && <Loader2 size={16} className="animate-spin" />}
+                  Create free account →
                 </button>
-              </div>
-              {errors.password && (
-                <p style={{ fontSize: 12, color: "#DC2626", marginTop: 4 }}>{errors.password}</p>
-              )}
-            </div>
+              </form>
 
-            {/* Confirm Password */}
-            <div>
-              <label style={{ display: "block", fontSize: 12, color: "#9490B8", marginBottom: 4 }}>
-                Confirm Password
-              </label>
-              <div style={{ position: "relative" }}>
-                <input
-                  type={showConfirm ? "text" : "password"}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  style={{
-                    width: "100%",
-                    background: "#F4F3FF",
-                    border: errors.confirmPassword ? "1px solid #DC2626" : "1px solid rgba(124,111,224,0.2)",
-                    borderRadius: 8,
-                    padding: "10px 14px",
-                    paddingRight: 42,
-                    fontSize: 14,
-                    color: "#1A1730",
-                    outline: "none",
-                    boxSizing: "border-box",
-                  }}
-                  onFocus={(e) => (e.target.style.borderColor = "#7C6FE0")}
-                  onBlur={(e) => (e.target.style.borderColor = errors.confirmPassword ? "#DC2626" : "rgba(124,111,224,0.2)")}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirm(!showConfirm)}
-                  style={{
-                    position: "absolute",
-                    right: 12,
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    padding: 0,
-                    color: "#9490B8",
-                  }}
-                >
-                  {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
-              {errors.confirmPassword && (
-                <p style={{ fontSize: 12, color: "#DC2626", marginTop: 4 }}>{errors.confirmPassword}</p>
-              )}
-            </div>
-
-            {/* Form-level error */}
-            {formError && (
-              <p style={{ fontSize: 13, color: "#DC2626", textAlign: "center" }}>{formError}</p>
-            )}
-
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                width: "100%",
-                background: loading ? "#9d94e8" : "#7C6FE0",
-                color: "#FFFFFF",
-                borderRadius: 8,
-                height: 44,
-                fontSize: 14,
-                fontWeight: 500,
-                border: "none",
-                cursor: loading ? "not-allowed" : "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 8,
-                marginTop: 8,
-              }}
-            >
-              {loading && <Loader2 size={16} className="animate-spin" />}
-              Create free account →
-            </button>
-          </form>
-
-          {/* Sign in link */}
-          <p
-            style={{
-              textAlign: "center",
-              fontSize: 13,
-              color: "#9490B8",
-              marginTop: 20,
-            }}
-          >
-            Already have an account?{" "}
-            <Link to="/auth" style={{ color: "#7C6FE0", textDecoration: "none" }}>
-              Sign in
-            </Link>
-          </p>
+              <p style={{ textAlign: "center", fontSize: 13, color: "#9490B8", marginTop: 20 }}>
+                Already have an account?{" "}
+                <Link to="/login" style={{ color: "#7C6FE0", textDecoration: "none" }}>Sign in</Link>
+              </p>
+            </>
+          )}
         </div>
       </div>
     </div>
