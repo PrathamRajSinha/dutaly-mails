@@ -39,3 +39,12 @@ verify_jwt = false
 
 [functions.generate-reply]
 verify_jwt = false
+
+[functions.validate-coupon]
+verify_jwt = false
+
+[functions.create-razorpay-subscription]
+verify_jwt = false
+
+[functions.activate-free-subscription]
+verify_jwt = false
