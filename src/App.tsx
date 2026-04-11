@@ -22,6 +22,7 @@ import Inbox from "./pages/Inbox";
 import ResetPassword from "./pages/ResetPassword";
 import ForgotPassword from "./pages/ForgotPassword";
 import Onboarding from "./pages/Onboarding";
+import OnboardingPlan from "./pages/OnboardingPlan";
 import Signup from "./pages/Signup";
 
 const queryClient = new QueryClient();
