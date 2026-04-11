@@ -76,7 +76,7 @@ Deno.serve(async (req) => {
     // Update profile
     await supabase
       .from("profiles")
-      .update({ plan, trial_start: now, trial_end: trialEnd })
+      .update({ plan, trial_start: now, trial_end: trialEnd, onboarding_completed: true })
       .eq("id", user.id);
 
     return new Response(
