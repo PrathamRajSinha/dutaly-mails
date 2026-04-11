@@ -216,6 +216,33 @@ export type Database = {
         }
         Relationships: []
       }
+      coupons: {
+        Row: {
+          code: string
+          created_at: string | null
+          discount_type: string | null
+          discount_value: number
+          id: string
+          is_active: boolean | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          discount_type?: string | null
+          discount_value: number
+          id?: string
+          is_active?: boolean | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          discount_type?: string | null
+          discount_value?: number
+          id?: string
+          is_active?: boolean | null
+        }
+        Relationships: []
+      }
       email_accounts: {
         Row: {
           access_token: string | null
@@ -547,6 +574,10 @@ export type Database = {
           full_name: string | null
           id: string
           onboarding_completed: boolean
+          plan: string | null
+          role: string | null
+          trial_end: string | null
+          trial_start: string | null
           updated_at: string
         }
         Insert: {
@@ -556,6 +587,10 @@ export type Database = {
           full_name?: string | null
           id: string
           onboarding_completed?: boolean
+          plan?: string | null
+          role?: string | null
+          trial_end?: string | null
+          trial_start?: string | null
           updated_at?: string
         }
         Update: {
@@ -565,6 +600,10 @@ export type Database = {
           full_name?: string | null
           id?: string
           onboarding_completed?: boolean
+          plan?: string | null
+          role?: string | null
+          trial_end?: string | null
+          trial_start?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -611,6 +650,54 @@ export type Database = {
           overage_rate_per_resolution?: number
           price_monthly?: number
           resolutions_limit?: number
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          amount_paid: number | null
+          coupon_used: string | null
+          created_at: string | null
+          current_period_end: string | null
+          id: string
+          plan: string
+          razorpay_customer_id: string | null
+          razorpay_payment_id: string | null
+          razorpay_subscription_id: string | null
+          status: string | null
+          trial_end: string | null
+          trial_start: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_paid?: number | null
+          coupon_used?: string | null
+          created_at?: string | null
+          current_period_end?: string | null
+          id?: string
+          plan: string
+          razorpay_customer_id?: string | null
+          razorpay_payment_id?: string | null
+          razorpay_subscription_id?: string | null
+          status?: string | null
+          trial_end?: string | null
+          trial_start?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_paid?: number | null
+          coupon_used?: string | null
+          created_at?: string | null
+          current_period_end?: string | null
+          id?: string
+          plan?: string
+          razorpay_customer_id?: string | null
+          razorpay_payment_id?: string | null
+          razorpay_subscription_id?: string | null
+          status?: string | null
+          trial_end?: string | null
+          trial_start?: string | null
+          user_id?: string
         }
         Relationships: []
       }
