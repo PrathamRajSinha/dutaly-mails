@@ -39,12 +39,8 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     return <Navigate to="/auth" replace />;
   }
 
-  if (isPending) {
-    return <Navigate to="/choose-plan" replace />;
-  }
-
-  if (profile && !profile.onboarding_completed) {
-    return <Navigate to="/onboarding" replace />;
+  if (isPending || (profile && !profile.onboarding_completed)) {
+    return <Navigate to="/onboarding/plan" replace />;
   }
 
   return <>{children}</>;
