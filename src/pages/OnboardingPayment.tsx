@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Tag, Loader2, Shield } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useQueryClient } from "@tanstack/react-query";
 
 const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_live_ScH5fy8kSUSwRs";
 
@@ -21,8 +22,8 @@ declare global {
 export default function OnboardingPayment() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
-  // Read plan selection from localStorage
   const stored = JSON.parse(localStorage.getItem("dutaly_selected_plan") || "{}");
   const planKey = stored.plan || "starter";
   const billingPeriod: "monthly" | "yearly" = stored.billing_period || "monthly";
@@ -38,7 +39,6 @@ export default function OnboardingPayment() {
   const [couponError, setCouponError] = useState("");
   const [payLoading, setPayLoading] = useState(false);
 
-  // Calculate final price
   const discount = couponApplied
     ? couponApplied.discount_type === "percentage"
       ? Math.round(basePrice * (couponApplied.discount_value / 100))
@@ -46,7 +46,6 @@ export default function OnboardingPayment() {
     : 0;
   const finalPrice = Math.max(0, basePrice - discount);
 
-  // Load Razorpay script
   useEffect(() => {
     if (document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]')) return;
     const script = document.createElement("script");
@@ -54,6 +53,22 @@ export default function OnboardingPayment() {
     script.async = true;
     document.body.appendChild(script);
   }, []);
+
+  const completeOnboarding = async () => {
+    if (!user) return;
+    try {
+      await supabase.from("profiles").update({ 
+        onboarding_completed: true,
+        plan: planKey 
+      }).eq("id", user.id);
+      await queryClient.invalidateQueries({ queryKey: ["profile-onboarding"] });
+      localStorage.removeItem("dutaly_selected_plan");
+      navigate("/dashboard", { replace: true });
+    } catch (e) {
+      console.error("Failed to complete onboarding:", e);
+      navigate("/dashboard", { replace: true });
+    }
+  };
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) return;
@@ -65,9 +80,7 @@ export default function OnboardingPayment() {
       const { data, error } = await supabase.functions.invoke("validate-coupon", {
         body: { code: couponCode.trim() },
       });
-
       if (error) throw error;
-
       if (data.valid) {
         setCouponApplied({
           discount_type: data.discount_type,
@@ -104,8 +117,7 @@ export default function OnboardingPayment() {
           body: { plan: planKey, coupon_code: couponCode.trim() || null },
         });
         if (error) throw error;
-        localStorage.removeItem("dutaly_selected_plan");
-        navigate("/onboarding/connect");
+        await completeOnboarding();
         return;
       }
 
@@ -124,7 +136,6 @@ export default function OnboardingPayment() {
         throw new Error(data?.error || "Failed to create subscription");
       }
 
-      // Open Razorpay Checkout
       const options = {
         key: RAZORPAY_KEY_ID,
         subscription_id: data.subscription_id,
@@ -136,7 +147,6 @@ export default function OnboardingPayment() {
         },
         theme: { color: "#7C6FE0" },
         handler: async (response: any) => {
-          // Payment success — save to DB
           try {
             await supabase.from("subscriptions").upsert({
               user_id: user.id,
@@ -150,14 +160,11 @@ export default function OnboardingPayment() {
               coupon_used: couponCode.trim() || null,
               amount_paid: finalPrice,
             }, { onConflict: "user_id" } as any);
-
-            await supabase.from("profiles").update({ plan: planKey }).eq("id", user.id);
           } catch (e) {
             console.error("Post-payment DB update error:", e);
           }
 
-          localStorage.removeItem("dutaly_selected_plan");
-          navigate("/onboarding/connect");
+          await completeOnboarding();
         },
         modal: {
           ondismiss: () => setPayLoading(false),
@@ -175,13 +182,9 @@ export default function OnboardingPayment() {
 
   return (
     <div className="flex min-h-screen flex-col items-center p-6" style={{ background: "#0A0A0F" }}>
-      {/* Logo */}
       <h1 style={{ color: "#7C6FE0", fontSize: 20, fontWeight: 500, marginTop: 32 }}>dutaly</h1>
+      <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 12, marginTop: 12 }}>Step 2 of 2</p>
 
-      {/* Step */}
-      <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 12, marginTop: 12 }}>Step 2 of 3</p>
-
-      {/* Heading */}
       <h2 style={{ color: "#F0EEF8", fontSize: 28, fontWeight: 500, marginTop: 32, textAlign: "center" }}>
         Complete your setup
       </h2>
@@ -189,7 +192,6 @@ export default function OnboardingPayment() {
         Your 14-day trial starts now. You won't be charged until day 15.
       </p>
 
-      {/* Main card */}
       <div
         style={{
           marginTop: 40,
@@ -201,7 +203,6 @@ export default function OnboardingPayment() {
           padding: "32px 28px",
         }}
       >
-        {/* Order summary */}
         <h3 style={{ color: "#F0EEF8", fontSize: 16, fontWeight: 500, marginBottom: 20 }}>
           Order Summary
         </h3>
@@ -258,13 +259,7 @@ export default function OnboardingPayment() {
               <span style={{ color: "#4ADE80", fontSize: 13, flex: 1 }}>{couponCode.toUpperCase()} applied</span>
               <button
                 onClick={handleRemoveCoupon}
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "rgba(255,255,255,0.4)",
-                  fontSize: 12,
-                  cursor: "pointer",
-                }}
+                style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", fontSize: 12, cursor: "pointer" }}
               >
                 Remove
               </button>
@@ -312,7 +307,6 @@ export default function OnboardingPayment() {
           )}
         </div>
 
-        {/* Pay button */}
         <button
           onClick={handlePay}
           disabled={payLoading}
@@ -343,16 +337,7 @@ export default function OnboardingPayment() {
           )}
         </button>
 
-        {/* Security note */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 6,
-            marginTop: 16,
-          }}
-        >
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 16 }}>
           <Shield size={12} style={{ color: "rgba(255,255,255,0.25)" }} />
           <span style={{ color: "rgba(255,255,255,0.25)", fontSize: 11 }}>
             Secured by Razorpay · 256-bit SSL encryption
@@ -360,24 +345,15 @@ export default function OnboardingPayment() {
         </div>
       </div>
 
-      {/* Back & change plan */}
       <div style={{ marginTop: 24, display: "flex", gap: 16, alignItems: "center" }}>
         <Link
           to="/onboarding/plan"
-          style={{
-            color: "rgba(255,255,255,0.4)",
-            fontSize: 13,
-            textDecoration: "none",
-            display: "flex",
-            alignItems: "center",
-            gap: 4,
-          }}
+          style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, textDecoration: "none", display: "flex", alignItems: "center", gap: 4 }}
         >
           <ArrowLeft size={14} /> Change plan
         </Link>
       </div>
 
-      {/* Footer */}
       <p style={{ color: "rgba(255,255,255,0.25)", fontSize: 12, marginTop: 20, marginBottom: 32, textAlign: "center" }}>
         All plans · 14-day trial · Cancel anytime · No setup fees
       </p>

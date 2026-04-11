@@ -108,9 +108,9 @@ export default function Auth() {
           <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary">
             <Mail className="h-7 w-7 text-primary-foreground" />
           </div>
-          <h1 className="mt-4 text-2xl font-bold text-foreground">AI Email Agent</h1>
+          <h1 className="mt-4 text-2xl font-bold text-foreground">dutaly</h1>
           <p className="mt-1 text-muted-foreground">
-            Automate your inbox with AI
+            AI agent for your inbox
           </p>
         </div>
 

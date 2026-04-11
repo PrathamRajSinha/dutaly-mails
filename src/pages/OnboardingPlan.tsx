@@ -74,7 +74,7 @@ export default function OnboardingPlan() {
 
       {/* Step */}
       <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 12, marginTop: 12 }}>
-        Step 1 of 3
+        Step 1 of 2
       </p>
 
       {/* Heading */}
