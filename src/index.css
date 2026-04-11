@@ -5,20 +5,19 @@
 
 @layer base {
   :root {
-    /* #F4F3FF → hsl(245 100% 98%) */
+    /* App interior background: #F4F3FF */
     --background: 245 100% 98%;
-    /* #1A1730 → hsl(250 30% 14%) */
+    /* Page header / foreground: #1A1730 */
     --foreground: 250 30% 14%;
 
-    /* #FFFFFF */
+    /* White card */
     --card: 0 0% 100%;
-    /* #1A1730 */
     --card-foreground: 250 30% 14%;
 
     --popover: 0 0% 100%;
     --popover-foreground: 250 30% 14%;
 
-    /* #7C6FE0 → hsl(248 64% 66%) */
+    /* Primary accent: #7C6FE0 */
     --primary: 248 64% 66%;
     --primary-foreground: 0 0% 100%;
 
@@ -26,29 +25,28 @@
     --secondary: 0 0% 100%;
     --secondary-foreground: 248 64% 66%;
 
-    /* #9490B8 → hsl(248 18% 65%) */
+    /* Muted text: #9490B8 */
     --muted: 245 100% 98%;
     --muted-foreground: 248 18% 65%;
 
     --accent: 248 64% 66%;
     --accent-foreground: 0 0% 100%;
 
-    /* Danger: #DC2626 → hsl(0 84% 50%) */
+    /* Danger */
     --destructive: 0 84% 50%;
-    /* #FEF2F2 → hsl(0 100% 97%) */
     --destructive-foreground: 0 84% 50%;
 
-    /* rgba(124,111,224,0.12) → use a light violet */
-    --border: 248 64% 66% / 0.22;
-    --input: 248 64% 66% / 0.3;
+    /* Card border: rgba(124,111,224,0.1) */
+    --border: 248 64% 66% / 0.1;
+    /* Input border: rgba(124,111,224,0.2) */
+    --input: 248 64% 66% / 0.2;
     --ring: 248 64% 66%;
 
     --radius: 0.75rem;
 
-    /* Sidebar: #0A0A0F → hsl(240 20% 5%) */
+    /* Sidebar */
     --sidebar-background: 240 20% 5%;
-    /* rgba(255,255,255,0.55) */
-    --sidebar-foreground: 0 0% 100% / 0.55;
+    --sidebar-foreground: 0 0% 100% / 0.5;
     --sidebar-primary: 248 64% 66%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 248 64% 66% / 0.1;
@@ -87,14 +85,25 @@
     @apply bg-background text-foreground;
     font-family: var(--font-sans);
     font-size: 13px;
+    color: #3D3A5C;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-weight: 500;
+    color: #1A1730;
   }
 }
+
+/* Badge variants */
+.badge-urgent { background: #FCEBEB; color: #A32D2D; }
+.badge-high { background: #FAEEDA; color: #854F0B; }
+.badge-medium { background: #E6F1FB; color: #185FA5; }
+.badge-low { background: #F1EFE8; color: #5F5E5A; }
+.badge-auto-resolved { background: #E1F5EE; color: #0F6E56; }
+.badge-ignored { background: #F1EFE8; color: #5F5E5A; }
+.badge-pending { background: #EBE9FF; color: #534AB7; }
 
 @keyframes marquee {
   0% { transform: translateX(0); }
