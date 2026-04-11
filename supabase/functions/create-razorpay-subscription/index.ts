@@ -1,4 +1,7 @@
-import { corsHeaders } from "https://deno.land/x/supabase_functions_js@v2.1.5/src/cors.ts";
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 
 const RAZORPAY_KEY_ID = Deno.env.get("VITE_RAZORPAY_KEY_ID") || Deno.env.get("RAZORPAY_KEY_ID") || "rzp_live_ScH5fy8kSUSwRs";
 const RAZORPAY_KEY_SECRET = Deno.env.get("RAZORPAY_KEY_SECRET")!;
