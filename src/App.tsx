@@ -45,6 +45,7 @@ const App = () => (
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/choose-plan" element={<ChoosePlan />} />
             <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/onboarding/plan" element={<OnboardingPlan />} />
             <Route
               element={
                 <ProtectedRoute>
