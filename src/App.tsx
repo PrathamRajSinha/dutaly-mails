@@ -20,6 +20,7 @@ import ChoosePlan from "./pages/ChoosePlan";
 import Inbox from "./pages/Inbox";
 import ResetPassword from "./pages/ResetPassword";
 import Onboarding from "./pages/Onboarding";
+import Signup from "./pages/Signup";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/" element={<Navigate to="/mails" replace />} />
             <Route path="/mails" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/signup" element={<Signup />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/choose-plan" element={<ChoosePlan />} />
