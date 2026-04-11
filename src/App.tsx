@@ -20,6 +20,7 @@ import ChoosePlan from "./pages/ChoosePlan";
 import Inbox from "./pages/Inbox";
 import ResetPassword from "./pages/ResetPassword";
 import Onboarding from "./pages/Onboarding";
+import Signup from "./pages/Signup";
 
 const queryClient = new QueryClient();
 
