@@ -11,7 +11,7 @@ export function FooterSection() {
             <a href="#features" className="hover:opacity-80 transition-opacity">features</a>
             <a href="#how-it-works" className="hover:opacity-80 transition-opacity">how it works</a>
             <Link to="/pricing" className="hover:opacity-80 transition-opacity">pricing</Link>
-            <Link to="/auth" className="hover:opacity-80 transition-opacity">sign in</Link>
+            <Link to="/login" className="hover:opacity-80 transition-opacity">sign in</Link>
           </div>
           <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.25)" }}>© 2026 Dutaly. All rights reserved.</p>
         </div>

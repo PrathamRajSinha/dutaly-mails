@@ -12,7 +12,6 @@ import Instructions from "./pages/Instructions";
 import Settings from "./pages/Settings";
 import AskEmails from "./pages/AskEmails";
 import Templates from "./pages/Templates";
-import Auth from "./pages/Auth";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import Landing from "./pages/Landing";
@@ -38,7 +37,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Navigate to="/mails" replace />} />
             <Route path="/mails" element={<Landing />} />
-            <Route path="/auth" element={<Auth />} />
+            <Route path="/auth" element={<Navigate to="/login" replace />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />

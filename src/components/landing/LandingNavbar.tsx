@@ -15,7 +15,7 @@ const navLinks = [
 export function LandingNavbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user } = useAuth();
-  const ctaLink = user ? "/dashboard" : "/auth";
+  const ctaLink = user ? "/dashboard" : "/signup";
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b" style={{ background: "#0A0A0F", borderColor: "rgba(255,255,255,0.08)" }}>
@@ -57,10 +57,10 @@ export function LandingNavbar() {
             </Link>
           ) : (
             <>
-              <Link to="/auth" className="text-[13px] font-medium transition-colors" style={{ color: "rgba(255,255,255,0.5)" }}>
+              <Link to="/login" className="text-[13px] font-medium transition-colors" style={{ color: "rgba(255,255,255,0.5)" }}>
                 Log in
               </Link>
-              <Link to="/auth">
+              <Link to="/signup">
                 <Button className="text-[13px] font-medium h-9 px-5 text-white border-0" style={{ background: "#7C6FE0", borderRadius: "6px" }}>
                   Sign up
                 </Button>
