@@ -38,6 +38,7 @@ export default function OnboardingPayment() {
   } | null>(null);
   const [couponError, setCouponError] = useState("");
   const [payLoading, setPayLoading] = useState(false);
+  const [razorpayReady, setRazorpayReady] = useState(typeof window !== "undefined" && typeof window.Razorpay !== "undefined");
 
   const discount = couponApplied
     ? couponApplied.discount_type === "percentage"
@@ -47,11 +48,42 @@ export default function OnboardingPayment() {
   const finalPrice = Math.max(0, basePrice - discount);
 
   useEffect(() => {
-    if (document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]')) return;
+    if (typeof window === "undefined") return;
+
+    const handleLoad = () => setRazorpayReady(true);
+    const handleError = () => {
+      setRazorpayReady(false);
+      setCouponError("Unable to load Razorpay checkout. Please refresh and try again.");
+    };
+
+    if (window.Razorpay) {
+      setRazorpayReady(true);
+      return;
+    }
+
+    const existingScript = document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]') as HTMLScriptElement | null;
+
+    if (existingScript) {
+      existingScript.addEventListener("load", handleLoad);
+      existingScript.addEventListener("error", handleError);
+
+      return () => {
+        existingScript.removeEventListener("load", handleLoad);
+        existingScript.removeEventListener("error", handleError);
+      };
+    }
+
     const script = document.createElement("script");
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
     script.async = true;
+    script.addEventListener("load", handleLoad);
+    script.addEventListener("error", handleError);
     document.body.appendChild(script);
+
+    return () => {
+      script.removeEventListener("load", handleLoad);
+      script.removeEventListener("error", handleError);
+    };
   }, []);
 
   const completeOnboarding = async () => {
@@ -121,6 +153,10 @@ export default function OnboardingPayment() {
         return;
       }
 
+      if (!window.Razorpay) {
+        throw new Error("Payment checkout is still loading. Please try again in a moment.");
+      }
+
       // Create Razorpay subscription
       const { data, error } = await supabase.functions.invoke("create-razorpay-subscription", {
         body: {
@@ -148,7 +184,7 @@ export default function OnboardingPayment() {
         theme: { color: "#7C6FE0" },
         handler: async (response: any) => {
           try {
-            await supabase.from("subscriptions").upsert({
+            const subscriptionPayload = {
               user_id: user.id,
               plan: planKey,
               status: "trialing",
@@ -159,7 +195,24 @@ export default function OnboardingPayment() {
               trial_end: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
               coupon_used: couponCode.trim() || null,
               amount_paid: finalPrice,
-            }, { onConflict: "user_id" } as any);
+            };
+
+            const { data: existingSubscription } = await supabase
+              .from("subscriptions")
+              .select("id")
+              .eq("user_id", user.id)
+              .order("created_at", { ascending: false })
+              .limit(1)
+              .maybeSingle();
+
+            if (existingSubscription?.id) {
+              await supabase
+                .from("subscriptions")
+                .update(subscriptionPayload)
+                .eq("id", existingSubscription.id);
+            } else {
+              await supabase.from("subscriptions").insert(subscriptionPayload);
+            }
           } catch (e) {
             console.error("Post-payment DB update error:", e);
           }
@@ -336,6 +389,12 @@ export default function OnboardingPayment() {
             `Start trial — ₹${finalPrice.toLocaleString("en-IN")}/mo`
           )}
         </button>
+
+        {!razorpayReady && finalPrice > 0 && (
+          <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 12, marginTop: 10, textAlign: "center" }}>
+            Loading secure checkout…
+          </p>
+        )}
 
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 16 }}>
           <Shield size={12} style={{ color: "rgba(255,255,255,0.25)" }} />
