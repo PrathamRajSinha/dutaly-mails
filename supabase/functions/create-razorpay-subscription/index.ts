@@ -48,13 +48,21 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Sanitize name: Razorpay only allows alphanumeric, spaces, dots, hyphens
+    // Sanitize name: Razorpay is strict about allowed chars and minimum length
     const rawName = (name || email.split("@")[0] || "Customer").trim();
-    const safeName = rawName.replace(/[^a-zA-Z0-9\s.\-]/g, "").trim() || "Customer";
+    const safeName = rawName
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[_+]+/g, " ")
+      .replace(/[^a-zA-Z0-9\s.\-]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 50);
+    const customerName = safeName.length >= 3 ? safeName : "Customer";
 
     // Create customer
     const customer = await razorpayFetch("/customers", {
-      name: safeName,
+      name: customerName,
       email,
     });
 
