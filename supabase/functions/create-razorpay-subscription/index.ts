@@ -48,9 +48,13 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Sanitize name: Razorpay only allows alphanumeric, spaces, dots, hyphens
+    const rawName = (name || email.split("@")[0] || "Customer").trim();
+    const safeName = rawName.replace(/[^a-zA-Z0-9\s.\-]/g, "").trim() || "Customer";
+
     // Create customer
     const customer = await razorpayFetch("/customers", {
-      name: name || email.split("@")[0],
+      name: safeName,
       email,
     });
 
