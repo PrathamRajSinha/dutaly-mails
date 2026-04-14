@@ -60,18 +60,36 @@ Deno.serve(async (req) => {
       .slice(0, 50);
     const customerName = safeName.length >= 3 ? safeName : "Customer";
 
-    // Create customer
-    const customer = await razorpayFetch("/customers", {
+    // Create or fetch existing customer
+    let customer = await razorpayFetch("/customers", {
       name: customerName,
       email,
     });
 
     if (customer.error) {
-      console.error("Customer creation error:", customer.error);
-      return new Response(
-        JSON.stringify({ error: "Failed to create customer" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      if (customer.error.description?.includes("already exists")) {
+        // Fetch existing customer by email
+        const auth = btoa(`${RAZORPAY_KEY_ID}:${RAZORPAY_KEY_SECRET}`);
+        const searchRes = await fetch(`https://api.razorpay.com/v1/customers?email=${encodeURIComponent(email)}`, {
+          headers: { Authorization: `Basic ${auth}` },
+        });
+        const searchData = await searchRes.json();
+        if (searchData.items && searchData.items.length > 0) {
+          customer = searchData.items[0];
+        } else {
+          console.error("Customer exists but could not be fetched");
+          return new Response(
+            JSON.stringify({ error: "Failed to find existing customer" }),
+            { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      } else {
+        console.error("Customer creation error:", customer.error);
+        return new Response(
+          JSON.stringify({ error: "Failed to create customer" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
     }
 
     // Create subscription with 14-day trial
