@@ -62,7 +62,7 @@ Deno.serve(async (req) => {
 
     // Create customer
     const customer = await razorpayFetch("/customers", {
-      name: safeName,
+      name: customerName,
       email,
     });
 
