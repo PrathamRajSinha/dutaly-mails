@@ -74,8 +74,12 @@ export default function Signup() {
     if (error) {
       setFormError(error.message);
     } else if (data.user) {
-      // If email confirmation is required, user won't have a confirmed session yet
-      // Show OTP step
+      // Supabase returns a user with empty identities for already-registered emails
+      const isExistingUser = data.user.identities && data.user.identities.length === 0;
+      if (isExistingUser) {
+        setFormError("An account with this email already exists. Please sign in instead.");
+        return;
+      }
       setStep("otp");
     }
   };
