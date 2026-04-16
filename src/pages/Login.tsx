@@ -51,7 +51,7 @@ export default function Login() {
     setLoading(false);
 
     if (error) {
-      setFormError("Incorrect email or password");
+      setFormError("We couldn’t sign you in. Check your password or create an account first.");
     }
   };
 
