@@ -24,6 +24,14 @@ interface UserSubscription {
   current_period_end: string | null;
 }
 
+interface BillingSubscription {
+  id: string;
+  plan: string;
+  status: string | null;
+  trial_start: string | null;
+  trial_end: string | null;
+}
+
 interface UsageTracking {
   emails_processed: number;
   ai_questions_asked: number;
@@ -33,6 +41,12 @@ interface UsageTracking {
 export function useSubscription() {
   const { user } = useAuth();
 
+  const planAliases: Record<string, string[]> = {
+    starter: ["starter"],
+    growth: ["growth", "pro"],
+    scale: ["scale", "enterprise"],
+  };
+
   const { data: subscription, isLoading: subLoading } = useQuery({
     queryKey: ["user-subscription", user?.id],
     queryFn: async () => {
@@ -40,9 +54,9 @@ export function useSubscription() {
         .from("user_subscriptions")
         .select("*")
         .eq("user_id", user!.id)
-        .single();
+        .maybeSingle();
       if (error) throw error;
-      return data as UserSubscription;
+      return data as UserSubscription | null;
     },
     enabled: !!user,
   });
@@ -80,9 +94,34 @@ export function useSubscription() {
     enabled: !!user,
   });
 
-  const currentPlan = plans?.find((p) => p.id === subscription?.plan_id) || null;
-  const isPending = subscription?.status === "pending" || !subscription?.plan_id;
-  const isActive = subscription?.status === "active" && !!subscription?.plan_id;
+  const { data: billingSubscription, isLoading: billingLoading } = useQuery({
+    queryKey: ["billing-subscription", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("subscriptions")
+        .select("id, plan, status, trial_start, trial_end")
+        .eq("user_id", user!.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return data as BillingSubscription | null;
+    },
+    enabled: !!user,
+  });
+
+  const currentPlan =
+    plans?.find((p) => p.id === subscription?.plan_id) ||
+    plans?.find((p) => {
+      const aliases = billingSubscription?.plan ? planAliases[billingSubscription.plan] || [billingSubscription.plan] : [];
+      return aliases.includes(p.name);
+    }) ||
+    null;
+
+  const hasManagedSubscription = subscription?.status === "active" && !!subscription?.plan_id;
+  const hasLegacyBillingAccess = ["trialing", "active"].includes(billingSubscription?.status || "");
+  const isPending = !hasManagedSubscription && !hasLegacyBillingAccess;
+  const isActive = hasManagedSubscription || hasLegacyBillingAccess;
 
   const usagePercent = (resource: "emails" | "ai_questions" | "resolutions") => {
     if (!currentPlan || !usage) return 0;
@@ -124,7 +163,7 @@ export function useSubscription() {
     usage: usage || { emails_processed: 0, ai_questions_asked: 0, resolutions_used: 0 },
     isPending,
     isActive,
-    isLoading: subLoading,
+    isLoading: subLoading || billingLoading,
     usagePercent,
     canUse,
   };

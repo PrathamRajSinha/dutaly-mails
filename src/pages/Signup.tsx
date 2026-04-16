@@ -32,9 +32,14 @@ export default function Signup() {
         .from("profiles")
         .select("onboarding_completed")
         .eq("id", user.id)
-        .single()
-        .then(({ data }) => {
-          if (data?.onboarding_completed) {
+        .maybeSingle()
+        .then(async ({ data }) => {
+          if (!data) {
+            await supabase.auth.signOut();
+            return;
+          }
+
+          if (data.onboarding_completed) {
             navigate("/dashboard", { replace: true });
           } else {
             navigate("/onboarding/plan", { replace: true });

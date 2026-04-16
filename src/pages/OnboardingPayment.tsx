@@ -13,6 +13,12 @@ const planDetails: Record<string, { name: string; monthly: number; yearly: numbe
   scale: { name: "Scale", monthly: 7999, yearly: 6399 },
 };
 
+const planAliases: Record<string, string[]> = {
+  starter: ["starter"],
+  growth: ["growth", "pro"],
+  scale: ["scale", "enterprise"],
+};
+
 declare global {
   interface Window {
     Razorpay: any;
@@ -86,9 +92,44 @@ export default function OnboardingPayment() {
     };
   }, []);
 
+  const syncUserSubscription = useCallback(async () => {
+    if (!user) return;
+
+    const aliases = planAliases[planKey] || [planKey];
+    const now = new Date();
+    const trialEnd = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+
+    const { data: matchingPlans, error: planError } = await supabase
+      .from("subscription_plans")
+      .select("id, name")
+      .in("name", aliases);
+
+    if (planError) throw planError;
+
+    const matchedPlan = matchingPlans?.find((row) => row.name === planKey) || matchingPlans?.[0] || null;
+
+    const { error: subscriptionError } = await supabase
+      .from("user_subscriptions")
+      .upsert(
+        {
+          user_id: user.id,
+          plan_id: matchedPlan?.id ?? null,
+          status: matchedPlan ? "active" : "pending",
+          current_period_start: now.toISOString(),
+          current_period_end: trialEnd.toISOString(),
+        },
+        { onConflict: "user_id" }
+      );
+
+    if (subscriptionError) throw subscriptionError;
+
+    await queryClient.invalidateQueries({ queryKey: ["user-subscription"] });
+  }, [planKey, queryClient, user]);
+
   const completeOnboarding = async () => {
     if (!user) return;
     try {
+      await syncUserSubscription();
       await supabase.from("profiles").update({ 
         onboarding_completed: true,
         plan: planKey 
@@ -393,6 +434,13 @@ export default function OnboardingPayment() {
         {!razorpayReady && finalPrice > 0 && (
           <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 12, marginTop: 10, textAlign: "center" }}>
             Loading secure checkout…
+          </p>
+        )}
+
+        {finalPrice > 0 && (
+          <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 12, lineHeight: 1.5, marginTop: 10, textAlign: "center" }}>
+            Razorpay may ask for a mobile number and show a small mandate setup charge like ₹5 for auto-pay.
+            Your actual {plan.name} plan starts after the 14-day trial.
           </p>
         )}
 
