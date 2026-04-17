@@ -27,8 +27,14 @@ const navItems = [
 export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const [isAutomationActive, setIsAutomationActive] = useState(true);
+
+  const displayName =
+    (user?.user_metadata?.full_name as string | undefined) ||
+    user?.email ||
+    "";
+  const initial = displayName.charAt(0).toUpperCase();
 
   const handleSignOut = async () => {
     await signOut();
@@ -93,12 +99,29 @@ export function AppSidebar() {
         </div>
       </div>
 
-      {/* Sign Out */}
-      <div className="flex items-center justify-center py-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      {/* User + Sign Out */}
+      <div className="px-3 py-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        {displayName && (
+          <div className="mb-2 flex items-center gap-2 px-1">
+            <div
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white"
+              style={{ backgroundColor: '#7C6FE0', fontSize: '12px', fontWeight: 600 }}
+            >
+              {initial}
+            </div>
+            <span
+              className="truncate"
+              style={{ color: 'rgba(255,255,255,0.75)', fontSize: '12px', fontWeight: 500 }}
+              title={displayName}
+            >
+              {displayName}
+            </span>
+          </div>
+        )}
         <button
           onClick={handleSignOut}
           style={{ color: 'rgba(255,255,255,0.35)', fontSize: '12px' }}
-          className="transition-colors hover:text-white/60"
+          className="w-full text-center transition-colors hover:text-white/60"
         >
           Sign out
         </button>
