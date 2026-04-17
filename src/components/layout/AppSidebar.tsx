@@ -27,8 +27,14 @@ const navItems = [
 export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const [isAutomationActive, setIsAutomationActive] = useState(true);
+
+  const displayName =
+    (user?.user_metadata?.full_name as string | undefined) ||
+    user?.email ||
+    "";
+  const initial = displayName.charAt(0).toUpperCase();
 
   const handleSignOut = async () => {
     await signOut();
