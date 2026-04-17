@@ -11,7 +11,7 @@ const plans = [
     yearly: 799,
     description: "For solo founders getting started.",
     features: ["1 email account", "300 emails/month", "AI drafts (manual send)", "20 KB entries", "Basic dashboard"],
-    cta: "Start 14-day trial",
+    cta: "Get started",
     highlighted: false,
   },
   {
@@ -20,7 +20,7 @@ const plans = [
     yearly: 2399,
     description: "For growing teams that need automation.",
     features: ["3 email accounts", "1,500 emails/month", "Auto-send enabled", "Unlimited KB entries", "Slack + webhooks", "SLA tracking"],
-    cta: "Start 14-day trial",
+    cta: "Get started",
     highlighted: true,
   },
   {
@@ -29,7 +29,7 @@ const plans = [
     yearly: 6399,
     description: "For high-volume operations.",
     features: ["Unlimited email accounts", "10,000 emails/month", "Everything in Growth", "Per-account AI instructions", "Custom integrations", "Dedicated onboarding"],
-    cta: "Start 14-day trial",
+    cta: "Get started",
     highlighted: false,
   },
 ];
@@ -51,7 +51,7 @@ export function PricingSection() {
           <h2 className="text-[clamp(2rem,4vw,3.25rem)] font-semibold tracking-[-0.03em] leading-[1.1]" style={{ color: "#E8E4FF" }}>
             Simple, transparent pricing.
           </h2>
-          <p className="mt-4 text-[16px]" style={{ color: "rgba(255,255,255,0.45)" }}>14-day free trial on all plans. No hidden fees.</p>
+          <p className="mt-4 text-[16px]" style={{ color: "rgba(255,255,255,0.45)" }}>Cancel anytime. No hidden fees.</p>
 
           {/* Billing toggle */}
           <div className="flex justify-center mt-8">
@@ -167,7 +167,7 @@ export function PricingSection() {
         </div>
 
         <p className="text-center mt-10 text-[13px] max-w-[480px] mx-auto" style={{ color: "rgba(255,255,255,0.3)" }}>
-          All plans include a 14-day trial · Cancel anytime · No setup fees
+          Cancel anytime · No setup fees
         </p>
       </div>
     </section>

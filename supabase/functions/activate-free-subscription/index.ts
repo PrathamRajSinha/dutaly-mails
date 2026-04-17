@@ -44,30 +44,24 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const now = new Date().toISOString();
-    const trialEnd = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
 
-    // Upsert subscription
+    // Upsert subscription (free activation via 100% coupon)
     const { error: subError } = await supabase
       .from("subscriptions")
       .upsert({
         user_id: user.id,
         plan,
         status: "free",
-        trial_start: now,
-        trial_end: trialEnd,
         coupon_used: coupon_code || null,
         amount_paid: 0,
       }, { onConflict: "user_id" });
 
     if (subError) {
       console.error("Subscription upsert error:", subError);
-      // Try insert if upsert fails (no unique on user_id)
       await supabase.from("subscriptions").insert({
         user_id: user.id,
         plan,
         status: "free",
-        trial_start: now,
-        trial_end: trialEnd,
         coupon_used: coupon_code || null,
         amount_paid: 0,
       });
@@ -76,7 +70,7 @@ Deno.serve(async (req) => {
     // Update profile
     await supabase
       .from("profiles")
-      .update({ plan, trial_start: now, trial_end: trialEnd, onboarding_completed: true })
+      .update({ plan, onboarding_completed: true })
       .eq("id", user.id);
 
     return new Response(

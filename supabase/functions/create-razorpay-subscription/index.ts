@@ -92,13 +92,12 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Create subscription with 14-day trial
+    // Create subscription — billed immediately, no trial
     const subPayload: Record<string, unknown> = {
       plan_id: razorpayPlanId,
       customer_id: customer.id,
       total_count: billing_period === "yearly" ? 12 : 120,
       quantity: 1,
-      start_at: Math.floor(Date.now() / 1000) + 14 * 24 * 60 * 60, // 14 days from now
     };
 
     if (coupon_code) {

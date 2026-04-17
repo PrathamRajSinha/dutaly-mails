@@ -98,7 +98,7 @@ export default function OnboardingPlan() {
           maxWidth: 420,
         }}
       >
-        Start with a 14-day trial. Your card won't be charged until day 15.
+        Pick the plan that fits your team. Cancel anytime.
       </p>
 
       {/* Billing toggle */}
@@ -287,7 +287,7 @@ export default function OnboardingPlan() {
                       }),
                 }}
               >
-                Start 14-day trial
+                Choose {plan.name}
               </button>
             </div>
           );
@@ -303,7 +303,7 @@ export default function OnboardingPlan() {
           textAlign: "center",
         }}
       >
-        All plans · 14-day trial · Cancel anytime · No setup fees
+        Cancel anytime · No setup fees
       </p>
       <p
         style={{
