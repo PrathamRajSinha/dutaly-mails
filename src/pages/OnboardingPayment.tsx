@@ -97,7 +97,8 @@ export default function OnboardingPayment() {
 
     const aliases = planAliases[planKey] || [planKey];
     const now = new Date();
-    const trialEnd = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+    const periodEnd = new Date(now);
+    periodEnd.setMonth(periodEnd.getMonth() + (billingPeriod === "yearly" ? 12 : 1));
 
     const { data: matchingPlans, error: planError } = await supabase
       .from("subscription_plans")
@@ -116,7 +117,7 @@ export default function OnboardingPayment() {
           plan_id: matchedPlan?.id ?? null,
           status: matchedPlan ? "active" : "pending",
           current_period_start: now.toISOString(),
-          current_period_end: trialEnd.toISOString(),
+          current_period_end: periodEnd.toISOString(),
         },
         { onConflict: "user_id" }
       );
@@ -124,7 +125,7 @@ export default function OnboardingPayment() {
     if (subscriptionError) throw subscriptionError;
 
     await queryClient.invalidateQueries({ queryKey: ["user-subscription"] });
-  }, [planKey, queryClient, user]);
+  }, [planKey, billingPeriod, queryClient, user]);
 
   const completeOnboarding = async () => {
     if (!user) return;
@@ -228,12 +229,10 @@ export default function OnboardingPayment() {
             const subscriptionPayload = {
               user_id: user.id,
               plan: planKey,
-              status: "trialing",
+              status: "active",
               razorpay_subscription_id: data.subscription_id,
               razorpay_customer_id: data.customer_id,
               razorpay_payment_id: response.razorpay_payment_id,
-              trial_start: new Date().toISOString(),
-              trial_end: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
               coupon_used: couponCode.trim() || null,
               amount_paid: finalPrice,
             };
@@ -283,7 +282,7 @@ export default function OnboardingPayment() {
         Complete your setup
       </h2>
       <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 14, marginTop: 8, textAlign: "center", maxWidth: 420 }}>
-        Your 14-day trial starts now. You won't be charged until day 15.
+        You'll be charged the plan price today. Cancel anytime.
       </p>
 
       <div
@@ -427,7 +426,7 @@ export default function OnboardingPayment() {
           ) : finalPrice === 0 ? (
             "Activate Free Access"
           ) : (
-            `Start trial — ₹${finalPrice.toLocaleString("en-IN")}/mo`
+            `Pay ₹${finalPrice.toLocaleString("en-IN")}/mo`
           )}
         </button>
 
@@ -439,8 +438,7 @@ export default function OnboardingPayment() {
 
         {finalPrice > 0 && (
           <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 12, lineHeight: 1.5, marginTop: 10, textAlign: "center" }}>
-            Razorpay may ask for a mobile number and show a small mandate setup charge like ₹5 for auto-pay.
-            Your actual {plan.name} plan starts after the 14-day trial.
+            Razorpay may ask for a mobile number to set up recurring auto-pay for your subscription.
           </p>
         )}
 
@@ -462,7 +460,7 @@ export default function OnboardingPayment() {
       </div>
 
       <p style={{ color: "rgba(255,255,255,0.25)", fontSize: 12, marginTop: 20, marginBottom: 32, textAlign: "center" }}>
-        All plans · 14-day trial · Cancel anytime · No setup fees
+        Cancel anytime · No setup fees
       </p>
     </div>
   );
