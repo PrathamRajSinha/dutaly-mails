@@ -357,7 +357,7 @@ export default function Signup() {
                   }}
                 >
                   {loading && <Loader2 size={16} className="animate-spin" />}
-                  Create free account →
+                  Create account →
                 </button>
               </form>
 
