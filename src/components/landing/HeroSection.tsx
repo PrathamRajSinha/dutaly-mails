@@ -62,7 +62,7 @@ export function HeroSection() {
         >
           <Link to={ctaLink}>
             <Button className="h-11 px-6 text-[14px] text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300" style={{ background: "#7C6FE0", borderRadius: "6px" }}>
-              Start free trial
+              Get started
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
