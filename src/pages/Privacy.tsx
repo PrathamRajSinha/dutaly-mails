@@ -12,7 +12,7 @@ export default function Privacy() {
       </header>
       <article className="max-w-[800px] mx-auto px-6 py-16 prose-invert">
         <h1 className="text-[36px] font-semibold mb-2 text-white">Privacy Policy</h1>
-        <p className="text-[13px]" style={{ color: "rgba(255,255,255,0.5)" }}>Effective Date: November 2025 · Last Updated: November 2025</p>
+        <p className="text-[13px]" style={{ color: "rgba(255,255,255,0.5)" }}>Effective Date: April 2026 · Last Updated: April 2026</p>
 
         <div className="mt-10 space-y-6 text-[15px] leading-relaxed">
           <p>At Dutaly ("Company", "we", "us", or "our"), we are committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your personal information when you visit or use our website, application, or any related services (collectively, the "Service").</p>
