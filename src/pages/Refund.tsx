@@ -12,7 +12,7 @@ export default function Refund() {
       </header>
       <article className="max-w-[800px] mx-auto px-6 py-16">
         <h1 className="text-[36px] font-semibold mb-2 text-white">Refund Policy</h1>
-        <p className="text-[13px]" style={{ color: "rgba(255,255,255,0.5)" }}>Effective Date: November 2025 · Last Updated: November 2025</p>
+        <p className="text-[13px]" style={{ color: "rgba(255,255,255,0.5)" }}>Effective Date: April 2026 · Last Updated: April 2026</p>
 
         <div className="mt-10 space-y-6 text-[15px] leading-relaxed">
           <p>Thank you for choosing Dutaly ("we", "us", or "our"). This Refund Policy outlines the conditions under which refunds are processed for payments made through our website, application, or any associated services (collectively, the "Service").</p>
