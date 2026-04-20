@@ -5,8 +5,30 @@ const GOOGLE_CLIENT_SECRET = Deno.env.get("GOOGLE_CLIENT_SECRET")!;
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-// Frontend URL for redirects
-const FRONTEND_URL = "https://id-preview--a10d7822-747b-4c2a-a9e5-fad4762101ef.lovable.app";
+// Allowed frontend origins (callback only redirects back to these)
+const ALLOWED_ORIGINS = [
+  "https://dutaly.com",
+  "https://www.dutaly.com",
+  "https://mail-replai.lovable.app",
+  "https://id-preview--a10d7822-747b-4c2a-a9e5-fad4762101ef.lovable.app",
+];
+const DEFAULT_FRONTEND_URL = "https://dutaly.com";
+
+function resolveFrontendUrl(origin: string | null | undefined): string {
+  if (!origin) return DEFAULT_FRONTEND_URL;
+  try {
+    const u = new URL(origin);
+    const normalized = `${u.protocol}//${u.host}`;
+    if (ALLOWED_ORIGINS.includes(normalized)) return normalized;
+    // Allow any lovableproject.com / lovable.app preview sandbox
+    if (u.host.endsWith(".lovableproject.com") || u.host.endsWith(".lovable.app")) {
+      return normalized;
+    }
+  } catch {
+    // fall through
+  }
+  return DEFAULT_FRONTEND_URL;
+}
 
 Deno.serve(async (req) => {
   try {
