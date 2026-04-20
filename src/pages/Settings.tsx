@@ -517,6 +517,7 @@ export default function Settings() {
     try {
       const { data, error } = await supabase.functions.invoke("gmail-auth-init", {
         headers: { Authorization: `Bearer ${session.access_token}` },
+        body: { origin: window.location.origin },
       });
 
       if (error) throw error;
