@@ -7,11 +7,13 @@ export function FooterSection() {
       <div className="max-w-[1200px] mx-auto px-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
           <img src={logoDarkBg} alt="Dutaly" className="h-6 w-auto" />
-          <div className="flex items-center gap-8 text-[13px]" style={{ color: "rgba(255,255,255,0.4)" }}>
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[13px]" style={{ color: "rgba(255,255,255,0.4)" }}>
             <a href="#features" className="hover:opacity-80 transition-opacity">features</a>
-            <a href="#how-it-works" className="hover:opacity-80 transition-opacity">how it works</a>
             <Link to="/pricing" className="hover:opacity-80 transition-opacity">pricing</Link>
             <Link to="/login" className="hover:opacity-80 transition-opacity">sign in</Link>
+            <Link to="/privacy" className="hover:opacity-80 transition-opacity">privacy</Link>
+            <Link to="/terms" className="hover:opacity-80 transition-opacity">terms</Link>
+            <Link to="/refund" className="hover:opacity-80 transition-opacity">refund</Link>
           </div>
           <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.25)" }}>© 2026 Dutaly. All rights reserved.</p>
         </div>
