@@ -45,10 +45,24 @@ Deno.serve(async (req) => {
     console.log(`Generating Gmail OAuth URL for user: ${userId}`);
 
     // Create state parameter with user ID (simple base64 encoding for now)
+    // Capture the caller's origin so the callback can redirect back to the same domain
+    let origin: string | null = null;
+    try {
+      const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
+      origin = body?.origin || req.headers.get("origin") || req.headers.get("referer") || null;
+      if (origin) {
+        const u = new URL(origin);
+        origin = `${u.protocol}//${u.host}`;
+      }
+    } catch {
+      origin = req.headers.get("origin");
+    }
+
     const stateData = {
       userId,
       timestamp: Date.now(),
       nonce: crypto.randomUUID(),
+      origin,
     };
     const state = btoa(JSON.stringify(stateData));
 

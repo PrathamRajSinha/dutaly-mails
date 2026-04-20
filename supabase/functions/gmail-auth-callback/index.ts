@@ -5,20 +5,54 @@ const GOOGLE_CLIENT_SECRET = Deno.env.get("GOOGLE_CLIENT_SECRET")!;
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-// Frontend URL for redirects
-const FRONTEND_URL = "https://id-preview--a10d7822-747b-4c2a-a9e5-fad4762101ef.lovable.app";
+// Allowed frontend origins (callback only redirects back to these)
+const ALLOWED_ORIGINS = [
+  "https://dutaly.com",
+  "https://www.dutaly.com",
+  "https://mail-replai.lovable.app",
+  "https://id-preview--a10d7822-747b-4c2a-a9e5-fad4762101ef.lovable.app",
+];
+const DEFAULT_FRONTEND_URL = "https://dutaly.com";
+
+function resolveFrontendUrl(origin: string | null | undefined): string {
+  if (!origin) return DEFAULT_FRONTEND_URL;
+  try {
+    const u = new URL(origin);
+    const normalized = `${u.protocol}//${u.host}`;
+    if (ALLOWED_ORIGINS.includes(normalized)) return normalized;
+    // Allow any lovableproject.com / lovable.app preview sandbox
+    if (u.host.endsWith(".lovableproject.com") || u.host.endsWith(".lovable.app")) {
+      return normalized;
+    }
+  } catch {
+    // fall through
+  }
+  return DEFAULT_FRONTEND_URL;
+}
 
 Deno.serve(async (req) => {
+  let FRONTEND_URL = DEFAULT_FRONTEND_URL;
   try {
     const url = new URL(req.url);
     const code = url.searchParams.get("code");
     const state = url.searchParams.get("state");
     const error = url.searchParams.get("error");
 
-    console.log("Gmail callback received:", { 
-      hasCode: !!code, 
-      hasState: !!state, 
-      error 
+    // Try to extract origin from state early so error redirects land on the right domain
+    if (state) {
+      try {
+        const preview = JSON.parse(atob(state));
+        FRONTEND_URL = resolveFrontendUrl(preview?.origin);
+      } catch {
+        // ignore, use default
+      }
+    }
+
+    console.log("Gmail callback received:", {
+      hasCode: !!code,
+      hasState: !!state,
+      error,
+      frontend: FRONTEND_URL,
     });
 
     // Handle OAuth errors
@@ -39,7 +73,7 @@ Deno.serve(async (req) => {
     }
 
     // Decode state to get user ID
-    let stateData: { userId: string; timestamp: number; nonce: string };
+    let stateData: { userId: string; timestamp: number; nonce: string; origin?: string };
     try {
       stateData = JSON.parse(atob(state));
     } catch {
@@ -50,8 +84,9 @@ Deno.serve(async (req) => {
       );
     }
 
+    FRONTEND_URL = resolveFrontendUrl(stateData.origin);
     const { userId } = stateData;
-    console.log(`Processing Gmail callback for user: ${userId}`);
+    console.log(`Processing Gmail callback for user: ${userId} -> ${FRONTEND_URL}`);
 
     // Exchange code for tokens
     const redirectUri = `${SUPABASE_URL}/functions/v1/gmail-auth-callback`;
