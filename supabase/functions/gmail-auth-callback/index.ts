@@ -31,16 +31,28 @@ function resolveFrontendUrl(origin: string | null | undefined): string {
 }
 
 Deno.serve(async (req) => {
+  let FRONTEND_URL = DEFAULT_FRONTEND_URL;
   try {
     const url = new URL(req.url);
     const code = url.searchParams.get("code");
     const state = url.searchParams.get("state");
     const error = url.searchParams.get("error");
 
-    console.log("Gmail callback received:", { 
-      hasCode: !!code, 
-      hasState: !!state, 
-      error 
+    // Try to extract origin from state early so error redirects land on the right domain
+    if (state) {
+      try {
+        const preview = JSON.parse(atob(state));
+        FRONTEND_URL = resolveFrontendUrl(preview?.origin);
+      } catch {
+        // ignore, use default
+      }
+    }
+
+    console.log("Gmail callback received:", {
+      hasCode: !!code,
+      hasState: !!state,
+      error,
+      frontend: FRONTEND_URL,
     });
 
     // Handle OAuth errors
@@ -61,7 +73,7 @@ Deno.serve(async (req) => {
     }
 
     // Decode state to get user ID
-    let stateData: { userId: string; timestamp: number; nonce: string };
+    let stateData: { userId: string; timestamp: number; nonce: string; origin?: string };
     try {
       stateData = JSON.parse(atob(state));
     } catch {
@@ -72,8 +84,9 @@ Deno.serve(async (req) => {
       );
     }
 
+    FRONTEND_URL = resolveFrontendUrl(stateData.origin);
     const { userId } = stateData;
-    console.log(`Processing Gmail callback for user: ${userId}`);
+    console.log(`Processing Gmail callback for user: ${userId} -> ${FRONTEND_URL}`);
 
     // Exchange code for tokens
     const redirectUri = `${SUPABASE_URL}/functions/v1/gmail-auth-callback`;
