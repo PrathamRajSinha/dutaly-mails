@@ -54,6 +54,11 @@ export default function OnboardingPlan() {
   const navigate = useNavigate();
   const [billing, setBilling] = useState<"monthly" | "yearly">("monthly");
 
+  const handleSignIn = () => {
+    localStorage.removeItem("dutaly_selected_plan");
+    navigate("/login");
+  };
+
   const handleSelect = (planKey: PlanKey) => {
     localStorage.setItem(
       "dutaly_selected_plan",
@@ -314,12 +319,13 @@ export default function OnboardingPlan() {
         }}
       >
         Already have an account?{" "}
-        <Link
-          to="/login"
+        <button
+          type="button"
+          onClick={handleSignIn}
           style={{ color: "#7C6FE0", textDecoration: "none" }}
         >
           Sign in →
-        </Link>
+        </button>
       </p>
     </div>
   );

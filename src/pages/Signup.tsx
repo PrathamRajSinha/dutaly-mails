@@ -157,6 +157,12 @@ export default function Signup() {
     }
   };
 
+  const handleGoToLogin = async () => {
+    localStorage.removeItem("dutaly_selected_plan");
+    await supabase.auth.signOut({ scope: "local" });
+    navigate("/login");
+  };
+
   if (authLoading) {
     return (
       <div className="flex h-screen items-center justify-center" style={{ background: "#0A0A0F" }}>
@@ -363,7 +369,7 @@ export default function Signup() {
 
               <p style={{ textAlign: "center", fontSize: 13, color: "#9490B8", marginTop: 20 }}>
                 Already have an account?{" "}
-                <Link to="/login" style={{ color: "#7C6FE0", textDecoration: "none" }}>Sign in</Link>
+                <button type="button" onClick={handleGoToLogin} style={{ color: "#7C6FE0", textDecoration: "none", background: "none", border: "none", cursor: "pointer", padding: 0 }}>Sign in</button>
               </p>
             </>
           )}
