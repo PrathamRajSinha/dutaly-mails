@@ -24,6 +24,9 @@ import Onboarding from "./pages/Onboarding";
 import OnboardingPlan from "./pages/OnboardingPlan";
 import OnboardingPayment from "./pages/OnboardingPayment";
 import Signup from "./pages/Signup";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import Refund from "./pages/Refund";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +50,9 @@ const App = () => (
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/onboarding/plan" element={<OnboardingPlan />} />
             <Route path="/onboarding/payment" element={<OnboardingPayment />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/refund" element={<Refund />} />
             <Route
               element={
                 <ProtectedRoute>
