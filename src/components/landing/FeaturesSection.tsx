@@ -80,25 +80,25 @@ export function FeaturesSection() {
       <div className="max-w-[1200px] mx-auto px-6 relative z-10">
         <motion.div {...fade} className="text-center mb-16">
           <p className="text-[13px] font-medium tracking-[0.15em] uppercase mb-4" style={{ color: "rgba(255,255,255,0.4)" }}>Features</p>
-          <h2 className="text-[clamp(2rem,4vw,3.25rem)] font-semibold tracking-[-0.03em] leading-[1.1] max-w-[600px] mx-auto" style={{ color: "#F0EEF8" }}>
-            A <span style={{ color: "#7C6FE0" }}>smarter</span> way to handle customer emails.
+          <h2 className="text-[clamp(2rem,4vw,3.25rem)] font-semibold tracking-[-0.03em] leading-[1.1] max-w-[700px] mx-auto" style={{ color: "#F0EEF8" }}>
+            Everything <span style={{ color: "#7C6FE0" }}>Dutaly</span> does for your inbox.
           </h2>
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          {/* Classification — wide */}
+          {/* 1. Understands every email — wide */}
           <motion.div {...fade} transition={{ duration: 0.5, delay: 0.05 }} className="lg:col-span-7">
             <MagicBentoCard className="h-full">
               <div className="p-6 sm:p-8 flex flex-col h-full">
                 <div className="mb-5">
                   <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full mb-3" style={{ background: "rgba(124,111,224,0.15)", color: "#A89EF0" }}>
-                    Classification
+                    Understanding
                   </span>
                   <h3 className="text-[clamp(1.25rem,2vw,1.5rem)] font-semibold tracking-[-0.02em] leading-[1.2] mb-2" style={{ color: "#F0EEF8" }}>
-                    Automatic classification
+                    Dutaly understands every email
                   </h3>
                   <p className="text-[14px] leading-[1.7] max-w-[440px]" style={{ color: "rgba(255,255,255,0.5)" }}>
-                    Every email is categorized by intent, urgency, and sentiment — before anyone opens it.
+                    Intent detection, sentiment analysis, and categorization — applied to every message before anyone reads it.
                   </p>
                 </div>
                 <div className="flex-1 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
@@ -108,19 +108,19 @@ export function FeaturesSection() {
             </MagicBentoCard>
           </motion.div>
 
-          {/* AI Replies — narrow */}
+          {/* 2. Handles automatically — narrow */}
           <motion.div {...fade} transition={{ duration: 0.5, delay: 0.1 }} className="lg:col-span-5">
             <MagicBentoCard className="h-full">
               <div className="p-6 sm:p-8 flex flex-col h-full">
                 <div className="mb-5">
                   <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full mb-3" style={{ background: "rgba(124,111,224,0.15)", color: "#A89EF0" }}>
-                    AI Replies
+                    Automation
                   </span>
                   <h3 className="text-[clamp(1.25rem,2vw,1.5rem)] font-semibold tracking-[-0.02em] leading-[1.2] mb-2" style={{ color: "#F0EEF8" }}>
-                    Smart reply & auto-send
+                    Dutaly handles emails automatically
                   </h3>
                   <p className="text-[14px] leading-[1.7] max-w-[440px]" style={{ color: "rgba(255,255,255,0.5)" }}>
-                    AI drafts replies <em>powered by your rules</em>. High-confidence ones send automatically — the rest queue for review.
+                    Dutaly replies automatically, auto-sends when confident, and creates or updates tickets as conversations evolve.
                   </p>
                 </div>
                 <div className="flex-1 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
@@ -130,41 +130,19 @@ export function FeaturesSection() {
             </MagicBentoCard>
           </motion.div>
 
-          {/* Send Later — narrow */}
+          {/* 3. Supports your team — narrow */}
           <motion.div {...fade} transition={{ duration: 0.5, delay: 0.15 }} className="lg:col-span-5">
             <MagicBentoCard className="h-full">
               <div className="p-6 sm:p-8 flex flex-col h-full">
                 <div className="mb-5">
                   <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full mb-3" style={{ background: "rgba(124,111,224,0.15)", color: "#A89EF0" }}>
-                    Timing
+                    Collaboration
                   </span>
                   <h3 className="text-[clamp(1.25rem,2vw,1.5rem)] font-semibold tracking-[-0.02em] leading-[1.2] mb-2" style={{ color: "#F0EEF8" }}>
-                    Have perfect timing with Send Later
+                    Dutaly supports your team
                   </h3>
                   <p className="text-[14px] leading-[1.7] max-w-[440px]" style={{ color: "rgba(255,255,255,0.5)" }}>
-                    Schedule replies to land in inboxes at the right moment — even while you sleep.
-                  </p>
-                </div>
-                <div className="flex-1 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
-                  <SendLaterMockup />
-                </div>
-              </div>
-            </MagicBentoCard>
-          </motion.div>
-
-          {/* Instant Reply — wide */}
-          <motion.div {...fade} transition={{ duration: 0.5, delay: 0.2 }} className="lg:col-span-7">
-            <MagicBentoCard className="h-full">
-              <div className="p-6 sm:p-8 flex flex-col h-full">
-                <div className="mb-5">
-                  <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full mb-3" style={{ background: "rgba(124,111,224,0.15)", color: "#A89EF0" }}>
-                    Speed
-                  </span>
-                  <h3 className="text-[clamp(1.25rem,2vw,1.5rem)] font-semibold tracking-[-0.02em] leading-[1.2] mb-2" style={{ color: "#F0EEF8" }}>
-                    Reply faster with Instant Reply
-                  </h3>
-                  <p className="text-[14px] leading-[1.7] max-w-[440px]" style={{ color: "rgba(255,255,255,0.5)" }}>
-                    One-click reply templates powered by AI. Pick a tone, customize if needed, and send in seconds.
+                    When unsure, Dutaly drafts when needed, suggests next actions, and keeps humans firmly in control.
                   </p>
                 </div>
                 <div className="flex-1 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
@@ -174,63 +152,73 @@ export function FeaturesSection() {
             </MagicBentoCard>
           </motion.div>
 
-          {/* Snooze — narrow */}
-          <motion.div {...fade} transition={{ duration: 0.5, delay: 0.25 }} className="lg:col-span-5">
+          {/* 4. Knows your business — wide */}
+          <motion.div {...fade} transition={{ duration: 0.5, delay: 0.2 }} className="lg:col-span-7">
             <MagicBentoCard className="h-full">
               <div className="p-6 sm:p-8 flex flex-col h-full">
                 <div className="mb-5">
                   <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full mb-3" style={{ background: "rgba(124,111,224,0.15)", color: "#A89EF0" }}>
-                    Focus
+                    Knowledge
                   </span>
                   <h3 className="text-[clamp(1.25rem,2vw,1.5rem)] font-semibold tracking-[-0.02em] leading-[1.2] mb-2" style={{ color: "#F0EEF8" }}>
-                    Snooze emails for later
+                    Dutaly knows your business
                   </h3>
                   <p className="text-[14px] leading-[1.7] max-w-[440px]" style={{ color: "rgba(255,255,255,0.5)" }}>
-                    Not ready to deal with it? Snooze it and it'll pop back up when you are.
+                    Powered by your knowledge base, your written instructions, and rule-based automation — Dutaly answers the way you would.
                   </p>
                 </div>
                 <div className="flex-1 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
-                  <SnoozeMockup />
+                  <DashboardMockup />
                 </div>
               </div>
             </MagicBentoCard>
           </motion.div>
 
-          {/* Keyboard Shortcuts — narrow */}
-          <motion.div {...fade} transition={{ duration: 0.5, delay: 0.3 }} className="lg:col-span-3">
+          {/* Confidence states — full width */}
+          <motion.div {...fade} transition={{ duration: 0.5, delay: 0.25 }} className="lg:col-span-12">
             <MagicBentoCard className="h-full">
-              <div className="p-6 sm:p-8 flex flex-col h-full">
-                <div className="mb-5">
+              <div className="p-6 sm:p-8">
+                <div className="mb-6 max-w-[640px]">
                   <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full mb-3" style={{ background: "rgba(124,111,224,0.15)", color: "#A89EF0" }}>
-                    Productivity
+                    Confidence
                   </span>
                   <h3 className="text-[clamp(1.25rem,2vw,1.5rem)] font-semibold tracking-[-0.02em] leading-[1.2] mb-2" style={{ color: "#F0EEF8" }}>
-                    Keyboard shortcuts
+                    Smart automation with control
                   </h3>
                   <p className="text-[14px] leading-[1.7]" style={{ color: "rgba(255,255,255,0.5)" }}>
-                    Hit Inbox Zero without touching the mouse.
+                    Dutaly sends replies automatically when confidence is high. When it's unsure, it asks you.
                   </p>
                 </div>
-                <div className="flex-1 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
-                  <ShortcutsMockup />
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {[
+                    { tag: "High", label: "Auto sent", desc: "Dutaly replies on its own.", color: "#34D399", bg: "rgba(52,211,153,0.1)" },
+                    { tag: "Medium", label: "Review", desc: "Dutaly drafts, you approve.", color: "#FBBF24", bg: "rgba(251,191,36,0.1)" },
+                    { tag: "Low", label: "Escalate", desc: "Dutaly hands it to your team.", color: "#F87171", bg: "rgba(248,113,113,0.1)" },
+                  ].map((s) => (
+                    <div key={s.tag} className="rounded-xl p-5" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded" style={{ color: s.color, background: s.bg }}>{s.tag} confidence</span>
+                      <p className="mt-3 text-[16px] font-semibold" style={{ color: "#F0EEF8" }}>{s.label}</p>
+                      <p className="mt-1 text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>{s.desc}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
             </MagicBentoCard>
           </motion.div>
 
-          {/* Ask Anything — narrow */}
-          <motion.div {...fade} transition={{ duration: 0.5, delay: 0.35 }} className="lg:col-span-4">
+          {/* Talk to Dutaly — narrow */}
+          <motion.div {...fade} transition={{ duration: 0.5, delay: 0.3 }} className="lg:col-span-7">
             <MagicBentoCard className="h-full">
               <div className="p-6 sm:p-8 flex flex-col h-full">
                 <div className="mb-5">
                   <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full mb-3" style={{ background: "rgba(124,111,224,0.15)", color: "#A89EF0" }}>
-                    Intelligence
+                    Conversational
                   </span>
                   <h3 className="text-[clamp(1.25rem,2vw,1.5rem)] font-semibold tracking-[-0.02em] leading-[1.2] mb-2" style={{ color: "#F0EEF8" }}>
-                    Ask anything about your emails
+                    Talk to Dutaly
                   </h3>
                   <p className="text-[14px] leading-[1.7] max-w-[440px]" style={{ color: "rgba(255,255,255,0.5)" }}>
-                    Chat with AI about your inbox. Get instant answers with direct references to the emails behind every insight.
+                    Ask Dutaly which emails need attention, summarize today's issues, or list unresolved queries — with direct references to every email.
                   </p>
                 </div>
                 <div className="flex-1 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
@@ -240,24 +228,39 @@ export function FeaturesSection() {
             </MagicBentoCard>
           </motion.div>
 
-          {/* Dashboard — wide */}
-          <motion.div {...fade} transition={{ duration: 0.5, delay: 0.4 }} className="lg:col-span-5">
+          {/* Tickets — narrow */}
+          <motion.div {...fade} transition={{ duration: 0.5, delay: 0.35 }} className="lg:col-span-5">
             <MagicBentoCard className="h-full">
               <div className="p-6 sm:p-8 flex flex-col h-full">
                 <div className="mb-5">
                   <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full mb-3" style={{ background: "rgba(124,111,224,0.15)", color: "#A89EF0" }}>
-                    Visibility
+                    Tickets
                   </span>
                   <h3 className="text-[clamp(1.25rem,2vw,1.5rem)] font-semibold tracking-[-0.02em] leading-[1.2] mb-2" style={{ color: "#F0EEF8" }}>
                     Full visibility & tracking
                   </h3>
                   <p className="text-[14px] leading-[1.7] max-w-[440px]" style={{ color: "rgba(255,255,255,0.5)" }}>
-                    Each email becomes a trackable ticket with status, priority, SLA deadlines, and full history.
+                    Every email becomes a structured, trackable ticket with full visibility — status, priority, SLA, and history.
                   </p>
                 </div>
-                <div className="flex-1 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
-                  <DashboardMockup />
+                <div className="grid grid-cols-3 gap-2 mt-2">
+                  {[
+                    { icon: Clock, label: "Snooze" },
+                    { icon: Sparkles, label: "Send later" },
+                    { icon: Keyboard, label: "Shortcuts" },
+                  ].map((u) => {
+                    const I = u.icon;
+                    return (
+                      <div key={u.label} className="flex items-center gap-2 px-2.5 py-2 rounded-md" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                        <I className="w-3 h-3" style={{ color: "rgba(255,255,255,0.4)" }} />
+                        <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.5)" }}>{u.label}</span>
+                      </div>
+                    );
+                  })}
                 </div>
+                <p className="mt-2 text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>
+                  Plus utilities for everyday flow.
+                </p>
               </div>
             </MagicBentoCard>
           </motion.div>

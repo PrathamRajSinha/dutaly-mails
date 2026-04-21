@@ -211,7 +211,7 @@ export function AskAnythingMockup() {
       {/* Header */}
       <div className="px-5 py-3.5 border-b border-zinc-100 flex items-center gap-2">
         <Zap className="h-3.5 w-3.5 text-violet-500" />
-        <span className="text-[13px] font-semibold text-zinc-900">Ask Me Anything</span>
+        <span className="text-[13px] font-semibold text-zinc-900">Talk to Dutaly</span>
       </div>
 
       {/* Chat */}
@@ -219,7 +219,7 @@ export function AskAnythingMockup() {
         {/* User bubble */}
         <div className="flex justify-end">
           <div className="bg-zinc-900 text-white rounded-xl rounded-br-sm px-3.5 py-2 max-w-[75%]">
-            <p className="text-[11px] leading-relaxed">Which emails had low confidence scores?</p>
+            <p className="text-[11px] leading-relaxed">Dutaly, which emails need attention?</p>
           </div>
         </div>
 
@@ -248,7 +248,7 @@ export function AskAnythingMockup() {
 
       {/* Suggestion chips */}
       <div className="px-4 pb-2 flex gap-1.5 flex-wrap">
-        {["Summarize all emails", "Unresolved questions", "List all senders"].map((s) => (
+        {["Dutaly, summarize today's issues", "Dutaly, list unresolved queries", "Dutaly, who's frustrated?"].map((s) => (
           <span key={s} className="text-[10px] px-2.5 py-1 rounded-full border border-zinc-200 text-zinc-500">{s}</span>
         ))}
       </div>
