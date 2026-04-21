@@ -24,11 +24,10 @@ function AnimatedCounter({ from = 0, value, suffix = "", prefix = "" }: { from?:
 }
 
 export function StatsSection() {
-  const metrics = [
-    { number: 2, suffix: " min", prefix: "~", label: "avg AI response time", from: 0 },
-    { number: 80, suffix: "%+", label: "emails auto-handled", from: 0 },
-    { number: 0, suffix: "", label: "emails missed", from: 100 },
-    { static: "24/7", label: "coverage" },
+  const points = [
+    { title: "Most repetitive emails are handled automatically", desc: "Refunds, status checks, password resets — Dutaly resolves them without waking up your team." },
+    { title: "Your team only reviews edge cases", desc: "Dutaly drafts when needed and routes the rest, so humans focus on what actually needs judgment." },
+    { title: "Faster responses without growing the team", desc: "Customers get answers in minutes — not hours — even as your inbox volume scales." },
   ];
 
   return (
@@ -41,37 +40,31 @@ export function StatsSection() {
           transition={{ duration: 0.5 }}
           className="text-center mb-20"
         >
-          <h2 className="text-[clamp(2rem,4vw,3.25rem)] font-semibold tracking-[-0.03em] leading-[1.1] max-w-[600px] mx-auto" style={{ color: "#F0EEF8" }}>
+          <h2 className="text-[clamp(2rem,4vw,3.25rem)] font-semibold tracking-[-0.03em] leading-[1.1] max-w-[640px] mx-auto" style={{ color: "#F0EEF8" }}>
             Support that <em>actually</em>{" "}
             <span style={{ color: "#7C6FE0" }}>scales.</span>
           </h2>
-          <p className="mt-4 text-[16px] max-w-[440px] mx-auto" style={{ color: "rgba(255,255,255,0.4)" }}>
-            Numbers that speak for themselves.
+          <p className="mt-4 text-[16px] max-w-[480px] mx-auto" style={{ color: "rgba(255,255,255,0.4)" }}>
+            Dutaly handles the volume. Your team handles the nuance.
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 max-w-[900px] mx-auto">
-          {metrics.map((item, i) => (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-[1000px] mx-auto">
+          {points.map((p, i) => (
             <motion.div
-              key={item.label}
+              key={p.title}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="text-center p-6 rounded-2xl"
+              className="p-7 rounded-2xl"
               style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
             >
-              <span className="text-[clamp(2.5rem,5vw,3.5rem)] font-bold tracking-[-0.04em] leading-none block" style={{ color: "#F0EEF8" }}>
-                {item.static ? item.static : <AnimatedCounter from={item.from ?? 0} value={item.number!} suffix={item.suffix} prefix={item.prefix} />}
-              </span>
-              <p className="text-[13px] mt-3 leading-relaxed" style={{ color: "rgba(255,255,255,0.4)" }}>{item.label}</p>
+              <p className="text-[17px] font-medium leading-snug" style={{ color: "#F0EEF8" }}>{p.title}</p>
+              <p className="text-[13px] mt-3 leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>{p.desc}</p>
             </motion.div>
           ))}
         </div>
-
-        <p className="text-center mt-8 text-[12px]" style={{ color: "rgba(255,255,255,0.25)" }}>
-          Based on internal testing.
-        </p>
       </div>
     </section>
   );

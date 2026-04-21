@@ -4,10 +4,10 @@ import { TextPressure } from "./TextPressure";
 
 const steps = [
   { icon: Mail, title: "Email received", text: "A customer sends an email to your connected inbox." },
-  { icon: Brain, title: "AI understands it", text: "Intent, sentiment, and category are detected instantly." },
-  { icon: Ticket, title: "Ticket created", text: "A structured ticket with priority and SLA timer." },
-  { icon: MessageSquare, title: "Reply drafted", text: "A confident reply generated from your knowledge base." },
-  { icon: CheckCircle, title: "Resolved or escalated", text: "High-confidence replies auto-send. The rest come to you." },
+  { icon: Brain, title: "Dutaly understands", text: "Intent, sentiment, and category are detected instantly." },
+  { icon: Ticket, title: "Dutaly decides", text: "A structured ticket is created with priority and SLA." },
+  { icon: MessageSquare, title: "Dutaly replies or escalates", text: "High-confidence replies auto-send. The rest come to you." },
+  { icon: CheckCircle, title: "Action taken", text: "Resolved automatically — or handed to your team with full context." },
 ];
 
 export function InteractiveDemoSection() {

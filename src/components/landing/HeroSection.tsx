@@ -38,9 +38,9 @@ export function HeroSection() {
           className="text-[clamp(2.8rem,6.5vw,5.5rem)] font-semibold tracking-[-0.04em] leading-[1.05] mx-auto max-w-[900px]"
           style={{ color: "#F0EEF8" }}
         >
-          Every customer email.
+          Every customer email. Handled —
           <br />
-          <em className="not-italic" style={{ color: "#7C6FE0" }}>Handled.</em>
+          by <em className="not-italic" style={{ color: "#7C6FE0" }}>Dutaly.</em>
         </motion.h1>
 
         <motion.p
@@ -50,8 +50,8 @@ export function HeroSection() {
           className="mt-6 text-[17px] sm:text-[19px] leading-[1.7] max-w-[560px] mx-auto"
           style={{ color: "rgba(255,255,255,0.5)" }}
         >
-          Automatically read incoming emails, create tickets, generate replies,
-          and resolve repetitive queries — while <em>keeping your team in control</em>.
+          Dutaly reads, replies, creates tickets, and resolves customer emails
+          automatically — while <em>keeping your team in control</em>.
         </motion.p>
 
         <motion.div
@@ -62,7 +62,7 @@ export function HeroSection() {
         >
           <Link to={ctaLink}>
             <Button className="h-11 px-6 text-[14px] text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300" style={{ background: "#7C6FE0", borderRadius: "6px" }}>
-              Get started
+              Let Dutaly handle your inbox
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
