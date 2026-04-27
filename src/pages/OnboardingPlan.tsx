@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Check } from "lucide-react";
+import { Check, ArrowLeft } from "lucide-react";
 
 const plans = {
   starter: {
@@ -69,13 +69,33 @@ export default function OnboardingPlan() {
 
   return (
     <div
-      className="flex min-h-screen flex-col items-center p-6"
+      className="relative flex min-h-screen flex-col items-center p-6"
       style={{ background: "#0A0A0F" }}
     >
+      {/* Back to home */}
+      <Link
+        to="/mails"
+        style={{
+          position: "absolute",
+          top: 24,
+          left: 24,
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 6,
+          color: "rgba(255,255,255,0.55)",
+          fontSize: 13,
+          fontWeight: 500,
+          textDecoration: "none",
+        }}
+      >
+        <ArrowLeft size={14} />
+        Back to home
+      </Link>
+
       {/* Logo */}
-      <h1 style={{ color: "#7C6FE0", fontSize: 20, fontWeight: 500, marginTop: 32 }}>
+      <Link to="/mails" style={{ color: "#7C6FE0", fontSize: 20, fontWeight: 500, marginTop: 32, textDecoration: "none" }}>
         dutaly
-      </h1>
+      </Link>
 
       {/* Step */}
       <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 12, marginTop: 12 }}>
