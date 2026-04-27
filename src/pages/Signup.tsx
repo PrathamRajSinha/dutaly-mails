@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Eye, EyeOff, Loader2, Mail } from "lucide-react";
+import { Eye, EyeOff, Loader2, Mail, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -184,10 +184,31 @@ export default function Signup() {
   });
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4" style={{ background: "#0A0A0F" }}>
+    <div className="relative flex min-h-screen items-center justify-center p-4" style={{ background: "#0A0A0F" }}>
+      <Link
+        to="/mails"
+        style={{
+          position: "absolute",
+          top: 24,
+          left: 24,
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 6,
+          color: "rgba(255,255,255,0.55)",
+          fontSize: 13,
+          fontWeight: 500,
+          textDecoration: "none",
+        }}
+      >
+        <ArrowLeft size={14} />
+        Back to home
+      </Link>
+
       <div className="w-full" style={{ maxWidth: 420 }}>
         <div className="mb-6 text-center">
-          <h1 style={{ color: "#7C6FE0", fontSize: 22, fontWeight: 500 }}>dutaly</h1>
+          <Link to="/mails" style={{ textDecoration: "none" }}>
+            <h1 style={{ color: "#7C6FE0", fontSize: 22, fontWeight: 500 }}>dutaly</h1>
+          </Link>
           <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 13, marginTop: 4 }}>AI agent for your inbox</p>
         </div>
 
