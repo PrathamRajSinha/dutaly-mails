@@ -7,7 +7,7 @@ const steps = [
   { icon: Brain, title: "Dutaly understands", text: "Intent, sentiment, and category are detected instantly." },
   { icon: Ticket, title: "Dutaly decides", text: "A structured ticket is created with priority and SLA." },
   { icon: MessageSquare, title: "Dutaly replies or escalates", text: "High-confidence replies auto-send. The rest come to you." },
-  { icon: CheckCircle, title: "Action taken", text: "Resolved automatically — or handed to your team with full context." },
+  { icon: CheckCircle, title: "Action taken", text: "Resolved automatically - or handed to your team with full context." },
 ];
 
 export function InteractiveDemoSection() {

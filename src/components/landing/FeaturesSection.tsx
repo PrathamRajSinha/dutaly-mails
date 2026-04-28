@@ -86,7 +86,7 @@ export function FeaturesSection() {
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          {/* 1. Understands every email — wide */}
+          {/* 1. Understands every email - wide */}
           <motion.div {...fade} transition={{ duration: 0.5, delay: 0.05 }} className="lg:col-span-7">
             <MagicBentoCard className="h-full">
               <div className="p-6 sm:p-8 flex flex-col h-full">
@@ -98,7 +98,7 @@ export function FeaturesSection() {
                     Dutaly understands every email
                   </h3>
                   <p className="text-[14px] leading-[1.7] max-w-[440px]" style={{ color: "rgba(255,255,255,0.5)" }}>
-                    Intent detection, sentiment analysis, and categorization — applied to every message before anyone reads it.
+                    Intent detection, sentiment analysis, and categorization - applied to every message before anyone reads it.
                   </p>
                 </div>
                 <div className="flex-1 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
@@ -108,7 +108,7 @@ export function FeaturesSection() {
             </MagicBentoCard>
           </motion.div>
 
-          {/* 2. Handles automatically — narrow */}
+          {/* 2. Handles automatically - narrow */}
           <motion.div {...fade} transition={{ duration: 0.5, delay: 0.1 }} className="lg:col-span-5">
             <MagicBentoCard className="h-full">
               <div className="p-6 sm:p-8 flex flex-col h-full">
@@ -130,7 +130,7 @@ export function FeaturesSection() {
             </MagicBentoCard>
           </motion.div>
 
-          {/* 3. Supports your team — narrow */}
+          {/* 3. Supports your team - narrow */}
           <motion.div {...fade} transition={{ duration: 0.5, delay: 0.15 }} className="lg:col-span-5">
             <MagicBentoCard className="h-full">
               <div className="p-6 sm:p-8 flex flex-col h-full">
@@ -152,7 +152,7 @@ export function FeaturesSection() {
             </MagicBentoCard>
           </motion.div>
 
-          {/* 4. Knows your business — wide */}
+          {/* 4. Knows your business - wide */}
           <motion.div {...fade} transition={{ duration: 0.5, delay: 0.2 }} className="lg:col-span-7">
             <MagicBentoCard className="h-full">
               <div className="p-6 sm:p-8 flex flex-col h-full">
@@ -164,7 +164,7 @@ export function FeaturesSection() {
                     Dutaly knows your business
                   </h3>
                   <p className="text-[14px] leading-[1.7] max-w-[440px]" style={{ color: "rgba(255,255,255,0.5)" }}>
-                    Powered by your knowledge base, your written instructions, and rule-based automation — Dutaly answers the way you would.
+                    Powered by your knowledge base, your written instructions, and rule-based automation - Dutaly answers the way you would.
                   </p>
                 </div>
                 <div className="flex-1 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
@@ -174,7 +174,7 @@ export function FeaturesSection() {
             </MagicBentoCard>
           </motion.div>
 
-          {/* Confidence states — full width */}
+          {/* Confidence states - full width */}
           <motion.div {...fade} transition={{ duration: 0.5, delay: 0.25 }} className="lg:col-span-12">
             <MagicBentoCard className="h-full">
               <div className="p-6 sm:p-8">
@@ -206,7 +206,7 @@ export function FeaturesSection() {
             </MagicBentoCard>
           </motion.div>
 
-          {/* Talk to Dutaly — narrow */}
+          {/* Talk to Dutaly - narrow */}
           <motion.div {...fade} transition={{ duration: 0.5, delay: 0.3 }} className="lg:col-span-7">
             <MagicBentoCard className="h-full">
               <div className="p-6 sm:p-8 flex flex-col h-full">
@@ -218,7 +218,7 @@ export function FeaturesSection() {
                     Talk to Dutaly
                   </h3>
                   <p className="text-[14px] leading-[1.7] max-w-[440px]" style={{ color: "rgba(255,255,255,0.5)" }}>
-                    Ask Dutaly which emails need attention, summarize today's issues, or list unresolved queries — with direct references to every email.
+                    Ask Dutaly which emails need attention, summarize today's issues, or list unresolved queries - with direct references to every email.
                   </p>
                 </div>
                 <div className="flex-1 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
@@ -228,7 +228,7 @@ export function FeaturesSection() {
             </MagicBentoCard>
           </motion.div>
 
-          {/* Tickets — narrow */}
+          {/* Tickets - narrow */}
           <motion.div {...fade} transition={{ duration: 0.5, delay: 0.35 }} className="lg:col-span-5">
             <MagicBentoCard className="h-full">
               <div className="p-6 sm:p-8 flex flex-col h-full">
@@ -240,7 +240,7 @@ export function FeaturesSection() {
                     Full visibility & tracking
                   </h3>
                   <p className="text-[14px] leading-[1.7] max-w-[440px]" style={{ color: "rgba(255,255,255,0.5)" }}>
-                    Every email becomes a structured, trackable ticket with full visibility — status, priority, SLA, and history.
+                    Every email becomes a structured, trackable ticket with full visibility - status, priority, SLA, and history.
                   </p>
                 </div>
                 <div className="grid grid-cols-3 gap-2 mt-2">

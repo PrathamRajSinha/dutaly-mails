@@ -6,7 +6,7 @@ const useCases = [
   {
     tab: "SaaS",
     headline: "Route, resolve, repeat.",
-    text: "Route bug reports to engineering, handle billing questions automatically, and keep feature requests organized — all without lifting a finger.",
+    text: "Route bug reports to engineering, handle billing questions automatically, and keep feature requests organized - all without lifting a finger.",
     bullets: ["Auto-categorize by intent", "Escalate bugs instantly", "Track feature requests"],
   },
   {

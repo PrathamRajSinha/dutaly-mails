@@ -12,7 +12,7 @@ export function EmailReferenceList({ emails, onEmailClick }: EmailReferenceListP
 
   return (
     <div className="mt-3 space-y-1">
-      <p className="text-xs text-muted-foreground mb-1">Referenced emails — click for details:</p>
+      <p className="text-xs text-muted-foreground mb-1">Referenced emails - click for details:</p>
       <div className="flex flex-col gap-1">
         {emails.map((email, i) => (
           <button
@@ -24,7 +24,7 @@ export function EmailReferenceList({ emails, onEmailClick }: EmailReferenceListP
             <span className="text-primary group-hover:underline truncate">
               {email.from_name || email.from_address}
             </span>
-            <span className="text-muted-foreground truncate">— {email.subject}</span>
+            <span className="text-muted-foreground truncate">- {email.subject}</span>
             <span className="text-muted-foreground/60 ml-auto shrink-0">
               {format(new Date(email.queued_at), "MMM d, HH:mm")}
             </span>

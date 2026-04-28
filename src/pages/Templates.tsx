@@ -267,7 +267,7 @@ export default function Templates() {
                   className="min-h-[60px]"
                   value={form.footer_text}
                   onChange={(e) => setForm({ ...form, footer_text: e.target.value })}
-                  placeholder="e.g., Company Inc. — All rights reserved"
+                  placeholder="e.g., Company Inc. - All rights reserved"
                 />
               </div>
 

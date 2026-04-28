@@ -45,7 +45,7 @@ export function UnsendToastProvider() {
         const windowSeconds = instructions?.unsend_window_seconds ?? 60;
 
         if (windowSeconds === 0) {
-          // Unsend window is off — don't show toasts
+          // Unsend window is off - don't show toasts
           return;
         }
 
@@ -98,7 +98,7 @@ export function UnsendToastProvider() {
     pendingSends.forEach((send) => {
       const remaining = Math.max(0, Math.ceil((send.scheduled_at - Date.now()) / 1000));
       if (remaining <= 0) {
-        // Time's up — remove from list
+        // Time's up - remove from list
         setPendingSends((prev) => prev.filter((p) => p.id !== send.id));
         return;
       }

@@ -59,7 +59,7 @@ export default function ForgotPassword() {
             <div className="flex flex-col items-center" style={{ paddingTop: 16, paddingBottom: 8 }}>
               <CheckCircle size={48} style={{ color: "#1D9E75" }} />
               <p style={{ color: "#1D9E75", fontSize: 15, fontWeight: 500, marginTop: 16, textAlign: "center" }}>
-                Check your inbox — reset link sent.
+                Check your inbox - reset link sent.
               </p>
             </div>
           ) : (
