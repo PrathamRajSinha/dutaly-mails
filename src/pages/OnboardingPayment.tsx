@@ -218,7 +218,7 @@ export default function OnboardingPayment() {
         key: RAZORPAY_KEY_ID,
         subscription_id: data.subscription_id,
         name: "dutaly",
-        description: `${plan.name} Plan — ${billingPeriod}`,
+        description: `${plan.name} Plan - ${billingPeriod}`,
         prefill: {
           email: user.email,
           name: user.user_metadata?.full_name || "",
@@ -302,7 +302,7 @@ export default function OnboardingPayment() {
 
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
           <span style={{ color: "rgba(255,255,255,0.6)", fontSize: 14 }}>
-            {plan.name} — {billingPeriod}
+            {plan.name} - {billingPeriod}
           </span>
           <span style={{ color: "#F0EEF8", fontSize: 14 }}>₹{basePrice.toLocaleString("en-IN")}/mo</span>
         </div>

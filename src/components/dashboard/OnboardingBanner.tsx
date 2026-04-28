@@ -44,7 +44,7 @@ export function OnboardingBanner({
             style={{ color: "#1A1730" }}
           >
             {stepsLeft > 0
-              ? `You're almost ready — ${stepsLeft} step${stepsLeft !== 1 ? "s" : ""} left`
+              ? `You're almost ready - ${stepsLeft} step${stepsLeft !== 1 ? "s" : ""} left`
               : "You're all set! 🎉"}
           </h2>
 

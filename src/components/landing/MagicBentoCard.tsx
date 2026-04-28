@@ -47,7 +47,7 @@ export function MagicBentoCard({
       className={`relative rounded-2xl overflow-hidden ${className}`}
       style={{ willChange: "auto" }}
     >
-      {/* Border glow layer — proximity based */}
+      {/* Border glow layer - proximity based */}
       <div
         className="absolute inset-0 rounded-2xl pointer-events-none"
         style={{
@@ -74,7 +74,7 @@ export function MagicBentoCard({
         }}
       />
 
-      {/* Spotlight overlay — only when directly hovering */}
+      {/* Spotlight overlay - only when directly hovering */}
       <div
         className="absolute inset-0 rounded-2xl pointer-events-none"
         style={{

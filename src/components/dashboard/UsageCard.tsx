@@ -65,7 +65,7 @@ export function UsageCard() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-[13px] font-medium" style={{ color: '#1A1730' }}>
             <BarChart3 className="h-4 w-4" style={{ color: '#7C6FE0' }} />
-            Usage — {currentPlan.display_name} Plan
+            Usage - {currentPlan.display_name} Plan
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">

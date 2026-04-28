@@ -38,7 +38,7 @@ export function HeroSection() {
           className="text-[clamp(2.8rem,6.5vw,5.5rem)] font-semibold tracking-[-0.04em] leading-[1.05] mx-auto max-w-[900px]"
           style={{ color: "#F0EEF8" }}
         >
-          Every customer email. Handled —
+          Every customer email. Handled -
           <br />
           by <em className="not-italic" style={{ color: "#7C6FE0" }}>Dutaly.</em>
         </motion.h1>
@@ -51,7 +51,7 @@ export function HeroSection() {
           style={{ color: "rgba(255,255,255,0.5)" }}
         >
           Dutaly reads, replies, creates tickets, and resolves customer emails
-          automatically — while <em>keeping your team in control</em>.
+          automatically - while <em>keeping your team in control</em>.
         </motion.p>
 
         <motion.div

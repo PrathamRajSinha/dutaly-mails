@@ -22,7 +22,7 @@ export function CTASection() {
             Let <span style={{ color: "#7C6FE0" }}>Dutaly</span> handle your inbox.
           </h2>
           <p className="mt-6 text-[17px] max-w-[520px] mx-auto leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>
-            Connect your inbox and let Dutaly handle emails automatically — while you stay in control.
+            Connect your inbox and let Dutaly handle emails automatically - while you stay in control.
           </p>
           <div className="mt-10 flex items-center justify-center gap-5">
             <Link to={ctaLink}>

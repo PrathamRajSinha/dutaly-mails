@@ -236,7 +236,7 @@ export function AskAnythingMockup() {
                 <div key={ref.subject} className="flex items-center gap-1.5 py-1 px-2 rounded-md bg-white border border-zinc-100">
                   <Mail className="h-2.5 w-2.5 text-violet-500 flex-shrink-0" />
                   <span className="text-[10px] font-medium text-violet-600 truncate">{ref.from}</span>
-                  <span className="text-[10px] text-zinc-400 truncate">— {ref.subject}</span>
+                  <span className="text-[10px] text-zinc-400 truncate">- {ref.subject}</span>
                   <span className="text-[9px] text-zinc-300 ml-auto flex-shrink-0">{ref.time}</span>
                 </div>
               ))}

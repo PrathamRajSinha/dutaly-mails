@@ -269,7 +269,7 @@ export default function Onboarding() {
               {draftEntries.length > 0 && (
                 <div className="space-y-3">
                   <Label className="text-sm font-medium">
-                    Generated {draftEntries.length} entries — review and confirm:
+                    Generated {draftEntries.length} entries - review and confirm:
                   </Label>
                   <div className="max-h-[400px] space-y-2 overflow-y-auto rounded-lg border border-border p-3">
                     {draftEntries.map((entry, i) => (
@@ -337,7 +337,7 @@ export default function Onboarding() {
 
               <div className="text-center">
                 <Button variant="ghost" onClick={() => setCurrentStep(2)}>
-                  Skip — I'll add manually later
+                  Skip - I'll add manually later
                 </Button>
               </div>
             </div>
@@ -408,7 +408,7 @@ export default function Onboarding() {
                     <span className="text-sm text-foreground">
                       {draftEntries.length > 0
                         ? `${draftEntries.length} knowledge base entries ready`
-                        : "Knowledge base — skipped (add entries later)"}
+                        : "Knowledge base - skipped (add entries later)"}
                     </span>
                   </div>
                   <div className="flex items-center gap-3">

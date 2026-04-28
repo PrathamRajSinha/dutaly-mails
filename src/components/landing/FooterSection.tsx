@@ -19,7 +19,7 @@ export function FooterSection() {
         </div>
         <div className="border-t pt-6 text-center" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
           <p className="text-[12px] max-w-[520px] mx-auto leading-relaxed" style={{ color: "rgba(255,255,255,0.2)" }}>
-            Duta (दूत) means messenger or agent in Sanskrit. We build AI agents that handle your business communication — starting with email.
+            Duta (दूत) means messenger or agent in Sanskrit. We build AI agents that handle your business communication - starting with email.
           </p>
         </div>
       </div>

@@ -20,7 +20,7 @@ export function InstructionBuilder() {
   const [newRuleText, setNewRuleText] = useState("");
   const [newPriority, setNewPriority] = useState<string>("normal");
 
-  // Flat list — filter out any legacy child rules
+  // Flat list - filter out any legacy child rules
   const flatRules = rules
     .filter((r) => !r.parent_id)
     .sort((a, b) => {
