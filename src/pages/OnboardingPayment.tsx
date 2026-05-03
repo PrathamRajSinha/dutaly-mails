@@ -47,7 +47,7 @@ export default function OnboardingPayment() {
   const [razorpayReady, setRazorpayReady] = useState(typeof window !== "undefined" && typeof window.Razorpay !== "undefined");
 
   const discount = couponApplied
-    ? couponApplied.discount_type === "percentage"
+    ? couponApplied.discount_type === "percent"
       ? Math.round(basePrice * (couponApplied.discount_value / 100))
       : couponApplied.discount_value
     : 0;
@@ -310,7 +310,7 @@ export default function OnboardingPayment() {
         {couponApplied && (
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
             <span style={{ color: "#4ADE80", fontSize: 14 }}>
-              Coupon ({couponApplied.discount_type === "percentage" ? `${couponApplied.discount_value}%` : `₹${couponApplied.discount_value}`})
+              Coupon ({couponApplied.discount_type === "percent" ? `${couponApplied.discount_value}%` : `₹${couponApplied.discount_value}`})
             </span>
             <span style={{ color: "#4ADE80", fontSize: 14 }}>−₹{discount.toLocaleString("en-IN")}</span>
           </div>
