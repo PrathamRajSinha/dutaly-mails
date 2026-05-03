@@ -17,6 +17,97 @@ interface SendReplyRequest {
   attachments?: string[]; // URLs to download
 }
 
+// ===== IMAP APPEND helper to save sent message to Sent folder =====
+async function imapReadUntil(conn: Deno.TlsConn, marker: string, timeoutMs = 10000): Promise<string> {
+  const buf = new Uint8Array(8192);
+  let result = "";
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    const n = await conn.read(buf);
+    if (n === null) break;
+    result += new TextDecoder().decode(buf.subarray(0, n));
+    if (result.includes(marker)) return result;
+  }
+  return result;
+}
+
+async function imapSend(conn: Deno.TlsConn, data: string): Promise<void> {
+  await conn.write(new TextEncoder().encode(data));
+}
+
+function buildRfc822(opts: {
+  from: string; to: string; subject: string; html?: string; text?: string;
+}): string {
+  const date = new Date().toUTCString();
+  const messageId = `<${crypto.randomUUID()}@${opts.from.split("@")[1] || "localhost"}>`;
+  const subjectEnc = `=?UTF-8?B?${btoa(unescape(encodeURIComponent(opts.subject)))}?=`;
+  const headers = [
+    `From: ${opts.from}`,
+    `To: ${opts.to}`,
+    `Subject: ${subjectEnc}`,
+    `Date: ${date}`,
+    `Message-ID: ${messageId}`,
+    `MIME-Version: 1.0`,
+  ];
+  let body: string;
+  if (opts.html) {
+    headers.push(`Content-Type: text/html; charset=UTF-8`);
+    headers.push(`Content-Transfer-Encoding: base64`);
+    body = btoa(unescape(encodeURIComponent(opts.html))).replace(/(.{76})/g, "$1\r\n");
+  } else {
+    headers.push(`Content-Type: text/plain; charset=UTF-8`);
+    headers.push(`Content-Transfer-Encoding: base64`);
+    body = btoa(unescape(encodeURIComponent(opts.text || ""))).replace(/(.{76})/g, "$1\r\n");
+  }
+  return headers.join("\r\n") + "\r\n\r\n" + body + "\r\n";
+}
+
+async function appendToSentFolder(opts: {
+  host: string; port: number; username: string; password: string;
+  from: string; to: string; subject: string; html?: string; text?: string;
+}): Promise<void> {
+  const conn = await Deno.connectTls({ hostname: opts.host, port: opts.port });
+  try {
+    await imapReadUntil(conn, "\r\n"); // greeting
+    // login
+    await imapSend(conn, `a1 LOGIN "${opts.username}" "${opts.password.replace(/"/g, '\\"')}"\r\n`);
+    const loginResp = await imapReadUntil(conn, "a1 ");
+    if (!/a1 OK/i.test(loginResp)) throw new Error("IMAP login failed: " + loginResp.slice(0, 200));
+
+    // discover Sent folder via LIST (look for \Sent special-use, fallback to common names)
+    await imapSend(conn, `a2 LIST "" "*"\r\n`);
+    const listResp = await imapReadUntil(conn, "a2 ");
+    const candidates = ["Sent", "Sent Mail", "Sent Messages", "INBOX.Sent", "[Gmail]/Sent Mail"];
+    let sentFolder: string | null = null;
+    // Prefer \Sent special-use
+    const sentMatch = listResp.match(/\(\\?[^)]*\\Sent[^)]*\)[^"]*"[^"]*"\s+"([^"]+)"/i);
+    if (sentMatch) sentFolder = sentMatch[1];
+    if (!sentFolder) {
+      for (const name of candidates) {
+        const re = new RegExp(`"\\s+"${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"`, "i");
+        if (re.test(listResp)) { sentFolder = name; break; }
+      }
+    }
+    if (!sentFolder) sentFolder = "Sent";
+
+    const message = buildRfc822(opts);
+    const bytes = new TextEncoder().encode(message);
+    await imapSend(conn, `a3 APPEND "${sentFolder}" (\\Seen) {${bytes.length}}\r\n`);
+    // wait for continuation "+"
+    const cont = await imapReadUntil(conn, "+");
+    if (!cont.includes("+")) throw new Error("APPEND not accepted: " + cont.slice(0, 200));
+    await conn.write(bytes);
+    await imapSend(conn, `\r\n`);
+    const appendResp = await imapReadUntil(conn, "a3 ");
+    if (!/a3 OK/i.test(appendResp)) throw new Error("APPEND failed: " + appendResp.slice(0, 200));
+
+    await imapSend(conn, `a4 LOGOUT\r\n`);
+    await imapReadUntil(conn, "a4 ", 3000);
+  } finally {
+    try { conn.close(); } catch { /* ignore */ }
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -141,6 +232,26 @@ serve(async (req) => {
     await client.close();
 
     console.log("SMTP email sent successfully");
+
+    // Append a copy to the IMAP Sent folder so it shows up in the user's mail client
+    if (account.imap_host && account.imap_password) {
+      try {
+        await appendToSentFolder({
+          host: account.imap_host,
+          port: account.imap_port || 993,
+          username: account.email_address,
+          password: account.imap_password,
+          from: account.email_address,
+          to: requestData.to_address,
+          subject,
+          html: requestData.html_body,
+          text: requestData.body,
+        });
+        console.log("Saved copy to Sent folder");
+      } catch (e) {
+        console.warn("Failed to append to Sent folder:", e instanceof Error ? e.message : e);
+      }
+    }
 
     return new Response(
       JSON.stringify({ success: true }),
