@@ -220,7 +220,7 @@ export function TicketDetailPanel({ ticketId, onBack }: { ticketId: string; onBa
   const { ticket, emails, notes, isLoading } = useTicketDetail(ticketId);
   const { updateStatus, updatePriority } = useTicketMutations(ticketId);
   const { addNote, deleteNote } = useTicketNotes(ticketId);
-  const { updateEmailStatus, snoozeEmail, scheduleEmail } = useEmailQueue();
+  const { updateEmailStatus, sendEmail, snoozeEmail, scheduleEmail } = useEmailQueue();
   const { session } = useAuth();
   const { accounts } = useEmailAccounts();
   const queryClient = useQueryClient();
@@ -229,16 +229,16 @@ export function TicketDetailPanel({ ticketId, onBack }: { ticketId: string; onBa
 
   const pendingCount = emails.filter((e) => e.status === "pending").length;
 
-  const handleApprove = async (emailId: string, _htmlBody?: string, _attachmentUrls?: string[]) => {
-    await updateEmailStatus.mutateAsync({ id: emailId, status: "approved" });
+  const handleApprove = async (email: QueuedEmail, htmlBody?: string, attachmentUrls?: string[]) => {
+    await sendEmail.mutateAsync({ email, htmlBody, attachmentUrls });
     queryClient.invalidateQueries({ queryKey: ["ticket-emails"] });
   };
   const handleIgnore = async (emailId: string) => {
     await updateEmailStatus.mutateAsync({ id: emailId, status: "ignored" });
     queryClient.invalidateQueries({ queryKey: ["ticket-emails"] });
   };
-  const handleEditSend = async (emailId: string, reply: string, _htmlBody?: string, _attachmentUrls?: string[]) => {
-    await updateEmailStatus.mutateAsync({ id: emailId, status: "edited", editedReply: reply });
+  const handleEditSend = async (email: QueuedEmail, reply: string, htmlBody?: string, attachmentUrls?: string[]) => {
+    await sendEmail.mutateAsync({ email, reply, htmlBody, attachmentUrls });
     queryClient.invalidateQueries({ queryKey: ["ticket-emails"] });
   };
   const handleSnooze = async (emailId: string, until: Date) => {
@@ -351,12 +351,12 @@ export function TicketDetailPanel({ ticketId, onBack }: { ticketId: string; onBa
                           )}
                           <EmailActions
                             email={email}
-                            onApprove={(htmlBody, attachmentUrls) => handleApprove(email.id, htmlBody, attachmentUrls)}
+                            onApprove={(htmlBody, attachmentUrls) => handleApprove(email, htmlBody, attachmentUrls)}
                             onIgnore={() => handleIgnore(email.id)}
-                            onEditSend={(reply, htmlBody, attachmentUrls) => handleEditSend(email.id, reply, htmlBody, attachmentUrls)}
+                            onEditSend={(reply, htmlBody, attachmentUrls) => handleEditSend(email, reply, htmlBody, attachmentUrls)}
                             onSnooze={(until) => handleSnooze(email.id, until)}
                             onSchedule={(sendAt, reply) => handleSchedule(email.id, sendAt, reply)}
-                            isPending={updateEmailStatus.isPending}
+                            isPending={updateEmailStatus.isPending || sendEmail.isPending}
                           />
                         </>
                       )}
