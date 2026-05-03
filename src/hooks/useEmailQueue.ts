@@ -28,7 +28,7 @@ export interface QueuedEmail {
 export type QueueTab = "needs_review" | "drafted" | "sent" | "ignored";
 
 export function useEmailQueue(statusFilter?: string) {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const queryClient = useQueryClient();
 
   const { data: allEmails = [], isLoading, error } = useQuery({
@@ -86,6 +86,118 @@ export function useEmailQueue(statusFilter?: string) {
     },
     onError: (error) => {
       toast.error("Failed to update: " + error.message);
+    },
+  });
+
+  const sendEmail = useMutation({
+    mutationFn: async ({
+      email,
+      reply,
+      htmlBody,
+      attachmentUrls,
+    }: {
+      email: QueuedEmail;
+      reply?: string;
+      htmlBody?: string;
+      attachmentUrls?: string[];
+    }) => {
+      if (!session?.access_token) {
+        throw new Error("Please sign in to send emails");
+      }
+
+      if (!email.email_account_id) {
+        throw new Error("No email account is connected to this conversation");
+      }
+
+      const replyBody = reply?.trim() || email.suggested_reply?.trim();
+      if (!replyBody) {
+        throw new Error("Reply content is empty");
+      }
+
+      const { data: account, error: accountError } = await supabase
+        .from("email_accounts")
+        .select("provider, is_active")
+        .eq("id", email.email_account_id)
+        .single();
+
+      if (accountError || !account) {
+        throw accountError ?? new Error("Email account not found");
+      }
+
+      if (!account.is_active) {
+        throw new Error("This email account is paused");
+      }
+
+      const functionName = account.provider === "gmail"
+        ? "send-gmail-reply"
+        : "send-imap-reply";
+
+      const payload: Record<string, unknown> = {
+        email_account_id: email.email_account_id,
+        to_address: email.from_address,
+        subject: email.subject,
+        body: replyBody,
+      };
+
+      if (htmlBody) {
+        payload.html_body = htmlBody;
+      }
+
+      if (attachmentUrls?.length) {
+        payload.attachments = attachmentUrls;
+      }
+
+      if (email.thread_id) {
+        payload.thread_id = email.thread_id;
+      }
+
+      if (account.provider === "gmail" && email.external_email_id) {
+        payload.message_id = email.external_email_id;
+      }
+
+      const { data: sendData, error: sendError } = await supabase.functions.invoke(functionName, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        body: payload,
+      });
+
+      if (sendError) {
+        throw sendError;
+      }
+
+      if (
+        sendData &&
+        typeof sendData === "object" &&
+        "error" in sendData &&
+        typeof sendData.error === "string"
+      ) {
+        throw new Error(sendData.error);
+      }
+
+      const updates: Partial<QueuedEmail> = {
+        status: "sent",
+        reviewed_at: new Date().toISOString(),
+      };
+
+      if (reply) {
+        updates.suggested_reply = replyBody;
+      }
+
+      const { error: queueError } = await supabase
+        .from("email_queue")
+        .update(updates)
+        .eq("id", email.id);
+
+      if (queueError) {
+        throw queueError;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["email-queue"] });
+      queryClient.invalidateQueries({ queryKey: ["ticket-emails"] });
+      toast.success("Email sent successfully");
+    },
+    onError: (error) => {
+      toast.error("Failed to send email: " + error.message);
     },
   });
 
@@ -159,6 +271,7 @@ export function useEmailQueue(statusFilter?: string) {
     isLoading,
     error,
     updateEmailStatus,
+    sendEmail,
     deleteEmail,
     snoozeEmail,
     scheduleEmail,

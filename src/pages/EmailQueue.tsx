@@ -396,7 +396,7 @@ export default function EmailQueue() {
   const { session } = useAuth();
   const queryClient = useQueryClient();
   const { accounts } = useEmailAccounts();
-  const { emails: allEmails, needsReview, drafted, sent, ignored, isLoading, updateEmailStatus, pendingCount } = useEmailQueue();
+  const { emails: allEmails, needsReview, drafted, sent, ignored, isLoading, updateEmailStatus, sendEmail, pendingCount } = useEmailQueue();
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [addKBDialogOpen, setAddKBDialogOpen] = useState(false);
@@ -539,16 +539,16 @@ export default function EmailQueue() {
       return true;
     });
 
-  const handleApprove = async (id: string, _htmlBody?: string, _attachmentUrls?: string[]) => {
-    await updateEmailStatus.mutateAsync({ id, status: "approved" });
+  const handleApprove = async (email: QueuedEmail, htmlBody?: string, attachmentUrls?: string[]) => {
+    await sendEmail.mutateAsync({ email, htmlBody, attachmentUrls });
   };
 
   const handleIgnore = async (id: string) => {
     await updateEmailStatus.mutateAsync({ id, status: "ignored" });
   };
 
-  const handleEditSend = async (id: string, editedReply: string, _htmlBody?: string, _attachmentUrls?: string[]) => {
-    await updateEmailStatus.mutateAsync({ id, status: "edited", editedReply });
+  const handleEditSend = async (email: QueuedEmail, editedReply: string, htmlBody?: string, attachmentUrls?: string[]) => {
+    await sendEmail.mutateAsync({ email, reply: editedReply, htmlBody, attachmentUrls });
   };
 
   const handleAddToKB = (email: QueuedEmail) => {
@@ -577,11 +577,11 @@ export default function EmailQueue() {
             email={email}
             isExpanded={expandedId === email.id}
             onToggle={() => setExpandedId(expandedId === email.id ? null : email.id)}
-            onApprove={(htmlBody, attachmentUrls) => handleApprove(email.id, htmlBody, attachmentUrls)}
+            onApprove={(htmlBody, attachmentUrls) => handleApprove(email, htmlBody, attachmentUrls)}
             onIgnore={() => handleIgnore(email.id)}
-            onEditSend={(reply, htmlBody, attachmentUrls) => handleEditSend(email.id, reply, htmlBody, attachmentUrls)}
+            onEditSend={(reply, htmlBody, attachmentUrls) => handleEditSend(email, reply, htmlBody, attachmentUrls)}
             onAddToKB={() => handleAddToKB(email)}
-            isPending={updateEmailStatus.isPending}
+            isPending={updateEmailStatus.isPending || sendEmail.isPending}
             readOnly={readOnly}
           />
         ))}
