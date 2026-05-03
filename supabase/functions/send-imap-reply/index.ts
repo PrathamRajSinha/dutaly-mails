@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.93.3";
-import { SmtpClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
+import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -161,45 +161,34 @@ serve(async (req) => {
       );
     }
 
-    const client = new SmtpClient();
-
     const smtpPort = account.smtp_port || 587;
     const useStartTls = smtpPort === 587;
 
-    if (useStartTls) {
-      await client.connect({
+    const client = new SMTPClient({
+      connection: {
         hostname: account.smtp_host,
         port: smtpPort,
-      });
-      await client.starttls();
-    } else {
-      await client.connectTLS({
-        hostname: account.smtp_host,
-        port: smtpPort,
-      });
-    }
-
-    await client.login({
-      username: account.email_address,
-      password: account.imap_password,
+        tls: !useStartTls,
+        auth: {
+          username: account.email_address,
+          password: account.imap_password,
+        },
+      },
     });
 
-    const subject = requestData.subject.startsWith("Re:") 
-      ? requestData.subject 
+    const subject = requestData.subject.startsWith("Re:")
+      ? requestData.subject
       : `Re: ${requestData.subject}`;
 
-    // Build send options with html support
     const sendOptions: Record<string, unknown> = {
       from: account.email_address,
       to: requestData.to_address,
       subject,
+      content: requestData.body || (requestData.html_body ? "See HTML version" : ""),
     };
 
     if (requestData.html_body) {
-      sendOptions.content = "auto";
       sendOptions.html = requestData.html_body;
-    } else {
-      sendOptions.content = requestData.body;
     }
 
     // Download and attach files if any
