@@ -527,7 +527,7 @@ function TicketCard({ ticket, isExpanded, onToggle }: { ticket: Ticket; isExpand
 
 // ─── Emails View ────────────────────────────────────────────
 function EmailsView({ searchQuery, onSearchChange }: { searchQuery: string; onSearchChange: (v: string) => void }) {
-  const { emails: allEmails, needsReview, drafted, sent, ignored, isLoading, updateEmailStatus, pendingCount } = useEmailQueue();
+  const { emails: allEmails, needsReview, drafted, sent, ignored, isLoading, updateEmailStatus, sendEmail, pendingCount } = useEmailQueue();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [addKBDialogOpen, setAddKBDialogOpen] = useState(false);
   const [selectedEmailForKB, setSelectedEmailForKB] = useState<QueuedEmail | null>(null);
@@ -563,14 +563,14 @@ function EmailsView({ searchQuery, onSearchChange }: { searchQuery: string; onSe
       return true;
     });
 
-  const handleApprove = async (id: string) => {
-    await updateEmailStatus.mutateAsync({ id, status: "approved" });
+  const handleApprove = async (email: QueuedEmail) => {
+    await sendEmail.mutateAsync({ email });
   };
   const handleIgnore = async (id: string) => {
     await updateEmailStatus.mutateAsync({ id, status: "ignored" });
   };
-  const handleEditSend = async (id: string, editedReply: string) => {
-    await updateEmailStatus.mutateAsync({ id, status: "edited", editedReply });
+  const handleEditSend = async (email: QueuedEmail, editedReply: string) => {
+    await sendEmail.mutateAsync({ email, reply: editedReply });
   };
   const handleAddToKB = (email: QueuedEmail) => {
     setSelectedEmailForKB(email);
@@ -603,12 +603,12 @@ function EmailsView({ searchQuery, onSearchChange }: { searchQuery: string; onSe
             email={email}
             isExpanded={expandedId === email.id}
             onToggle={() => setExpandedId(expandedId === email.id ? null : email.id)}
-            onApprove={() => handleApprove(email.id)}
+            onApprove={() => handleApprove(email)}
             onIgnore={() => handleIgnore(email.id)}
-            onEditSend={(reply) => handleEditSend(email.id, reply)}
+            onEditSend={(reply) => handleEditSend(email, reply)}
             onAddToKB={() => handleAddToKB(email)}
             onReopen={() => handleReopen(email.id)}
-            isPending={updateEmailStatus.isPending}
+            isPending={updateEmailStatus.isPending || sendEmail.isPending}
             readOnly={readOnly}
           />
         ))}
