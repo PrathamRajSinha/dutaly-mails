@@ -1,7 +1,7 @@
-## Update favicon to new Dutaly logo
+## Fix: Coupon applies ₹100 instead of 100%
 
-1. Copy `user-uploads://dutalybig.png` to `public/favicon.png` (overwrite existing).
-2. Delete `public/favicon.ico` if present so browsers don't fall back to the old icon.
-3. Update `index.html` `<link rel="icon">` to point at `/favicon.png?v=3` (bump cache-buster from `v=2` so existing visitors see the new icon).
+**Root cause:** DB stores `discount_type = "percent"` but `OnboardingPayment.tsx` checks for `"percentage"`, falling through to the flat-amount branch.
 
-No other files change. The OG/Twitter image tags stay as-is.
+**Change:** In `src/pages/OnboardingPayment.tsx`, replace both `"percentage"` string comparisons with `"percent"` (lines 50 and 313).
+
+After the fix, `FREETEST` (100% off) will compute `finalPrice = 0` and trigger the existing free-activation flow.
