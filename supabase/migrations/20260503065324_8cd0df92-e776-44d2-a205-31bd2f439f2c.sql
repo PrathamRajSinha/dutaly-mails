@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Anyone can read email attachments" ON storage.objects;
