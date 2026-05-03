@@ -142,6 +142,26 @@ serve(async (req) => {
 
     console.log("SMTP email sent successfully");
 
+    // Append a copy to the IMAP Sent folder so it shows up in the user's mail client
+    if (account.imap_host && account.imap_password) {
+      try {
+        await appendToSentFolder({
+          host: account.imap_host,
+          port: account.imap_port || 993,
+          username: account.email_address,
+          password: account.imap_password,
+          from: account.email_address,
+          to: requestData.to_address,
+          subject,
+          html: requestData.html_body,
+          text: requestData.body,
+        });
+        console.log("Saved copy to Sent folder");
+      } catch (e) {
+        console.warn("Failed to append to Sent folder:", e instanceof Error ? e.message : e);
+      }
+    }
+
     return new Response(
       JSON.stringify({ success: true }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
