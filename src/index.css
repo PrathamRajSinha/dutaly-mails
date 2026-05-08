@@ -36,10 +36,10 @@
     --destructive: 0 84% 50%;
     --destructive-foreground: 0 84% 50%;
 
-    /* Card border: rgba(124,111,224,0.1) */
-    --border: 248 64% 66% / 0.1;
-    /* Input border: rgba(124,111,224,0.2) */
-    --input: 248 64% 66% / 0.2;
+    /* Card border: solid muted lavender */
+    --border: 248 40% 88%;
+    /* Input border: slightly darker lavender */
+    --input: 248 40% 82%;
     --ring: 248 64% 66%;
 
     --radius: 0.75rem;
