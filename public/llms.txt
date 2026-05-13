@@ -1,0 +1,18 @@
+# Dutaly
+
+> Dutaly is an AI helpdesk that turns customer emails into structured tickets and replies automatically using your knowledge base.
+
+Dutaly connects to Gmail or any IMAP/SMTP inbox, classifies incoming email, drafts grounded replies from your knowledge base, and escalates anything risky or angry to a human. Built for small support teams that want to scale without hiring.
+
+## Pages
+
+- [Home](/mails): Product overview, features, and how Dutaly handles your inbox.
+- [Pricing](/pricing): Starter, Growth, and Scale plans with monthly resolution limits.
+- [Sign in](/login): Existing customers log in here.
+- [Sign up](/signup): Create a Dutaly account.
+
+## Optional
+
+- [Privacy](/privacy): Privacy policy.
+- [Terms](/terms): Terms of service.
+- [Refund](/refund): Refund policy.

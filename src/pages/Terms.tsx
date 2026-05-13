@@ -1,9 +1,15 @@
 import { Link } from "react-router-dom";
 import logoDarkBg from "@/assets/logo-dark-bg.png";
+import { Seo } from "@/components/Seo";
 
 export default function Terms() {
   return (
     <div className="min-h-screen" style={{ background: "#0A0A0F", color: "rgba(255,255,255,0.85)" }}>
+      <Seo
+        title="Terms and Conditions — Dutaly"
+        description="The terms governing your use of Dutaly's AI helpdesk service."
+        path="/terms"
+      />
       <header className="border-b" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
         <div className="max-w-[880px] mx-auto px-6 h-14 flex items-center justify-between">
           <Link to="/mails"><img src={logoDarkBg} alt="Dutaly" className="h-6 w-auto" /></Link>
