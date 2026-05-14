@@ -69,7 +69,7 @@ export function LandingNavbar() {
           )}
         </div>
 
-        <button className="md:hidden" style={{ color: "rgba(255,255,255,0.5)" }} onClick={() => setMobileOpen(!mobileOpen)}>
+        <button className="md:hidden" aria-label={mobileOpen ? "Close menu" : "Open menu"} aria-expanded={mobileOpen} style={{ color: "rgba(255,255,255,0.5)" }} onClick={() => setMobileOpen(!mobileOpen)}>
           {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
