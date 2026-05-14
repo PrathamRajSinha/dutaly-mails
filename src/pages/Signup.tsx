@@ -206,27 +206,27 @@ export default function Signup() {
 
       <div className="w-full" style={{ maxWidth: 420 }}>
         <div className="mb-6 text-center">
-          <Link to="/mails" style={{ textDecoration: "none" }}>
-            <h1 style={{ color: "#7C6FE0", fontSize: 22, fontWeight: 500 }}>dutaly</h1>
+          <Link to="/mails" style={{ textDecoration: "none" }} aria-label="Dutaly home">
+            <span style={{ color: "#7C6FE0", fontSize: 22, fontWeight: 500 }}>dutaly</span>
           </Link>
-          <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 13, marginTop: 4 }}>AI agent for your inbox</p>
+          <p style={{ color: "rgba(255,255,255,0.55)", fontSize: 13, marginTop: 4 }}>AI agent for your inbox</p>
         </div>
 
-        <div style={{ background: "#FFFFFF", borderRadius: 16, padding: 40 }}>
+        <main style={{ background: "#FFFFFF", borderRadius: 16, padding: 40 }}>
           {step === "otp" ? (
             <>
               <div style={{ textAlign: "center", marginBottom: 24 }}>
                 <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#F4F3FF", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
-                  <Mail size={24} style={{ color: "#7C6FE0" }} />
+                  <Mail size={24} style={{ color: "#7C6FE0" }} aria-hidden="true" />
                 </div>
-                <h2 style={{ color: "#1A1730", fontSize: 20, fontWeight: 500, marginBottom: 8 }}>Verify your email</h2>
-                <p style={{ color: "#9490B8", fontSize: 13, lineHeight: 1.5 }}>
+                <h1 style={{ color: "#1A1730", fontSize: 20, fontWeight: 500, marginBottom: 8 }}>Verify your email</h1>
+                <p style={{ color: "#6B6890", fontSize: 13, lineHeight: 1.5 }}>
                   Enter the 6-digit code sent to<br />
                   <strong style={{ color: "#1A1730" }}>{email}</strong>
                 </p>
               </div>
 
-              <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 16 }}>
+              <div role="group" aria-label="One-time verification code" style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 16 }}>
                 {otp.map((digit, i) => (
                   <input
                     key={i}
@@ -235,6 +235,7 @@ export default function Signup() {
                     inputMode="numeric"
                     maxLength={1}
                     value={digit}
+                    aria-label={`Digit ${i + 1} of 6`}
                     onChange={(e) => handleOtpChange(i, e.target.value)}
                     onKeyDown={(e) => handleOtpKeyDown(i, e)}
                     onPaste={i === 0 ? handleOtpPaste : undefined}
@@ -281,7 +282,7 @@ export default function Signup() {
                 Verify →
               </button>
 
-              <p style={{ textAlign: "center", fontSize: 13, color: "#9490B8", marginTop: 16 }}>
+              <p style={{ textAlign: "center", fontSize: 13, color: "#6B6890", marginTop: 16 }}>
                 Didn't receive the code?{" "}
                 <button
                   onClick={handleResendOtp}
@@ -294,14 +295,15 @@ export default function Signup() {
             </>
           ) : (
             <>
-              <h2 style={{ color: "#1A1730", fontSize: 20, fontWeight: 500, marginBottom: 24, textAlign: "center" }}>
-                Create your account
-              </h2>
+              <h1 style={{ color: "#1A1730", fontSize: 20, fontWeight: 500, marginBottom: 24, textAlign: "center" }}>
+                Create your Dutaly account
+              </h1>
 
               <form onSubmit={handleSubmit} className="flex flex-col" style={{ gap: 12 }}>
                 <div>
-                  <label style={{ display: "block", fontSize: 12, color: "#9490B8", marginBottom: 4 }}>Full Name</label>
+                  <label htmlFor="signup-name" style={{ display: "block", fontSize: 12, color: "#6B6890", marginBottom: 4 }}>Full Name</label>
                   <input
+                    id="signup-name"
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
@@ -313,8 +315,9 @@ export default function Signup() {
                 </div>
 
                 <div>
-                  <label style={{ display: "block", fontSize: 12, color: "#9490B8", marginBottom: 4 }}>Email address</label>
+                  <label htmlFor="signup-email" style={{ display: "block", fontSize: 12, color: "#6B6890", marginBottom: 4 }}>Email address</label>
                   <input
+                    id="signup-email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -326,9 +329,10 @@ export default function Signup() {
                 </div>
 
                 <div>
-                  <label style={{ display: "block", fontSize: 12, color: "#9490B8", marginBottom: 4 }}>Password</label>
+                  <label htmlFor="signup-password" style={{ display: "block", fontSize: 12, color: "#6B6890", marginBottom: 4 }}>Password</label>
                   <div style={{ position: "relative" }}>
                     <input
+                      id="signup-password"
                       type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -336,7 +340,7 @@ export default function Signup() {
                       onFocus={(e) => (e.target.style.borderColor = "#7C6FE0")}
                       onBlur={(e) => (e.target.style.borderColor = errors.password ? "#DC2626" : "rgba(124,111,224,0.2)")}
                     />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: 0, color: "#9490B8" }}>
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? "Hide password" : "Show password"} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: 0, color: "#6B6890" }}>
                       {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
                   </div>
@@ -344,9 +348,10 @@ export default function Signup() {
                 </div>
 
                 <div>
-                  <label style={{ display: "block", fontSize: 12, color: "#9490B8", marginBottom: 4 }}>Confirm Password</label>
+                  <label htmlFor="signup-confirm" style={{ display: "block", fontSize: 12, color: "#6B6890", marginBottom: 4 }}>Confirm Password</label>
                   <div style={{ position: "relative" }}>
                     <input
+                      id="signup-confirm"
                       type={showConfirm ? "text" : "password"}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
@@ -354,7 +359,7 @@ export default function Signup() {
                       onFocus={(e) => (e.target.style.borderColor = "#7C6FE0")}
                       onBlur={(e) => (e.target.style.borderColor = errors.confirmPassword ? "#DC2626" : "rgba(124,111,224,0.2)")}
                     />
-                    <button type="button" onClick={() => setShowConfirm(!showConfirm)} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: 0, color: "#9490B8" }}>
+                    <button type="button" onClick={() => setShowConfirm(!showConfirm)} aria-label={showConfirm ? "Hide password" : "Show password"} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: 0, color: "#6B6890" }}>
                       {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
                   </div>
@@ -388,13 +393,13 @@ export default function Signup() {
                 </button>
               </form>
 
-              <p style={{ textAlign: "center", fontSize: 13, color: "#9490B8", marginTop: 20 }}>
+              <p style={{ textAlign: "center", fontSize: 13, color: "#6B6890", marginTop: 20 }}>
                 Already have an account?{" "}
                 <button type="button" onClick={handleGoToLogin} style={{ color: "#7C6FE0", textDecoration: "none", background: "none", border: "none", cursor: "pointer", padding: 0 }}>Sign in</button>
               </p>
             </>
           )}
-        </div>
+        </main>
       </div>
     </div>
   );

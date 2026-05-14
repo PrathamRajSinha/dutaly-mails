@@ -48,9 +48,9 @@ export function PricingSection() {
           className="text-center mb-16"
         >
           <p className="text-[13px] font-medium tracking-[0.15em] uppercase mb-4" style={{ color: "rgba(255,255,255,0.4)" }}>Pricing</p>
-          <h2 className="text-[clamp(2rem,4vw,3.25rem)] font-semibold tracking-[-0.03em] leading-[1.1]" style={{ color: "#E8E4FF" }}>
+          <h1 className="text-[clamp(2rem,4vw,3.25rem)] font-semibold tracking-[-0.03em] leading-[1.1]" style={{ color: "#E8E4FF" }}>
             Simple, transparent pricing.
-          </h2>
+          </h1>
           <p className="mt-4 text-[16px]" style={{ color: "rgba(255,255,255,0.45)" }}>Cancel anytime. No hidden fees.</p>
 
           {/* Billing toggle */}

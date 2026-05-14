@@ -239,9 +239,9 @@ export default function Dashboard() {
                   <FileEdit className="h-4 w-4" style={{ color: '#BA7517' }} />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-[13px] font-medium" style={{ color: '#1A1730' }}>
+                  <h2 className="text-[13px] font-medium" style={{ color: '#1A1730' }}>
                     {drafted.length} drafted repl{drafted.length !== 1 ? "ies" : "y"} ready
-                  </h3>
+                  </h2>
                   <p className="mt-0.5 text-[11px]" style={{ color: '#9490B8' }}>
                     AI has drafted replies for your review.
                   </p>
@@ -262,9 +262,9 @@ export default function Dashboard() {
                   <AlertCircle className="h-4 w-4" style={{ color: '#DC2626' }} />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-[13px] font-medium" style={{ color: '#1A1730' }}>
+                  <h2 className="text-[13px] font-medium" style={{ color: '#1A1730' }}>
                     {needsReview.length} email{needsReview.length !== 1 ? "s" : ""} need attention
-                  </h3>
+                  </h2>
                   <p className="mt-0.5 text-[11px]" style={{ color: '#9490B8' }}>
                     The AI wasn't confident about these emails.
                   </p>
