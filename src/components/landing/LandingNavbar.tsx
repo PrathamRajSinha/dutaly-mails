@@ -20,8 +20,8 @@ export function LandingNavbar() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b" style={{ background: "#0A0A0F", borderColor: "rgba(255,255,255,0.08)" }}>
       <div className="max-w-[1200px] mx-auto px-6 h-14 flex items-center justify-between">
-        <Link to="/mails">
-          <img src={logoDarkBg} alt="Dutaly" className="h-6 w-auto" />
+        <Link to="/mails" aria-label="Dutaly home">
+          <img src={logoDarkBg} alt="Dutaly — AI-powered email support" className="h-6 w-auto" />
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">
