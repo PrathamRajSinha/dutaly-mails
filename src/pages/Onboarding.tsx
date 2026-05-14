@@ -242,7 +242,7 @@ export default function Onboarding() {
           {currentStep === 1 && (
             <div className="space-y-6">
               <div className="text-center">
-                <h2 className="text-2xl font-bold text-foreground">Build Your Knowledge Base</h2>
+                <h1 className="text-2xl font-bold text-foreground">Build Your Knowledge Base</h1>
                 <p className="mt-2 text-muted-foreground">
                   Paste your website or FAQ URL and we'll generate knowledge base entries automatically.
                 </p>
@@ -347,7 +347,7 @@ export default function Onboarding() {
           {currentStep === 2 && (
             <div className="space-y-8">
               <div className="text-center">
-                <h2 className="text-2xl font-bold text-foreground">Set Your Confidence Threshold</h2>
+                <h1 className="text-2xl font-bold text-foreground">Set Your Confidence Threshold</h1>
                 <p className="mt-2 text-muted-foreground">
                   This controls when your AI auto-replies vs. escalates to you.
                 </p>
@@ -392,7 +392,7 @@ export default function Onboarding() {
                 <Rocket className="h-10 w-10 text-primary" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-foreground">You're All Set!</h2>
+                <h1 className="text-2xl font-bold text-foreground">You're All Set!</h1>
                 <p className="mt-2 text-muted-foreground">
                   Here's a summary of your setup:
                 </p>
