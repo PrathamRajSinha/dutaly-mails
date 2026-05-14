@@ -112,7 +112,7 @@ export default function ForgotPassword() {
               </form>
             </>
           )}
-        </div>
+        </main>
       </div>
     </div>
   );
