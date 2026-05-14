@@ -206,13 +206,13 @@ export default function Signup() {
 
       <div className="w-full" style={{ maxWidth: 420 }}>
         <div className="mb-6 text-center">
-          <Link to="/mails" style={{ textDecoration: "none" }}>
-            <h1 style={{ color: "#7C6FE0", fontSize: 22, fontWeight: 500 }}>dutaly</h1>
+          <Link to="/mails" style={{ textDecoration: "none" }} aria-label="Dutaly home">
+            <span style={{ color: "#7C6FE0", fontSize: 22, fontWeight: 500 }}>dutaly</span>
           </Link>
-          <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 13, marginTop: 4 }}>AI agent for your inbox</p>
+          <p style={{ color: "rgba(255,255,255,0.55)", fontSize: 13, marginTop: 4 }}>AI agent for your inbox</p>
         </div>
 
-        <div style={{ background: "#FFFFFF", borderRadius: 16, padding: 40 }}>
+        <main style={{ background: "#FFFFFF", borderRadius: 16, padding: 40 }}>
           {step === "otp" ? (
             <>
               <div style={{ textAlign: "center", marginBottom: 24 }}>
