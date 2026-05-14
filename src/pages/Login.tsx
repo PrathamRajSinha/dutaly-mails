@@ -98,21 +98,22 @@ export default function Login() {
 
       <div className="w-full" style={{ maxWidth: 420 }}>
         <div className="mb-6 text-center">
-          <Link to="/mails" style={{ textDecoration: "none" }}>
-            <h1 style={{ color: "#7C6FE0", fontSize: 22, fontWeight: 500 }}>dutaly</h1>
+          <Link to="/mails" style={{ textDecoration: "none" }} aria-label="Dutaly home">
+            <span style={{ color: "#7C6FE0", fontSize: 22, fontWeight: 500 }}>dutaly</span>
           </Link>
-          <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 13, marginTop: 4 }}>AI agent for your inbox</p>
+          <p style={{ color: "rgba(255,255,255,0.55)", fontSize: 13, marginTop: 4 }}>AI agent for your inbox</p>
         </div>
 
-        <div style={{ background: "#FFFFFF", borderRadius: 16, padding: 40 }}>
-          <h2 style={{ color: "#1A1730", fontSize: 20, fontWeight: 500, marginBottom: 24, textAlign: "center" }}>
-            Welcome back
-          </h2>
+        <main style={{ background: "#FFFFFF", borderRadius: 16, padding: 40 }}>
+          <h1 style={{ color: "#1A1730", fontSize: 20, fontWeight: 500, marginBottom: 24, textAlign: "center" }}>
+            Sign in to Dutaly
+          </h1>
 
           <form onSubmit={handleSubmit} className="flex flex-col" style={{ gap: 12 }}>
             <div>
-              <label style={{ display: "block", fontSize: 12, color: "#9490B8", marginBottom: 4 }}>Email address</label>
+              <label htmlFor="login-email" style={{ display: "block", fontSize: 12, color: "#6B6890", marginBottom: 4 }}>Email address</label>
               <input
+                id="login-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -124,9 +125,10 @@ export default function Login() {
             </div>
 
             <div>
-              <label style={{ display: "block", fontSize: 12, color: "#9490B8", marginBottom: 4 }}>Password</label>
+              <label htmlFor="login-password" style={{ display: "block", fontSize: 12, color: "#6B6890", marginBottom: 4 }}>Password</label>
               <div style={{ position: "relative" }}>
                 <input
+                  id="login-password"
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -137,7 +139,8 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: 0, color: "#9490B8" }}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: 0, color: "#6B6890" }}
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
