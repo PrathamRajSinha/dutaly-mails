@@ -46,35 +46,36 @@ export default function ForgotPassword() {
     <div className="flex min-h-screen items-center justify-center p-4" style={{ background: "#0A0A0F" }}>
       <div className="w-full" style={{ maxWidth: 420 }}>
         <div className="mb-6 text-center">
-          <h1 style={{ color: "#7C6FE0", fontSize: 22, fontWeight: 500 }}>dutaly</h1>
-          <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 13, marginTop: 4 }}>AI agent for your inbox</p>
+          <p style={{ color: "#7C6FE0", fontSize: 22, fontWeight: 500 }}>dutaly</p>
+          <p style={{ color: "rgba(255,255,255,0.55)", fontSize: 13, marginTop: 4 }}>AI agent for your inbox</p>
         </div>
 
-        <div style={{ background: "#FFFFFF", borderRadius: 16, padding: 40 }}>
+        <main style={{ background: "#FFFFFF", borderRadius: 16, padding: 40 }}>
           <Link to="/login" style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 13, color: "#7C6FE0", textDecoration: "none", marginBottom: 20 }}>
             <ArrowLeft size={14} /> Back to login
           </Link>
 
           {sent ? (
             <div className="flex flex-col items-center" style={{ paddingTop: 16, paddingBottom: 8 }}>
-              <CheckCircle size={48} style={{ color: "#1D9E75" }} />
+              <CheckCircle size={48} style={{ color: "#1D9E75" }} aria-hidden="true" />
               <p style={{ color: "#1D9E75", fontSize: 15, fontWeight: 500, marginTop: 16, textAlign: "center" }}>
                 Check your inbox - reset link sent.
               </p>
             </div>
           ) : (
             <>
-              <h2 style={{ color: "#1A1730", fontSize: 20, fontWeight: 500, marginBottom: 8 }}>
-                Reset your password
-              </h2>
-              <p style={{ color: "#9490B8", fontSize: 13, marginBottom: 24 }}>
+              <h1 style={{ color: "#1A1730", fontSize: 20, fontWeight: 500, marginBottom: 8 }}>
+                Reset your Dutaly password
+              </h1>
+              <p style={{ color: "#6B6890", fontSize: 13, marginBottom: 24 }}>
                 Enter your email and we'll send you a reset link.
               </p>
 
               <form onSubmit={handleSubmit} className="flex flex-col" style={{ gap: 12 }}>
                 <div>
-                  <label style={{ display: "block", fontSize: 12, color: "#9490B8", marginBottom: 4 }}>Email address</label>
+                  <label htmlFor="forgot-email" style={{ display: "block", fontSize: 12, color: "#6B6890", marginBottom: 4 }}>Email address</label>
                   <input
+                    id="forgot-email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
