@@ -9,6 +9,7 @@ export function FooterSection() {
           <img src={logoDarkBg} alt="Dutaly — AI-powered email support" className="h-6 w-auto" />
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[13px]" style={{ color: "rgba(255,255,255,0.4)" }}>
             <a href="#features" className="hover:opacity-80 transition-opacity">features</a>
+            <Link to="/about" className="hover:opacity-80 transition-opacity">about</Link>
             <Link to="/pricing" className="hover:opacity-80 transition-opacity">pricing</Link>
             <Link to="/login" className="hover:opacity-80 transition-opacity">sign in</Link>
             <Link to="/privacy" className="hover:opacity-80 transition-opacity">privacy</Link>
