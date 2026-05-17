@@ -90,6 +90,28 @@ export default function About() {
             See pricing →
           </Link>
         </div>
+
+        <section className="mt-20" aria-labelledby="faq-heading">
+          <h2 id="faq-heading" className="text-[28px] md:text-[32px] font-medium tracking-tight mb-6" style={{ color: "white" }}>
+            Frequently asked questions
+          </h2>
+          <Accordion type="single" collapsible className="w-full">
+            {faqs.map((item, i) => (
+              <AccordionItem
+                key={i}
+                value={`item-${i}`}
+                style={{ borderColor: "rgba(255,255,255,0.08)" }}
+              >
+                <AccordionTrigger className="text-left text-[15px] font-medium py-5 hover:no-underline" style={{ color: "white" }}>
+                  {item.q}
+                </AccordionTrigger>
+                <AccordionContent className="text-[14px] leading-[1.7] pb-5" style={{ color: "rgba(255,255,255,0.6)" }}>
+                  {item.a}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </section>
       </main>
 
       <FooterSection />
