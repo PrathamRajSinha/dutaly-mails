@@ -1,0 +1,77 @@
+import { Seo } from "@/components/Seo";
+import { LandingNavbar } from "@/components/landing/LandingNavbar";
+import { FooterSection } from "@/components/landing/FooterSection";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+
+export default function About() {
+  return (
+    <div className="relative min-h-screen overflow-x-hidden" style={{ background: "#0A0A0F", color: "rgba(255,255,255,0.85)" }}>
+      <Seo
+        title="About Dutaly — AI helpdesk for customer email"
+        description="Dutaly is an AI helpdesk that turns customer emails into structured tickets and grounded replies from your knowledge base. Learn how it works and who it's for."
+        path="/about"
+      />
+      <LandingNavbar />
+
+      <main className="max-w-[760px] mx-auto px-6 pt-32 pb-24">
+        <p className="text-[12px] uppercase tracking-[0.18em] mb-4" style={{ color: "#7C6FE0" }}>
+          About
+        </p>
+        <h1 className="text-[44px] md:text-[56px] leading-[1.05] font-medium tracking-tight mb-8" style={{ color: "white" }}>
+          We build AI agents that handle your inbox.
+        </h1>
+
+        <div className="space-y-6 text-[16px] leading-[1.7]" style={{ color: "rgba(255,255,255,0.7)" }}>
+          <p>
+            Dutaly is an AI helpdesk built for small support teams who want to scale without hiring.
+            We connect to Gmail or any standard IMAP/SMTP inbox, read every incoming customer email,
+            and turn the noise into structured tickets your team can actually work with.
+          </p>
+          <p>
+            Every reply is grounded in your knowledge base — your docs, FAQs, help pages, and policies.
+            The AI doesn't guess. If there's no source for an answer, it surfaces the gap so you can fill it,
+            and routes the conversation to a human in the meantime. Angry customers and high-risk threads
+            are escalated automatically.
+          </p>
+          <p>
+            You stay in control. Set confidence thresholds per category, choose between draft-only or
+            fully automated replies, define a quiet "unsend window" before anything goes out, and add
+            instructions that shape the AI's tone and rules. Nothing happens that you didn't approve in advance.
+          </p>
+          <p>
+            The name <span style={{ color: "white" }}>Duta (दूत)</span> means messenger or agent in Sanskrit.
+            Email is where we started. The mission is bigger: AI agents that handle your business communication,
+            end to end, with the judgment you'd expect from a teammate who's been there for years.
+          </p>
+        </div>
+
+        <div className="grid sm:grid-cols-3 gap-px mt-16 border" style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.06)" }}>
+          {[
+            { k: "Grounded", v: "Every reply cites your knowledge base. No hallucinations." },
+            { k: "Controlled", v: "Per-category thresholds, approval mode, and unsend window." },
+            { k: "Safe", v: "Angry or risky threads escalate to a human automatically." },
+          ].map((item) => (
+            <div key={item.k} className="p-6" style={{ background: "#0A0A0F" }}>
+              <p className="text-[13px] font-medium mb-2" style={{ color: "white" }}>{item.k}</p>
+              <p className="text-[13px] leading-[1.6]" style={{ color: "rgba(255,255,255,0.5)" }}>{item.v}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-4 mt-16">
+          <Link to="/signup">
+            <Button className="h-11 px-6 text-white border-0" style={{ background: "#7C6FE0", borderRadius: "6px" }}>
+              Start free
+            </Button>
+          </Link>
+          <Link to="/pricing" className="text-[13px]" style={{ color: "rgba(255,255,255,0.5)" }}>
+            See pricing →
+          </Link>
+        </div>
+      </main>
+
+      <FooterSection />
+    </div>
+  );
+}
