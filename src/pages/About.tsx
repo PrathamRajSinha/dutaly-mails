@@ -3,6 +3,27 @@ import { LandingNavbar } from "@/components/landing/LandingNavbar";
 import { FooterSection } from "@/components/landing/FooterSection";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+
+const faqs = [
+  {
+    q: "How does pricing work?",
+    a: "Plans start at ₹999/mo for Starter (300 emails, 1 inbox), ₹2,999/mo for Growth (1,500 emails, auto-send, Slack + webhooks), and ₹7,999/mo for Scale (10,000 emails, unlimited inboxes). Save 20% on yearly billing. Cancel anytime — no setup fees, no hidden charges.",
+  },
+  {
+    q: "How do you handle data privacy?",
+    a: "Your emails and knowledge base stay yours. We store data with row-level security so only your account can access it, encrypt credentials at rest, and never train shared models on your content. You can disconnect an inbox or delete your account at any time and your data is removed.",
+  },
+  {
+    q: "How do approvals and auto-send work?",
+    a: "You choose the level of automation per category. In draft mode the AI prepares a reply and waits for you to click send. In auto-send mode replies go out only when the AI's confidence is above the threshold you set, and there's a configurable unsend window (30s–2m) before delivery. Angry or high-risk threads always escalate to a human, regardless of mode.",
+  },
+];
 
 export default function About() {
   return (
