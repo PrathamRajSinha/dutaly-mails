@@ -98,7 +98,7 @@ export default function Instructions() {
       setConfidenceThreshold(instructions.auto_reply_confidence_threshold ?? 0.8);
       setGreetingEnabled(instructions.greeting_response_enabled ?? true);
       setGreetingTemplate(instructions.greeting_template || "Hello! Thank you for reaching out. How can I assist you today?");
-      setEmailFooter(instructions.email_footer || "This email was sent by an AI assistant. If you believe this was sent in error, please let us know.");
+      setEmailFooter(instructions.email_footer ?? "This email was sent by an AI assistant. If you believe this was sent in error, please let us know.");
       setLogoUrl(instructions.logo_url || "");
       setDoRules(instructions.do_rules || []);
       setDoNotRules(instructions.do_not_rules || []);
