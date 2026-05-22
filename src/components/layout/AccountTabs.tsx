@@ -24,7 +24,7 @@ export function AccountTabs() {
     new Map(accounts.map((a) => [a.email_address.toLowerCase(), a])).values()
   );
 
-  if (isLoading || uniqueAccounts.length <= 1) return null;
+  if (isLoading || uniqueAccounts.length === 0) return null;
 
   return (
     <>
