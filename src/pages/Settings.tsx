@@ -228,12 +228,12 @@ function ImapConnectionForm({ session }: { session: Session | null }) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      // Prevent duplicate connection for the same email address
+      // Prevent duplicate connection for the same email address (case-insensitive)
       const { data: existing } = await supabase
         .from("email_accounts")
         .select("id")
         .eq("user_id", user.id)
-        .eq("email_address", email)
+        .ilike("email_address", email)
         .maybeSingle();
 
       if (existing) {
