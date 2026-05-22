@@ -17,28 +17,27 @@ export interface ActivityLog {
 
 export function useActivityLogs(limit = 10) {
   const { user } = useAuth();
-  const { selectedAccountId } = useSelectedAccount();
+  const { selectedAccountId, connectedAccountIds, accountsLoading } = useSelectedAccount();
   const queryClient = useQueryClient();
 
+  const scopeIds =
+    selectedAccountId === "all" ? connectedAccountIds : [selectedAccountId];
+
   const { data: logs = [], isLoading, error } = useQuery({
-    queryKey: ["activity-logs", user?.id, limit, selectedAccountId],
+    queryKey: ["activity-logs", user?.id, limit, selectedAccountId, scopeIds.join(",")],
     queryFn: async () => {
-      let query = supabase
+      if (scopeIds.length === 0) return [] as ActivityLog[];
+      const { data, error } = await supabase
         .from("activity_logs")
         .select("*")
+        .in("email_account_id", scopeIds)
         .order("created_at", { ascending: false })
         .limit(limit);
-
-      if (selectedAccountId !== "all") {
-        query = query.eq("email_account_id", selectedAccountId);
-      }
-
-      const { data, error } = await query;
 
       if (error) throw error;
       return data as ActivityLog[];
     },
-    enabled: !!user,
+    enabled: !!user && !accountsLoading,
   });
 
   const createLog = useMutation({
