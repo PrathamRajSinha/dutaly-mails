@@ -228,6 +228,20 @@ function ImapConnectionForm({ session }: { session: Session | null }) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      // Prevent duplicate connection for the same email address
+      const { data: existing } = await supabase
+        .from("email_accounts")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("email_address", email)
+        .maybeSingle();
+
+      if (existing) {
+        toast.error("This email is already connected");
+        setIsConnecting(false);
+        return;
+      }
+
       const { error } = await supabase.from("email_accounts").insert({
         user_id: user.id,
         email_address: email,
