@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
+import { useSelectedAccount } from "@/contexts/SelectedAccountContext";
 import type { Json } from "@/integrations/supabase/types";
 
 export interface ActivityLog {
@@ -16,16 +17,23 @@ export interface ActivityLog {
 
 export function useActivityLogs(limit = 10) {
   const { user } = useAuth();
+  const { selectedAccountId } = useSelectedAccount();
   const queryClient = useQueryClient();
 
   const { data: logs = [], isLoading, error } = useQuery({
-    queryKey: ["activity-logs", user?.id, limit],
+    queryKey: ["activity-logs", user?.id, limit, selectedAccountId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("activity_logs")
         .select("*")
         .order("created_at", { ascending: false })
         .limit(limit);
+
+      if (selectedAccountId !== "all") {
+        query = query.eq("email_account_id", selectedAccountId);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       return data as ActivityLog[];
