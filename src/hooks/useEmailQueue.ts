@@ -54,6 +54,29 @@ export function useEmailQueue(statusFilter?: string) {
     enabled: !!user,
   });
 
+  // Realtime: refresh when new emails arrive or status changes for this user
+  useEffect(() => {
+    if (!user?.id) return;
+    const channel = supabase
+      .channel(`email-queue-${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "email_queue",
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["email-queue"] });
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, queryClient]);
+
   // Categorize emails
   const needsReview = allEmails.filter(
     e => e.status === "pending" && (!e.suggested_reply || (e.confidence_score !== null && e.confidence_score < 0.7))
