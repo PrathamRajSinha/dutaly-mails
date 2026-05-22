@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
+import { useSelectedAccount } from "@/contexts/SelectedAccountContext";
 
 export interface AutoSentEntry {
   id: string;
@@ -18,16 +19,21 @@ export interface AutoSentEntry {
 
 export function useAutoSentAudit() {
   const { user } = useAuth();
+  const { selectedAccountId } = useSelectedAccount();
 
   return useQuery({
-    queryKey: ["auto-sent-audit", user?.id],
+    queryKey: ["auto-sent-audit", user?.id, selectedAccountId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("activity_logs")
         .select("*")
         .eq("action", "auto_replied")
         .order("created_at", { ascending: false })
         .limit(100);
+      if (selectedAccountId !== "all") {
+        query = query.eq("email_account_id", selectedAccountId);
+      }
+      const { data, error } = await query;
       if (error) throw error;
       return (data || []).map((log: any) => ({
         id: log.id,
@@ -36,7 +42,7 @@ export function useAutoSentAudit() {
         subject: log.email_subject || "No subject",
         sent_at: log.created_at,
         confidence_score: log.details?.confidence ?? null,
-        suggested_reply: null, // Would need to join email_queue
+        suggested_reply: null,
         kb_entry_used: log.details?.kb_entry_title ?? null,
         ticket_id: log.details?.ticket_id ?? null,
         action: log.action,
