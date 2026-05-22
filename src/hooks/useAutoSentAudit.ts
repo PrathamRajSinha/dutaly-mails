@@ -19,21 +19,22 @@ export interface AutoSentEntry {
 
 export function useAutoSentAudit() {
   const { user } = useAuth();
-  const { selectedAccountId } = useSelectedAccount();
+  const { selectedAccountId, connectedAccountIds, accountsLoading } = useSelectedAccount();
+
+  const scopeIds =
+    selectedAccountId === "all" ? connectedAccountIds : [selectedAccountId];
 
   return useQuery({
-    queryKey: ["auto-sent-audit", user?.id, selectedAccountId],
+    queryKey: ["auto-sent-audit", user?.id, selectedAccountId, scopeIds.join(",")],
     queryFn: async () => {
-      let query = supabase
+      if (scopeIds.length === 0) return [] as AutoSentEntry[];
+      const { data, error } = await supabase
         .from("activity_logs")
         .select("*")
         .eq("action", "auto_replied")
+        .in("email_account_id", scopeIds)
         .order("created_at", { ascending: false })
         .limit(100);
-      if (selectedAccountId !== "all") {
-        query = query.eq("email_account_id", selectedAccountId);
-      }
-      const { data, error } = await query;
       if (error) throw error;
       return (data || []).map((log: any) => ({
         id: log.id,
@@ -49,6 +50,6 @@ export function useAutoSentAudit() {
         details: log.details,
       })) as AutoSentEntry[];
     },
-    enabled: !!user,
+    enabled: !!user && !accountsLoading,
   });
 }

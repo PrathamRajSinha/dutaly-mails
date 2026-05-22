@@ -228,12 +228,12 @@ function ImapConnectionForm({ session }: { session: Session | null }) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      // Prevent duplicate connection for the same email address
+      // Prevent duplicate connection for the same email address (case-insensitive)
       const { data: existing } = await supabase
         .from("email_accounts")
         .select("id")
         .eq("user_id", user.id)
-        .eq("email_address", email)
+        .ilike("email_address", email)
         .maybeSingle();
 
       if (existing) {
@@ -611,7 +611,11 @@ export default function Settings() {
             <div className="mb-6">
               <h3 className="mb-4 text-lg font-medium text-foreground">Connected Accounts</h3>
               <div className="space-y-3">
-                {accounts.map((account) => (
+                {Array.from(
+                  new Map(
+                    accounts.map((a) => [a.email_address.toLowerCase(), a])
+                  ).values()
+                ).map((account) => (
                   <ConnectedAccountCard
                     key={account.id}
                     account={account}

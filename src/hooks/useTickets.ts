@@ -27,27 +27,29 @@ export interface Ticket {
 
 export function useTickets(statusFilter?: TicketStatus) {
   const { user } = useAuth();
-  const { selectedAccountId } = useSelectedAccount();
+  const { selectedAccountId, connectedAccountIds, accountsLoading } = useSelectedAccount();
+
+  const scopeIds =
+    selectedAccountId === "all" ? connectedAccountIds : [selectedAccountId];
 
   return useQuery({
-    queryKey: ["tickets", user?.id, statusFilter, selectedAccountId],
+    queryKey: ["tickets", user?.id, statusFilter, selectedAccountId, scopeIds.join(",")],
     queryFn: async () => {
+      if (scopeIds.length === 0) return [] as Ticket[];
       let query = supabase
         .from("tickets")
         .select("*")
+        .in("email_account_id", scopeIds)
         .order("created_at", { ascending: false });
 
       if (statusFilter) {
         query = query.eq("status", statusFilter);
-      }
-      if (selectedAccountId !== "all") {
-        query = query.eq("email_account_id", selectedAccountId);
       }
 
       const { data, error } = await query;
       if (error) throw error;
       return data as Ticket[];
     },
-    enabled: !!user,
+    enabled: !!user && !accountsLoading,
   });
 }

@@ -7,6 +7,10 @@ export type SelectedAccountValue = string | "all";
 interface SelectedAccountContextType {
   selectedAccountId: SelectedAccountValue;
   setSelectedAccountId: (id: SelectedAccountValue) => void;
+  /** IDs of currently connected (deduped) accounts. Used to scope "all" queries. */
+  connectedAccountIds: string[];
+  /** True while account list is still loading. */
+  accountsLoading: boolean;
 }
 
 const SelectedAccountContext = createContext<SelectedAccountContextType | undefined>(undefined);
@@ -17,29 +21,36 @@ function storageKey(userId: string | undefined) {
 
 export function SelectedAccountProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  const { accounts } = useEmailAccounts();
+  const { accounts, isLoading: accountsLoading } = useEmailAccounts();
   const [selectedAccountId, setSelectedAccountIdState] = useState<SelectedAccountValue>("all");
 
-  // Load from localStorage when user changes
+  // Dedupe by email_address — keep newest (accounts are ordered desc)
+  const uniqueAccounts = useMemo(
+    () =>
+      Array.from(
+        new Map(accounts.map((a) => [a.email_address.toLowerCase(), a])).values()
+      ),
+    [accounts]
+  );
+  const connectedAccountIds = useMemo(
+    () => uniqueAccounts.map((a) => a.id),
+    [uniqueAccounts]
+  );
+
   useEffect(() => {
     const stored = localStorage.getItem(storageKey(user?.id));
-    if (stored) {
-      setSelectedAccountIdState(stored);
-    } else {
-      setSelectedAccountIdState("all");
-    }
+    setSelectedAccountIdState(stored || "all");
   }, [user?.id]);
 
-  // If selected account no longer exists, fall back to "all"
   useEffect(() => {
     if (selectedAccountId === "all") return;
-    if (accounts.length === 0) return;
-    const exists = accounts.some((a) => a.id === selectedAccountId);
+    if (accountsLoading) return;
+    const exists = connectedAccountIds.includes(selectedAccountId);
     if (!exists) {
       setSelectedAccountIdState("all");
       localStorage.setItem(storageKey(user?.id), "all");
     }
-  }, [accounts, selectedAccountId, user?.id]);
+  }, [connectedAccountIds, selectedAccountId, accountsLoading, user?.id]);
 
   const setSelectedAccountId = (id: SelectedAccountValue) => {
     setSelectedAccountIdState(id);
@@ -47,8 +58,8 @@ export function SelectedAccountProvider({ children }: { children: ReactNode }) {
   };
 
   const value = useMemo(
-    () => ({ selectedAccountId, setSelectedAccountId }),
-    [selectedAccountId, user?.id]
+    () => ({ selectedAccountId, setSelectedAccountId, connectedAccountIds, accountsLoading }),
+    [selectedAccountId, connectedAccountIds, accountsLoading]
   );
 
   return (
@@ -59,8 +70,12 @@ export function SelectedAccountProvider({ children }: { children: ReactNode }) {
 export function useSelectedAccount() {
   const ctx = useContext(SelectedAccountContext);
   if (!ctx) {
-    // Safe default for components rendered outside the provider (e.g. auth pages)
-    return { selectedAccountId: "all" as SelectedAccountValue, setSelectedAccountId: () => {} };
+    return {
+      selectedAccountId: "all" as SelectedAccountValue,
+      setSelectedAccountId: () => {},
+      connectedAccountIds: [] as string[],
+      accountsLoading: false,
+    };
   }
   return ctx;
 }
