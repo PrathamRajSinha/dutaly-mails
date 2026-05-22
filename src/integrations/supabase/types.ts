@@ -739,6 +739,7 @@ export type Database = {
           category: string | null
           created_at: string | null
           customer_email: string
+          email_account_id: string | null
           escalation_flag: boolean | null
           id: string
           last_customer_reply_at: string | null
@@ -756,6 +757,7 @@ export type Database = {
           category?: string | null
           created_at?: string | null
           customer_email: string
+          email_account_id?: string | null
           escalation_flag?: boolean | null
           id?: string
           last_customer_reply_at?: string | null
@@ -773,6 +775,7 @@ export type Database = {
           category?: string | null
           created_at?: string | null
           customer_email?: string
+          email_account_id?: string | null
           escalation_flag?: boolean | null
           id?: string
           last_customer_reply_at?: string | null
