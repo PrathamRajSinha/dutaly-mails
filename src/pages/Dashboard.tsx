@@ -19,7 +19,7 @@ import { useKnowledgeBase } from "@/hooks/useKnowledgeBase";
 
 export default function Dashboard() {
   const { logs, isLoading: logsLoading } = useActivityLogs(10);
-  const { pendingCount, needsReview, drafted, isLoading: queueLoading } = useEmailQueue();
+  const { emails, pendingCount, needsReview, drafted, isLoading: queueLoading } = useEmailQueue();
 
   const { accounts } = useEmailAccounts();
   const { session } = useAuth();
@@ -123,20 +123,26 @@ export default function Dashboard() {
     },
   ];
 
-  const recentActivity = logs.map(log => {
-    const details = log.details as Record<string, unknown> | null;
-    const confidence = details?.confidence
-      ? Math.round(Number(details.confidence) * 100)
-      : undefined;
-
-    return {
-      from: log.email_from || "Unknown",
-      subject: log.email_subject || "No subject",
-      action: log.action,
-      time: formatTimeAgo(log.created_at),
-      confidence,
-    };
-  });
+  const recentActivity = emails.slice(0, 10).map((email) => ({
+    from: email.from_name || email.from_address || "Unknown",
+    subject: email.subject || "No subject",
+    action:
+      email.status === "ignored"
+        ? "ignored"
+        : email.status === "sent" ||
+            email.status === "approved" ||
+            email.status === "edited" ||
+            email.status === "sending"
+          ? "auto_sent"
+          : email.suggested_reply
+            ? "drafted"
+            : "queued",
+    time: formatTimeAgo(email.queued_at),
+    confidence:
+      email.confidence_score !== null
+        ? Math.round(Number(email.confidence_score) * 100)
+        : undefined,
+  }));
 
   if (isLoading) {
     return (
@@ -217,7 +223,7 @@ export default function Dashboard() {
             <CardContent className="space-y-2">
               {recentActivity.length === 0 ? (
                 <p className="text-center py-8 text-[13px]" style={{ color: '#9490B8' }}>
-                  No activity yet. Connect your email to get started.
+                  No recent mails yet. Connect your email to get started.
                 </p>
               ) : (
                 recentActivity.map((email, index) => (
