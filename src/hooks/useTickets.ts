@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useSelectedAccount } from "@/contexts/SelectedAccountContext";
 
 export type TicketStatus = "open" | "pending" | "resolved" | "closed";
 export type TicketPriority = "low" | "medium" | "high" | "urgent";
@@ -19,15 +20,17 @@ export interface Ticket {
   sla_due_at: string | null;
   last_customer_reply_at: string | null;
   thread_id: string | null;
+  email_account_id: string | null;
   created_at: string;
   updated_at: string;
 }
 
 export function useTickets(statusFilter?: TicketStatus) {
   const { user } = useAuth();
+  const { selectedAccountId } = useSelectedAccount();
 
   return useQuery({
-    queryKey: ["tickets", user?.id, statusFilter],
+    queryKey: ["tickets", user?.id, statusFilter, selectedAccountId],
     queryFn: async () => {
       let query = supabase
         .from("tickets")
@@ -36,6 +39,9 @@ export function useTickets(statusFilter?: TicketStatus) {
 
       if (statusFilter) {
         query = query.eq("status", statusFilter);
+      }
+      if (selectedAccountId !== "all") {
+        query = query.eq("email_account_id", selectedAccountId);
       }
 
       const { data, error } = await query;

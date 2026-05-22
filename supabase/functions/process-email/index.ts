@@ -490,6 +490,7 @@ ${emailData.body}`
             sentiment_score: sentimentScore,
             escalation_flag: escalationFlag,
             thread_id: emailData.thread_id || null,
+            email_account_id: emailData.email_account_id || null,
             last_customer_reply_at: new Date().toISOString(),
             sla_due_at: slaDueAt,
           })

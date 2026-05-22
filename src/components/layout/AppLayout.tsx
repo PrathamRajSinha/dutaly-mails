@@ -1,15 +1,22 @@
 import { Outlet } from "react-router-dom";
 import { AppSidebar } from "./AppSidebar";
+import { AccountTabs } from "./AccountTabs";
 import { UnsendToastProvider } from "@/components/UnsendToastProvider";
+import { SelectedAccountProvider } from "@/contexts/SelectedAccountContext";
 
 export function AppLayout() {
   return (
-    <div className="flex h-screen bg-background">
-      <AppSidebar />
-      <main className="flex-1 overflow-auto">
-        <Outlet />
-      </main>
-      <UnsendToastProvider />
-    </div>
+    <SelectedAccountProvider>
+      <div className="flex h-screen bg-background">
+        <AppSidebar />
+        <main className="flex flex-1 flex-col overflow-hidden">
+          <AccountTabs />
+          <div className="flex-1 overflow-auto">
+            <Outlet />
+          </div>
+        </main>
+        <UnsendToastProvider />
+      </div>
+    </SelectedAccountProvider>
   );
 }

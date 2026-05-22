@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
+import { useSelectedAccount } from "@/contexts/SelectedAccountContext";
 import { toast } from "sonner";
 
 export interface QueuedEmail {
@@ -29,15 +30,22 @@ export type QueueTab = "needs_review" | "drafted" | "sent" | "ignored";
 
 export function useEmailQueue(statusFilter?: string) {
   const { user, session } = useAuth();
+  const { selectedAccountId } = useSelectedAccount();
   const queryClient = useQueryClient();
 
   const { data: allEmails = [], isLoading, error } = useQuery({
-    queryKey: ["email-queue", user?.id],
+    queryKey: ["email-queue", user?.id, selectedAccountId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("email_queue")
         .select("*")
         .order("queued_at", { ascending: false });
+
+      if (selectedAccountId !== "all") {
+        query = query.eq("email_account_id", selectedAccountId);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       return data as QueuedEmail[];
