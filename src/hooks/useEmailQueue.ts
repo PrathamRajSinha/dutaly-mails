@@ -31,27 +31,26 @@ export type QueueTab = "needs_review" | "drafted" | "sent" | "ignored";
 
 export function useEmailQueue(statusFilter?: string) {
   const { user, session } = useAuth();
-  const { selectedAccountId } = useSelectedAccount();
+  const { selectedAccountId, connectedAccountIds, accountsLoading } = useSelectedAccount();
   const queryClient = useQueryClient();
 
+  const scopeIds =
+    selectedAccountId === "all" ? connectedAccountIds : [selectedAccountId];
+
   const { data: allEmails = [], isLoading, error } = useQuery({
-    queryKey: ["email-queue", user?.id, selectedAccountId],
+    queryKey: ["email-queue", user?.id, selectedAccountId, scopeIds.join(",")],
     queryFn: async () => {
-      let query = supabase
+      if (scopeIds.length === 0) return [] as QueuedEmail[];
+      const { data, error } = await supabase
         .from("email_queue")
         .select("*")
+        .in("email_account_id", scopeIds)
         .order("queued_at", { ascending: false });
-
-      if (selectedAccountId !== "all") {
-        query = query.eq("email_account_id", selectedAccountId);
-      }
-
-      const { data, error } = await query;
 
       if (error) throw error;
       return data as QueuedEmail[];
     },
-    enabled: !!user,
+    enabled: !!user && !accountsLoading,
   });
 
   // Realtime: refresh when new emails arrive or status changes for this user
