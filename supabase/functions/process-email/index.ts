@@ -581,6 +581,7 @@ ${emailData.body}`
 
     await supabase.from("activity_logs").insert({
       user_id: user.id,
+      email_account_id: emailData.email_account_id || null,
       action: logAction,
       email_subject: emailData.subject,
       email_from: emailData.from_address,
