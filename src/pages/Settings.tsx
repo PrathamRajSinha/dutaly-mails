@@ -611,7 +611,11 @@ export default function Settings() {
             <div className="mb-6">
               <h3 className="mb-4 text-lg font-medium text-foreground">Connected Accounts</h3>
               <div className="space-y-3">
-                {accounts.map((account) => (
+                {Array.from(
+                  new Map(
+                    accounts.map((a) => [a.email_address.toLowerCase(), a])
+                  ).values()
+                ).map((account) => (
                   <ConnectedAccountCard
                     key={account.id}
                     account={account}
