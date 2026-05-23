@@ -21,21 +21,13 @@ export default function ChoosePlan() {
     if (!user) return;
     setSubscribingPlanId(planId);
     try {
-      const now = new Date();
-      const periodEnd = new Date(now);
-      periodEnd.setMonth(periodEnd.getMonth() + 1);
-
-      const { error } = await supabase
-        .from("user_subscriptions")
-        .upsert({
-          user_id: user.id,
-          plan_id: planId,
-          status: "active",
-          current_period_start: now.toISOString(),
-          current_period_end: periodEnd.toISOString(),
-        }, { onConflict: "user_id" });
+      const { data, error } = await supabase.functions.invoke("activate-subscription", {
+        body: { plan_id: planId, billing_period: "monthly" },
+      });
 
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
 
       await queryClient.invalidateQueries({ queryKey: ["user-subscription"] });
       toast.success(`Subscribed to ${planName}!`);
