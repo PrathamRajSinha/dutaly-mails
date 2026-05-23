@@ -254,9 +254,28 @@ serve(async (req) => {
 
   } catch (error: unknown) {
     console.error("Error sending SMTP reply:", error);
-    const errorMessage = error instanceof Error ? error.message : "Internal server error";
+    const raw = error instanceof Error ? error.message : String(error);
+    let friendly = "We couldn't send your email. Please try again in a moment.";
+    const lower = raw.toLowerCase();
+    if (lower.includes("bare lf") || lower.includes("822.bis")) {
+      friendly = "Your email contained formatting that the mail server rejected. Please try again — we've cleaned it up.";
+    } else if (lower.includes("authentication") || lower.includes("auth") || lower.includes("535") || lower.includes("login")) {
+      friendly = "We couldn't sign in to your email account. Please reconnect it in Settings.";
+    } else if (lower.includes("timeout") || lower.includes("timed out")) {
+      friendly = "Your mail server took too long to respond. Please try again.";
+    } else if (lower.includes("connection") || lower.includes("econnrefused") || lower.includes("network")) {
+      friendly = "We couldn't reach your mail server. Please check your connection and try again.";
+    } else if (lower.includes("relay") || lower.includes("not allowed") || lower.includes("denied")) {
+      friendly = "Your mail server refused to send this message. Please check your account permissions.";
+    } else if (lower.includes("recipient") || lower.includes("550") || lower.includes("invalid address")) {
+      friendly = "The recipient's address was rejected by the mail server.";
+    } else if (lower.includes("quota") || lower.includes("552")) {
+      friendly = "The message couldn't be delivered (mailbox full or message too large).";
+    } else if (lower.includes("tls") || lower.includes("ssl") || lower.includes("certificate")) {
+      friendly = "We couldn't establish a secure connection to your mail server.";
+    }
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: friendly }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
