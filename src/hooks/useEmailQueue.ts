@@ -237,7 +237,7 @@ export function useEmailQueue(statusFilter?: string) {
       toast.success("Email sent successfully");
     },
     onError: (error) => {
-      toast.error("Failed to send email: " + error.message);
+      toast.error(error.message || "We couldn't send your email. Please try again.");
     },
   });
 
