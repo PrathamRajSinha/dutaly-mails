@@ -192,7 +192,16 @@ export function useEmailQueue(statusFilter?: string) {
       });
 
       if (sendError) {
-        throw sendError;
+        // Try to extract a user-friendly error from the function's response body
+        let friendly: string | null = null;
+        try {
+          const ctx = (sendError as { context?: Response }).context;
+          if (ctx && typeof ctx.json === "function") {
+            const parsed = await ctx.json();
+            if (parsed && typeof parsed.error === "string") friendly = parsed.error;
+          }
+        } catch { /* ignore */ }
+        throw new Error(friendly || "We couldn't send your email. Please try again.");
       }
 
       if (
