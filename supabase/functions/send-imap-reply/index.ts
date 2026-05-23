@@ -180,15 +180,20 @@ serve(async (req) => {
       ? requestData.subject
       : `Re: ${requestData.subject}`;
 
+    // Normalize line endings to CRLF to comply with RFC 5322 (avoids "bare LF" SMTP 552 errors)
+    const toCrlf = (s: string) => s.replace(/\r\n/g, "\n").replace(/\r/g, "\n").replace(/\n/g, "\r\n");
+    const textBody = requestData.body ? toCrlf(requestData.body) : (requestData.html_body ? "See HTML version" : "");
+    const htmlBody = requestData.html_body ? toCrlf(requestData.html_body) : undefined;
+
     const sendOptions: Record<string, unknown> = {
       from: account.email_address,
       to: requestData.to_address,
       subject,
-      content: requestData.body || (requestData.html_body ? "See HTML version" : ""),
+      content: textBody,
     };
 
-    if (requestData.html_body) {
-      sendOptions.html = requestData.html_body;
+    if (htmlBody) {
+      sendOptions.html = htmlBody;
     }
 
     // Download and attach files if any
