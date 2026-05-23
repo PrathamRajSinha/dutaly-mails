@@ -96,9 +96,6 @@ export default function OnboardingPayment() {
     if (!user) return;
 
     const aliases = planAliases[planKey] || [planKey];
-    const now = new Date();
-    const periodEnd = new Date(now);
-    periodEnd.setMonth(periodEnd.getMonth() + (billingPeriod === "yearly" ? 12 : 1));
 
     const { data: matchingPlans, error: planError } = await supabase
       .from("subscription_plans")
@@ -109,23 +106,28 @@ export default function OnboardingPayment() {
 
     const matchedPlan = matchingPlans?.find((row) => row.name === planKey) || matchingPlans?.[0] || null;
 
-    const { error: subscriptionError } = await supabase
-      .from("user_subscriptions")
-      .upsert(
-        {
-          user_id: user.id,
-          plan_id: matchedPlan?.id ?? null,
-          status: matchedPlan ? "active" : "pending",
-          current_period_start: now.toISOString(),
-          current_period_end: periodEnd.toISOString(),
+    if (!matchedPlan) {
+      // No matching free plan — leave subscription as-is; paid activation flows
+      // through the verified Razorpay handler with service-role privileges.
+      return;
+    }
+
+    const { data, error: subscriptionError } = await supabase.functions.invoke(
+      "activate-subscription",
+      {
+        body: {
+          plan_id: matchedPlan.id,
+          billing_period: billingPeriod === "yearly" ? "yearly" : "monthly",
         },
-        { onConflict: "user_id" }
-      );
+      }
+    );
 
     if (subscriptionError) throw subscriptionError;
+    if (data?.error) throw new Error(data.error);
 
     await queryClient.invalidateQueries({ queryKey: ["user-subscription"] });
   }, [planKey, billingPeriod, queryClient, user]);
+
 
   const completeOnboarding = async () => {
     if (!user) return;
