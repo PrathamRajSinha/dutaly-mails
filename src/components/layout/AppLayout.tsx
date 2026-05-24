@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom";
 import { AppSidebar } from "./AppSidebar";
 import { AccountTabs } from "./AccountTabs";
 import { UnsendToastProvider } from "@/components/UnsendToastProvider";
+import { WelcomeWizard } from "@/components/WelcomeWizard";
 import { SelectedAccountProvider } from "@/contexts/SelectedAccountContext";
 
 export function AppLayout() {
@@ -16,6 +17,7 @@ export function AppLayout() {
           </div>
         </main>
         <UnsendToastProvider />
+        <WelcomeWizard />
       </div>
     </SelectedAccountProvider>
   );
