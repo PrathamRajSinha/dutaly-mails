@@ -23,7 +23,7 @@ import {
 const STORAGE_KEY = "dutaly-welcome-wizard-seen";
 
 interface Step {
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   title: string;
   description: string;
 }
