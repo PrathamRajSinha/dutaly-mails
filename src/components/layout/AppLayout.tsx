@@ -17,6 +17,7 @@ export function AppLayout() {
           </div>
         </main>
         <UnsendToastProvider />
+        <WelcomeWizard />
       </div>
     </SelectedAccountProvider>
   );
