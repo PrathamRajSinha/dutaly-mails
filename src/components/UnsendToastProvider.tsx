@@ -106,7 +106,14 @@ export function UnsendToastProvider() {
 
       const customerName = send.from_name || send.from_address;
       toast(
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 pr-6 relative">
+          <button
+            onClick={() => handleDismiss(send.id)}
+            className="absolute -right-2 -top-1 rounded-sm p-1 text-muted-foreground hover:text-foreground"
+            aria-label="Dismiss"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
           <p className="text-sm">
             AI is sending a reply to <strong>{customerName}</strong> in {remaining}s
           </p>
@@ -116,7 +123,7 @@ export function UnsendToastProvider() {
               size="sm"
               variant="outline"
               className="h-7 text-xs"
-              onClick={() => handleView(send.ticket_id)}
+              onClick={handleView}
             >
               <Eye className="mr-1 h-3 w-3" />
               View
@@ -139,7 +146,7 @@ export function UnsendToastProvider() {
         }
       );
     });
-  }, [pendingSends, handleCancel, handleView]);
+  }, [pendingSends, handleCancel, handleView, handleDismiss]);
 
   return null;
 }
