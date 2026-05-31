@@ -43,35 +43,71 @@ Deno.serve(async (req) => {
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const now = new Date().toISOString();
 
-    // Upsert subscription (free activation via 100% coupon)
-    const { error: subError } = await supabase
+    const subscriptionPayload = {
+      user_id: user.id,
+      plan,
+      status: "active",
+      coupon_used: coupon_code || null,
+      amount_paid: 0,
+    };
+
+    // Select-then-insert/update (no unique constraint on user_id)
+    const { data: existing } = await supabase
       .from("subscriptions")
-      .upsert({
-        user_id: user.id,
-        plan,
-        status: "free",
-        coupon_used: coupon_code || null,
-        amount_paid: 0,
-      }, { onConflict: "user_id" });
+      .select("id")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-    if (subError) {
-      console.error("Subscription upsert error:", subError);
-      await supabase.from("subscriptions").insert({
-        user_id: user.id,
-        plan,
-        status: "free",
-        coupon_used: coupon_code || null,
-        amount_paid: 0,
-      });
+    if (existing?.id) {
+      const { error: updErr } = await supabase
+        .from("subscriptions")
+        .update(subscriptionPayload)
+        .eq("id", existing.id);
+      if (updErr) console.error("Subscription update error:", updErr);
+    } else {
+      const { error: insErr } = await supabase
+        .from("subscriptions")
+        .insert(subscriptionPayload);
+      if (insErr) console.error("Subscription insert error:", insErr);
     }
+
+    // Also activate managed user_subscriptions row so ProtectedRoute lets the user in.
+    // Try to match the selected plan in subscription_plans (handles aliases like growth/pro, scale/enterprise).
+    const aliases: Record<string, string[]> = {
+      starter: ["starter"],
+      growth: ["growth", "pro"],
+      scale: ["scale", "enterprise"],
+    };
+    const planNames = aliases[plan] || [plan];
+    const { data: matchedPlans } = await supabase
+      .from("subscription_plans")
+      .select("id, name")
+      .in("name", planNames);
+    const matchedPlan = matchedPlans?.find((p) => p.name === plan) || matchedPlans?.[0] || null;
+
+    const nowDate = new Date();
+    const periodEnd = new Date(nowDate);
+    periodEnd.setMonth(periodEnd.getMonth() + 1);
+
+    await supabase
+      .from("user_subscriptions")
+      .update({
+        status: "active",
+        plan_id: matchedPlan?.id || null,
+        current_period_start: nowDate.toISOString(),
+        current_period_end: periodEnd.toISOString(),
+      })
+      .eq("user_id", user.id);
 
     // Update profile
     await supabase
       .from("profiles")
       .update({ plan, onboarding_completed: true })
       .eq("id", user.id);
+
 
     return new Response(
       JSON.stringify({ success: true }),
