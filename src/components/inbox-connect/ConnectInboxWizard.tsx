@@ -363,13 +363,38 @@ export function ConnectInboxWizard({ open, onOpenChange, onConnected }: Props) {
                   <div>SMTP: <span className="text-[#1A1730] font-mono">{smtpHost || "—"}:{smtpPort}</span></div>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1"><Label className="text-[11px]">IMAP host</Label><Input value={imapHost} onChange={(e) => setImapHost(e.target.value)} /></div>
-                  <div className="space-y-1"><Label className="text-[11px]">IMAP port</Label><Input value={imapPort} onChange={(e) => setImapPort(e.target.value)} /></div>
-                  <div className="space-y-1"><Label className="text-[11px]">SMTP host</Label><Input value={smtpHost} onChange={(e) => setSmtpHost(e.target.value)} /></div>
-                  <div className="space-y-1"><Label className="text-[11px]">SMTP port</Label><Input value={smtpPort} onChange={(e) => setSmtpPort(e.target.value)} /></div>
+                <div className="space-y-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-[11px] text-[#9490B8]">Pick your hosting provider to auto-fill</Label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {Object.entries(PROVIDER_PRESETS).map(([domain, p]) => {
+                        const label = APP_PASSWORD_LINKS[domain]?.label || domain;
+                        const active = imapHost === p.imap_host && smtpHost === p.smtp_host;
+                        return (
+                          <button
+                            key={domain}
+                            type="button"
+                            onClick={() => {
+                              setImapHost(p.imap_host); setImapPort(String(p.imap_port));
+                              setSmtpHost(p.smtp_host); setSmtpPort(String(p.smtp_port));
+                            }}
+                            className={`px-2.5 py-1 rounded-md border text-[11px] transition ${active ? "border-[#7C6FE0] bg-[#F4F3FF] text-[#1A1730]" : "border-border text-[#9490B8] hover:text-[#1A1730] hover:border-[#7C6FE0]/40"}`}
+                          >
+                            {label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1"><Label className="text-[11px]">IMAP host</Label><Input value={imapHost} onChange={(e) => setImapHost(e.target.value)} /></div>
+                    <div className="space-y-1"><Label className="text-[11px]">IMAP port</Label><Input value={imapPort} onChange={(e) => setImapPort(e.target.value)} /></div>
+                    <div className="space-y-1"><Label className="text-[11px]">SMTP host</Label><Input value={smtpHost} onChange={(e) => setSmtpHost(e.target.value)} /></div>
+                    <div className="space-y-1"><Label className="text-[11px]">SMTP port</Label><Input value={smtpPort} onChange={(e) => setSmtpPort(e.target.value)} /></div>
+                  </div>
                 </div>
               )}
+
               <button type="button" onClick={() => setShowManual((s) => !s)} className="text-[11px] text-[#7C6FE0] hover:underline">
                 {showManual ? "Hide server settings" : "Edit server settings manually"}
               </button>
