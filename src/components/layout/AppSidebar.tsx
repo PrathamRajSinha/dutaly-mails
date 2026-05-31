@@ -11,9 +11,12 @@ import {
   Ticket,
   PanelLeftClose,
   PanelLeft,
+  Moon,
+  Sun,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/hooks/useTheme";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
@@ -29,6 +32,7 @@ export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [isAutomationActive, setIsAutomationActive] = useState(true);
   const [collapsed, setCollapsed] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
