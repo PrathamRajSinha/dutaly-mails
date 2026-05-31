@@ -37,6 +37,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSlaSettings } from "@/hooks/useSlaSettings";
 import { useIntegrations } from "@/hooks/useIntegrations";
 import type { Session } from "@supabase/supabase-js";
+import { ConnectInboxWizard } from "@/components/inbox-connect/ConnectInboxWizard";
 
 interface EmailAccount {
   id: string;
