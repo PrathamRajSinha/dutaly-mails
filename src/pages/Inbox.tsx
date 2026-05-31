@@ -528,6 +528,30 @@ function TicketCard({ ticket, isExpanded, onToggle }: { ticket: Ticket; isExpand
 // ─── Emails View ────────────────────────────────────────────
 function EmailsView({ searchQuery, onSearchChange }: { searchQuery: string; onSearchChange: (v: string) => void }) {
   const { emails: allEmails, needsReview, drafted, sent, ignored, isLoading, updateEmailStatus, sendEmail, pendingCount } = useEmailQueue();
+  const queryClient = useQueryClient();
+  const { session } = useAuth();
+  const [recheckLoading, setRecheckLoading] = useState(false);
+  const handleRecheckKB = async () => {
+    if (!session?.access_token) {
+      toast.error("Please sign in");
+      return;
+    }
+    setRecheckLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("reprocess-queued-emails", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        body: {},
+      });
+      if (error) throw error;
+      const count = (data as { reprocessed?: number })?.reprocessed ?? 0;
+      toast.success(count > 0 ? `Re-checked ${count} email${count === 1 ? "" : "s"} against your knowledge base` : "No emails needed re-checking");
+      queryClient.invalidateQueries({ queryKey: ["email-queue"] });
+    } catch (e) {
+      toast.error("Failed to re-check: " + (e as Error).message);
+    } finally {
+      setRecheckLoading(false);
+    }
+  };
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [addKBDialogOpen, setAddKBDialogOpen] = useState(false);
   const [selectedEmailForKB, setSelectedEmailForKB] = useState<QueuedEmail | null>(null);
@@ -681,28 +705,42 @@ function EmailsView({ searchQuery, onSearchChange }: { searchQuery: string; onSe
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as EmailTabValue)}>
-          <TabsList className="mb-6">
-            <TabsTrigger value="all_emails" className="gap-2 min-w-[80px] justify-center">
-              <Eye className="h-4 w-4" />All
-              <Badge variant="secondary" className={cn("ml-1 h-5 min-w-[20px] px-1.5 text-xs", allEmails.length > 0 ? "" : "invisible")}>{allEmails.length}</Badge>
-            </TabsTrigger>
-            <TabsTrigger value="needs_review" className="gap-2 min-w-[120px] justify-center">
-              <AlertCircle className="h-4 w-4" />Needs Review
-              <Badge variant="secondary" className={cn("ml-1 h-5 min-w-[20px] px-1.5 text-xs", needsReview.length > 0 ? "" : "invisible")}>{needsReview.length}</Badge>
-            </TabsTrigger>
-            <TabsTrigger value="drafted" className="gap-2 min-w-[100px] justify-center">
-              <FileEdit className="h-4 w-4" />Drafted
-              <Badge variant="secondary" className={cn("ml-1 h-5 min-w-[20px] px-1.5 text-xs", drafted.length > 0 ? "" : "invisible")}>{drafted.length}</Badge>
-            </TabsTrigger>
-            <TabsTrigger value="sent" className="gap-2 min-w-[80px] justify-center">
-              <Send className="h-4 w-4" />Sent
-              <Badge variant="secondary" className={cn("ml-1 h-5 min-w-[20px] px-1.5 text-xs", sent.length > 0 ? "" : "invisible")}>{sent.length}</Badge>
-            </TabsTrigger>
-            <TabsTrigger value="ignored" className="gap-2 min-w-[100px] justify-center">
-              <XCircle className="h-4 w-4" />Ignored
-              <Badge variant="secondary" className={cn("ml-1 h-5 min-w-[20px] px-1.5 text-xs", ignored.length > 0 ? "" : "invisible")}>{ignored.length}</Badge>
-            </TabsTrigger>
-          </TabsList>
+          <div className="flex items-center justify-between mb-6">
+            <TabsList>
+              <TabsTrigger value="all_emails" className="gap-2 min-w-[80px] justify-center">
+                <Eye className="h-4 w-4" />All
+                <Badge variant="secondary" className={cn("ml-1 h-5 min-w-[20px] px-1.5 text-xs", allEmails.length > 0 ? "" : "invisible")}>{allEmails.length}</Badge>
+              </TabsTrigger>
+              <TabsTrigger value="needs_review" className="gap-2 min-w-[120px] justify-center">
+                <AlertCircle className="h-4 w-4" />Needs Review
+                <Badge variant="secondary" className={cn("ml-1 h-5 min-w-[20px] px-1.5 text-xs", needsReview.length > 0 ? "" : "invisible")}>{needsReview.length}</Badge>
+              </TabsTrigger>
+              <TabsTrigger value="drafted" className="gap-2 min-w-[100px] justify-center">
+                <FileEdit className="h-4 w-4" />Drafted
+                <Badge variant="secondary" className={cn("ml-1 h-5 min-w-[20px] px-1.5 text-xs", drafted.length > 0 ? "" : "invisible")}>{drafted.length}</Badge>
+              </TabsTrigger>
+              <TabsTrigger value="sent" className="gap-2 min-w-[80px] justify-center">
+                <Send className="h-4 w-4" />Sent
+                <Badge variant="secondary" className={cn("ml-1 h-5 min-w-[20px] px-1.5 text-xs", sent.length > 0 ? "" : "invisible")}>{sent.length}</Badge>
+              </TabsTrigger>
+              <TabsTrigger value="ignored" className="gap-2 min-w-[100px] justify-center">
+                <XCircle className="h-4 w-4" />Ignored
+                <Badge variant="secondary" className={cn("ml-1 h-5 min-w-[20px] px-1.5 text-xs", ignored.length > 0 ? "" : "invisible")}>{ignored.length}</Badge>
+              </TabsTrigger>
+            </TabsList>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRecheckKB}
+              disabled={recheckLoading}
+              className="gap-2"
+              title="Re-run AI on pending emails using the latest knowledge base"
+            >
+              {recheckLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              Re-check with KB
+            </Button>
+          </div>
+
 
           <TabsContent value="all_emails">{renderEmailList(allEmails)}</TabsContent>
           <TabsContent value="needs_review">{renderEmailList(needsReview)}</TabsContent>
