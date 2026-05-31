@@ -128,10 +128,15 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  html.dark body { color: #B8B5D6; }
+
   h1, h2, h3, h4, h5, h6 {
     font-weight: 500;
     color: #1A1730;
   }
+
+  html.dark h1, html.dark h2, html.dark h3,
+  html.dark h4, html.dark h5, html.dark h6 { color: #E8E4FF; }
 }
 
 /* Badge variants */
@@ -142,6 +147,58 @@
 .badge-auto-resolved { background: #E1F5EE; color: #0F6E56; }
 .badge-ignored { background: #F1EFE8; color: #5F5E5A; }
 .badge-pending { background: #EBE9FF; color: #534AB7; }
+
+html.dark .badge-urgent { background: #3a1414; color: #ff8a8a; }
+html.dark .badge-high { background: #3a2a10; color: #f0c070; }
+html.dark .badge-medium { background: #102640; color: #6fb0ee; }
+html.dark .badge-low { background: #1f1d17; color: #b8b3a3; }
+html.dark .badge-auto-resolved { background: #0f2e22; color: #6cd9a8; }
+html.dark .badge-ignored { background: #1f1d17; color: #b8b3a3; }
+html.dark .badge-pending { background: #1f1b3d; color: #b8aef0; }
+
+/* =================================================================
+   Dark-mode overrides for inline-style hex colors.
+   Many components hardcode hex via style={{}} instead of semantic
+   tokens; these rules remap the dominant palette when .dark is on.
+   ================================================================= */
+
+/* Background remaps */
+html.dark [style*="#F4F3FF" i] { background-color: #0F0F18 !important; }
+html.dark [style*="#FFFFFF" i]:not(.preserve-light),
+html.dark [style*="#ffffff" i]:not(.preserve-light),
+html.dark [style*="background-color: #fff" i]:not(.preserve-light) {
+  background-color: #16161F !important;
+}
+html.dark [style*="#FAFAFA" i],
+html.dark [style*="#F9FAFB" i],
+html.dark [style*="#F5F5F5" i] { background-color: #14141C !important; }
+html.dark [style*="#EBE9FF" i] { background-color: #1F1B3D !important; }
+html.dark [style*="#F1EFE8" i] { background-color: #1A1820 !important; }
+
+/* Text-color remaps via specific declaration matching */
+html.dark [style*="color: #1A1730" i],
+html.dark [style*="color:#1A1730" i] { color: #E8E4FF !important; }
+html.dark [style*="color: #3D3A5C" i],
+html.dark [style*="color:#3D3A5C" i] { color: #B8B5D6 !important; }
+html.dark [style*="color: #9490B8" i],
+html.dark [style*="color:#9490B8" i] { color: #7C7898 !important; }
+html.dark [style*="color: #534AB7" i] { color: #B8AEF0 !important; }
+
+/* Border remaps */
+html.dark [style*="border: 1px solid #E5E7EB" i],
+html.dark [style*="border: 1px solid #EAE7F5" i],
+html.dark [style*="border: 1px solid #E8E4FF" i],
+html.dark [style*="border-color: #E5E7EB" i] {
+  border-color: #2A2738 !important;
+}
+
+/* Common bg-white tailwind class */
+html.dark .bg-white { background-color: #16161F !important; }
+html.dark .bg-gray-50, html.dark .bg-slate-50 { background-color: #14141C !important; }
+html.dark .text-gray-900, html.dark .text-slate-900 { color: #E8E4FF !important; }
+html.dark .text-gray-700, html.dark .text-slate-700 { color: #B8B5D6 !important; }
+html.dark .text-gray-500, html.dark .text-slate-500 { color: #7C7898 !important; }
+html.dark .border-gray-200, html.dark .border-slate-200 { border-color: #2A2738 !important; }
 
 @keyframes marquee {
   0% { transform: translateX(0); }
