@@ -37,6 +37,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSlaSettings } from "@/hooks/useSlaSettings";
 import { useIntegrations } from "@/hooks/useIntegrations";
 import type { Session } from "@supabase/supabase-js";
+import { ConnectInboxWizard } from "@/components/inbox-connect/ConnectInboxWizard";
 
 interface EmailAccount {
   id: string;
@@ -472,6 +473,7 @@ export default function Settings() {
   const [whitelistEmails, setWhitelistEmails] = useState<string[]>([]);
   const [blacklistEmails, setBlacklistEmails] = useState<string[]>([]);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [wizardOpen, setWizardOpen] = useState(false);
   const [slaFirstResponse, setSlaFirstResponse] = useState(4);
   const [slaResolution, setSlaResolution] = useState(24);
 
@@ -628,46 +630,28 @@ export default function Settings() {
             </div>
           )}
 
-          <div className="grid gap-6 lg:grid-cols-2">
-            {/* Gmail */}
+          <div className="grid gap-6">
             <Card className="border border-border">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100">
-                    <svg className="h-5 w-5" viewBox="0 0 24 24">
-                      <path
-                        fill="#EA4335"
-                        d="M22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2l.01 12c0 1.1.89 2 1.99 2h16c1.1 0 2-.9 2-2V6zm-2 0l-8 5-8-5h16zm0 12H4V8l8 5 8-5v10z"
-                      />
-                    </svg>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#F4F3FF]">
+                    <Mail className="h-5 w-5 text-[#7C6FE0]" />
                   </div>
-                  Gmail
+                  Add an inbox
                 </CardTitle>
                 <CardDescription>
-                  Connect your Gmail account to read and send emails
+                  Step-by-step connection for Gmail (recommended) or any IMAP/SMTP provider. Includes permission review and connection tests.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button onClick={handleConnectGmail} className="w-full" disabled={isConnecting}>
-                  {isConnecting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Connecting...
-                    </>
-                  ) : (
-                    <>
-                      Connect Gmail
-                      <ExternalLink className="ml-2 h-4 w-4" />
-                    </>
-                  )}
+                <Button onClick={() => setWizardOpen(true)} style={{ backgroundColor: "#7C6FE0" }}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Connect inbox
                 </Button>
               </CardContent>
             </Card>
-
-
-            {/* IMAP/SMTP */}
-            <ImapConnectionForm session={session} />
           </div>
+          <ConnectInboxWizard open={wizardOpen} onOpenChange={setWizardOpen} />
 
           {/* Permissions Info */}
           <Card className="mt-6 border-primary/20 bg-primary/5">
