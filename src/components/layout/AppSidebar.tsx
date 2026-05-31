@@ -11,9 +11,12 @@ import {
   Ticket,
   PanelLeftClose,
   PanelLeft,
+  Moon,
+  Sun,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/hooks/useTheme";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
@@ -29,6 +32,7 @@ export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [isAutomationActive, setIsAutomationActive] = useState(true);
   const [collapsed, setCollapsed] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
@@ -164,12 +168,34 @@ export function AppSidebar() {
           </div>
         )}
         {!collapsed && (
+          <div className="flex items-center justify-between gap-2">
+            <button
+              onClick={handleSignOut}
+              style={{ color: 'rgba(255,255,255,0.35)', fontSize: '12px' }}
+              className="flex-1 text-left transition-colors hover:text-white/60"
+            >
+              Sign out
+            </button>
+            <button
+              onClick={toggleTheme}
+              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              className="flex h-7 w-7 items-center justify-center rounded-md transition-colors hover:bg-white/10"
+              style={{ color: 'rgba(255,255,255,0.55)' }}
+              aria-label="Toggle theme"
+            >
+              {theme === 'dark' ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
+            </button>
+          </div>
+        )}
+        {collapsed && (
           <button
-            onClick={handleSignOut}
-            style={{ color: 'rgba(255,255,255,0.35)', fontSize: '12px' }}
-            className="w-full text-center transition-colors hover:text-white/60"
+            onClick={toggleTheme}
+            title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
+            className="mx-auto flex h-7 w-7 items-center justify-center rounded-md transition-colors hover:bg-white/10"
+            style={{ color: 'rgba(255,255,255,0.55)' }}
+            aria-label="Toggle theme"
           >
-            Sign out
+            {theme === 'dark' ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
           </button>
         )}
       </div>
