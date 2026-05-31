@@ -85,6 +85,11 @@ export default function Signup() {
         setFormError("An account with this email already exists. Please sign in instead.");
         return;
       }
+      // If a session was created immediately, email confirmation is disabled — skip OTP
+      if (data.session) {
+        navigate("/onboarding/plan", { replace: true });
+        return;
+      }
       setStep("otp");
     }
   };
