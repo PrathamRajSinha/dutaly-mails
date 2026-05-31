@@ -85,13 +85,14 @@ export function UnsendToastProvider() {
     }
   }, []);
 
-  const handleView = useCallback((ticketId: string | null) => {
-    if (ticketId) {
-      navigate(`/tickets?ticket=${ticketId}`);
-    } else {
-      navigate("/tickets");
-    }
+  const handleView = useCallback(() => {
+    navigate("/inbox");
   }, [navigate]);
+
+  const handleDismiss = useCallback((id: string) => {
+    setPendingSends((prev) => prev.filter((p) => p.id !== id));
+    toast.dismiss(`unsend-${id}`);
+  }, []);
 
   // Show toast for each pending send
   useEffect(() => {
