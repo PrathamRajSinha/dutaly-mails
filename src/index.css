@@ -74,6 +74,44 @@
     --tracking-normal: 0em;
     --spacing: 0.25rem;
   }
+
+  .dark {
+    /* App interior background: deep ink */
+    --background: 250 25% 7%;
+    /* Foreground: near-white lavender */
+    --foreground: 245 60% 95%;
+
+    /* Card: elevated dark surface */
+    --card: 250 22% 10%;
+    --card-foreground: 245 60% 95%;
+
+    --popover: 250 22% 10%;
+    --popover-foreground: 245 60% 95%;
+
+    --primary: 248 64% 66%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 250 20% 14%;
+    --secondary-foreground: 245 50% 90%;
+
+    --muted: 250 18% 14%;
+    --muted-foreground: 248 18% 65%;
+
+    --accent: 248 64% 66%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 250 18% 18%;
+    --input: 250 18% 22%;
+    --ring: 248 64% 66%;
+
+    /* Sidebar stays its own dark identity */
+    --sidebar-background: 240 25% 4%;
+    --sidebar-foreground: 0 0% 100% / 0.5;
+    --sidebar-border: 0 0% 100% / 0.06;
+  }
 }
 
 @layer base {
