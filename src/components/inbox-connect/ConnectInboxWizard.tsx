@@ -90,11 +90,12 @@ export function ConnectInboxWizard({ open, onOpenChange, onConnected }: Props) {
     if (!imapHost || !smtpHost) { setErrorMsg("Server host fields are required."); return; }
     setBusy(true); setErrorMsg(null);
     setStep(4);
-    const initial = [
-      { label: "Reach IMAP server", state: "running" as CheckState },
-      { label: "Authenticate inbox credentials", state: "pending" as CheckState },
-      { label: "Verify SMTP server", state: "pending" as CheckState },
-      { label: "Save connection", state: "pending" as CheckState },
+    type Check = { label: string; state: CheckState; detail?: string };
+    const initial: Check[] = [
+      { label: "Reach IMAP server", state: "running" },
+      { label: "Authenticate inbox credentials", state: "pending" },
+      { label: "Verify SMTP server", state: "pending" },
+      { label: "Save connection", state: "pending" },
     ];
     setChecks(initial);
 
