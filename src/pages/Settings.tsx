@@ -472,6 +472,7 @@ export default function Settings() {
   const [whitelistEmails, setWhitelistEmails] = useState<string[]>([]);
   const [blacklistEmails, setBlacklistEmails] = useState<string[]>([]);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [wizardOpen, setWizardOpen] = useState(false);
   const [slaFirstResponse, setSlaFirstResponse] = useState(4);
   const [slaResolution, setSlaResolution] = useState(24);
 
