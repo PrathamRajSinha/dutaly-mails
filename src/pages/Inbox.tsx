@@ -528,6 +528,30 @@ function TicketCard({ ticket, isExpanded, onToggle }: { ticket: Ticket; isExpand
 // ─── Emails View ────────────────────────────────────────────
 function EmailsView({ searchQuery, onSearchChange }: { searchQuery: string; onSearchChange: (v: string) => void }) {
   const { emails: allEmails, needsReview, drafted, sent, ignored, isLoading, updateEmailStatus, sendEmail, pendingCount } = useEmailQueue();
+  const queryClient = useQueryClient();
+  const { session } = useAuth();
+  const [recheckLoading, setRecheckLoading] = useState(false);
+  const handleRecheckKB = async () => {
+    if (!session?.access_token) {
+      toast.error("Please sign in");
+      return;
+    }
+    setRecheckLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("reprocess-queued-emails", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        body: {},
+      });
+      if (error) throw error;
+      const count = (data as { reprocessed?: number })?.reprocessed ?? 0;
+      toast.success(count > 0 ? `Re-checked ${count} email${count === 1 ? "" : "s"} against your knowledge base` : "No emails needed re-checking");
+      queryClient.invalidateQueries({ queryKey: ["email-queue"] });
+    } catch (e) {
+      toast.error("Failed to re-check: " + (e as Error).message);
+    } finally {
+      setRecheckLoading(false);
+    }
+  };
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [addKBDialogOpen, setAddKBDialogOpen] = useState(false);
   const [selectedEmailForKB, setSelectedEmailForKB] = useState<QueuedEmail | null>(null);
