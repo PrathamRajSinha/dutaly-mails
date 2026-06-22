@@ -109,7 +109,7 @@ export default function Privacy() {
             <p>We may update this Privacy Policy from time to time. The updated version will be posted on this page with a revised effective date. Your continued use of the Service after changes are posted constitutes your acceptance of the updated policy.</p>
           </Section>
 
-          <Section title="12. Google User Data and Gmail Access">
+          <Section title="11. Google User Data and Gmail Access">
             <p>Dutaly integrates with Google Gmail through Google's OAuth authorization system.</p>
 
             <p className="font-semibold text-white">Google User Data Accessed</p>
@@ -119,6 +119,12 @@ export default function Privacy() {
               <li>Email conversation history</li>
               <li>Email metadata including sender, recipient, subject, timestamps, and labels</li>
               <li>Gmail labels and folder information</li>
+            </ul>
+            <p>Dutaly may request the following Gmail permissions:</p>
+            <ul>
+              <li>gmail.readonly — to read incoming customer support emails and conversation history.</li>
+              <li>gmail.send — to send replies on behalf of the connected user.</li>
+              <li>gmail.labels — to read and manage Gmail labels used for email organization.</li>
             </ul>
             <p>This access is limited to the permissions granted by the user through Google's consent screen.</p>
 
@@ -133,6 +139,7 @@ export default function Privacy() {
               <li>Maintaining conversation context for customer support interactions</li>
             </ul>
             <p>Google user data is not used for advertising, profiling, marketing, or sold to third parties.</p>
+            <p>Google user data is used exclusively to provide customer support functionality requested by the user. Data is not used to train generalized AI models, build user profiles, serve advertisements, or perform unrelated analytics.</p>
 
             <p className="font-semibold text-white">Google User Data Sharing</p>
             <p>Dutaly does not sell, rent, or share Google user data with advertisers or data brokers.</p>
@@ -143,6 +150,7 @@ export default function Privacy() {
               <li>AI processing providers used to generate support responses</li>
             </ul>
             <p>These providers are contractually required to protect user information and may only process data necessary to provide the Service.</p>
+            <p>No Google user data is shared with third parties for advertising, marketing, profiling, or resale purposes.</p>
 
             <p className="font-semibold text-white">Google User Data Storage and Protection</p>
             <p>Google user data is protected using industry-standard security measures including:</p>
@@ -153,23 +161,28 @@ export default function Privacy() {
               <li>Restricted access to authorized personnel only</li>
               <li>Secure storage of OAuth credentials and access tokens</li>
             </ul>
+            <p>OAuth access tokens and refresh tokens are stored securely and are used only to provide authorized Gmail functionality requested by the user.</p>
 
             <p className="font-semibold text-white">Data Retention and Deletion</p>
             <p>Google user data is retained only for as long as necessary to provide the Service.</p>
-            <p>Users may request deletion of their data by contacting Dutaly at <a href="mailto:prathamrajsinha@gmail.com" className="underline" style={{ color: "rgba(255,255,255,0.85)" }}>prathamrajsinha@gmail.com</a>.</p>
+            <p>Users may request deletion of their data by:</p>
+            <ul>
+              <li>Contacting support at <a href="mailto:prathamrajsinha@gmail.com" className="underline" style={{ color: "rgba(255,255,255,0.85)" }}>prathamrajsinha@gmail.com</a></li>
+              <li>Deleting their Dutaly account through the application (where available)</li>
+            </ul>
             <p>Upon account deletion or approved deletion request:</p>
             <ul>
               <li>Connected Gmail accounts are disconnected</li>
               <li>Stored OAuth tokens are revoked or removed</li>
               <li>Associated user data is permanently deleted within a reasonable period unless retention is required by law</li>
             </ul>
-            <p>Users may also revoke Dutaly's access at any time through their Google Account security settings.</p>
+            <p>Users may revoke Dutaly's access to their Google Account at any time through Google's Security Settings. Upon revocation, Dutaly will no longer be able to access Gmail data associated with that account.</p>
 
             <p className="font-semibold text-white">Google API Services Disclosure</p>
             <p>Dutaly's use and transfer of information received from Google APIs to any other app will adhere to the Google API Services User Data Policy, including the Limited Use requirements.</p>
           </Section>
 
-          <Section title="13. Contact Us">
+          <Section title="12. Contact Us">
             <p>If you have any questions, concerns, or requests regarding this Privacy Policy, please contact:</p>
             <ContactBlock />
           </Section>
