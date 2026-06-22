@@ -49,7 +49,7 @@ export default function Refund() {
             <p>For refund-related queries or issues, please contact:</p>
             <div className="mt-2 p-5 rounded-lg" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
               <p className="font-semibold text-white">Dutaly</p>
-              <p>📧 prathamrajsinha@gmail.com</p>
+              <p>📧 <a href="mailto:pratham@dutaly.com" className="underline" style={{ color: "rgba(255,255,255,0.85)" }}>pratham@dutaly.com</a></p>
               <p>📞 +91 9148253924</p>
               <p>📍 Bengaluru, Karnataka 560072, India</p>
             </div>
