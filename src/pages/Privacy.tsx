@@ -61,7 +61,7 @@ export default function Privacy() {
           <Section title="4. Sharing of Information">
             <p>We do not sell or rent your personal information. We may share limited data with:</p>
             <ul>
-              <li>Trusted third parties who help us operate our Service (e.g., hosting, payment processing, analytics, AI model providers)</li>
+              <li>Trusted service providers who help us operate the Service, including cloud hosting providers, database providers, payment processors, analytics providers, and AI service providers that process email content solely for generating customer support responses requested by the user.</li>
               <li>Regulatory authorities if required by law or legal process</li>
               <li>Legal representatives in case of disputes or compliance investigations</li>
             </ul>
@@ -98,6 +98,7 @@ export default function Privacy() {
               <li>Request a copy of your data</li>
               <li>Lodge a complaint with a relevant data protection authority</li>
             </ul>
+            <p>Users may request access to, correction of, export of, or deletion of their personal data by contacting <a href="mailto:pratham@dutaly.com" className="underline" style={{ color: "rgba(255,255,255,0.85)" }}>pratham@dutaly.com</a>.</p>
             <p>To exercise any of these rights, please contact us at the details below.</p>
           </Section>
 
@@ -147,10 +148,11 @@ export default function Privacy() {
             <ul>
               <li>Cloud hosting providers</li>
               <li>Database and infrastructure providers</li>
-              <li>AI processing providers used to generate support responses</li>
+              <li>AI service providers that process email content solely for generating customer support responses requested by the user.</li>
             </ul>
             <p>These providers are contractually required to protect user information and may only process data necessary to provide the Service.</p>
             <p>No Google user data is shared with third parties for advertising, marketing, profiling, or resale purposes.</p>
+            <p>Google user data is never transferred, sold, rented, or disclosed to data brokers, advertising networks, marketing platforms, or other third parties for purposes unrelated to providing Dutaly's customer support functionality.</p>
 
             <p className="font-semibold text-white">Google User Data Storage and Protection</p>
             <p>Google user data is protected using industry-standard security measures including:</p>
@@ -162,24 +164,31 @@ export default function Privacy() {
               <li>Secure storage of OAuth credentials and access tokens</li>
             </ul>
             <p>OAuth access tokens and refresh tokens are stored securely and are used only to provide authorized Gmail functionality requested by the user.</p>
+            <p>Google user data is accessed only when required to provide functionality requested by the user. Internal access to Google user data is restricted to authorized personnel with a legitimate operational need.</p>
+            <p>OAuth access tokens are encrypted at rest and protected using industry-standard security controls. Tokens are used exclusively to provide Gmail functionality authorized by the user.</p>
 
             <p className="font-semibold text-white">Data Retention and Deletion</p>
             <p>Google user data is retained only for as long as necessary to provide the Service.</p>
             <p>Users may request deletion of their data by:</p>
             <ul>
-              <li>Contacting support at <a href="mailto:prathamrajsinha@gmail.com" className="underline" style={{ color: "rgba(255,255,255,0.85)" }}>prathamrajsinha@gmail.com</a></li>
+              <li>Contacting support at <a href="mailto:pratham@dutaly.com" className="underline" style={{ color: "rgba(255,255,255,0.85)" }}>pratham@dutaly.com</a></li>
               <li>Deleting their Dutaly account through the application (where available)</li>
             </ul>
+            <p>Users may also request deletion of their account and associated data by contacting <a href="mailto:pratham@dutaly.com" className="underline" style={{ color: "rgba(255,255,255,0.85)" }}>pratham@dutaly.com</a>.</p>
             <p>Upon account deletion or approved deletion request:</p>
             <ul>
               <li>Connected Gmail accounts are disconnected</li>
               <li>Stored OAuth tokens are revoked or removed</li>
               <li>Associated user data is permanently deleted within a reasonable period unless retention is required by law</li>
             </ul>
+            <p>Upon deletion of an account, Dutaly permanently removes stored Gmail-related data, OAuth credentials, and associated support records within a reasonable period unless retention is legally required.</p>
             <p>Users may revoke Dutaly's access to their Google Account at any time through Google's Security Settings. Upon revocation, Dutaly will no longer be able to access Gmail data associated with that account.</p>
 
             <p className="font-semibold text-white">Google API Services Disclosure</p>
             <p>Dutaly's use and transfer of information received from Google APIs to any other app will adhere to the Google API Services User Data Policy, including the Limited Use requirements.</p>
+
+            <p className="font-semibold text-white">Google Workspace API Disclosure</p>
+            <p>Dutaly only accesses Gmail data that users explicitly authorize through Google's OAuth consent process. Gmail data is used exclusively for providing AI-powered customer support functionality, including reading support emails, organizing conversations, generating draft responses, and sending approved replies on behalf of the user. Gmail data is not used for advertising, marketing, user profiling, or training generalized artificial intelligence models.</p>
           </Section>
 
           <Section title="12. Contact Us">
@@ -207,7 +216,7 @@ function ContactBlock() {
   return (
     <div className="mt-2 p-5 rounded-lg" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
       <p className="font-semibold text-white">Dutaly</p>
-      <p>📧 prathamrajsinha@gmail.com</p>
+      <p>📧 <a href="mailto:pratham@dutaly.com" className="underline" style={{ color: "rgba(255,255,255,0.85)" }}>pratham@dutaly.com</a></p>
       <p>📞 +91 9148253924</p>
       <p>📍 Bengaluru, Karnataka 560072, India</p>
     </div>
