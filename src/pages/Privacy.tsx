@@ -120,6 +120,12 @@ export default function Privacy() {
               <li>Email metadata including sender, recipient, subject, timestamps, and labels</li>
               <li>Gmail labels and folder information</li>
             </ul>
+            <p>Dutaly may request the following Gmail permissions:</p>
+            <ul>
+              <li>gmail.readonly — to read incoming customer support emails and conversation history.</li>
+              <li>gmail.send — to send replies on behalf of the connected user.</li>
+              <li>gmail.labels — to read and manage Gmail labels used for email organization.</li>
+            </ul>
             <p>This access is limited to the permissions granted by the user through Google's consent screen.</p>
 
             <p className="font-semibold text-white">Google User Data Usage</p>
