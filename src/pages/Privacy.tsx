@@ -109,7 +109,7 @@ export default function Privacy() {
             <p>We may update this Privacy Policy from time to time. The updated version will be posted on this page with a revised effective date. Your continued use of the Service after changes are posted constitutes your acceptance of the updated policy.</p>
           </Section>
 
-          <Section title="12. Google User Data and Gmail Access">
+          <Section title="11. Google User Data and Gmail Access">
             <p>Dutaly integrates with Google Gmail through Google's OAuth authorization system.</p>
 
             <p className="font-semibold text-white">Google User Data Accessed</p>
@@ -169,7 +169,7 @@ export default function Privacy() {
             <p>Dutaly's use and transfer of information received from Google APIs to any other app will adhere to the Google API Services User Data Policy, including the Limited Use requirements.</p>
           </Section>
 
-          <Section title="13. Contact Us">
+          <Section title="12. Contact Us">
             <p>If you have any questions, concerns, or requests regarding this Privacy Policy, please contact:</p>
             <ContactBlock />
           </Section>
