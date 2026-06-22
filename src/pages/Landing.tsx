@@ -1,5 +1,8 @@
+import { useEffect } from "react";
+import Lenis from "lenis";
 import { Seo } from "@/components/Seo";
 import { LandingNavbar } from "@/components/landing/LandingNavbar";
+
 import { HeroSection } from "@/components/landing/HeroSection";
 import { TrustedBySection } from "@/components/landing/TrustedBySection";
 import { FeaturesSection } from "@/components/landing/FeaturesSection";
