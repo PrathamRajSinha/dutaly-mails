@@ -16,6 +16,7 @@ import { UsageCard } from "@/components/dashboard/UsageCard";
 import { ResolutionRateCard } from "@/components/dashboard/ResolutionRateCard";
 import { OnboardingBanner } from "@/components/dashboard/OnboardingBanner";
 import { useKnowledgeBase } from "@/hooks/useKnowledgeBase";
+import { useSelectedAccount } from "@/contexts/SelectedAccountContext";
 
 export default function Dashboard() {
   const { logs, isLoading: logsLoading } = useActivityLogs(10);
@@ -39,19 +40,20 @@ export default function Dashboard() {
     }
     setIsFetching(true);
     try {
-      const hasGmail = accounts.some(a => a.provider === "gmail" && a.is_active);
-      const hasImap = accounts.some(a => a.provider === "imap" && a.is_active);
-
+      const authHeaders = { Authorization: `Bearer ${session.access_token}` };
       const fetches: Promise<{ data: any; error: any }>[] = [];
-      if (hasGmail) {
-        fetches.push(supabase.functions.invoke("fetch-gmail-emails", {
-          headers: { Authorization: `Bearer ${session.access_token}` },
-        }));
-      }
-      if (hasImap) {
-        fetches.push(supabase.functions.invoke("fetch-imap-emails", {
-          headers: { Authorization: `Bearer ${session.access_token}` },
-        }));
+
+      if (selectedAccountId && selectedAccountId !== "all") {
+        const acc = accounts.find((a) => a.id === selectedAccountId && a.is_active);
+        if (acc) {
+          const fn = acc.provider === "imap" ? "fetch-imap-emails" : "fetch-gmail-emails";
+          fetches.push(supabase.functions.invoke(fn, { headers: authHeaders, body: { account_id: acc.id } }));
+        }
+      } else {
+        const hasGmail = accounts.some(a => a.provider === "gmail" && a.is_active);
+        const hasImap = accounts.some(a => a.provider === "imap" && a.is_active);
+        if (hasGmail) fetches.push(supabase.functions.invoke("fetch-gmail-emails", { headers: authHeaders }));
+        if (hasImap) fetches.push(supabase.functions.invoke("fetch-imap-emails", { headers: authHeaders }));
       }
 
       if (fetches.length === 0) {
@@ -59,6 +61,7 @@ export default function Dashboard() {
         setIsFetching(false);
         return;
       }
+
 
       const results = await Promise.all(fetches);
       let totalProcessed = 0;
