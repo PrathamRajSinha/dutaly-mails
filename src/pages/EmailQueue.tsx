@@ -50,6 +50,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEmailAccounts } from "@/hooks/useEmailAccounts";
+import { useSelectedAccount } from "@/contexts/SelectedAccountContext";
 import { TemplatePickerDialog } from "@/components/email-templates/TemplatePickerDialog";
 import { type EmailTemplate } from "@/hooks/useEmailTemplates";
 import { replaceVariables, renderEmailHtml } from "@/lib/emailHtml";
