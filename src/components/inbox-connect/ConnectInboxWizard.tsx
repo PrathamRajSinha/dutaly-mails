@@ -356,7 +356,23 @@ export function ConnectInboxWizard({ open, onOpenChange, onConnected }: Props) {
             <div className="space-y-3">
               <div className="space-y-2">
                 <Label className="text-[12px]">Password</Label>
-                <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="App-specific password" />
+                <div className="relative">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="App-specific password"
+                    className="pr-9"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((s) => !s)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-[#9490B8] hover:text-[#1A1730]"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
               {!showManual ? (
                 <div className="grid grid-cols-2 gap-3 text-[11px] text-[#9490B8]">
