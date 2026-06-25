@@ -24,6 +24,7 @@ export default function Dashboard() {
 
   const { accounts } = useEmailAccounts();
   const { session } = useAuth();
+  const { selectedAccountId } = useSelectedAccount();
   const queryClient = useQueryClient();
   const [isFetching, setIsFetching] = useState(false);
   const [onboardingDismissed, setOnboardingDismissed] = useState(
