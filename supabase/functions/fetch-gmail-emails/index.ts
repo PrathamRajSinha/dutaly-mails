@@ -349,12 +349,13 @@ serve(async (req) => {
       }
     }
 
-    console.log(`Completed: ${processed} processed, ${skipped} skipped (already in queue)`);
+    console.log(`Completed: ${processed} processed, ${skipped} skipped across ${accounts.length} Gmail account(s)`);
 
     return new Response(
       JSON.stringify({
         success: true,
-        total: messages.length,
+        accounts: accounts.length,
+        total: totalMessages,
         processed,
         skipped,
       }),
