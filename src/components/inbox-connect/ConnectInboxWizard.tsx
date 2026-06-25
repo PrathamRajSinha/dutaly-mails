@@ -454,7 +454,7 @@ export function ConnectInboxWizard({ open, onOpenChange, onConnected }: Props) {
               </Button>
             )}
             {step === 4 && someFail && (
-              <Button variant="ghost" size="sm" onClick={() => setStep(3)}>
+              <Button variant="ghost" size="sm" onClick={() => { setChecks([]); setErrorMsg(null); setStep(3); }} disabled={busy}>
                 <ArrowLeft className="h-3.5 w-3.5 mr-1" /> Back
               </Button>
             )}
@@ -493,6 +493,12 @@ export function ConnectInboxWizard({ open, onOpenChange, onConnected }: Props) {
             )}
             {step === 4 && allChecksOk && (
               <Button size="sm" onClick={() => setStep(5)} style={{ backgroundColor: "#7C6FE0" }}>Continue</Button>
+            )}
+            {step === 4 && someFail && (
+              <Button size="sm" onClick={runImapConnect} disabled={busy} style={{ backgroundColor: "#7C6FE0" }}>
+                {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : null}
+                Try again
+              </Button>
             )}
             {step === 5 && (
               <Button size="sm" onClick={close} style={{ backgroundColor: "#7C6FE0" }}>Done</Button>
