@@ -168,192 +168,184 @@ serve(async (req) => {
       );
     }
 
-    const account = accounts[0];
-    let accessToken = account.access_token;
-
-    // Check if token needs refresh
-    if (account.token_expires_at && new Date(account.token_expires_at) < new Date()) {
-      console.log("Access token expired, refreshing...");
-      accessToken = await refreshAccessToken(supabaseUrl, supabaseKey, account.id, account.refresh_token);
-      if (!accessToken) {
-        return new Response(
-          JSON.stringify({ error: "Failed to refresh access token" }),
-          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-    }
-
-    // Fetch recent unread emails from Gmail
-    const listResponse = await fetch(
-      "https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=10&q=is:unread",
-      {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      }
-    );
-
-    if (!listResponse.ok) {
-      const errorText = await listResponse.text();
-      console.error("Gmail API error:", errorText);
-      return new Response(
-        JSON.stringify({ error: "Failed to fetch emails from Gmail" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    const listData = await listResponse.json();
-    const messages: GmailMessage[] = listData.messages || [];
-
-    console.log(`Found ${messages.length} unread messages`);
-
-    // Get existing external_email_ids to avoid duplicates
+    // Get existing external_email_ids to avoid duplicates (across all accounts)
     const { data: existingEmails } = await supabase
       .from("email_queue")
       .select("external_email_id")
       .eq("user_id", user.id)
       .not("external_email_id", "is", null);
 
-    // Also check activity logs for already-processed emails
-    const { data: existingLogs } = await supabase
-      .from("activity_logs")
-      .select("details")
-      .eq("user_id", user.id);
-
     const existingIds = new Set((existingEmails || []).map((e) => e.external_email_id));
 
     let processed = 0;
     let skipped = 0;
+    let totalMessages = 0;
 
-    for (const msg of messages) {
-      if (existingIds.has(msg.id)) {
-        skipped++;
-        continue;
+    // Loop through ALL connected Gmail accounts
+    for (const account of accounts) {
+      console.log(`Processing Gmail account: ${account.email_address} (${account.id})`);
+      let accessToken = account.access_token;
+
+      // Check if token needs refresh
+      if (account.token_expires_at && new Date(account.token_expires_at) < new Date()) {
+        console.log(`Access token expired for ${account.email_address}, refreshing...`);
+        const refreshed = await refreshAccessToken(supabaseUrl, supabaseKey, account.id, account.refresh_token);
+        if (!refreshed) {
+          console.error(`Failed to refresh access token for ${account.email_address}, skipping`);
+          continue;
+        }
+        accessToken = refreshed;
       }
 
-      // Fetch full message details
-      const detailResponse = await fetch(
-        `https://gmail.googleapis.com/gmail/v1/users/me/messages/${msg.id}?format=full`,
+      // Fetch recent unread emails from Gmail
+      const listResponse = await fetch(
+        "https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=10&q=is:unread",
         {
           headers: { Authorization: `Bearer ${accessToken}` },
         }
       );
 
-      if (!detailResponse.ok) {
-        console.error(`Failed to fetch message ${msg.id}`);
+      if (!listResponse.ok) {
+        const errorText = await listResponse.text();
+        console.error(`Gmail API error for ${account.email_address}:`, errorText);
         continue;
       }
 
-      const detail: GmailMessageDetail = await detailResponse.json();
-      const headers = detail.payload.headers;
+      const listData = await listResponse.json();
+      const messages: GmailMessage[] = listData.messages || [];
+      totalMessages += messages.length;
 
-      const from = getHeader(headers, "From");
-      const subject = getHeader(headers, "Subject");
-      const body = extractEmailBody(detail.payload) || detail.snippet;
+      console.log(`Found ${messages.length} unread messages for ${account.email_address}`);
 
-      const { address: fromAddress, name: fromName } = parseFromHeader(from);
-
-      console.log(`Processing email: "${subject}" from ${fromAddress}`);
-
-      // Call process-email function to classify and queue
-      const processResponse = await fetch(
-        `${supabaseUrl}/functions/v1/process-email`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: authHeader,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email_id: msg.id,
-            email_account_id: account.id,
-            from_address: fromAddress,
-            from_name: fromName,
-            subject: subject,
-            body: body,
-            thread_id: msg.threadId || null,
-          }),
+      for (const msg of messages) {
+        if (existingIds.has(msg.id)) {
+          skipped++;
+          continue;
         }
-      );
 
-      if (processResponse.ok) {
-        processed++;
-        const result = await processResponse.json();
-        console.log(`Email processed: ${result.action}, auto_send: ${result.auto_send}`);
+        // Fetch full message details
+        const detailResponse = await fetch(
+          `https://gmail.googleapis.com/gmail/v1/users/me/messages/${msg.id}?format=full`,
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          }
+        );
 
-        // If auto_send is true, actually send the reply via Gmail
-        if (result.action === "reply" && result.auto_send && result.suggested_reply) {
-          console.log(`Auto-sending reply to ${fromAddress}...`);
-          
-          try {
-            const sendResponse = await fetch(
-              `${supabaseUrl}/functions/v1/send-gmail-reply`,
-              {
-                method: "POST",
-                headers: {
-                  Authorization: authHeader,
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
+        if (!detailResponse.ok) {
+          console.error(`Failed to fetch message ${msg.id}`);
+          continue;
+        }
+
+        const detail: GmailMessageDetail = await detailResponse.json();
+        const headers = detail.payload.headers;
+
+        const from = getHeader(headers, "From");
+        const subject = getHeader(headers, "Subject");
+        const body = extractEmailBody(detail.payload) || detail.snippet;
+
+        const { address: fromAddress, name: fromName } = parseFromHeader(from);
+
+        console.log(`Processing email: "${subject}" from ${fromAddress}`);
+
+        // Call process-email function to classify and queue
+        const processResponse = await fetch(
+          `${supabaseUrl}/functions/v1/process-email`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: authHeader,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email_id: msg.id,
+              email_account_id: account.id,
+              from_address: fromAddress,
+              from_name: fromName,
+              subject: subject,
+              body: body,
+              thread_id: msg.threadId || null,
+            }),
+          }
+        );
+
+        if (processResponse.ok) {
+          processed++;
+          existingIds.add(msg.id);
+          const result = await processResponse.json();
+          console.log(`Email processed: ${result.action}, auto_send: ${result.auto_send}`);
+
+          // If auto_send is true, actually send the reply via Gmail
+          if (result.action === "reply" && result.auto_send && result.suggested_reply) {
+            console.log(`Auto-sending reply to ${fromAddress}...`);
+
+            try {
+              const sendResponse = await fetch(
+                `${supabaseUrl}/functions/v1/send-gmail-reply`,
+                {
+                  method: "POST",
+                  headers: {
+                    Authorization: authHeader,
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    email_account_id: account.id,
+                    to_address: fromAddress,
+                    subject: subject,
+                    body: result.suggested_reply,
+                    message_id: msg.id,
+                    thread_id: msg.threadId,
+                  }),
+                }
+              );
+
+              if (sendResponse.ok) {
+                const sendResult = await sendResponse.json();
+                console.log(`Auto-reply sent successfully, message ID: ${sendResult.message_id}`);
+
+                await supabase
+                  .from("email_queue")
+                  .update({
+                    status: "sent",
+                    reviewed_at: new Date().toISOString(),
+                    email_account_id: account.id,
+                  })
+                  .eq("external_email_id", msg.id)
+                  .eq("user_id", user.id);
+
+                await supabase.from("activity_logs").insert({
+                  user_id: user.id,
                   email_account_id: account.id,
-                  to_address: fromAddress,
-                  subject: subject,
-                  body: result.suggested_reply,
-                  message_id: msg.id,
-                  thread_id: msg.threadId,
-                }),
+                  action: "auto_sent",
+                  email_subject: subject,
+                  email_from: fromAddress,
+                  details: {
+                    intent: result.intent,
+                    confidence: result.confidence,
+                    sent_message_id: sendResult.message_id,
+                  },
+                });
+              } else {
+                const errorText = await sendResponse.text();
+                console.error("Failed to auto-send reply:", errorText);
+
+                await supabase
+                  .from("email_queue")
+                  .update({ status: "pending" })
+                  .eq("external_email_id", msg.id)
+                  .eq("user_id", user.id);
               }
-            );
-
-            if (sendResponse.ok) {
-              const sendResult = await sendResponse.json();
-              console.log(`Auto-reply sent successfully, message ID: ${sendResult.message_id}`);
-              
-              // Update queue entry status to "sent"
-              await supabase
-                .from("email_queue")
-                .update({ 
-                  status: "sent",
-                  reviewed_at: new Date().toISOString(),
-                  email_account_id: account.id,
-                })
-                .eq("external_email_id", msg.id)
-                .eq("user_id", user.id);
-
-              // Update activity log action to confirmed sent
-              await supabase.from("activity_logs").insert({
-                user_id: user.id,
-                email_account_id: account.id,
-                action: "auto_sent",
-                email_subject: subject,
-                email_from: fromAddress,
-                details: { 
-                  intent: result.intent,
-                  confidence: result.confidence,
-                  sent_message_id: sendResult.message_id,
-                },
-              });
-            } else {
-              const errorText = await sendResponse.text();
-              console.error("Failed to auto-send reply:", errorText);
-              
-              // Revert queue status to pending so user can manually review
+            } catch (sendError) {
+              console.error("Error during auto-send:", sendError);
               await supabase
                 .from("email_queue")
                 .update({ status: "pending" })
                 .eq("external_email_id", msg.id)
                 .eq("user_id", user.id);
             }
-          } catch (sendError) {
-            console.error("Error during auto-send:", sendError);
-            // Revert queue status to pending
-            await supabase
-              .from("email_queue")
-              .update({ status: "pending" })
-              .eq("external_email_id", msg.id)
-              .eq("user_id", user.id);
           }
+        } else {
+          console.error(`Failed to process email ${msg.id}:`, await processResponse.text());
         }
-      } else {
-        console.error(`Failed to process email ${msg.id}:`, await processResponse.text());
       }
     }
 
