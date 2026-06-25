@@ -7,12 +7,13 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 // Allowed frontend origins (callback only redirects back to these)
 const ALLOWED_ORIGINS = [
+  "https://mails.dutaly.com",
   "https://dutaly.com",
   "https://www.dutaly.com",
   "https://mail-replai.lovable.app",
   "https://id-preview--a10d7822-747b-4c2a-a9e5-fad4762101ef.lovable.app",
 ];
-const DEFAULT_FRONTEND_URL = "https://dutaly.com";
+const DEFAULT_FRONTEND_URL = "https://mails.dutaly.com";
 
 function resolveFrontendUrl(origin: string | null | undefined): string {
   if (!origin) return DEFAULT_FRONTEND_URL;
