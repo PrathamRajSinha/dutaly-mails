@@ -12,6 +12,8 @@ export const PROVIDER_PRESETS: Record<string, { imap_host: string; imap_port: nu
 };
 
 export const APP_PASSWORD_LINKS: Record<string, { label: string; url: string; note?: string }> = {
+  "gmail.com": { label: "Gmail", url: "https://myaccount.google.com/apppasswords", note: "Requires 2-Step Verification enabled on your Google account" },
+  "googlemail.com": { label: "Gmail", url: "https://myaccount.google.com/apppasswords", note: "Requires 2-Step Verification enabled on your Google account" },
   "yahoo.com": { label: "Yahoo", url: "https://login.yahoo.com/account/security/app-passwords" },
   "yahoo.co.uk": { label: "Yahoo", url: "https://login.yahoo.com/account/security/app-passwords" },
   "aol.com": { label: "AOL", url: "https://login.aol.com/account/security/app-passwords" },
