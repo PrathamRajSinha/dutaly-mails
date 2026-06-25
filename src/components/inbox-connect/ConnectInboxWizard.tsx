@@ -33,6 +33,7 @@ export function ConnectInboxWizard({ open, onOpenChange, onConnected }: Props) {
   // IMAP state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [imapHost, setImapHost] = useState("");
   const [imapPort, setImapPort] = useState("993");
   const [smtpHost, setSmtpHost] = useState("");
