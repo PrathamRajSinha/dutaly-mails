@@ -163,11 +163,7 @@ export default function UnifiedInbox() {
     }
     setIsFetching(true);
     try {
-      const hasGmail = accounts.some((a) => a.provider === "gmail" && a.is_active);
-      const hasImap = accounts.some((a) => a.provider === "imap" && a.is_active);
-      const fetches: Promise<{ data: any; error: any }>[] = [];
-      if (hasGmail) fetches.push(supabase.functions.invoke("fetch-gmail-emails", { headers: { Authorization: `Bearer ${session.access_token}` } }));
-      if (hasImap) fetches.push(supabase.functions.invoke("fetch-imap-emails", { headers: { Authorization: `Bearer ${session.access_token}` } }));
+      const fetches = buildFetches();
       if (fetches.length === 0) {
         toast.info("No active email accounts connected");
         setIsFetching(false);
