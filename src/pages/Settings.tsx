@@ -47,6 +47,8 @@ interface EmailAccount {
 }
 
 const PROVIDER_PRESETS: Record<string, { imap_host: string; imap_port: number; smtp_host: string; smtp_port: number }> = {
+  "gmail.com": { imap_host: "imap.gmail.com", imap_port: 993, smtp_host: "smtp.gmail.com", smtp_port: 465 },
+  "googlemail.com": { imap_host: "imap.gmail.com", imap_port: 993, smtp_host: "smtp.gmail.com", smtp_port: 465 },
   "yahoo.com": { imap_host: "imap.mail.yahoo.com", imap_port: 993, smtp_host: "smtp.mail.yahoo.com", smtp_port: 587 },
   "yahoo.co.uk": { imap_host: "imap.mail.yahoo.com", imap_port: 993, smtp_host: "smtp.mail.yahoo.com", smtp_port: 587 },
   "aol.com": { imap_host: "imap.aol.com", imap_port: 993, smtp_host: "smtp.aol.com", smtp_port: 587 },
@@ -59,6 +61,8 @@ const PROVIDER_PRESETS: Record<string, { imap_host: string; imap_port: number; s
 };
 
 const APP_PASSWORD_LINKS: Record<string, { label: string; url: string; note?: string }> = {
+  "gmail.com": { label: "Gmail App Password", url: "https://myaccount.google.com/apppasswords", note: "Requires 2-Step Verification enabled on your Google account" },
+  "googlemail.com": { label: "Gmail App Password", url: "https://myaccount.google.com/apppasswords", note: "Requires 2-Step Verification enabled on your Google account" },
   "yahoo.com": { label: "Yahoo App Password", url: "https://login.yahoo.com/account/security/app-passwords" },
   "yahoo.co.uk": { label: "Yahoo App Password", url: "https://login.yahoo.com/account/security/app-passwords" },
   "aol.com": { label: "AOL App Password", url: "https://login.aol.com/account/security/app-passwords" },
