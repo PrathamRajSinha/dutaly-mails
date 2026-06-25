@@ -454,7 +454,7 @@ export function ConnectInboxWizard({ open, onOpenChange, onConnected }: Props) {
               </Button>
             )}
             {step === 4 && someFail && (
-              <Button variant="ghost" size="sm" onClick={() => setStep(3)}>
+              <Button variant="ghost" size="sm" onClick={() => { setChecks([]); setErrorMsg(null); setStep(3); }} disabled={busy}>
                 <ArrowLeft className="h-3.5 w-3.5 mr-1" /> Back
               </Button>
             )}
