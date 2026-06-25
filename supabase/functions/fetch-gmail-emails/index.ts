@@ -153,13 +153,26 @@ serve(async (req) => {
 
     console.log("Fetching Gmail emails for user:", user.id);
 
-    // Get user's Gmail account
-    const { data: accounts, error: accountsError } = await supabase
+    // Optional account_id filter (sync only the selected account)
+    let bodyAccountId: string | null = null;
+    try {
+      if (req.headers.get("content-type")?.includes("application/json")) {
+        const body = await req.json().catch(() => null);
+        if (body && typeof body.account_id === "string") {
+          bodyAccountId = body.account_id;
+        }
+      }
+    } catch { /* ignore */ }
+
+    // Get user's Gmail account(s)
+    let accountsQuery = supabase
       .from("email_accounts")
       .select("*")
       .eq("user_id", user.id)
       .eq("provider", "gmail")
       .eq("is_active", true);
+    if (bodyAccountId) accountsQuery = accountsQuery.eq("id", bodyAccountId);
+    const { data: accounts, error: accountsError } = await accountsQuery;
 
     if (accountsError || !accounts || accounts.length === 0) {
       return new Response(
