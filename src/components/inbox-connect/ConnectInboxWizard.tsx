@@ -196,7 +196,7 @@ export function ConnectInboxWizard({ open, onOpenChange, onConnected }: Props) {
             {step === 1 && "Pick the email provider you want Dutaly to manage."}
             {step === 2 && "Review the permissions Dutaly will request."}
             {step === 3 && (provider === "gmail" ? "Sign in with Google to authorize Dutaly." : "Enter your IMAP credentials.")}
-            {step === 4 && "Running connection checks…"}
+            {step === 4 && (busy ? "Running connection checks…" : someFail ? "Some checks failed. Fix the issue and try again." : "All checks passed.")}
             {step === 5 && "Your inbox is connected."}
           </DialogDescription>
           {/* Progress */}
