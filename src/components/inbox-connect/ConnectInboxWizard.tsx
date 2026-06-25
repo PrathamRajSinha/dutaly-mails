@@ -196,7 +196,7 @@ export function ConnectInboxWizard({ open, onOpenChange, onConnected }: Props) {
             {step === 1 && "Pick the email provider you want Dutaly to manage."}
             {step === 2 && "Review the permissions Dutaly will request."}
             {step === 3 && (provider === "gmail" ? "Sign in with Google to authorize Dutaly." : "Enter your IMAP credentials.")}
-            {step === 4 && "Running connection checks…"}
+            {step === 4 && (busy ? "Running connection checks…" : someFail ? "Some checks failed. Fix the issue and try again." : "All checks passed.")}
             {step === 5 && "Your inbox is connected."}
           </DialogDescription>
           {/* Progress */}
@@ -495,10 +495,15 @@ export function ConnectInboxWizard({ open, onOpenChange, onConnected }: Props) {
               <Button size="sm" onClick={() => setStep(5)} style={{ backgroundColor: "#7C6FE0" }}>Continue</Button>
             )}
             {step === 4 && someFail && (
-              <Button size="sm" onClick={runImapConnect} disabled={busy} style={{ backgroundColor: "#7C6FE0" }}>
-                {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : null}
-                Try again
-              </Button>
+              <>
+                <Button variant="outline" size="sm" onClick={() => { setChecks([]); setErrorMsg(null); setStep(3); }} disabled={busy}>
+                  Edit settings
+                </Button>
+                <Button size="sm" onClick={runImapConnect} disabled={busy} style={{ backgroundColor: "#7C6FE0" }}>
+                  {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : null}
+                  Try again
+                </Button>
+              </>
             )}
             {step === 5 && (
               <Button size="sm" onClick={close} style={{ backgroundColor: "#7C6FE0" }}>Done</Button>
