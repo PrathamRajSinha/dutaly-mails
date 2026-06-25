@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import {
   Mail, Server, Shield, Check, Loader2, AlertTriangle, ArrowLeft,
-  ExternalLink, ChevronRight, Lock, Sparkles,
+  ExternalLink, ChevronRight, Lock, Sparkles, Eye, EyeOff,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
