@@ -397,6 +397,7 @@ export default function EmailQueue() {
   const { session } = useAuth();
   const queryClient = useQueryClient();
   const { accounts } = useEmailAccounts();
+  const { selectedAccountId } = useSelectedAccount();
   const { emails: allEmails, needsReview, drafted, sent, ignored, isLoading, updateEmailStatus, sendEmail, pendingCount } = useEmailQueue();
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -413,23 +414,31 @@ export default function EmailQueue() {
   const [datePreset, setDatePreset] = useState<string>("all");
   const isFetchingRef = useRef(false);
 
+  const buildFetches = useCallback(() => {
+    if (!session?.access_token) return [];
+    const fetches: Promise<{ data: any; error: any }>[] = [];
+    const authHeaders = { Authorization: `Bearer ${session.access_token}` };
+
+    if (selectedAccountId && selectedAccountId !== "all") {
+      const acc = accounts.find((a) => a.id === selectedAccountId && a.is_active);
+      if (!acc) return [];
+      const fn = acc.provider === "imap" ? "fetch-imap-emails" : "fetch-gmail-emails";
+      fetches.push(supabase.functions.invoke(fn, { headers: authHeaders, body: { account_id: acc.id } }));
+      return fetches;
+    }
+
+    const hasGmail = accounts.some(a => a.provider === "gmail" && a.is_active);
+    const hasImap = accounts.some(a => a.provider === "imap" && a.is_active);
+    if (hasGmail) fetches.push(supabase.functions.invoke("fetch-gmail-emails", { headers: authHeaders }));
+    if (hasImap) fetches.push(supabase.functions.invoke("fetch-imap-emails", { headers: authHeaders }));
+    return fetches;
+  }, [session?.access_token, accounts, selectedAccountId]);
+
   const handleAutoFetch = useCallback(async () => {
     if (!session?.access_token || isFetchingRef.current) return;
     isFetchingRef.current = true;
     try {
-      const hasGmail = accounts.some(a => a.provider === "gmail" && a.is_active);
-      const hasImap = accounts.some(a => a.provider === "imap" && a.is_active);
-      const fetches: Promise<{ data: any; error: any }>[] = [];
-      if (hasGmail) {
-        fetches.push(supabase.functions.invoke("fetch-gmail-emails", {
-          headers: { Authorization: `Bearer ${session.access_token}` },
-        }));
-      }
-      if (hasImap) {
-        fetches.push(supabase.functions.invoke("fetch-imap-emails", {
-          headers: { Authorization: `Bearer ${session.access_token}` },
-        }));
-      }
+      const fetches = buildFetches();
       if (fetches.length === 0) return;
       await Promise.allSettled(fetches);
       await queryClient.invalidateQueries({ queryKey: ["email-queue"] });
@@ -438,7 +447,7 @@ export default function EmailQueue() {
     } finally {
       isFetchingRef.current = false;
     }
-  }, [session?.access_token, accounts, queryClient]);
+  }, [session?.access_token, buildFetches, queryClient]);
 
   useEffect(() => {
     if (!autoFetchEnabled) return;
@@ -453,25 +462,13 @@ export default function EmailQueue() {
     }
     setIsFetching(true);
     try {
-      const hasGmail = accounts.some(a => a.provider === "gmail" && a.is_active);
-      const hasImap = accounts.some(a => a.provider === "imap" && a.is_active);
-
-      const fetches: Promise<{ data: any; error: any }>[] = [];
-      if (hasGmail) {
-        fetches.push(supabase.functions.invoke("fetch-gmail-emails", {
-          headers: { Authorization: `Bearer ${session.access_token}` },
-        }));
-      }
-      if (hasImap) {
-        fetches.push(supabase.functions.invoke("fetch-imap-emails", {
-          headers: { Authorization: `Bearer ${session.access_token}` },
-        }));
-      }
+      const fetches = buildFetches();
       if (fetches.length === 0) {
         toast.info("No active email accounts connected");
         setIsFetching(false);
         return;
       }
+
 
       const results = await Promise.allSettled(fetches);
       let totalProcessed = 0;
