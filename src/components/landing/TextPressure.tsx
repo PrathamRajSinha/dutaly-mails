@@ -40,8 +40,8 @@ interface TextPressureProps {
 
 export function TextPressure({
   text = 'Hello!',
-  fontFamily = 'Compressa VF',
-  fontUrl = 'https://res.cloudinary.com/dr6lvwubh/raw/upload/v1529908256/CompressaPRO-GX.woff2',
+  fontFamily = 'Roboto Flex',
+  fontUrl = 'https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&display=swap',
   width = true,
   weight = true,
   italic = true,
@@ -147,8 +147,8 @@ export function TextPressure({
 
           const d = dist(mouseRef.current, charCenter);
 
-          const wdth = width ? Math.floor(getAttr(d, maxDist, 85, 80)) : 100;
-          const wght = weight ? Math.floor(getAttr(d, maxDist, 500, 400)) : 400;
+          const wdth = width ? Math.floor(getAttr(d, maxDist, 25, 151)) : 100;
+          const wght = weight ? Math.floor(getAttr(d, maxDist, 100, 900)) : 400;
           const italVal = italic ? getAttr(d, maxDist, 0, 1).toFixed(2) : '0';
           const alphaVal = alpha ? getAttr(d, maxDist, 0, 1).toFixed(2) : '1';
 
@@ -173,14 +173,6 @@ export function TextPressure({
   const styleElement = useMemo(() => {
     return (
       <style>{`
-        @font-face {
-          font-family: '${fontFamily}';
-          src: url('${fontUrl}') format('woff2-variations');
-          font-weight: 100 900;
-          font-stretch: 50% 200%;
-          font-style: oblique 0deg 20deg;
-        }
-
         .text-pressure-title {
           font-family: '${fontFamily}', sans-serif;
           font-size: inherit;
