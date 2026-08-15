@@ -18,19 +18,19 @@ export function LandingNavbar() {
   const ctaLink = user ? "/dashboard" : "/signup";
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 border-b" style={{ background: "#0A0A0F", borderColor: "rgba(255,255,255,0.08)" }}>
-      <div className="max-w-[1200px] mx-auto px-6 h-14 flex items-center justify-between">
+    <header className="fixed top-0 left-0 right-0 z-50 border-b" style={{ background: "#0A0A0F", borderColor: "rgba(237,235,245,0.12)" }}>
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-10 h-16 flex items-center justify-between">
         <Link to="/mails" aria-label="Dutaly home">
           <img src={logoDarkBg} alt="Dutaly — AI-powered email support" className="h-6 w-auto" />
         </Link>
 
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden md:flex items-center gap-10">
           {navLinks.map((link) =>
             link.href.startsWith("/") ? (
               <Link
                 key={link.label}
                 to={link.href}
-                className="text-[13px] font-medium transition-colors duration-200 hover:opacity-80"
+                className="text-[10px] uppercase tracking-[0.2em] font-medium transition-colors duration-200 hover:opacity-80"
                 style={{ color: "rgba(255,255,255,0.5)" }}
               >
                 {link.label}
@@ -39,7 +39,7 @@ export function LandingNavbar() {
               <a
                 key={link.label}
                 href={link.href}
-                className="text-[13px] font-medium transition-colors duration-200 hover:opacity-80"
+                className="text-[10px] uppercase tracking-[0.2em] font-medium transition-colors duration-200 hover:opacity-80"
                 style={{ color: "rgba(255,255,255,0.5)" }}
               >
                 {link.label}
@@ -51,17 +51,17 @@ export function LandingNavbar() {
         <div className="hidden md:flex items-center gap-4">
           {user ? (
             <Link to="/dashboard">
-              <Button className="text-[13px] font-medium h-9 px-5 text-white border-0" style={{ background: "#7C6FE0", borderRadius: "6px" }}>
+              <Button className="text-[11px] uppercase tracking-[0.18em] font-medium h-9 px-6 text-white border-0" style={{ background: "#6E62C4", borderRadius: "0px" }}>
                 Dashboard
               </Button>
             </Link>
           ) : (
             <>
-              <Link to="/login" className="text-[13px] font-medium transition-colors" style={{ color: "rgba(255,255,255,0.5)" }}>
+              <Link to="/login" className="text-[10px] uppercase tracking-[0.2em] font-medium transition-colors" style={{ color: "rgba(237,235,245,0.5)" }}>
                 Log in
               </Link>
               <Link to="/signup">
-                <Button className="text-[13px] font-medium h-9 px-5 text-white border-0" style={{ background: "#7C6FE0", borderRadius: "6px" }}>
+                <Button className="text-[11px] uppercase tracking-[0.18em] font-medium h-9 px-6 text-white border-0" style={{ background: "#6E62C4", borderRadius: "0px" }}>
                   Sign up
                 </Button>
               </Link>
@@ -75,7 +75,7 @@ export function LandingNavbar() {
       </div>
 
       {mobileOpen && (
-        <div className="md:hidden px-6 py-5 space-y-3 border-t" style={{ background: "#0A0A0F", borderColor: "rgba(255,255,255,0.08)" }}>
+        <div className="md:hidden px-6 py-5 space-y-3 border-t" style={{ background: "#0A0A0F", borderColor: "rgba(237,235,245,0.12)" }}>
           {navLinks.map((link) =>
             link.href.startsWith("/") ? (
               <Link
@@ -100,7 +100,7 @@ export function LandingNavbar() {
             )
           )}
           <Link to={ctaLink} className="block pt-2">
-            <Button className="w-full text-white font-medium" style={{ background: "#7C6FE0", borderRadius: "6px" }}>
+            <Button className="w-full text-white font-medium" style={{ background: "#6E62C4", borderRadius: "0px" }}>
               {user ? "Dashboard" : "Sign up"}
             </Button>
           </Link>
