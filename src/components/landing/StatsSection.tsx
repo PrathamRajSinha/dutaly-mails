@@ -25,10 +25,11 @@ function AnimatedCounter({ from = 0, value, suffix = "", prefix = "" }: { from?:
 
 export function StatsSection() {
   const points = [
-    { title: "Most repetitive emails are handled automatically", desc: "Refunds, status checks, password resets - Dutaly resolves them without waking up your team." },
+    { title: "Most repetitive emails are handled automatically", desc: "Refunds, status checks, password resets - Dutaly resolves them without involving your team." },
     { title: "Your team only reviews edge cases", desc: "Dutaly drafts when needed and routes the rest, so humans focus on what actually needs judgment." },
-    { title: "Faster responses without growing the team", desc: "Customers get answers in minutes - not hours - even as your inbox volume scales." },
+    { title: "Faster responses without growing the team", desc: "Customers get answers in minutes, not hours - even as your inbox volume scales." },
   ];
+
 
   return (
     <section className="py-28 sm:py-36 relative overflow-hidden" style={{ background: "#0A0A0F" }}>

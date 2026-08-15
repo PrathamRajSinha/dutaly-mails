@@ -47,12 +47,14 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="mt-6 text-[17px] sm:text-[19px] leading-[1.7] max-w-[560px] mx-auto"
+          className="mt-6 text-[17px] sm:text-[19px] leading-[1.7] max-w-[620px] mx-auto"
           style={{ color: "rgba(255,255,255,0.5)" }}
         >
-          Dutaly reads, replies, creates tickets, and resolves customer emails
-          automatically - while <em>keeping your team in control</em>.
+          An autonomous email agent for support teams. Dutaly connects to your support
+          inbox, reads every message, answers from your knowledge base, auto-sends
+          replies, and creates tickets - while <em>keeping your team in control</em>.
         </motion.p>
+
 
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -100,8 +102,17 @@ export function HeroSection() {
             </div>
           </div>
 
+          {/* Caption */}
+          <div className="px-5 pt-4 pb-3 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+            <p className="text-[12px] font-medium mb-1" style={{ color: "rgba(255,255,255,0.7)" }}>Customer Inbox</p>
+            <p className="text-[12px] leading-relaxed" style={{ color: "rgba(255,255,255,0.4)" }}>
+              See Dutaly in action: routine emails auto-resolved, edge cases flagged for review, complex issues escalated with context.
+            </p>
+          </div>
+
           {/* Realistic inbox UI */}
           <div className="flex min-h-[420px]">
+
             {/* Sidebar */}
             <div className="hidden sm:block w-[200px] border-r p-3 space-y-1" style={{ borderColor: "rgba(255,255,255,0.06)", background: "#0D0D14" }}>
               <div className="px-3 py-1.5 rounded-md text-[12px] font-medium" style={{ background: "#7C6FE0", color: "white" }}>Customer Inbox</div>
