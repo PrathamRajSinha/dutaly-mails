@@ -102,8 +102,17 @@ export function HeroSection() {
             </div>
           </div>
 
+          {/* Caption */}
+          <div className="px-5 pt-4 pb-3 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+            <p className="text-[12px] font-medium mb-1" style={{ color: "rgba(255,255,255,0.7)" }}>Customer Inbox</p>
+            <p className="text-[12px] leading-relaxed" style={{ color: "rgba(255,255,255,0.4)" }}>
+              See Dutaly in action: routine emails auto-resolved, edge cases flagged for review, complex issues escalated with context.
+            </p>
+          </div>
+
           {/* Realistic inbox UI */}
           <div className="flex min-h-[420px]">
+
             {/* Sidebar */}
             <div className="hidden sm:block w-[200px] border-r p-3 space-y-1" style={{ borderColor: "rgba(255,255,255,0.06)", background: "#0D0D14" }}>
               <div className="px-3 py-1.5 rounded-md text-[12px] font-medium" style={{ background: "#7C6FE0", color: "white" }}>Customer Inbox</div>

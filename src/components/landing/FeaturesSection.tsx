@@ -98,8 +98,9 @@ export function FeaturesSection() {
                     Dutaly understands every email
                   </h3>
                   <p className="text-[14px] leading-[1.7] max-w-[440px]" style={{ color: "rgba(255,255,255,0.5)" }}>
-                    Intent detection, sentiment analysis, and categorization - applied to every message before anyone reads it.
+                    Intent, sentiment, and category are detected on every message - before a human ever opens it.
                   </p>
+
                 </div>
                 <div className="flex-1 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
                   <ClassificationMockup />
@@ -120,8 +121,9 @@ export function FeaturesSection() {
                     Dutaly handles emails automatically
                   </h3>
                   <p className="text-[14px] leading-[1.7] max-w-[440px]" style={{ color: "rgba(255,255,255,0.5)" }}>
-                    Dutaly replies automatically, auto-sends when confident, and creates or updates tickets as conversations evolve.
+                    Replies are sent on its own when confidence is high, and tickets are created or updated as conversations evolve.
                   </p>
+
                 </div>
                 <div className="flex-1 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
                   <ReplyMockup />
@@ -142,8 +144,9 @@ export function FeaturesSection() {
                     Dutaly supports your team
                   </h3>
                   <p className="text-[14px] leading-[1.7] max-w-[440px]" style={{ color: "rgba(255,255,255,0.5)" }}>
-                    When unsure, Dutaly drafts when needed, suggests next actions, and keeps humans firmly in control.
+                    When unsure, it drafts replies, suggests next actions, and keeps humans firmly in control.
                   </p>
+
                 </div>
                 <div className="flex-1 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
                   <InstantReplyMockup />
@@ -164,8 +167,9 @@ export function FeaturesSection() {
                     Dutaly knows your business
                   </h3>
                   <p className="text-[14px] leading-[1.7] max-w-[440px]" style={{ color: "rgba(255,255,255,0.5)" }}>
-                    Powered by your knowledge base, your written instructions, and rule-based automation - Dutaly answers the way you would.
+                    Powered by your knowledge base, instructions, and rules - Dutaly answers the way you would.
                   </p>
+
                 </div>
                 <div className="flex-1 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
                   <DashboardMockup />
@@ -218,8 +222,9 @@ export function FeaturesSection() {
                     Talk to Dutaly
                   </h3>
                   <p className="text-[14px] leading-[1.7] max-w-[440px]" style={{ color: "rgba(255,255,255,0.5)" }}>
-                    Ask Dutaly which emails need attention, summarize today's issues, or list unresolved queries - with direct references to every email.
+                    Ask which emails need attention, get a summary of today's issues, or list unresolved queries - with direct links to every email.
                   </p>
+
                 </div>
                 <div className="flex-1 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
                   <AskAnythingMockup />
@@ -240,8 +245,9 @@ export function FeaturesSection() {
                     Full visibility & tracking
                   </h3>
                   <p className="text-[14px] leading-[1.7] max-w-[440px]" style={{ color: "rgba(255,255,255,0.5)" }}>
-                    Every email becomes a structured, trackable ticket with full visibility - status, priority, SLA, and history.
+                    Every email becomes a structured ticket with status, priority, SLA, and full history.
                   </p>
+
                 </div>
                 <div className="grid grid-cols-3 gap-2 mt-2">
                   {[
@@ -259,8 +265,9 @@ export function FeaturesSection() {
                   })}
                 </div>
                 <p className="mt-2 text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>
-                  Plus utilities for everyday flow.
+                  Plus utilities for everyday flow
                 </p>
+
               </div>
             </MagicBentoCard>
           </motion.div>
