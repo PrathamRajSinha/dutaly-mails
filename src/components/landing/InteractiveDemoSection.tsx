@@ -20,7 +20,7 @@ export function InteractiveDemoSection() {
         </p>
         <div className="w-full max-w-[900px] mx-auto h-[100px] sm:h-[130px] lg:h-[160px] mb-16">
           <TextPressure
-            text="through thick & thin."
+            text="from inbox to resolution."
             textColor="#E8E4FF"
             weight={true}
             width={true}
