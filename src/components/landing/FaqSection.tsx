@@ -44,38 +44,33 @@ const faqs = [
   },
 ];
 
+
 export function FaqSection() {
   return (
-    <section id="faq" style={{ background: "#0A0A0F" }} aria-labelledby="landing-faq-heading">
-      <div className="max-w-[1400px] mx-auto px-6 lg:px-10 py-24">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 border-t pt-12" style={{ borderColor: "rgba(237,235,245,0.12)" }}>
-          <div className="md:col-span-4">
-            <div className="md:sticky md:top-24">
-              <p className="text-[10px] uppercase tracking-[0.22em] mb-6" style={{ color: "#6E62C4" }}>06 / FAQ</p>
-              <h2 id="landing-faq-heading" className="text-[clamp(1.9rem,3.2vw,2.5rem)] leading-[1.08]" style={{ fontFamily: "Lora, serif", color: "#EDEBF5" }}>
-                Frequently asked <span className="italic">questions</span>
-              </h2>
-            </div>
-          </div>
-
-          <div className="md:col-span-8">
-            <Accordion type="single" collapsible className="w-full">
-              {faqs.map((item, i) => (
-                <AccordionItem key={i} value={`faq-${i}`} style={{ borderColor: "rgba(237,235,245,0.12)" }}>
-                  <AccordionTrigger
-                    className="text-left text-[17px] py-6 hover:no-underline"
-                    style={{ fontFamily: "Lora, serif", color: "#EDEBF5" }}
-                  >
-                    {item.q}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-[14px] leading-[1.85] pb-6 max-w-2xl" style={{ color: "rgba(237,235,245,0.55)" }}>
-                    {item.a}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </div>
-        </div>
+    <section id="faq" className="py-24 md:py-32" style={{ background: "#0A0A0F" }} aria-labelledby="landing-faq-heading">
+      <div className="max-w-[760px] mx-auto px-6">
+        <p className="text-[12px] uppercase tracking-[0.18em] mb-4" style={{ color: "#7C6FE0" }}>
+          FAQ
+        </p>
+        <h2 id="landing-faq-heading" className="text-[36px] md:text-[44px] leading-[1.1] font-medium tracking-tight mb-12" style={{ color: "white" }}>
+          Frequently asked questions
+        </h2>
+        <Accordion type="single" collapsible className="w-full">
+          {faqs.map((item, i) => (
+            <AccordionItem
+              key={i}
+              value={`faq-${i}`}
+              style={{ borderColor: "rgba(255,255,255,0.08)" }}
+            >
+              <AccordionTrigger className="text-left text-[15px] font-medium py-5 hover:no-underline" style={{ color: "white" }}>
+                {item.q}
+              </AccordionTrigger>
+              <AccordionContent className="text-[14px] leading-[1.7] pb-5" style={{ color: "rgba(255,255,255,0.6)" }}>
+                {item.a}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
       </div>
     </section>
   );

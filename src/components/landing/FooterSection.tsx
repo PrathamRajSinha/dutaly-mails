@@ -3,18 +3,18 @@ import logoDarkBg from "@/assets/logo-dark-bg.png";
 
 export function FooterSection() {
   return (
-    <footer className="py-10" style={{ background: "#0A0A0F", borderTop: "1px solid rgba(237,235,245,0.12)" }}>
-      <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
+    <footer className="py-10" style={{ background: "#0A0A0F", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+      <div className="max-w-[1200px] mx-auto px-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
           <img src={logoDarkBg} alt="Dutaly — AI-powered email support" className="h-6 w-auto" />
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[13px]" style={{ color: "rgba(255,255,255,0.4)" }}>
-            <a href="#features" className="text-[10px] uppercase tracking-[0.18em] hover:opacity-80 transition-opacity">features</a>
-            <Link to="/about" className="text-[10px] uppercase tracking-[0.18em] hover:opacity-80 transition-opacity">about</Link>
-            <Link to="/pricing" className="text-[10px] uppercase tracking-[0.18em] hover:opacity-80 transition-opacity">pricing</Link>
-            <Link to="/login" className="text-[10px] uppercase tracking-[0.18em] hover:opacity-80 transition-opacity">sign in</Link>
-            <Link to="/privacy" className="text-[10px] uppercase tracking-[0.18em] hover:opacity-80 transition-opacity">privacy</Link>
-            <Link to="/terms" className="text-[10px] uppercase tracking-[0.18em] hover:opacity-80 transition-opacity">terms</Link>
-            <Link to="/refund" className="text-[10px] uppercase tracking-[0.18em] hover:opacity-80 transition-opacity">refund</Link>
+            <a href="#features" className="hover:opacity-80 transition-opacity">features</a>
+            <Link to="/about" className="hover:opacity-80 transition-opacity">about</Link>
+            <Link to="/pricing" className="hover:opacity-80 transition-opacity">pricing</Link>
+            <Link to="/login" className="hover:opacity-80 transition-opacity">sign in</Link>
+            <Link to="/privacy" className="hover:opacity-80 transition-opacity">privacy</Link>
+            <Link to="/terms" className="hover:opacity-80 transition-opacity">terms</Link>
+            <Link to="/refund" className="hover:opacity-80 transition-opacity">refund</Link>
           </div>
           <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.25)" }}>© 2026 Dutaly. All rights reserved.</p>
         </div>
