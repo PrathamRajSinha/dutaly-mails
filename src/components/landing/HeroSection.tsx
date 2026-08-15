@@ -45,7 +45,7 @@ export function HeroSection() {
             <div className="flex flex-col sm:flex-row gap-3">
               <Link to={ctaLink}>
                 <button
-                  className="w-full sm:w-auto px-8 py-3 text-[13px] font-medium transition-colors"
+                  className="w-full sm:w-auto whitespace-nowrap px-8 py-3 text-[13px] font-medium transition-colors"
                   style={{ background: "#EDEBF5", color: "#0A0A0F" }}
                 >
                   Let Dutaly handle your inbox
@@ -53,7 +53,7 @@ export function HeroSection() {
               </Link>
               <a
                 href="#how-it-works"
-                className="w-full sm:w-auto px-8 py-3 text-[13px] font-medium text-center transition-colors hover:bg-[#16161E]"
+                className="w-full sm:w-auto whitespace-nowrap px-8 py-3 text-[13px] font-medium text-center transition-colors hover:bg-[#16161E]"
                 style={{ border: "1px solid rgba(237,235,245,0.2)", color: "rgba(237,235,245,0.75)" }}
               >
                 See how it works →
