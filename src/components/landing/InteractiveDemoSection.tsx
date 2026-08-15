@@ -1,86 +1,49 @@
 import { motion } from "framer-motion";
-import { Mail, Brain, Ticket, MessageSquare, CheckCircle } from "lucide-react";
-import { TextPressure } from "./TextPressure";
 
 const steps = [
-  { icon: Mail, title: "Email received", text: "A customer sends an email to your connected inbox." },
-  { icon: Brain, title: "Dutaly understands", text: "Intent, sentiment, and category are detected instantly." },
-  { icon: Ticket, title: "Dutaly decides", text: "A structured ticket is created with priority and SLA." },
-  { icon: MessageSquare, title: "Dutaly replies or escalates", text: "High-confidence replies auto-send. The rest are drafted or handed to your team." },
-  { icon: CheckCircle, title: "Action taken", text: "Issues are resolved automatically - or escalated with full context." },
+  { numeral: "I.", title: "Email received", text: "A customer sends an email to your connected inbox." },
+  { numeral: "II.", title: "Dutaly understands", text: "Intent, sentiment, and category are detected instantly." },
+  { numeral: "III.", title: "Dutaly decides", text: "A structured ticket is created with priority and SLA." },
+  { numeral: "IV.", title: "Dutaly replies or escalates", text: "High-confidence replies auto-send. The rest are drafted or handed to your team." },
+  { numeral: "V.", title: "Action taken", text: "Issues are resolved automatically — or escalated with full context." },
 ];
-
 
 export function InteractiveDemoSection() {
   return (
-    <section id="how-it-works" style={{ background: "#0A0A0F" }} className="py-24 sm:py-32">
-      <div className="max-w-3xl mx-auto px-6">
-        <p className="text-[13px] font-medium tracking-[0.15em] uppercase mb-4 text-center" style={{ color: "rgba(255,255,255,0.4)" }}>
-          How it works
-        </p>
-        <div className="w-full max-w-[900px] mx-auto h-[100px] sm:h-[130px] lg:h-[160px] mb-16">
-          <TextPressure
-            text="from inbox to resolution."
-            textColor="#E8E4FF"
-            weight={true}
-            width={true}
-            italic={true}
-            alpha={false}
-            flex={true}
-            stroke={false}
-            minFontSize={24}
-          />
-        </div>
+    <section id="how-it-works" style={{ background: "#0A0A0F" }}>
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-10 py-24">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
+          <div className="md:col-span-4">
+            <div className="md:sticky md:top-24">
+              <p className="text-[10px] uppercase tracking-[0.22em] mb-6" style={{ color: "#6E62C4" }}>03 / How it works</p>
+              <h2 className="text-[clamp(1.9rem,3.2vw,2.75rem)] leading-[1.08]" style={{ fontFamily: "Lora, serif", color: "#EDEBF5" }}>
+                From inbox <br />
+                <span className="italic">to resolution.</span>
+              </h2>
+              <p className="mt-6 text-[14px]" style={{ color: "rgba(237,235,245,0.4)" }}>Five steps, start to finish.</p>
+            </div>
+          </div>
 
-        <div className="relative">
-          {/* Vertical line */}
-          <div className="absolute left-6 sm:left-8 top-0 bottom-0 w-px" style={{ background: "rgba(124,111,224,0.15)" }} />
-
-          <div className="space-y-12">
-            {steps.map((step, i) => {
-              const Icon = step.icon;
-              return (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-50px" }}
-                  transition={{ duration: 0.4, delay: i * 0.05 }}
-                  className="relative flex gap-6 sm:gap-8"
-                >
-                  {/* Dot on line */}
-                  <div className="relative z-10 flex-shrink-0 w-12 sm:w-16 flex justify-center pt-1">
-                    <div
-                      className="w-3 h-3 rounded-full"
-                      style={{
-                        background: "#7C6FE0",
-                        boxShadow: "0 0 8px rgba(124,111,224,0.4)",
-                      }}
-                    />
-                  </div>
-
-                  {/* Content */}
-                  <div className="pb-2">
-                    <div className="flex items-center gap-3 mb-2">
-                      <motion.div
-                        initial={{ scale: 0, opacity: 0 }}
-                        whileInView={{ scale: 1, opacity: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.3 + i * 0.15 }}
-                      >
-                        <Icon className="w-4 h-4" style={{ color: "#7C6FE0" }} />
-                      </motion.div>
-                      <h3 className="text-[17px] sm:text-[19px] font-medium" style={{ color: "#F0EEF8" }}>
-                        {step.title}
-                      </h3>
-                    </div>
-                    <p className="text-[14px] sm:text-[15px] leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
-                      {step.text}
-                    </p>
-                  </div>
-                </motion.div>
-              );
-            })}
+          <div className="md:col-span-8">
+            {steps.map((s, i) => (
+              <motion.div
+                key={s.numeral}
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 1, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
+                className="flex gap-8 border-t pt-8 pb-14"
+                style={{ borderColor: "rgba(237,235,245,0.12)" }}
+              >
+                <span className="text-[22px] italic shrink-0 w-10" style={{ fontFamily: "Lora, serif", color: "#6E62C4" }}>
+                  {s.numeral}
+                </span>
+                <div>
+                  <h3 className="text-[20px] mb-3" style={{ fontFamily: "Lora, serif", color: "#EDEBF5" }}>{s.title}</h3>
+                  <p className="text-[15px] leading-[1.75] max-w-xl" style={{ color: "rgba(237,235,245,0.55)" }}>{s.text}</p>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </div>
