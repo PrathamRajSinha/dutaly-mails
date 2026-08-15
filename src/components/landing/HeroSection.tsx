@@ -47,12 +47,14 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="mt-6 text-[17px] sm:text-[19px] leading-[1.7] max-w-[560px] mx-auto"
+          className="mt-6 text-[17px] sm:text-[19px] leading-[1.7] max-w-[620px] mx-auto"
           style={{ color: "rgba(255,255,255,0.5)" }}
         >
-          Dutaly reads, replies, creates tickets, and resolves customer emails
-          automatically - while <em>keeping your team in control</em>.
+          An autonomous email agent for support teams. Dutaly connects to your support
+          inbox, reads every message, answers from your knowledge base, auto-sends
+          replies, and creates tickets - while <em>keeping your team in control</em>.
         </motion.p>
+
 
         <motion.div
           initial={{ opacity: 0, y: 16 }}

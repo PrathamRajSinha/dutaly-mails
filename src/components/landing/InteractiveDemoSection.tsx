@@ -6,9 +6,10 @@ const steps = [
   { icon: Mail, title: "Email received", text: "A customer sends an email to your connected inbox." },
   { icon: Brain, title: "Dutaly understands", text: "Intent, sentiment, and category are detected instantly." },
   { icon: Ticket, title: "Dutaly decides", text: "A structured ticket is created with priority and SLA." },
-  { icon: MessageSquare, title: "Dutaly replies or escalates", text: "High-confidence replies auto-send. The rest come to you." },
-  { icon: CheckCircle, title: "Action taken", text: "Resolved automatically - or handed to your team with full context." },
+  { icon: MessageSquare, title: "Dutaly replies or escalates", text: "High-confidence replies auto-send. The rest are drafted or handed to your team." },
+  { icon: CheckCircle, title: "Action taken", text: "Issues are resolved automatically - or escalated with full context." },
 ];
+
 
 export function InteractiveDemoSection() {
   return (

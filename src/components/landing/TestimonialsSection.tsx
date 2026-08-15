@@ -6,22 +6,31 @@ const useCases = [
   {
     tab: "SaaS",
     headline: "Route, resolve, repeat.",
-    text: "Route bug reports to engineering, handle billing questions automatically, and keep feature requests organized - all without lifting a finger.",
+    text: "Route bug reports to engineering, handle billing questions automatically, and keep feature requests organized - all without lifting a finger. Answers are grounded in your docs and release notes.",
     bullets: ["Auto-categorize by intent", "Escalate bugs instantly", "Track feature requests"],
   },
   {
     tab: "D2C / E-commerce",
-    headline: "Happy customers, less effort.",
-    text: "Resolve refund requests, order inquiries, and shipping questions without overwhelming your support team. Customers get answers in minutes, not hours.",
-    bullets: ["Instant order-status replies", "Refund flow automation", "Sentiment-based prioritization"],
+    headline: "Route, resolve, repeat.",
+    text: "Handle order status, returns, and common product questions automatically, and escalate complex issues to support.",
+    bullets: [
+      "Auto-answer FAQs from your knowledge base",
+      "Create tickets for disputed refunds or delivery issues",
+      "Tag by order, product, and issue type",
+    ],
   },
   {
     tab: "Agencies",
-    headline: "Every client, every thread.",
-    text: "Manage client communication across shared inboxes. Keep every thread structured, assigned, and visible to the right people.",
-    bullets: ["Multi-inbox management", "Client-specific routing", "Full audit trail"],
+    headline: "Route, resolve, repeat.",
+    text: "Manage client requests, status updates, and routine queries across multiple brands without chaos.",
+    bullets: [
+      "Separate inboxes per client or project",
+      "Auto-reply to common status questions",
+      "Escalate urgent or high-value client issues",
+    ],
   },
 ];
+
 
 export function TestimonialsSection() {
   const [active, setActive] = useState(0);

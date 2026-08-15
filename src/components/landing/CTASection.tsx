@@ -27,12 +27,13 @@ export function CTASection() {
           <div className="mt-10 flex items-center justify-center gap-5">
             <Link to={ctaLink}>
               <Button className="h-12 px-8 text-[15px] text-white font-medium shadow-xl hover:shadow-2xl transition-all duration-300" style={{ background: "#7C6FE0", borderRadius: "6px" }}>
-                Let Dutaly handle your inbox
+                Start free
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
           </div>
-          <p className="mt-5 text-[13px]" style={{ color: "rgba(255,255,255,0.3)" }}>No credit card required to sign up</p>
+          <p className="mt-5 text-[13px]" style={{ color: "rgba(255,255,255,0.3)" }}>No credit card required.</p>
+
         </motion.div>
       </div>
     </section>
