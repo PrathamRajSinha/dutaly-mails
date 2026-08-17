@@ -1,70 +1,83 @@
-import { motion, useMotionValue, useTransform, animate, useInView } from "framer-motion";
-import { useEffect, useRef } from "react";
-
-function AnimatedCounter({ from = 0, value, suffix = "", prefix = "" }: { from?: number; value: number; suffix?: string; prefix?: string }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-60px" });
-  const count = useMotionValue(from);
-  const rounded = useTransform(count, (v) => Math.round(v));
-
-  useEffect(() => {
-    if (isInView) {
-      animate(count, value, { duration: 1.8, ease: [0.16, 1, 0.3, 1] });
-    }
-  }, [isInView, count, value]);
-
-  useEffect(() => {
-    const unsubscribe = rounded.on("change", (v) => {
-      if (ref.current) ref.current.textContent = prefix + v + suffix;
-    });
-    return unsubscribe;
-  }, [rounded, suffix, prefix]);
-
-  return <span ref={ref}>{prefix}{from}{suffix}</span>;
-}
+import { motion } from "framer-motion";
+import { Repeat, UserCheck, Gauge } from "lucide-react";
 
 export function StatsSection() {
   const points = [
-    { title: "Most repetitive emails are handled automatically", desc: "Refunds, status checks, password resets - Dutaly resolves them without involving your team." },
-    { title: "Your team only reviews edge cases", desc: "Dutaly drafts when needed and routes the rest, so humans focus on what actually needs judgment." },
-    { title: "Faster responses without growing the team", desc: "Customers get answers in minutes, not hours - even as your inbox volume scales." },
+    {
+      icon: Repeat,
+      title: "Most repetitive emails are handled automatically",
+      desc: "Refunds, status checks, password resets — Dutaly resolves them without involving your team.",
+    },
+    {
+      icon: UserCheck,
+      title: "Your team only reviews edge cases",
+      desc: "Dutaly drafts when needed and routes the rest, so humans focus on what actually needs judgment.",
+    },
+    {
+      icon: Gauge,
+      title: "Faster responses without growing the team",
+      desc: "Customers get answers in minutes, not hours — even as your inbox volume scales.",
+    },
   ];
 
-
   return (
-    <section className="py-28 sm:py-36 relative overflow-hidden" style={{ background: "#0A0A0F" }}>
-      <div className="max-w-[1200px] mx-auto px-6 relative z-10">
+    <section className="relative overflow-hidden py-28 sm:py-36" style={{ background: "#0A0A0F" }}>
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-px"
+        style={{ background: "linear-gradient(to right, transparent, rgba(255,255,255,0.10), transparent)" }}
+      />
+      <div className="relative z-10 mx-auto max-w-[1200px] px-6">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-20"
+          transition={{ duration: 0.55 }}
+          className="mx-auto max-w-[720px] text-center"
         >
-          <h2 className="text-[clamp(2rem,4vw,3.25rem)] font-semibold tracking-[-0.03em] leading-[1.1] max-w-[640px] mx-auto" style={{ color: "#F0EEF8" }}>
-            Support that <em>actually</em>{" "}
+          <p className="eyebrow mb-5" style={{ color: "rgba(255,255,255,0.38)" }}>Scale</p>
+          <h2
+            className="text-[clamp(2rem,3.8vw,3.1rem)] font-semibold leading-[1.08] tracking-[-0.03em]"
+            style={{ color: "#F7F6FC" }}
+          >
+            Support that actually{" "}
             <span style={{ color: "#7C6FE0" }}>scales.</span>
           </h2>
-          <p className="mt-4 text-[16px] max-w-[480px] mx-auto" style={{ color: "rgba(255,255,255,0.4)" }}>
+          <p className="mx-auto mt-5 max-w-[520px] text-[16px] leading-[1.7]" style={{ color: "rgba(255,255,255,0.45)" }}>
             Dutaly handles the volume. Your team handles the nuance.
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-[1000px] mx-auto">
-          {points.map((p, i) => (
-            <motion.div
-              key={p.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="p-7 rounded-2xl"
-              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
-            >
-              <p className="text-[17px] font-medium leading-snug" style={{ color: "#F0EEF8" }}>{p.title}</p>
-              <p className="text-[13px] mt-3 leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>{p.desc}</p>
-            </motion.div>
-          ))}
+        <div className="mx-auto mt-16 grid max-w-[1060px] grid-cols-1 gap-5 md:grid-cols-3">
+          {points.map((p, i) => {
+            const I = p.icon;
+            return (
+              <motion.div
+                key={p.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.5, delay: i * 0.08 }}
+                className="group flex flex-col rounded-2xl p-8 transition-colors duration-300"
+                style={{
+                  background: "linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                }}
+              >
+                <div
+                  className="mb-6 flex h-10 w-10 items-center justify-center rounded-xl"
+                  style={{ background: "rgba(124,111,224,0.12)", border: "1px solid rgba(124,111,224,0.22)" }}
+                >
+                  <I className="h-4 w-4" style={{ color: "#A89EF0" }} />
+                </div>
+                <h3 className="text-[17px] font-semibold leading-snug tracking-[-0.01em]" style={{ color: "#F0EEF8" }}>
+                  {p.title}
+                </h3>
+                <p className="mt-3 text-[14px] leading-[1.75]" style={{ color: "rgba(255,255,255,0.46)" }}>
+                  {p.desc}
+                </p>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>
