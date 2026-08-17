@@ -96,8 +96,10 @@ export default {
   			xl: 'var(--shadow-xl)',
   			'2xl': 'var(--shadow-2xl)'
   		},
-  		fontFamily: {
+ 		fontFamily: {
   			sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+  			display: ['Montserrat', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+  			body: ['Karla', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
   		}
   	}
   },
