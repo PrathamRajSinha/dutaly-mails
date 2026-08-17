@@ -1,132 +1,228 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ShieldCheck, Zap, Inbox } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
+
+const ease = [0.25, 0.46, 0.45, 0.94] as const;
+
+const proofPoints = [
+  { icon: Zap, label: "Replies in minutes, not hours" },
+  { icon: ShieldCheck, label: "Human approval where it matters" },
+  { icon: Inbox, label: "Gmail & IMAP in under 15 min" },
+];
 
 export function HeroSection() {
   const { user } = useAuth();
   const ctaLink = user ? "/dashboard" : "/auth";
 
   return (
-    <section className="pt-36 pb-0 sm:pt-44 relative overflow-hidden" style={{ background: "#0A0A0F" }}>
-      <div className="max-w-[1200px] mx-auto px-6 relative z-10 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="mb-6"
-        >
-          <span
-            className="inline-flex items-center gap-2 px-4 py-1.5 text-[12px] font-medium tracking-wide"
-            style={{
-              background: "rgba(124,111,224,0.15)",
-              border: "1px solid rgba(124,111,224,0.3)",
-              borderRadius: "9999px",
-              color: "#A89EF0",
-            }}
+    <section className="relative overflow-hidden pt-32 pb-0 sm:pt-40" style={{ background: "#0A0A0F" }}>
+      {/* Ambient light */}
+      <div
+        className="pointer-events-none absolute inset-x-0 -top-40 h-[560px]"
+        style={{ background: "radial-gradient(60% 60% at 50% 40%, rgba(124,111,224,0.16) 0%, transparent 70%)" }}
+      />
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.35]"
+        style={{
+          backgroundImage:
+            "linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px)",
+          backgroundSize: "72px 72px",
+          maskImage: "radial-gradient(70% 50% at 50% 20%, black, transparent)",
+          WebkitMaskImage: "radial-gradient(70% 50% at 50% 20%, black, transparent)",
+        }}
+      />
+
+      <div className="relative z-10 mx-auto max-w-[1200px] px-6">
+        <div className="mx-auto max-w-[860px] text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease }}
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            AI-powered email support
-          </span>
-        </motion.div>
+            <span
+              className="font-display inline-flex items-center gap-2.5 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em]"
+              style={{
+                background: "rgba(124,111,224,0.10)",
+                border: "1px solid rgba(124,111,224,0.28)",
+                borderRadius: "999px",
+                color: "#A89EF0",
+              }}
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              AI-powered email support
+            </span>
+          </motion.div>
 
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.15, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="text-[clamp(2.8rem,6.5vw,5.5rem)] font-semibold tracking-[-0.04em] leading-[1.05] mx-auto max-w-[900px]"
-          style={{ color: "#F0EEF8" }}
-        >
-          Every customer email. Handled -
-          <br />
-          by <em className="not-italic" style={{ color: "#7C6FE0" }}>Dutaly.</em>
-        </motion.h1>
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: 0.1, ease }}
+            className="mt-8 text-[clamp(2.6rem,6vw,5rem)] font-semibold leading-[1.04] tracking-[-0.035em]"
+            style={{ color: "#F7F6FC" }}
+          >
+            Every customer email.
+            <br />
+            Handled — by{" "}
+            <span
+              style={{
+                background: "linear-gradient(120deg, #A89EF0 0%, #7C6FE0 60%, #6055C8 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+            >
+              Dutaly.
+            </span>
+          </motion.h1>
 
-        <motion.p
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="mt-6 text-[17px] sm:text-[19px] leading-[1.7] max-w-[620px] mx-auto"
-          style={{ color: "rgba(255,255,255,0.5)" }}
-        >
-          An autonomous email agent for support teams. Dutaly connects to your support
-          inbox, reads every message, answers from your knowledge base, auto-sends
-          replies, and creates tickets - while <em>keeping your team in control</em>.
-        </motion.p>
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: 0.28, ease }}
+            className="mx-auto mt-7 max-w-[640px] text-[17px] leading-[1.75] sm:text-[18px]"
+            style={{ color: "rgba(255,255,255,0.56)" }}
+          >
+            An autonomous email agent for support teams. Dutaly connects to your support inbox,
+            reads every message, answers from your knowledge base, auto-sends replies, and creates
+            tickets — while keeping your team in control.
+          </motion.p>
 
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: 0.42, ease }}
+            className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-5"
+          >
+            <Link to={ctaLink} className="w-full sm:w-auto">
+              <Button
+                className="font-display h-12 w-full px-7 text-[14px] font-semibold tracking-[0.01em] text-white transition-all duration-300 sm:w-auto"
+                style={{
+                  background: "#7C6FE0",
+                  borderRadius: "8px",
+                  boxShadow: "0 12px 34px -12px rgba(124,111,224,0.75)",
+                }}
+              >
+                Let Dutaly handle your inbox
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+            <a
+              href="#how-it-works"
+              className="font-display inline-flex h-12 items-center justify-center rounded-lg px-6 text-[14px] font-medium transition-colors"
+              style={{
+                color: "rgba(255,255,255,0.72)",
+                border: "1px solid rgba(255,255,255,0.12)",
+              }}
+            >
+              See how it works →
+            </a>
+          </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="mt-10 flex items-center justify-center gap-5"
-        >
-          <Link to={ctaLink}>
-            <Button className="h-11 px-6 text-[14px] text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300" style={{ background: "#7C6FE0", borderRadius: "6px" }}>
-              Let Dutaly handle your inbox
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
-          <a href="#how-it-works" className="text-[14px] font-medium transition-colors" style={{ color: "rgba(255,255,255,0.5)" }}>
-            See how it works →
-          </a>
-        </motion.div>
+          <motion.ul
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.9, delay: 0.6 }}
+            className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-3"
+          >
+            {proofPoints.map((p) => {
+              const I = p.icon;
+              return (
+                <li key={p.label} className="flex items-center gap-2 text-[13px]" style={{ color: "rgba(255,255,255,0.42)" }}>
+                  <I className="h-3.5 w-3.5" style={{ color: "#7C6FE0" }} />
+                  {p.label}
+                </li>
+              );
+            })}
+          </motion.ul>
+        </div>
       </div>
 
-      {/* Product screenshot mockup with glow */}
+      {/* Product preview */}
       <motion.div
-        initial={{ opacity: 0, y: 40 }}
+        initial={{ opacity: 0, y: 48 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.4, delay: 1.1, ease: [0.25, 0.46, 0.45, 0.94] }}
-        className="mt-20 sm:mt-24 max-w-[1100px] mx-auto px-6 relative"
+        transition={{ duration: 1.2, delay: 0.75, ease }}
+        className="relative mx-auto mt-20 max-w-[1140px] px-6 sm:mt-24"
       >
-        {/* Subtle glow behind screenshot */}
         <div
-          className="absolute inset-0 -top-20 pointer-events-none"
-          style={{ background: "radial-gradient(ellipse at center, rgba(124,111,224,0.12) 0%, transparent 70%)" }}
-        />
-
-        <div className="relative rounded-t-2xl border border-b-0 overflow-hidden shadow-[0_20px_80px_-20px_rgba(0,0,0,0.5)]" style={{ borderColor: "rgba(255,255,255,0.1)", background: "#111118" }}>
+          className="relative overflow-hidden rounded-t-[18px] border border-b-0"
+          style={{
+            borderColor: "rgba(255,255,255,0.10)",
+            background: "linear-gradient(180deg, #12121B 0%, #0D0D14 100%)",
+            boxShadow: "0 -1px 0 rgba(255,255,255,0.06) inset, 0 40px 120px -30px rgba(0,0,0,0.85)",
+          }}
+        >
           {/* Window chrome */}
-          <div className="flex items-center gap-2 px-4 py-3 border-b" style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.03)" }}>
+          <div
+            className="flex items-center gap-3 border-b px-4 py-3"
+            style={{ borderColor: "rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.02)" }}
+          >
             <div className="flex gap-1.5">
-              <div className="w-[10px] h-[10px] rounded-full bg-[#FF5F57]" />
-              <div className="w-[10px] h-[10px] rounded-full bg-[#FEBC2E]" />
-              <div className="w-[10px] h-[10px] rounded-full bg-[#28C840]" />
+              <div className="h-[10px] w-[10px] rounded-full bg-[#FF5F57]" />
+              <div className="h-[10px] w-[10px] rounded-full bg-[#FEBC2E]" />
+              <div className="h-[10px] w-[10px] rounded-full bg-[#28C840]" />
             </div>
-            <div className="flex-1 flex justify-center">
-              <div className="px-12 py-1 rounded-md text-[11px] font-mono" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.3)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <div className="flex flex-1 justify-center">
+              <div
+                className="rounded-md px-10 py-1 text-[11px]"
+                style={{
+                  background: "rgba(255,255,255,0.04)",
+                  color: "rgba(255,255,255,0.32)",
+                  border: "1px solid rgba(255,255,255,0.07)",
+                }}
+              >
                 dutaly.com/inbox
               </div>
             </div>
           </div>
 
           {/* Caption */}
-          <div className="px-5 pt-4 pb-3 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-            <p className="text-[12px] font-medium mb-1" style={{ color: "rgba(255,255,255,0.7)" }}>Customer Inbox</p>
-            <p className="text-[12px] leading-relaxed" style={{ color: "rgba(255,255,255,0.4)" }}>
-              See Dutaly in action: routine emails auto-resolved, edge cases flagged for review, complex issues escalated with context.
-            </p>
+          <div className="flex flex-col gap-1 border-b px-6 py-4 sm:flex-row sm:items-center sm:justify-between" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+            <div>
+              <p className="font-display text-[13px] font-semibold" style={{ color: "rgba(255,255,255,0.82)" }}>
+                Customer Inbox
+              </p>
+              <p className="mt-1 max-w-[680px] text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.4)" }}>
+                See Dutaly in action: routine emails auto-resolved, edge cases flagged for review,
+                complex issues escalated with context.
+              </p>
+            </div>
+            <span
+              className="font-display w-fit rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em]"
+              style={{ background: "rgba(52,211,153,0.10)", color: "#34D399" }}
+            >
+              Live
+            </span>
           </div>
 
-          {/* Realistic inbox UI */}
-          <div className="flex min-h-[420px]">
-
+          {/* Inbox UI */}
+          <div className="flex min-h-[440px]">
             {/* Sidebar */}
-            <div className="hidden sm:block w-[200px] border-r p-3 space-y-1" style={{ borderColor: "rgba(255,255,255,0.06)", background: "#0D0D14" }}>
-              <div className="px-3 py-1.5 rounded-md text-[12px] font-medium" style={{ background: "#7C6FE0", color: "white" }}>Customer Inbox</div>
-              <div className="px-3 py-1.5 text-[12px]" style={{ color: "rgba(255,255,255,0.4)" }}>Auto-Sent</div>
-              <div className="px-3 py-1.5 text-[12px]" style={{ color: "rgba(255,255,255,0.4)" }}>Knowledge Base</div>
-              <div className="px-3 py-1.5 text-[12px]" style={{ color: "rgba(255,255,255,0.4)" }}>Instructions</div>
-              <div className="px-3 py-1.5 text-[12px]" style={{ color: "rgba(255,255,255,0.4)" }}>Templates</div>
-              <div className="mt-6 px-3 py-1.5 text-[12px]" style={{ color: "rgba(255,255,255,0.3)" }}>Settings</div>
+            <div
+              className="hidden w-[204px] space-y-1 border-r p-3 sm:block"
+              style={{ borderColor: "rgba(255,255,255,0.06)", background: "#0B0B12" }}
+            >
+              <div className="font-display rounded-lg px-3 py-2 text-[12px] font-semibold" style={{ background: "rgba(124,111,224,0.16)", color: "#BDB4F5" }}>
+                Customer Inbox
+              </div>
+              {["Auto-Sent", "Knowledge Base", "Instructions", "Templates"].map((l) => (
+                <div key={l} className="px-3 py-2 text-[12px]" style={{ color: "rgba(255,255,255,0.38)" }}>
+                  {l}
+                </div>
+              ))}
+              <div className="mt-6 px-3 py-2 text-[12px]" style={{ color: "rgba(255,255,255,0.26)" }}>
+                Settings
+              </div>
             </div>
 
             {/* Ticket list */}
-            <div className="flex-1 border-r" style={{ borderColor: "rgba(255,255,255,0.06)", background: "#0F0F16" }}>
-              <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-                <span className="text-[12px] font-medium" style={{ color: "rgba(255,255,255,0.7)" }}>All Tickets</span>
+            <div className="flex-1 border-r" style={{ borderColor: "rgba(255,255,255,0.06)", background: "#0E0E16" }}>
+              <div className="flex items-center justify-between border-b px-5 py-3.5" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+                <span className="font-display text-[12px] font-semibold" style={{ color: "rgba(255,255,255,0.75)" }}>
+                  All Tickets
+                </span>
                 <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>4 open</span>
               </div>
               {[
@@ -137,46 +233,66 @@ export function HeroSection() {
               ].map((t, i) => (
                 <div
                   key={i}
-                  className="px-4 py-3 border-b cursor-default"
-                  style={{ borderColor: "rgba(255,255,255,0.04)", background: t.active ? "rgba(124,111,224,0.06)" : "transparent" }}
+                  className="relative cursor-default border-b px-5 py-3.5"
+                  style={{
+                    borderColor: "rgba(255,255,255,0.04)",
+                    background: t.active ? "rgba(124,111,224,0.07)" : "transparent",
+                  }}
                 >
-                  <div className="flex items-center justify-between mb-0.5">
-                    <span className="text-[13px] font-medium" style={{ color: "rgba(255,255,255,0.85)" }}>{t.from}</span>
+                  {t.active && <span className="absolute inset-y-0 left-0 w-[2px]" style={{ background: "#7C6FE0" }} />}
+                  <div className="mb-1 flex items-center justify-between">
+                    <span className="font-display text-[13px] font-semibold" style={{ color: "rgba(255,255,255,0.88)" }}>
+                      {t.from}
+                    </span>
                     <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>{t.time}</span>
                   </div>
-                  <p className="text-[12px] truncate mb-1.5" style={{ color: "rgba(255,255,255,0.45)" }}>{t.subject}</p>
+                  <p className="mb-2 truncate text-[12.5px]" style={{ color: "rgba(255,255,255,0.46)" }}>{t.subject}</p>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded" style={{ color: t.statusColor, background: t.statusBg }}>{t.status}</span>
-                    <span className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.25)" }}>{t.score} confidence</span>
+                    <span className="font-display rounded px-1.5 py-0.5 text-[10px] font-semibold" style={{ color: t.statusColor, background: t.statusBg }}>
+                      {t.status}
+                    </span>
+                    <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.26)" }}>{t.score} confidence</span>
                   </div>
                 </div>
               ))}
             </div>
 
             {/* Detail panel */}
-            <div className="hidden lg:block w-[340px] p-4" style={{ background: "#0F0F16" }}>
-              <div className="mb-4">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[14px] font-medium" style={{ color: "rgba(255,255,255,0.9)" }}>Mike Torres</span>
-                  <span className="text-[10px] font-medium px-1.5 py-0.5 rounded" style={{ color: "#FBBF24", background: "rgba(251,191,36,0.1)" }}>Needs review</span>
+            <div className="hidden w-[352px] p-5 lg:block" style={{ background: "#0E0E16" }}>
+              <div className="mb-5">
+                <div className="mb-1 flex items-center justify-between">
+                  <span className="font-display text-[14px] font-semibold" style={{ color: "rgba(255,255,255,0.9)" }}>
+                    Mike Torres
+                  </span>
+                  <span className="font-display rounded px-1.5 py-0.5 text-[10px] font-semibold" style={{ color: "#FBBF24", background: "rgba(251,191,36,0.1)" }}>
+                    Needs review
+                  </span>
                 </div>
-                <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>mike@startup.io</span>
+                <span className="text-[11.5px]" style={{ color: "rgba(255,255,255,0.3)" }}>mike@startup.io</span>
               </div>
 
-              <div className="text-[13px] leading-relaxed mb-6">
-                <p className="mb-2 font-medium" style={{ color: "rgba(255,255,255,0.85)" }}>API rate limiting question</p>
-                <p style={{ color: "rgba(255,255,255,0.45)" }}>Hi, we've been hitting rate limits on the /v2/messages endpoint. Our integration sends about 500 requests per minute during peak hours. Can you increase our limit or suggest a batching approach?</p>
+              <div className="mb-6 text-[13px] leading-relaxed">
+                <p className="font-display mb-2 text-[13.5px] font-semibold" style={{ color: "rgba(255,255,255,0.86)" }}>
+                  API rate limiting question
+                </p>
+                <p style={{ color: "rgba(255,255,255,0.46)" }}>
+                  Hi, we've been hitting rate limits on the /v2/messages endpoint. Our integration
+                  sends about 500 requests per minute during peak hours. Can you increase our limit
+                  or suggest a batching approach?
+                </p>
               </div>
 
-              <div className="p-3 rounded-lg" style={{ background: "rgba(124,111,224,0.08)", border: "1px solid rgba(124,111,224,0.15)" }}>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-4 h-4 rounded flex items-center justify-center" style={{ background: "rgba(124,111,224,0.2)" }}>
-                    <span className="text-[8px] font-semibold" style={{ color: "#A89EF0" }}>AI</span>
+              <div className="rounded-xl p-4" style={{ background: "rgba(124,111,224,0.07)", border: "1px solid rgba(124,111,224,0.16)" }}>
+                <div className="mb-2.5 flex items-center gap-2">
+                  <div className="flex h-4 w-4 items-center justify-center rounded" style={{ background: "rgba(124,111,224,0.22)" }}>
+                    <span className="font-display text-[8px] font-bold" style={{ color: "#A89EF0" }}>AI</span>
                   </div>
-                  <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>Suggested reply · 67% confidence</span>
+                  <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.34)" }}>Suggested reply · 67% confidence</span>
                 </div>
-                <p className="text-[12px] leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
-                  Hi Mike, thanks for reaching out. Our standard rate limit is 300 req/min. I'd recommend implementing request batching using our bulk endpoint at /v2/messages/batch...
+                <p className="text-[12.5px] leading-relaxed" style={{ color: "rgba(255,255,255,0.48)" }}>
+                  Hi Mike, thanks for reaching out. Our standard rate limit is 300 req/min. I'd
+                  recommend implementing request batching using our bulk endpoint at
+                  /v2/messages/batch...
                 </p>
               </div>
             </div>

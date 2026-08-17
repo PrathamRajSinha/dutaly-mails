@@ -15,7 +15,7 @@ export function InteractiveDemoSection() {
   return (
     <section id="how-it-works" style={{ background: "#0A0A0F" }} className="py-24 sm:py-32">
       <div className="max-w-3xl mx-auto px-6">
-        <p className="text-[13px] font-medium tracking-[0.15em] uppercase mb-4 text-center" style={{ color: "rgba(255,255,255,0.4)" }}>
+        <p className="eyebrow mb-5 text-center" style={{ color: "rgba(255,255,255,0.38)" }}>
           How it works
         </p>
         <div className="w-full max-w-[900px] mx-auto h-[100px] sm:h-[130px] lg:h-[160px] mb-16">
@@ -70,11 +70,11 @@ export function InteractiveDemoSection() {
                       >
                         <Icon className="w-4 h-4" style={{ color: "#7C6FE0" }} />
                       </motion.div>
-                      <h3 className="text-[17px] sm:text-[19px] font-medium" style={{ color: "#F0EEF8" }}>
+                      <h3 className="text-[17px] sm:text-[19px] font-semibold tracking-[-0.015em]" style={{ color: "#F0EEF8" }}>
                         {step.title}
                       </h3>
                     </div>
-                    <p className="text-[14px] sm:text-[15px] leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
+                    <p className="text-[14.5px] sm:text-[15px] leading-[1.75] max-w-[520px]" style={{ color: "rgba(255,255,255,0.45)" }}>
                       {step.text}
                     </p>
                   </div>

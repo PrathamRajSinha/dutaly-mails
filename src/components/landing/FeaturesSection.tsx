@@ -79,8 +79,8 @@ export function FeaturesSection() {
     <section id="features" className="py-28 sm:py-36 relative" style={{ background: "#0A0A0F" }}>
       <div className="max-w-[1200px] mx-auto px-6 relative z-10">
         <motion.div {...fade} className="text-center mb-16">
-          <p className="text-[13px] font-medium tracking-[0.15em] uppercase mb-4" style={{ color: "rgba(255,255,255,0.4)" }}>Features</p>
-          <h2 className="text-[clamp(2rem,4vw,3.25rem)] font-semibold tracking-[-0.03em] leading-[1.1] max-w-[700px] mx-auto" style={{ color: "#F0EEF8" }}>
+          <p className="eyebrow mb-5" style={{ color: "rgba(255,255,255,0.38)" }}>Features</p>
+          <h2 className="text-[clamp(2rem,3.8vw,3.1rem)] font-semibold tracking-[-0.03em] leading-[1.08] max-w-[720px] mx-auto" style={{ color: "#F0EEF8" }}>
             Everything <span style={{ color: "#7C6FE0" }}>Dutaly</span> does for your inbox.
           </h2>
         </motion.div>
@@ -91,13 +91,13 @@ export function FeaturesSection() {
             <MagicBentoCard className="h-full">
               <div className="p-6 sm:p-8 flex flex-col h-full">
                 <div className="mb-5">
-                  <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full mb-3" style={{ background: "rgba(124,111,224,0.15)", color: "#A89EF0" }}>
+                  <span className="eyebrow inline-block mb-4" style={{ color: "#A89EF0" }}>
                     Understanding
                   </span>
-                  <h3 className="text-[clamp(1.25rem,2vw,1.5rem)] font-semibold tracking-[-0.02em] leading-[1.2] mb-2" style={{ color: "#F0EEF8" }}>
+                  <h3 className="text-[clamp(1.3rem,2vw,1.6rem)] font-semibold tracking-[-0.022em] leading-[1.2] mb-2.5" style={{ color: "#F0EEF8" }}>
                     Dutaly understands every email
                   </h3>
-                  <p className="text-[14px] leading-[1.7] max-w-[440px]" style={{ color: "rgba(255,255,255,0.5)" }}>
+                  <p className="text-[14.5px] leading-[1.75] max-w-[460px]" style={{ color: "rgba(255,255,255,0.5)" }}>
                     Intent, sentiment, and category are detected on every message - before a human ever opens it.
                   </p>
 
@@ -114,13 +114,13 @@ export function FeaturesSection() {
             <MagicBentoCard className="h-full">
               <div className="p-6 sm:p-8 flex flex-col h-full">
                 <div className="mb-5">
-                  <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full mb-3" style={{ background: "rgba(124,111,224,0.15)", color: "#A89EF0" }}>
+                  <span className="eyebrow inline-block mb-4" style={{ color: "#A89EF0" }}>
                     Automation
                   </span>
-                  <h3 className="text-[clamp(1.25rem,2vw,1.5rem)] font-semibold tracking-[-0.02em] leading-[1.2] mb-2" style={{ color: "#F0EEF8" }}>
+                  <h3 className="text-[clamp(1.3rem,2vw,1.6rem)] font-semibold tracking-[-0.022em] leading-[1.2] mb-2.5" style={{ color: "#F0EEF8" }}>
                     Dutaly handles emails automatically
                   </h3>
-                  <p className="text-[14px] leading-[1.7] max-w-[440px]" style={{ color: "rgba(255,255,255,0.5)" }}>
+                  <p className="text-[14.5px] leading-[1.75] max-w-[460px]" style={{ color: "rgba(255,255,255,0.5)" }}>
                     Replies are sent on its own when confidence is high, and tickets are created or updated as conversations evolve.
                   </p>
 
@@ -137,13 +137,13 @@ export function FeaturesSection() {
             <MagicBentoCard className="h-full">
               <div className="p-6 sm:p-8 flex flex-col h-full">
                 <div className="mb-5">
-                  <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full mb-3" style={{ background: "rgba(124,111,224,0.15)", color: "#A89EF0" }}>
+                  <span className="eyebrow inline-block mb-4" style={{ color: "#A89EF0" }}>
                     Collaboration
                   </span>
-                  <h3 className="text-[clamp(1.25rem,2vw,1.5rem)] font-semibold tracking-[-0.02em] leading-[1.2] mb-2" style={{ color: "#F0EEF8" }}>
+                  <h3 className="text-[clamp(1.3rem,2vw,1.6rem)] font-semibold tracking-[-0.022em] leading-[1.2] mb-2.5" style={{ color: "#F0EEF8" }}>
                     Dutaly supports your team
                   </h3>
-                  <p className="text-[14px] leading-[1.7] max-w-[440px]" style={{ color: "rgba(255,255,255,0.5)" }}>
+                  <p className="text-[14.5px] leading-[1.75] max-w-[460px]" style={{ color: "rgba(255,255,255,0.5)" }}>
                     When unsure, it drafts replies, suggests next actions, and keeps humans firmly in control.
                   </p>
 
@@ -160,13 +160,13 @@ export function FeaturesSection() {
             <MagicBentoCard className="h-full">
               <div className="p-6 sm:p-8 flex flex-col h-full">
                 <div className="mb-5">
-                  <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full mb-3" style={{ background: "rgba(124,111,224,0.15)", color: "#A89EF0" }}>
+                  <span className="eyebrow inline-block mb-4" style={{ color: "#A89EF0" }}>
                     Knowledge
                   </span>
-                  <h3 className="text-[clamp(1.25rem,2vw,1.5rem)] font-semibold tracking-[-0.02em] leading-[1.2] mb-2" style={{ color: "#F0EEF8" }}>
+                  <h3 className="text-[clamp(1.3rem,2vw,1.6rem)] font-semibold tracking-[-0.022em] leading-[1.2] mb-2.5" style={{ color: "#F0EEF8" }}>
                     Dutaly knows your business
                   </h3>
-                  <p className="text-[14px] leading-[1.7] max-w-[440px]" style={{ color: "rgba(255,255,255,0.5)" }}>
+                  <p className="text-[14.5px] leading-[1.75] max-w-[460px]" style={{ color: "rgba(255,255,255,0.5)" }}>
                     Powered by your knowledge base, instructions, and rules - Dutaly answers the way you would.
                   </p>
 
@@ -183,10 +183,10 @@ export function FeaturesSection() {
             <MagicBentoCard className="h-full">
               <div className="p-6 sm:p-8">
                 <div className="mb-6 max-w-[640px]">
-                  <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full mb-3" style={{ background: "rgba(124,111,224,0.15)", color: "#A89EF0" }}>
+                  <span className="eyebrow inline-block mb-4" style={{ color: "#A89EF0" }}>
                     Confidence
                   </span>
-                  <h3 className="text-[clamp(1.25rem,2vw,1.5rem)] font-semibold tracking-[-0.02em] leading-[1.2] mb-2" style={{ color: "#F0EEF8" }}>
+                  <h3 className="text-[clamp(1.3rem,2vw,1.6rem)] font-semibold tracking-[-0.022em] leading-[1.2] mb-2.5" style={{ color: "#F0EEF8" }}>
                     Smart automation with control
                   </h3>
                   <p className="text-[14px] leading-[1.7]" style={{ color: "rgba(255,255,255,0.5)" }}>
@@ -215,13 +215,13 @@ export function FeaturesSection() {
             <MagicBentoCard className="h-full">
               <div className="p-6 sm:p-8 flex flex-col h-full">
                 <div className="mb-5">
-                  <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full mb-3" style={{ background: "rgba(124,111,224,0.15)", color: "#A89EF0" }}>
+                  <span className="eyebrow inline-block mb-4" style={{ color: "#A89EF0" }}>
                     Conversational
                   </span>
-                  <h3 className="text-[clamp(1.25rem,2vw,1.5rem)] font-semibold tracking-[-0.02em] leading-[1.2] mb-2" style={{ color: "#F0EEF8" }}>
+                  <h3 className="text-[clamp(1.3rem,2vw,1.6rem)] font-semibold tracking-[-0.022em] leading-[1.2] mb-2.5" style={{ color: "#F0EEF8" }}>
                     Talk to Dutaly
                   </h3>
-                  <p className="text-[14px] leading-[1.7] max-w-[440px]" style={{ color: "rgba(255,255,255,0.5)" }}>
+                  <p className="text-[14.5px] leading-[1.75] max-w-[460px]" style={{ color: "rgba(255,255,255,0.5)" }}>
                     Ask which emails need attention, get a summary of today's issues, or list unresolved queries - with direct links to every email.
                   </p>
 
@@ -238,13 +238,13 @@ export function FeaturesSection() {
             <MagicBentoCard className="h-full">
               <div className="p-6 sm:p-8 flex flex-col h-full">
                 <div className="mb-5">
-                  <span className="inline-block text-[11px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full mb-3" style={{ background: "rgba(124,111,224,0.15)", color: "#A89EF0" }}>
+                  <span className="eyebrow inline-block mb-4" style={{ color: "#A89EF0" }}>
                     Tickets
                   </span>
-                  <h3 className="text-[clamp(1.25rem,2vw,1.5rem)] font-semibold tracking-[-0.02em] leading-[1.2] mb-2" style={{ color: "#F0EEF8" }}>
+                  <h3 className="text-[clamp(1.3rem,2vw,1.6rem)] font-semibold tracking-[-0.022em] leading-[1.2] mb-2.5" style={{ color: "#F0EEF8" }}>
                     Full visibility & tracking
                   </h3>
-                  <p className="text-[14px] leading-[1.7] max-w-[440px]" style={{ color: "rgba(255,255,255,0.5)" }}>
+                  <p className="text-[14.5px] leading-[1.75] max-w-[460px]" style={{ color: "rgba(255,255,255,0.5)" }}>
                     Every email becomes a structured ticket with status, priority, SLA, and full history.
                   </p>
 
@@ -267,6 +267,23 @@ export function FeaturesSection() {
                 <p className="mt-2 text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>
                   Plus utilities for everyday flow
                 </p>
+
+                <div className="mt-6 flex-1 space-y-2.5 rounded-xl p-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                  {[
+                    { k: "Status", v: "Open · Pending · Resolved" },
+                    { k: "Priority", v: "Urgent → Low" },
+                    { k: "SLA", v: "Breach alerts & escalation" },
+                    { k: "History", v: "Every reply, note, and action" },
+                  ].map((row) => (
+                    <div key={row.k} className="flex items-center justify-between gap-3 py-1">
+                      <span className="font-display text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: "rgba(255,255,255,0.35)" }}>
+                        {row.k}
+                      </span>
+                      <span className="text-right text-[12px]" style={{ color: "rgba(255,255,255,0.55)" }}>{row.v}</span>
+                    </div>
+                  ))}
+                </div>
+
 
               </div>
             </MagicBentoCard>

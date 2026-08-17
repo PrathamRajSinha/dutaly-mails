@@ -1,4 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Karla:wght@300;400;500;600;700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&display=swap");
 @tailwind base;
 @tailwind components;
@@ -222,4 +223,35 @@ html.dark .border-gray-200, html.dark .border-slate-200 { border-color: #2A2738 
 @keyframes magic-ripple {
   0% { width: 0; height: 0; opacity: 0.5; }
   100% { width: 300px; height: 300px; opacity: 0; }
+}
+
+/* =================================================================
+   Landing page typography scope: Montserrat display + Karla body
+   ================================================================= */
+.landing-page {
+  font-family: 'Karla', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px;
+  letter-spacing: 0;
+}
+
+.landing-page h1,
+.landing-page h2,
+.landing-page h3,
+.landing-page h4,
+.landing-page h5,
+.landing-page h6,
+.landing-page .font-display,
+.landing-page button,
+.landing-page nav a,
+.landing-page kbd {
+  font-family: 'Montserrat', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "ss01";
+}
+
+.landing-page .eyebrow {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
 }
