@@ -47,31 +47,41 @@ const faqs = [
 
 export function FaqSection() {
   return (
-    <section id="faq" className="py-24 md:py-32" style={{ background: "#0A0A0F" }} aria-labelledby="landing-faq-heading">
-      <div className="max-w-[760px] mx-auto px-6">
-        <p className="text-[12px] uppercase tracking-[0.18em] mb-4" style={{ color: "#7C6FE0" }}>
-          FAQ
-        </p>
-        <h2 id="landing-faq-heading" className="text-[36px] md:text-[44px] leading-[1.1] font-medium tracking-tight mb-12" style={{ color: "white" }}>
-          Frequently asked questions
-        </h2>
-        <Accordion type="single" collapsible className="w-full">
-          {faqs.map((item, i) => (
-            <AccordionItem
-              key={i}
-              value={`faq-${i}`}
-              style={{ borderColor: "rgba(255,255,255,0.08)" }}
+    <section id="faq" className="py-28 md:py-36" style={{ background: "#0A0A0F" }} aria-labelledby="landing-faq-heading">
+      <div className="mx-auto max-w-[1200px] px-6">
+        <div className="grid gap-12 lg:grid-cols-[380px_1fr] lg:gap-20">
+          <div className="lg:sticky lg:top-28 lg:self-start">
+            <p className="eyebrow mb-5" style={{ color: "rgba(255,255,255,0.38)" }}>FAQ</p>
+            <h2
+              id="landing-faq-heading"
+              className="text-[clamp(2rem,3.6vw,2.9rem)] font-semibold leading-[1.1] tracking-[-0.03em]"
+              style={{ color: "#F7F6FC" }}
             >
-              <AccordionTrigger className="text-left text-[15px] font-medium py-5 hover:no-underline" style={{ color: "white" }}>
-                {item.q}
-              </AccordionTrigger>
-              <AccordionContent className="text-[14px] leading-[1.7] pb-5" style={{ color: "rgba(255,255,255,0.6)" }}>
-                {item.a}
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
+              Frequently asked questions
+            </h2>
+            <p className="mt-5 text-[15px] leading-[1.75]" style={{ color: "rgba(255,255,255,0.45)" }}>
+              Everything about setup, control, and how Dutaly keeps your team in the loop.
+            </p>
+          </div>
+
+          <Accordion type="single" collapsible className="w-full">
+            {faqs.map((item, i) => (
+              <AccordionItem key={i} value={`faq-${i}`} style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+                <AccordionTrigger
+                  className="font-display py-5 text-left text-[15.5px] font-semibold tracking-[-0.005em] hover:no-underline"
+                  style={{ color: "#F0EEF8" }}
+                >
+                  {item.q}
+                </AccordionTrigger>
+                <AccordionContent className="pb-6 pr-6 text-[14.5px] leading-[1.8]" style={{ color: "rgba(255,255,255,0.52)" }}>
+                  {item.a}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
       </div>
     </section>
   );
 }
+
