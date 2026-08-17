@@ -268,6 +268,23 @@ export function FeaturesSection() {
                   Plus utilities for everyday flow
                 </p>
 
+                <div className="mt-6 flex-1 space-y-2.5 rounded-xl p-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                  {[
+                    { k: "Status", v: "Open · Pending · Resolved" },
+                    { k: "Priority", v: "Urgent → Low" },
+                    { k: "SLA", v: "Breach alerts & escalation" },
+                    { k: "History", v: "Every reply, note, and action" },
+                  ].map((row) => (
+                    <div key={row.k} className="flex items-center justify-between gap-3 py-1">
+                      <span className="font-display text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: "rgba(255,255,255,0.35)" }}>
+                        {row.k}
+                      </span>
+                      <span className="text-right text-[12px]" style={{ color: "rgba(255,255,255,0.55)" }}>{row.v}</span>
+                    </div>
+                  ))}
+                </div>
+
+
               </div>
             </MagicBentoCard>
           </motion.div>
