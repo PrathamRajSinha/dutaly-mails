@@ -39,7 +39,7 @@ export default function Landing() {
   }, []);
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden" style={{ background: "#0A0A0F" }}>
+    <div className="landing-page relative min-h-screen overflow-x-hidden" style={{ background: "#0A0A0F" }}>
       <Seo
 
         title="Dutaly — AI helpdesk that handles your inbox"
