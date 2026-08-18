@@ -912,182 +912,55 @@ export default function Settings() {
 
         {/* Integrations Tab */}
         <TabsContent value="integrations">
-          <div className="space-y-6">
-            {/* Existing integrations */}
-            {(integrations && integrations.length > 0) && (
-              <div className="space-y-3">
-                <h3 className="text-lg font-medium text-foreground">Active Integrations</h3>
-                {integrations.map((integration) => {
-                  const config = (typeof integration.config_json === "string"
-                    ? JSON.parse(integration.config_json)
-                    : integration.config_json) || {};
-                  return (
-                    <Card key={integration.id} className="border border-border">
-                      <CardContent className="flex items-center justify-between p-4">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary">
-                            {integration.provider === "slack" ? (
-                              <MessageSquare className="h-5 w-5" />
-                            ) : (
-                              <Webhook className="h-5 w-5" />
-                            )}
-                          </div>
-                          <div>
-                            <p className="font-medium text-card-foreground capitalize">{integration.provider}</p>
-                            <p className="text-sm text-muted-foreground truncate max-w-xs">
-                              {integration.provider === "slack"
-                                ? config.webhook_url ? "Webhook configured" : "Not configured"
-                                : config.url || "No URL"}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <Badge variant={integration.is_active ? "default" : "secondary"}>
-                            {integration.is_active ? "Active" : "Paused"}
-                          </Badge>
-                          <Switch
-                            checked={integration.is_active ?? false}
-                            onCheckedChange={(checked) =>
-                              updateIntegration.mutate({ id: integration.id, is_active: checked })
-                            }
-                          />
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => deleteIntegration.mutate(integration.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
+          <Card className="border border-border">
+            <CardContent className="flex flex-col items-center gap-6 px-6 py-12 text-center sm:py-16">
+              <div className="flex items-center gap-3" aria-hidden="true">
+                <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-secondary">
+                  <MessageSquare className="h-5 w-5 text-muted-foreground" />
+                </span>
+                <span className="h-px w-6 bg-border" />
+                <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-secondary">
+                  <Webhook className="h-5 w-5 text-muted-foreground" />
+                </span>
               </div>
-            )}
 
-            {/* Add new integration */}
-            <Card className="border border-border">
-              <CardHeader>
-                <CardTitle>Add Integration</CardTitle>
-                <CardDescription>
-                  Connect a webhook or Slack to receive ticket events in real-time.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Provider</Label>
-                  <div className="flex gap-2">
-                    <Button
-                      variant={newIntProvider === "webhook" ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setNewIntProvider("webhook")}
-                    >
-                      <Webhook className="mr-2 h-4 w-4" />
-                      Webhook
-                    </Button>
-                    <Button
-                      variant={newIntProvider === "slack" ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setNewIntProvider("slack")}
-                    >
-                      <MessageSquare className="mr-2 h-4 w-4" />
-                      Slack
-                    </Button>
-                  </div>
-                </div>
+              <div className="max-w-md space-y-2">
+                <h2 className="text-xl font-semibold text-card-foreground">
+                  Integrations are coming soon
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Slack notifications and outgoing webhooks for ticket events will be
+                  available in a future release. Nothing to configure here yet.
+                </p>
+              </div>
 
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between"><Label>{newIntProvider === "slack" ? "Slack Incoming Webhook URL" : "Webhook URL"}</Label><ConfigStatus type={newIntProvider} value={newIntUrl} /></div>
-                  <Input
-                    placeholder={newIntProvider === "slack" ? "https://hooks.slack.com/services/..." : "https://your-api.com/webhook"}
-                    value={newIntUrl}
-                    onChange={(e) => setNewIntUrl(e.target.value)}
-                  />
-                </div>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <Badge variant="secondary" className="gap-1.5">
+                  <MessageSquare className="h-3 w-3" />
+                  Slack
+                </Badge>
+                <Badge variant="secondary" className="gap-1.5">
+                  <Webhook className="h-3 w-3" />
+                  Webhooks
+                </Badge>
+                <Badge variant="outline" className="gap-1.5">
+                  <Bell className="h-3 w-3" />
+                  Ticket events
+                </Badge>
+              </div>
 
-                {newIntProvider === "webhook" && (
-                  <div className="space-y-2">
-                    <Label>Secret (optional)</Label>
-                    <Input
-                      placeholder="Signing secret for verification"
-                      value={newIntSecret}
-                      onChange={(e) => setNewIntSecret(e.target.value)}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Sent as X-Webhook-Secret header with each request.
-                    </p>
-                  </div>
-                )}
-
-                <div className="space-y-2">
-                  <Label>Events to send</Label>
-                  <div className="flex flex-wrap gap-2">
-                    {["ticket.created", "ticket.updated", "ticket.resolved", "ticket.sla_breached", "ticket.angry_detected"].map((evt) => (
-                      <Button
-                        key={evt}
-                        variant={newIntEvents.includes(evt) ? "default" : "outline"}
-                        size="sm"
-                        onClick={() =>
-                          setNewIntEvents((prev) =>
-                            prev.includes(evt) ? prev.filter((e) => e !== evt) : [...prev, evt]
-                          )
-                        }
-                      >
-                        {evt}
-                      </Button>
-                    ))}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Leave empty to receive all events.
-                  </p>
-                </div>
-
-                <Button
-                  onClick={() => {
-                    if (!newIntUrl) {
-                      toast.error("Please enter a URL");
-                      return;
-                    }
-                    const config: Record<string, any> = {};
-                    if (newIntProvider === "slack") {
-                      config.webhook_url = newIntUrl;
-                    } else {
-                      config.url = newIntUrl;
-                      if (newIntSecret) config.secret = newIntSecret;
-                    }
-                    if (newIntEvents.length > 0) config.events = newIntEvents;
-
-                    addIntegration.mutate(
-                      { provider: newIntProvider, config_json: config },
-                      {
-                        onSuccess: () => {
-                          setNewIntUrl("");
-                          setNewIntSecret("");
-                          setNewIntEvents([]);
-                        },
-                      }
-                    );
-                  }}
-                  disabled={addIntegration.isPending}
-                  className="w-full"
-                >
-                  {addIntegration.isPending ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Adding...
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="mr-2 h-4 w-4" />
-                      Add Integration
-                    </>
-                  )}
+              <div className="space-y-2">
+                <Button variant="outline" size="sm" disabled aria-disabled="true">
+                  Notify me when available
                 </Button>
-              </CardContent>
-            </Card>
-          </div>
+                <p className="text-xs text-muted-foreground">
+                  This button is a placeholder and does not submit anything.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
+
       </Tabs>
     </div>
   );
