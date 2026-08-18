@@ -1,3 +1,4 @@
+import { Eye } from "lucide-react";
 import { useRef, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";

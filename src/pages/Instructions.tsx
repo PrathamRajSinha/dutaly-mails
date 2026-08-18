@@ -17,7 +17,8 @@ import {
   Type,
   Palette,
   ShieldCheck,
-  Zap
+  Zap,
+  RotateCw
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -79,6 +80,7 @@ export default function Instructions() {
   
   const [showBackupEmailConfirm, setShowBackupEmailConfirm] = useState(false);
   const [showAutoReplyConfirm, setShowAutoReplyConfirm] = useState(false);
+  const [showPauseConfirm, setShowPauseConfirm] = useState(false);
   const [showThresholdConfirm, setShowThresholdConfirm] = useState(false);
   const [pendingThreshold, setPendingThreshold] = useState(0.8);
 
@@ -172,6 +174,11 @@ export default function Instructions() {
     toast.info("Changes discarded");
   };
 
+  const handleResetToDefault = () => {
+    setLocalInstructions(defaultInstructions);
+    toast.info("System prompt reset to default (save to apply)");
+  };
+
   if (isLoading) {
     return (
       <div className="flex h-[calc(100vh-4rem)] items-center justify-center p-8">
@@ -206,7 +213,13 @@ export default function Instructions() {
         >
           <div className="space-y-8 py-2">
             <div>
-              <Label className="text-sm font-semibold mb-3 block">Instruction Builder</Label>
+              <div className="flex items-center justify-between mb-3">
+                <Label className="text-sm font-semibold">Instruction Builder</Label>
+                <Button variant="ghost" size="sm" onClick={handleResetToDefault} className="text-xs text-[#9490B8] hover:text-primary">
+                  <RotateCw className="mr-1.5 h-3 w-3" />
+                  Reset to Default
+                </Button>
+              </div>
               <InstructionBuilder />
             </div>
 
@@ -325,9 +338,11 @@ export default function Instructions() {
                       checked={!autoReply} 
                       onCheckedChange={(v) => {
                         if (!v) {
+                          // Switching FROM Review Mode TO Auto-Reply
                           setShowAutoReplyConfirm(true);
                         } else {
-                          setAutoReply(false);
+                          // Switching FROM Auto-Reply TO Review Mode
+                          setShowPauseConfirm(true);
                         }
                       }} 
                     />
@@ -344,7 +359,7 @@ export default function Instructions() {
                         if (v) {
                           setShowAutoReplyConfirm(true);
                         } else {
-                          setAutoReply(false);
+                          setShowPauseConfirm(true);
                         }
                       }} 
                     />
@@ -604,6 +619,29 @@ export default function Instructions() {
               }}
             >
               Enable Auto-Reply
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showPauseConfirm} onOpenChange={setShowPauseConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Pause Auto-Reply?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will stop the AI from sending replies automatically for <strong>all connected accounts</strong>. You will need to manually approve all drafts.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={() => {
+                setAutoReply(false);
+                setShowPauseConfirm(false);
+              }}
+            >
+              Pause Automation
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

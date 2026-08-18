@@ -80,7 +80,7 @@ function SlaCountdown({ slaDueAt }: { slaDueAt: string | null }) {
   if (!slaDueAt) return null;
   const due = new Date(slaDueAt);
   const overdue = isPast(due);
-  const isBreached = overdue;
+  const isBreached = ticket?.sla_due_at ? isPast(new Date(ticket.sla_due_at)) : false;
   return (
     <div className={cn("flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium animate-pulse", overdue ? "bg-destructive text-destructive-foreground" : "bg-primary/10 text-primary")}>
       <Clock className="h-3.5 w-3.5" />
@@ -145,7 +145,7 @@ function EmailActions({ email, onApprove, onIgnore, onEditSend, onSnooze, onSche
     setIsComposing(true);
   };
 
-  const isBreached = overdue;
+  const isBreached = ticket?.sla_due_at ? isPast(new Date(ticket.sla_due_at)) : false;
   return (
     <div className="space-y-3 pt-2">
       {/* Quick Reply Chips */}
@@ -266,7 +266,7 @@ export function TicketDetailPanel({ ticketId, onBack }: { ticketId: string; onBa
 
   const handleAddNote = () => { if (!newNote.trim()) return; addNote.mutate(newNote, { onSuccess: () => setNewNote("") }); };
 
-  const isBreached = overdue;
+  const isBreached = ticket?.sla_due_at ? isPast(new Date(ticket.sla_due_at)) : false;
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
@@ -301,7 +301,7 @@ export function TicketDetailPanel({ ticketId, onBack }: { ticketId: string; onBa
       {/* Section toggle */}
       <div className="flex border-b border-border">
         <button className={cn("flex-1 px-4 py-2.5 text-sm font-medium transition-colors", activeSection === "conversation" ? "border-b-2 border-primary text-foreground" : "text-muted-foreground hover:text-foreground")} onClick={() => setActiveSection("conversation")}>
-          <Mail className="inline h-4 w-4 mr-1.5" />Conversation ({emails.length})
+          <Mail className="inline h-4 w-4 mr-1.5" />Emails ({emails.length})
           {pendingCount > 0 && <Badge variant="secondary" className="ml-1.5 h-5 px-1.5 text-[10px] bg-destructive/10 text-destructive">{pendingCount} pending</Badge>}
         </button>
         <button className={cn("flex-1 px-4 py-2.5 text-sm font-medium transition-colors", activeSection === "notes" ? "border-b-2 border-primary text-foreground" : "text-muted-foreground hover:text-foreground")} onClick={() => setActiveSection("notes")}>
@@ -321,7 +321,7 @@ export function TicketDetailPanel({ ticketId, onBack }: { ticketId: string; onBa
                 const isSent = email.status === "sent" || email.status === "approved" || email.status === "edited" || email.status === "sending";
                 const isIgnored = email.status === "ignored";
 
-                const isBreached = overdue;
+                const isBreached = ticket?.sla_due_at ? isPast(new Date(ticket.sla_due_at)) : false;
   return (
                   <Card key={email.id} className="border-border">
                     <CardContent className="p-4 space-y-3">
