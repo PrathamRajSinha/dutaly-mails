@@ -11,7 +11,7 @@ import {
   Loader2,
   Trash2,
   Mail,
-  ArrowLeft,
+  ArrowLeft, History, User,
   Check,
   X,
   Edit,
@@ -80,8 +80,9 @@ function SlaCountdown({ slaDueAt }: { slaDueAt: string | null }) {
   if (!slaDueAt) return null;
   const due = new Date(slaDueAt);
   const overdue = isPast(due);
+  const isBreached = overdue;
   return (
-    <div className={cn("flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium", overdue ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary")}>
+    <div className={cn("flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium animate-pulse", overdue ? "bg-destructive text-destructive-foreground" : "bg-primary/10 text-primary")}>
       <Clock className="h-3.5 w-3.5" />
       {overdue ? <span>Overdue by {formatDistanceToNow(due)}</span> : <span>{formatDistanceToNow(due, { addSuffix: false })} left</span>}
     </div>
@@ -144,6 +145,7 @@ function EmailActions({ email, onApprove, onIgnore, onEditSend, onSnooze, onSche
     setIsComposing(true);
   };
 
+  const isBreached = overdue;
   return (
     <div className="space-y-3 pt-2">
       {/* Quick Reply Chips */}
@@ -216,6 +218,14 @@ function EmailActions({ email, onApprove, onIgnore, onEditSend, onSnooze, onSche
   );
 }
 
+type HistoryItem = {
+  id: string;
+  type: "status_change" | "priority_change" | "assignment" | "note" | "email_in" | "email_out" | "creation";
+  content: string;
+  timestamp: string;
+  icon: React.ReactNode;
+};
+
 export function TicketDetailPanel({ ticketId, onBack }: { ticketId: string; onBack: () => void }) {
   const { ticket, emails, notes, isLoading } = useTicketDetail(ticketId);
   const { updateStatus, updatePriority } = useTicketMutations(ticketId);
@@ -256,6 +266,7 @@ export function TicketDetailPanel({ ticketId, onBack }: { ticketId: string; onBa
 
   const handleAddNote = () => { if (!newNote.trim()) return; addNote.mutate(newNote, { onSuccess: () => setNewNote("") }); };
 
+  const isBreached = overdue;
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
@@ -310,7 +321,8 @@ export function TicketDetailPanel({ ticketId, onBack }: { ticketId: string; onBa
                 const isSent = email.status === "sent" || email.status === "approved" || email.status === "edited" || email.status === "sending";
                 const isIgnored = email.status === "ignored";
 
-                return (
+                const isBreached = overdue;
+  return (
                   <Card key={email.id} className="border-border">
                     <CardContent className="p-4 space-y-3">
                       <div className="flex items-start justify-between">

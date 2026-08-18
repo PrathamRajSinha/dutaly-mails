@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Check, Clock, AlertCircle, XCircle, Forward, Send, FileEdit, Mail } from "lucide-react";
+import { Check, Clock, AlertCircle, XCircle, Forward, Send, FileEdit, Mail, type LucideIcon } from "lucide-react";
 
 interface ActivityItemProps {
   email: {
@@ -13,7 +13,7 @@ interface ActivityItemProps {
   };
 }
 
-export const actionConfig: Record<string, { icon: any; label: string; badgeBg: string; badgeColor: string; iconBg: string; iconColor: string }> = {
+export const actionConfig: Record<string, { icon: LucideIcon; label: string; badgeBg: string; badgeColor: string; iconBg: string; iconColor: string }> = {
   replied: {
     icon: Check,
     label: "Auto-resolved",

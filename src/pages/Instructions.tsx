@@ -1,5 +1,24 @@
-import { useState, useEffect, useRef } from "react";
-import { Save, RotateCcw, Info, Sparkles, Loader2, MessageCircle, Image, Plus, X, CheckCircle, Ban, Mail, ShieldAlert } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { 
+  Save, 
+  RotateCcw, 
+  Info, 
+  Sparkles, 
+  Loader2, 
+  MessageCircle, 
+  Image, 
+  Plus, 
+  X, 
+  CheckCircle, 
+  Ban, 
+  Mail, 
+  ShieldAlert,
+  Settings2,
+  Type,
+  Palette,
+  ShieldCheck,
+  Zap
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +33,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
+import { Accordion } from "@/components/ui/accordion";
 import { toast } from "sonner";
 import { useAIInstructions } from "@/hooks/useAIInstructions";
 import { InstructionBuilder } from "@/components/instructions/InstructionBuilder";
@@ -29,13 +49,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
-const examplePrompts = [
-  "Only answer pricing questions if the exact price is in the knowledge base",
-  "Forward all partnership emails to team@company.com",
-  "If someone asks for a demo, share the Calendly link",
-  "Apologize and escalate if someone complains about our service",
-];
+import { StickyHeader } from "@/components/instructions/StickyHeader";
+import { AutomationSummary } from "@/components/instructions/AutomationSummary";
+import { InstructionSection } from "@/components/instructions/InstructionSection";
+import { cn } from "@/lib/utils";
 
 export default function Instructions() {
   const { instructions, isLoading, updateInstructions, defaultInstructions } = useAIInstructions();
@@ -59,35 +76,13 @@ export default function Instructions() {
   const [backupEmail, setBackupEmail] = useState("");
   const [backupEmailInput, setBackupEmailInput] = useState("");
   const [escalationConditions, setEscalationConditions] = useState<string[]>([]);
-  const [newCondition, setNewCondition] = useState("");
+  
   const [showBackupEmailConfirm, setShowBackupEmailConfirm] = useState(false);
   const [showAutoReplyConfirm, setShowAutoReplyConfirm] = useState(false);
   const [showThresholdConfirm, setShowThresholdConfirm] = useState(false);
   const [pendingThreshold, setPendingThreshold] = useState(0.8);
 
-  const saveToggle = (updates: Record<string, unknown>) => {
-    const payload = {
-      system_prompt: localInstructions || defaultInstructions,
-      tone,
-      reply_length: replyLength,
-      signature,
-      auto_reply_enabled: autoReply,
-      escalate_unknown: escalateUncertain,
-      auto_reply_confidence_threshold: confidenceThreshold,
-      greeting_response_enabled: greetingEnabled,
-      greeting_template: greetingTemplate,
-      email_footer: emailFooter,
-      logo_url: logoUrl || null,
-      do_rules: doRules,
-      do_not_rules: doNotRules,
-      backup_email: backupEmail || null,
-      escalation_conditions: escalationConditions,
-      ...updates,
-    };
-    updateInstructions.mutate(payload as any);
-  };
-
-  useEffect(() => {
+  const setInitialState = () => {
     if (instructions) {
       setLocalInstructions(instructions.system_prompt || defaultInstructions);
       setTone(instructions.tone || "professional");
@@ -105,10 +100,53 @@ export default function Instructions() {
       setBackupEmail(instructions.backup_email || "");
       setEscalationConditions(instructions.escalation_conditions || []);
     }
+  };
+
+  useEffect(() => {
+    setInitialState();
   }, [instructions, defaultInstructions]);
 
+  const isDirty = useMemo(() => {
+    if (!instructions) return false;
+    
+    return (
+      localInstructions !== (instructions.system_prompt || defaultInstructions) ||
+      tone !== (instructions.tone || "professional") ||
+      replyLength !== (instructions.reply_length || "medium") ||
+      signature !== (instructions.signature || "Best regards,\nThe Team") ||
+      autoReply !== (instructions.auto_reply_enabled ?? false) ||
+      escalateUncertain !== (instructions.escalate_unknown ?? true) ||
+      confidenceThreshold !== (instructions.auto_reply_confidence_threshold ?? 0.8) ||
+      greetingEnabled !== (instructions.greeting_response_enabled ?? true) ||
+      greetingTemplate !== (instructions.greeting_template || "Hello! Thank you for reaching out. How can I assist you today?") ||
+      emailFooter !== (instructions.email_footer ?? "This email was sent by an AI assistant. If you believe this was sent in error, please let us know.") ||
+      logoUrl !== (instructions.logo_url || "") ||
+      JSON.stringify(doRules) !== JSON.stringify(instructions.do_rules || []) ||
+      JSON.stringify(doNotRules) !== JSON.stringify(instructions.do_not_rules || []) ||
+      backupEmail !== (instructions.backup_email || "") ||
+      JSON.stringify(escalationConditions) !== JSON.stringify(instructions.escalation_conditions || [])
+    );
+  }, [
+    instructions, 
+    localInstructions, 
+    tone, 
+    replyLength, 
+    signature, 
+    autoReply, 
+    escalateUncertain, 
+    confidenceThreshold, 
+    greetingEnabled, 
+    greetingTemplate, 
+    emailFooter, 
+    logoUrl, 
+    doRules, 
+    doNotRules, 
+    backupEmail, 
+    escalationConditions,
+    defaultInstructions
+  ]);
+
   const handleSave = async () => {
-    // Compile structured rules into system_prompt if rules exist, otherwise use local instructions
     const compiledPrompt = rules.length > 0 ? compileRulesToPrompt(rules) : localInstructions;
     await updateInstructions.mutateAsync({
       system_prompt: compiledPrompt,
@@ -129,73 +167,63 @@ export default function Instructions() {
     });
   };
 
-  const handleReset = () => {
-    setLocalInstructions(defaultInstructions);
-    toast.info("Instructions reset to default");
+  const handleDiscard = () => {
+    setInitialState();
+    toast.info("Changes discarded");
   };
 
   if (isLoading) {
     return (
-      <div className="flex h-full items-center justify-center p-8">
+      <div className="flex h-[calc(100vh-4rem)] items-center justify-center p-8">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="p-8">
-      {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-[20px] font-medium text-[#1A1730]">AI Instructions</h1>
-          <p className="mt-0.5 text-[13px] text-[#9490B8]">
-            Tell the AI how to handle your emails in plain English
-          </p>
-        </div>
-        <div className="flex gap-3">
-          <Button variant="outline" onClick={handleReset}>
-            <RotateCcw className="mr-2 h-4 w-4" />
-            Reset
-          </Button>
-          <Button onClick={handleSave} disabled={updateInstructions.isPending}>
-            {updateInstructions.isPending ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="mr-2 h-4 w-4" />
-            )}
-            Save Changes
-          </Button>
-        </div>
-      </div>
+    <div className="max-w-[1200px] mx-auto px-8 pb-12">
+      <StickyHeader 
+        isDirty={isDirty} 
+        isSaving={updateInstructions.isPending} 
+        onSave={handleSave} 
+        onDiscard={handleDiscard} 
+      />
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Column 1 */}
-        <div className="space-y-6">
-          {/* Structured Instruction Builder */}
-          <InstructionBuilder />
+      <AutomationSummary 
+        autoReply={autoReply}
+        confidenceThreshold={confidenceThreshold}
+        backupEmail={backupEmail}
+        escalateUncertain={escalateUncertain}
+      />
 
-          {/* Do & Don't Rules */}
-          <Card className="border border-border">
-            <CardHeader>
-              <CardTitle className="text-base">Do & Don't Rules</CardTitle>
-              <CardDescription>
-                Specific rules the AI must always follow or avoid when replying.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
+      <Accordion type="multiple" defaultValue={["core-instructions", "automation-settings"]} className="w-full">
+        {/* Core AI Instructions */}
+        <InstructionSection 
+          id="core-instructions"
+          title="Core Behavior & Rules"
+          description="Define the fundamental logic for how the AI interacts with your customers."
+          icon={<Sparkles className="h-5 w-5" />}
+        >
+          <div className="space-y-8 py-2">
+            <div>
+              <Label className="text-sm font-semibold mb-3 block">Instruction Builder</Label>
+              <InstructionBuilder />
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2 pt-4 border-t border-slate-100">
               {/* DO rules */}
               <div className="space-y-3">
-                <Label className="flex items-center gap-2 text-sm font-semibold text-primary">
+                <Label className="flex items-center gap-2 text-sm font-semibold text-emerald-600">
                   <CheckCircle className="h-4 w-4" />
-                  DO (Always follow)
+                  Positive Constraints (DO)
                 </Label>
                 <div className="space-y-2">
                   {doRules.map((rule, i) => (
-                    <div key={i} className="flex items-center gap-2 rounded-[10px] border-l-[3px] border-l-[#1D9E75] bg-[#F6FFF9] px-3 py-2">
-                      <span className="flex-1 text-sm text-foreground">{rule}</span>
+                    <div key={i} className="flex items-center gap-2 rounded-xl border border-emerald-100 bg-emerald-50/30 px-3 py-2">
+                      <span className="flex-1 text-sm text-[#3D3A5C]">{rule}</span>
                       <button
                         onClick={() => setDoRules(doRules.filter((_, idx) => idx !== i))}
-                        className="text-muted-foreground hover:text-destructive"
+                        className="text-muted-foreground hover:text-destructive transition-colors"
                       >
                         <X className="h-4 w-4" />
                       </button>
@@ -205,7 +233,7 @@ export default function Instructions() {
                     <Input
                       value={newDoRule}
                       onChange={(e) => setNewDoRule(e.target.value)}
-                      placeholder="e.g. Always include a link to our FAQ page"
+                      placeholder="e.g. Always mention our refund policy"
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && newDoRule.trim()) {
                           setDoRules([...doRules, newDoRule.trim()]);
@@ -233,15 +261,15 @@ export default function Instructions() {
               <div className="space-y-3">
                 <Label className="flex items-center gap-2 text-sm font-semibold text-destructive">
                   <Ban className="h-4 w-4" />
-                  DON'T (Never do)
+                  Negative Constraints (DON'T)
                 </Label>
                 <div className="space-y-2">
                   {doNotRules.map((rule, i) => (
-                    <div key={i} className="flex items-center gap-2 rounded-[10px] border-l-[3px] border-l-[#DC2626] bg-[#FFF5F5] px-3 py-2">
-                      <span className="flex-1 text-sm text-foreground">{rule}</span>
+                    <div key={i} className="flex items-center gap-2 rounded-xl border border-destructive/10 bg-destructive/5 px-3 py-2">
+                      <span className="flex-1 text-sm text-[#3D3A5C]">{rule}</span>
                       <button
                         onClick={() => setDoNotRules(doNotRules.filter((_, idx) => idx !== i))}
-                        className="text-muted-foreground hover:text-destructive"
+                        className="text-muted-foreground hover:text-destructive transition-colors"
                       >
                         <X className="h-4 w-4" />
                       </button>
@@ -251,7 +279,7 @@ export default function Instructions() {
                     <Input
                       value={newDoNotRule}
                       onChange={(e) => setNewDoNotRule(e.target.value)}
-                      placeholder="e.g. Never make up pricing information"
+                      placeholder="e.g. Never promise specific dates"
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && newDoNotRule.trim()) {
                           setDoNotRules([...doNotRules, newDoNotRule.trim()]);
@@ -274,108 +302,62 @@ export default function Instructions() {
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
+        </InstructionSection>
 
-          <Card className="border border-border">
-            <CardHeader>
-              <CardTitle className="text-base">Reply Style</CardTitle>
-              <CardDescription>Control the tone and length of AI-generated replies.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label>Tone</Label>
-                  <Select value={tone} onValueChange={(v) => setTone(v as typeof tone)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="formal">Formal</SelectItem>
-                      <SelectItem value="professional">Professional</SelectItem>
-                      <SelectItem value="friendly">Friendly</SelectItem>
-                      <SelectItem value="concise">Concise</SelectItem>
-                    </SelectContent>
-                  </Select>
+        {/* Automation Settings */}
+        <InstructionSection 
+          id="automation-settings"
+          title="Automation & Escalation"
+          description="Control when the AI sends emails vs when it asks for your review."
+          icon={<Settings2 className="h-5 w-5" />}
+        >
+          <div className="space-y-6 py-2">
+             <div className="grid gap-6 md:grid-cols-2">
+                <div className="space-y-4 rounded-xl border p-4 bg-slate-50/30">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-[#1A1730]">Review Mode (Approval Only)</p>
+                      <p className="text-xs text-[#9490B8]">AI drafts replies but never sends them automatically.</p>
+                    </div>
+                    <Switch 
+                      checked={!autoReply} 
+                      onCheckedChange={(v) => {
+                        if (!v) {
+                          setShowAutoReplyConfirm(true);
+                        } else {
+                          setAutoReply(false);
+                        }
+                      }} 
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between border-t pt-4">
+                    <div>
+                      <p className="text-sm font-semibold text-[#1A1730]">Auto-Send Enabled</p>
+                      <p className="text-xs text-[#9490B8]">AI will automatically send replies when confident.</p>
+                    </div>
+                    <Switch 
+                      checked={autoReply} 
+                      onCheckedChange={(v) => {
+                        if (v) {
+                          setShowAutoReplyConfirm(true);
+                        } else {
+                          setAutoReply(false);
+                        }
+                      }} 
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>Reply Length</Label>
-                  <Select value={replyLength} onValueChange={(v) => setReplyLength(v as typeof replyLength)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="short">Short (1 paragraph)</SelectItem>
-                      <SelectItem value="medium">Medium (2 paragraphs)</SelectItem>
-                      <SelectItem value="long">Long (detailed)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
 
-          {/* Signature & Footer */}
-          <Card className="border border-border">
-            <CardHeader>
-              <CardTitle className="text-base">Signature & Footer</CardTitle>
-              <CardDescription>Customize the closing of every email reply.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label>Email Signature</Label>
-                <Textarea
-                  rows={3}
-                  value={signature}
-                  onChange={(e) => setSignature(e.target.value)}
-                  placeholder="Your email signature..."
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Email Footer</Label>
-                <Textarea
-                  rows={2}
-                  value={emailFooter}
-                  onChange={(e) => setEmailFooter(e.target.value)}
-                  placeholder="Footer text appended to every email..."
-                />
-                <p className="text-xs text-muted-foreground">
-                  Appears at the bottom of every sent email
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Column 2 */}
-        <div className="space-y-6">
-          {/* Automation Controls */}
-          <Card className="border border-border">
-            <CardHeader>
-              <CardTitle className="text-base">Automation Controls</CardTitle>
-              <CardDescription>Configure when and how the AI acts on your behalf.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-card-foreground">Auto-reply enabled</p>
-                  <p className="text-xs text-muted-foreground">AI sends replies automatically</p>
-                </div>
-                <Switch checked={autoReply} onCheckedChange={(v) => {
-                  if (v) {
-                    setShowAutoReplyConfirm(true);
-                  } else {
-                    setAutoReply(false);
-                    saveToggle({ auto_reply_enabled: false });
-                  }
-                }} />
-              </div>
-              
-              {autoReply && (
-                <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-3">
-                  <div className="flex items-center justify-between mb-1">
-                    <Label className="text-sm">Confidence Threshold</Label>
-                    <span className="text-sm font-medium text-[#7C6FE0]">{Math.round(confidenceThreshold * 100)}%</span>
+                <div className="space-y-4 rounded-xl border p-4 bg-slate-50/30">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-[#1A1730]">Confidence Threshold</p>
+                      <p className="text-xs text-[#9490B8]">Minimum confidence needed to auto-send.</p>
+                    </div>
+                    <span className="text-sm font-bold text-primary">{Math.round(confidenceThreshold * 100)}%</span>
                   </div>
                   <Slider
                     value={[confidenceThreshold]}
@@ -386,349 +368,264 @@ export default function Instructions() {
                     min={0.5}
                     max={1}
                     step={0.05}
+                    disabled={!autoReply}
                     className="w-full"
                   />
-                  <p className="text-xs text-muted-foreground">
-                    Only auto-send when AI confidence exceeds this threshold
-                  </p>
+                  {!autoReply && <p className="text-[10px] text-amber-600 font-medium">Threshold ignored in Review Mode</p>}
                 </div>
-              )}
+             </div>
 
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-card-foreground">Escalate uncertain emails</p>
-                  <p className="text-xs text-muted-foreground">Queue emails with low confidence</p>
-                </div>
-                <Switch checked={escalateUncertain} onCheckedChange={(v) => { setEscalateUncertain(v); saveToggle({ escalate_unknown: v }); }} />
-              </div>
-            </CardContent>
-          </Card>
+             <div className="space-y-4">
+                <Label className="text-sm font-semibold">Category Specific Overrides</Label>
+                <CategoryThresholds globalThreshold={confidenceThreshold} />
+             </div>
 
-          {/* Greeting Response */}
-          <Card className="border border-border">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <MessageCircle className="h-4 w-4 text-primary" />
-                Greeting Response
-              </CardTitle>
-              <CardDescription>Auto-respond to simple greetings like "Hi" or "Hello".</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-card-foreground">Enable greeting response</p>
-                  <p className="text-xs text-muted-foreground">Automatically reply to simple greetings</p>
-                </div>
-                <Switch checked={greetingEnabled} onCheckedChange={(v) => { setGreetingEnabled(v); saveToggle({ greeting_response_enabled: v }); }} />
-              </div>
-              
-              {greetingEnabled && (
-                <div className="space-y-2">
-                  <Label>Greeting Template</Label>
-                  <Textarea
-                    rows={3}
-                    value={greetingTemplate}
-                    onChange={(e) => setGreetingTemplate(e.target.value)}
-                    placeholder="Your greeting response..."
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Sent for simple greetings (no knowledge base needed)
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Branding */}
-          <Card className="border border-border">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Image className="h-4 w-4 text-primary" />
-                Branding
-              </CardTitle>
-              <CardDescription>Add your logo to email replies.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="space-y-2">
-                <Label>Logo URL</Label>
-                <Input
-                  value={logoUrl}
-                  onChange={(e) => setLogoUrl(e.target.value)}
-                  placeholder="https://example.com/logo.png"
-                />
-              </div>
-              {logoUrl && (
-                <div className="rounded-lg border border-border bg-muted/30 p-3">
-                  <img
-                    src={logoUrl}
-                    alt="Logo preview"
-                    className="h-12 max-w-[200px] object-contain"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                  />
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Backup Email */}
-          <Card className="border border-border">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <ShieldAlert className="h-4 w-4 text-primary" />
-                Backup Email (Escalation)
-              </CardTitle>
-              <CardDescription>
-                When an urgent or uncertain email arrives, a notification will be sent to this address.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {backupEmail ? (
-                <div className="flex items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
-                  <Mail className="h-4 w-4 text-primary" />
-                  <span className="flex-1 text-sm font-medium text-foreground">{backupEmail}</span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setBackupEmailInput("");
-                      setShowBackupEmailConfirm(true);
-                    }}
-                  >
-                    Change
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-destructive hover:text-destructive"
-                    onClick={() => {
-                      setBackupEmail("");
-                      saveToggle({ backup_email: null });
-                      toast.success("Backup email removed");
-                    }}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <div className="flex gap-2">
-                    <Input
-                      type="email"
-                      value={backupEmailInput}
-                      onChange={(e) => setBackupEmailInput(e.target.value)}
-                      placeholder="e.g. manager@company.com"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && backupEmailInput.trim()) {
-                          setShowBackupEmailConfirm(true);
-                        }
-                      }}
-                    />
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        if (backupEmailInput.trim()) {
-                          setShowBackupEmailConfirm(true);
-                        } else {
-                          toast.error("Please enter an email address");
-                        }
-                      }}
-                    >
-                      Set
-                    </Button>
+             <div className="rounded-xl border p-4 bg-slate-50/30 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-white rounded-lg shadow-sm border text-primary">
+                    <ShieldCheck className="h-5 w-5" />
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    Urgent, doubtful, or escalated emails will trigger a notification to this address
-                  </p>
+                  <div>
+                    <p className="text-sm font-semibold text-[#1A1730]">Safety & Escalation</p>
+                    <p className="text-xs text-[#9490B8]">Handle uncertainty and critical emails.</p>
+                  </div>
                 </div>
-              )}
 
-              {/* Escalation Conditions */}
-              <div className="space-y-3">
-                <Label className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                  <ShieldAlert className="h-4 w-4 text-primary" />
-                  Escalation Conditions
-                </Label>
-                <p className="text-xs text-muted-foreground">
-                  Define when the backup email should be notified. The AI will check incoming emails against these conditions.
-                </p>
-                <div className="space-y-2">
-                  {escalationConditions.map((condition, i) => (
-                    <div key={i} className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2">
-                      <span className="flex-1 text-sm text-foreground">{condition}</span>
-                      <button
-                        onClick={() => setEscalationConditions(escalationConditions.filter((_, idx) => idx !== i))}
-                        className="text-muted-foreground hover:text-destructive"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
+                <div className="grid gap-6 md:grid-cols-2 border-t pt-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">Escalate uncertain emails</p>
+                      <p className="text-xs text-[#9490B8]">Queue emails below threshold for review.</p>
                     </div>
-                  ))}
-                  <div className="flex gap-2">
-                    <Input
-                      value={newCondition}
-                      onChange={(e) => setNewCondition(e.target.value)}
-                      placeholder="e.g. Email mentions 'urgent' or 'ASAP'"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && newCondition.trim()) {
-                          setEscalationConditions([...escalationConditions, newCondition.trim()]);
-                          setNewCondition("");
-                        }
-                      }}
-                    />
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => {
-                        if (newCondition.trim()) {
-                          setEscalationConditions([...escalationConditions, newCondition.trim()]);
-                          setNewCondition("");
-                        }
-                      }}
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
+                    <Switch checked={escalateUncertain} onCheckedChange={setEscalateUncertain} />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium uppercase text-[#9490B8]">Escalation Destination</Label>
+                    {backupEmail ? (
+                      <div className="flex items-center gap-2 rounded-lg border bg-white px-3 py-2 shadow-sm">
+                        <Mail className="h-4 w-4 text-primary" />
+                        <span className="flex-1 text-sm font-medium">{backupEmail}</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 text-primary"
+                          onClick={() => {
+                            setBackupEmailInput(backupEmail);
+                            setShowBackupEmailConfirm(true);
+                          }}
+                        >
+                          Change
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button 
+                        variant="outline" 
+                        className="w-full justify-start text-muted-foreground"
+                        onClick={() => setShowBackupEmailConfirm(true)}
+                      >
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add Backup Email
+                      </Button>
+                    )}
                   </div>
                 </div>
+             </div>
+          </div>
+        </InstructionSection>
+
+        {/* Tone & Branding */}
+        <InstructionSection 
+          id="tone-branding"
+          title="Tone, Style & Branding"
+          description="Customize the personality and visual identity of your AI's replies."
+          icon={<Palette className="h-5 w-5" />}
+        >
+          <div className="space-y-8 py-2">
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold">Writing Tone</Label>
+                <Select value={tone} onValueChange={(v) => setTone(v as any)}>
+                  <SelectTrigger className="bg-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="formal">Formal</SelectItem>
+                    <SelectItem value="professional">Professional</SelectItem>
+                    <SelectItem value="friendly">Friendly</SelectItem>
+                    <SelectItem value="concise">Concise</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-            </CardContent>
-          </Card>
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold">Reply Length</Label>
+                <Select value={replyLength} onValueChange={(v) => setReplyLength(v as any)}>
+                  <SelectTrigger className="bg-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="short">Short (1 paragraph)</SelectItem>
+                    <SelectItem value="medium">Medium (2 paragraphs)</SelectItem>
+                    <SelectItem value="long">Long (detailed)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
 
-          {/* Category Thresholds */}
-          <CategoryThresholds globalThreshold={confidenceThreshold} />
+            <div className="space-y-6 border-t pt-6">
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold">Email Signature</Label>
+                  <Textarea
+                    rows={4}
+                    value={signature}
+                    onChange={(e) => setSignature(e.target.value)}
+                    placeholder="Best regards,\nThe Support Team"
+                    className="bg-white"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold">Email Footer</Label>
+                  <Textarea
+                    rows={4}
+                    value={emailFooter}
+                    onChange={(e) => setEmailFooter(e.target.value)}
+                    placeholder="This was generated by AI..."
+                    className="bg-white"
+                  />
+                </div>
+              </div>
+            </div>
 
-          {/* Example Instructions */}
-          <Card className="border-primary/20 bg-primary/5">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Info className="h-4 w-4 text-primary" />
-                Example Instructions
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {examplePrompts.map((prompt, i) => (
-                <p
-                  key={i}
-                  className="cursor-pointer rounded-lg bg-card p-2 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                  onClick={() => {
-                    setLocalInstructions((prev) => prev + "\n\n" + prompt);
-                    toast.success("Added to instructions");
-                  }}
-                >
-                  "{prompt}"
-                </p>
-              ))}
-              <p className="pt-2 text-xs text-muted-foreground">
-                Click any example to add it to your instructions
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+            <div className="space-y-4 border-t pt-6">
+              <Label className="text-sm font-semibold">Branding</Label>
+              <div className="flex gap-4 items-start">
+                <div className="flex-1 space-y-2">
+                  <Input
+                    value={logoUrl}
+                    onChange={(e) => setLogoUrl(e.target.value)}
+                    placeholder="https://example.com/logo.png"
+                    className="bg-white"
+                  />
+                  <p className="text-xs text-[#9490B8]">URL to your company logo (PNG/JPG recommended).</p>
+                </div>
+                {logoUrl && (
+                  <div className="h-20 w-32 rounded-lg border bg-slate-50 flex items-center justify-center p-2 overflow-hidden shadow-inner">
+                    <img
+                      src={logoUrl}
+                      alt="Logo preview"
+                      className="max-h-full max-w-full object-contain"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </InstructionSection>
 
-      {/* Confidence threshold confirmation dialog */}
-      <AlertDialog open={showThresholdConfirm} onOpenChange={(open) => {
-        if (!open) setPendingThreshold(confidenceThreshold);
-        setShowThresholdConfirm(open);
-      }}>
+        {/* Greetings */}
+        <InstructionSection 
+          id="greetings"
+          title="Greeting Responses"
+          description="Configure how the AI handles simple greetings like 'Hi' or 'Hello'."
+          icon={<MessageCircle className="h-5 w-5" />}
+        >
+          <div className="space-y-6 py-2">
+             <div className="flex items-center justify-between rounded-xl border p-4 bg-slate-50/30">
+                <div>
+                  <p className="text-sm font-semibold text-[#1A1730]">Enable greeting response</p>
+                  <p className="text-xs text-[#9490B8]">Automatically reply to simple greetings without searching knowledge base.</p>
+                </div>
+                <Switch checked={greetingEnabled} onCheckedChange={setGreetingEnabled} />
+             </div>
+             
+             {greetingEnabled && (
+               <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                 <Label className="text-sm font-semibold">Greeting Template</Label>
+                 <Textarea
+                   rows={3}
+                   value={greetingTemplate}
+                   onChange={(e) => setGreetingTemplate(e.target.value)}
+                   placeholder="Hello! How can I help you today?"
+                   className="bg-white"
+                 />
+               </div>
+             )}
+          </div>
+        </InstructionSection>
+      </Accordion>
+
+      {/* Confirmation Dialogs */}
+      <AlertDialog open={showBackupEmailConfirm} onOpenChange={setShowBackupEmailConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Change Confidence Threshold?</AlertDialogTitle>
+            <AlertDialogTitle>Configure Backup Email</AlertDialogTitle>
             <AlertDialogDescription>
-              You're changing the auto-reply confidence threshold from {Math.round(confidenceThreshold * 100)}% to {Math.round(pendingThreshold * 100)}%. This affects which emails get auto-replied.
+              Critical alerts and escalations for <strong>all connected accounts</strong> will be sent to this address.
             </AlertDialogDescription>
+            <div className="mt-4">
+              <Input
+                value={backupEmailInput}
+                onChange={(e) => setBackupEmailInput(e.target.value)}
+                placeholder="email@example.com"
+              />
+            </div>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => {
-              setConfidenceThreshold(pendingThreshold);
-              saveToggle({ auto_reply_confidence_threshold: pendingThreshold });
-            }}>
-              Confirm Change
+            <AlertDialogAction
+              onClick={() => {
+                setBackupEmail(backupEmailInput);
+                setShowBackupEmailConfirm(false);
+              }}
+            >
+              Update Email
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Auto-reply confirmation dialog */}
       <AlertDialog open={showAutoReplyConfirm} onOpenChange={setShowAutoReplyConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Enable Auto-Reply?</AlertDialogTitle>
+            <AlertDialogTitle className="text-amber-600">Enable Auto-Reply?</AlertDialogTitle>
             <AlertDialogDescription>
-              When enabled, the AI will automatically send replies to incoming emails that meet the confidence threshold. Make sure your instructions and knowledge base are configured properly.
+              This will allow the AI to send replies automatically to <strong>all connected accounts</strong> when it meets the confidence threshold. This is a risky action that affects live customer communication.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-4 my-2">
-            <div className="flex items-center justify-between mb-2">
-              <Label className="text-sm">Confidence Threshold</Label>
-              <span className="text-sm font-medium text-primary">{Math.round(confidenceThreshold * 100)}%</span>
-            </div>
-            <Slider
-              value={[confidenceThreshold]}
-              onValueChange={([v]) => setConfidenceThreshold(v)}
-              min={0.5}
-              max={1}
-              step={0.05}
-              className="w-full"
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              Only auto-send replies when AI confidence is above this threshold
-            </p>
-          </div>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => {
-              setAutoReply(true);
-              saveToggle({ auto_reply_enabled: true, auto_reply_confidence_threshold: confidenceThreshold });
-            }}>
+            <AlertDialogCancel onClick={() => setAutoReply(false)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-amber-600 hover:bg-amber-700"
+              onClick={() => {
+                setAutoReply(true);
+                setShowAutoReplyConfirm(false);
+              }}
+            >
               Enable Auto-Reply
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Backup email confirmation dialog */}
-      <AlertDialog open={showBackupEmailConfirm} onOpenChange={setShowBackupEmailConfirm}>
+      <AlertDialog open={showThresholdConfirm} onOpenChange={setShowThresholdConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Backup Email</AlertDialogTitle>
+            <AlertDialogTitle>Change Confidence Threshold?</AlertDialogTitle>
             <AlertDialogDescription>
-              {backupEmail
-                ? `You're changing the backup email from "${backupEmail}" to a new address. Please enter and confirm the new email below.`
-                : "Urgent or doubtful emails will trigger a notification to this address. Please confirm the email is correct."}
+              Changing this affects <strong>all connected accounts</strong>. A lower threshold increases automation but carries higher risk of incorrect AI replies.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="space-y-3 my-2">
-            <div className="space-y-2">
-              <Label>Email Address</Label>
-              <Input
-                type="email"
-                value={backupEmailInput}
-                onChange={(e) => setBackupEmailInput(e.target.value)}
-                placeholder="Enter backup email address"
-              />
-            </div>
-            <div className="rounded-lg border border-border bg-muted/30 p-3">
-              <p className="text-xs text-muted-foreground">
-                <strong>When does this trigger?</strong> The system will send a notification to this email when it detects an urgent request, a complaint, or an email it's uncertain how to handle.
-              </p>
-            </div>
-          </div>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
-                const email = backupEmailInput.trim();
-                if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                  toast.error("Please enter a valid email address");
-                  return;
-                }
-                setBackupEmail(email);
-                saveToggle({ backup_email: email });
-                toast.success(`Backup email set to ${email}`);
+                setConfidenceThreshold(pendingThreshold);
+                setShowThresholdConfirm(false);
               }}
             >
-              Confirm Email
+              Confirm Change
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

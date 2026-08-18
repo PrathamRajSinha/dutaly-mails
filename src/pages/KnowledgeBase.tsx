@@ -1,23 +1,16 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import {
   Plus,
   Search,
-  FileText,
-  MessageSquare,
-  File,
-  Trash2,
-  Edit,
   Loader2,
   Upload,
-  FileImage,
-  FileSpreadsheet,
-  FileType2,
-  AlertTriangle,
-  Sparkles,
+  AlertCircle,
+  FileText,
+  Filter,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
@@ -44,29 +37,28 @@ import { toast } from "sonner";
 import { useKnowledgeBase, type KnowledgeEntry } from "@/hooks/useKnowledgeBase";
 import { useKbGaps, type GroupedGap } from "@/hooks/useKbGaps";
 import { useQueryClient } from "@tanstack/react-query";
-
-const typeConfig = {
-  faq: { icon: MessageSquare, label: "FAQ", color: "bg-[#E6F1FB] text-[#185FA5]", badgeClass: "bg-[#E6F1FB] text-[#185FA5] rounded-full" },
-  snippet: { icon: FileText, label: "Snippet", color: "bg-[#EBE9FF] text-[#534AB7]", badgeClass: "bg-[#EBE9FF] text-[#534AB7] rounded-full" },
-  document: { icon: File, label: "Document", color: "bg-[#FAEEDA] text-[#854F0B]", badgeClass: "bg-[#FAEEDA] text-[#854F0B] rounded-full" },
-  policy: { icon: FileText, label: "Policy", color: "bg-[#E1F5EE] text-[#0F6E56]", badgeClass: "bg-[#E1F5EE] text-[#0F6E56] rounded-full" },
-};
-
-const fileTypeIcons: Record<string, typeof FileText> = {
-  pdf: FileType2,
-  docx: FileText,
-  pptx: FileSpreadsheet,
-  image: FileImage,
-  txt: FileText,
-  text: FileText,
-};
+import { KnowledgeBaseEntryCard } from "@/components/knowledge-base/KnowledgeBaseEntryCard";
+import { KnowledgeBaseSkeleton } from "@/components/knowledge-base/KnowledgeBaseSkeleton";
+import { BulkActionBar } from "@/components/knowledge-base/BulkActionBar";
+import { differenceInDays } from "date-fns";
 
 const categories = ["All", "faq", "snippet", "document", "policy"];
-
 const ACCEPTED_FILE_TYPES = ".pdf,.doc,.docx,.ppt,.pptx,.txt,.md,.jpg,.jpeg,.png,.gif,.webp";
 
+// Helper for similarity detection
+function getSimilarity(s1: string, s2: string) {
+  const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(w => w.length > 2);
+  const words1 = new Set(normalize(s1));
+  const words2 = new Set(normalize(s2));
+  if (words1.size === 0 || words2.size === 0) return 0;
+  
+  const intersection = new Set([...words1].filter(w => words2.has(w)));
+  const union = new Set([...words1, ...words2]);
+  return intersection.size / union.size;
+}
+
 export default function KnowledgeBase() {
-  const { entries, isLoading, createEntry, updateEntry, deleteEntry } = useKnowledgeBase();
+  const { entries, isLoading, error, createEntry, updateEntry, deleteEntry } = useKnowledgeBase();
   const { grouped: gapGroups, totalGaps, resolveGaps } = useKbGaps();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
@@ -78,6 +70,11 @@ export default function KnowledgeBase() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [mainTab, setMainTab] = useState<"entries" | "gaps">("entries");
   const [generatingTopic, setGeneratingTopic] = useState<string | null>(null);
+  
+  // Selection state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isDeletingBulk, setIsDeletingBulk] = useState(false);
+
   const [newEntry, setNewEntry] = useState({
     category: "faq" as KnowledgeEntry["category"],
     title: "",
@@ -87,14 +84,66 @@ export default function KnowledgeBase() {
   const [editingEntry, setEditingEntry] = useState<KnowledgeEntry | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
-  const filteredEntries = entries.filter((entry) => {
-    const matchesSearch =
-      entry.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      entry.content.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory =
-      selectedCategory === "All" || entry.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  const filteredEntries = useMemo(() => {
+    return entries.filter((entry) => {
+      const matchesSearch =
+        entry.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        entry.content.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory =
+        selectedCategory === "All" || entry.category === selectedCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [entries, searchQuery, selectedCategory]);
+
+  // Derived hints
+  const entryHints = useMemo(() => {
+    const hints: Record<string, { stale: boolean; duplicate: boolean }> = {};
+    const now = new Date();
+
+    entries.forEach((entry, idx) => {
+      const stale = differenceInDays(now, new Date(entry.updated_at)) > 30;
+      let duplicate = false;
+      
+      // Compare with other entries for duplicates
+      for (let i = 0; i < entries.length; i++) {
+        if (i === idx) continue;
+        const similarity = getSimilarity(entry.title, entries[i].title);
+        if (similarity > 0.7) {
+          duplicate = true;
+          break;
+        }
+      }
+      
+      hints[entry.id] = { stale, duplicate };
+    });
+    return hints;
+  }, [entries]);
+
+  const toggleSelection = (id: string) => {
+    const newSelected = new Set(selectedIds);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedIds(newSelected);
+  };
+
+  const handleBulkDelete = async () => {
+    setIsDeletingBulk(true);
+    try {
+      const idsToDelete = Array.from(selectedIds);
+      for (const id of idsToDelete) {
+        await deleteEntry.mutateAsync(id);
+      }
+      setSelectedIds(new Set());
+      toast.success(`Deleted ${idsToDelete.length} entries`);
+    } catch (error) {
+      toast.error("Failed to delete some entries");
+    } finally {
+      setIsDeletingBulk(false);
+    }
+  };
 
   const handleAddEntry = async () => {
     if (!newEntry.title || !newEntry.content) return;
@@ -206,7 +255,6 @@ export default function KnowledgeBase() {
         await resolveGaps.mutateAsync(gap.ids);
         toast.success("KB entry created and gap resolved");
       } else {
-        // Fallback: open add dialog pre-filled
         setNewEntry({
           category: "faq",
           title: gap.detected_topic,
@@ -230,29 +278,21 @@ export default function KnowledgeBase() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex h-full items-center justify-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
   return (
-    <div className="p-8">
+    <div className="p-8 max-w-7xl mx-auto min-h-screen">
       {/* Header */}
-      <div className="mb-6 flex items-start justify-between">
+      <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-[20px] font-medium text-[#1A1730]">Knowledge Base</h1>
-          <p className="mt-0.5 text-[13px] text-[#9490B8]">
-            Add information the AI should use when replying to emails
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Knowledge Base</h1>
+          <p className="mt-1 text-sm text-slate-500 max-w-md">
+            The source of truth for your AI. Add FAQs, documents, and policies to help the AI provide accurate responses.
           </p>
         </div>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
+            <Button className="shadow-sm hover:shadow-md transition-shadow">
               <Plus className="mr-2 h-4 w-4" />
-              Add Entry
+              Add Knowledge Entry
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-lg">
@@ -322,22 +362,22 @@ export default function KnowledgeBase() {
                   <div
                     className={cn(
                       "border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors",
-                      selectedFile ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                      selectedFile ? "border-primary bg-primary/5" : "border-slate-200 hover:border-primary/50"
                     )}
                     onClick={() => fileInputRef.current?.click()}
                   >
                     <input ref={fileInputRef} type="file" accept={ACCEPTED_FILE_TYPES} onChange={handleFileSelect} className="hidden" />
                     {selectedFile ? (
                       <div className="flex items-center justify-center gap-2">
-                        <File className="h-5 w-5 text-primary" />
+                        <FileText className="h-5 w-5 text-primary" />
                         <span className="text-sm font-medium">{selectedFile.name}</span>
                         <Badge variant="secondary" className="text-xs">{(selectedFile.size / 1024).toFixed(1)} KB</Badge>
                       </div>
                     ) : (
                       <div>
-                        <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                        <p className="text-sm text-muted-foreground">Click to upload or drag and drop</p>
-                        <p className="text-xs text-muted-foreground mt-1">PDF, Word, PowerPoint, Text, Images</p>
+                        <Upload className="h-8 w-8 mx-auto text-slate-400 mb-2" />
+                        <p className="text-sm text-slate-600">Click to upload or drag and drop</p>
+                        <p className="text-xs text-slate-400 mt-1">PDF, Word, PowerPoint, Text, Images</p>
                       </div>
                     )}
                   </div>
@@ -355,164 +395,149 @@ export default function KnowledgeBase() {
         </Dialog>
       </div>
 
-      {/* Main Tabs: Entries vs Gaps */}
+      {/* Main Tabs */}
       <div className="mb-6">
-        <div className="flex gap-1 border-b border-border">
-          <button
-            className={cn(
-              "px-4 py-2.5 text-sm font-medium transition-colors",
-              mainTab === "entries"
-                ? "border-b-2 border-primary text-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-            onClick={() => setMainTab("entries")}
-          >
-            Entries ({entries.length})
-          </button>
-          <button
-            className={cn(
-              "px-4 py-2.5 text-sm font-medium transition-colors flex items-center gap-1.5",
-              mainTab === "gaps"
-                ? "border-b-2 border-[#BA7517] text-[#BA7517]"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-            onClick={() => setMainTab("gaps")}
-          >
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#EF9F27]" />
-            Gaps Detected
-            {totalGaps > 0 && (
-              <Badge variant="secondary" className="h-5 px-1.5 text-[10px] bg-[#FAEEDA] text-[#854F0B] border-none">
-                {totalGaps}
-              </Badge>
-            )}
-          </button>
-        </div>
+        <Tabs value={mainTab} onValueChange={(v) => setMainTab(v as "entries" | "gaps")}>
+          <TabsList className="bg-slate-100 p-1">
+            <TabsTrigger value="entries" className="px-6">
+              Entries ({entries.length})
+            </TabsTrigger>
+            <TabsTrigger value="gaps" className="px-6 flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-orange-500 animate-pulse" />
+              Gaps Detected
+              {totalGaps > 0 && (
+                <Badge variant="secondary" className="h-5 px-1.5 text-[10px] bg-orange-100 text-orange-700 border-none ml-1">
+                  {totalGaps}
+                </Badge>
+              )}
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
       {mainTab === "entries" ? (
         <>
-          {/* Search and Filter */}
-          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center">
+          {/* Filters & Search */}
+          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Search knowledge base..." className="pl-10 border-[rgba(124,111,224,0.2)] focus-visible:ring-primary focus-visible:border-primary" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <Input 
+                placeholder="Search knowledge by title or content..." 
+                className="pl-10 border-slate-200 focus-visible:ring-primary h-10" 
+                value={searchQuery} 
+                onChange={(e) => setSearchQuery(e.target.value)} 
+              />
             </div>
-            <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0">
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+              <div className="flex items-center gap-2 pr-2 border-r border-slate-100 mr-2">
+                <Filter className="h-4 w-4 text-slate-400" />
+                <span className="text-xs font-medium text-slate-500 whitespace-nowrap">Filter by type:</span>
+              </div>
               {categories.map((cat) => (
-                <Button key={cat} variant={selectedCategory === cat ? "default" : "outline"} size="sm" onClick={() => setSelectedCategory(cat)} className="capitalize">
+                <Button 
+                  key={cat} 
+                  variant={selectedCategory === cat ? "default" : "ghost"} 
+                  size="sm" 
+                  onClick={() => setSelectedCategory(cat)} 
+                  className={cn(
+                    "capitalize text-xs rounded-full h-8 px-4",
+                    selectedCategory !== cat && "text-slate-500 hover:bg-slate-100"
+                  )}
+                >
                   {cat}
                 </Button>
               ))}
             </div>
           </div>
 
-          {/* Entries Grid */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredEntries.map((entry) => {
-              const config = typeConfig[entry.category];
-              const FileIcon = entry.file_type ? (fileTypeIcons[entry.file_type] || File) : null;
-              const Icon = FileIcon || config?.icon || FileText;
-              return (
-                <Card key={entry.id} className="group border border-[rgba(124,111,224,0.1)] transition-all hover:border-[rgba(124,111,224,0.3)] hover:bg-[#FDFCFF]">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className={cn("rounded-lg p-2", config?.color || "bg-muted")}>
-                          <Icon className="h-4 w-4" />
-                        </div>
-                        <Badge className={cn("text-xs capitalize border-none", config?.badgeClass)}>{entry.category}</Badge>
-                        {entry.file_name && <Badge variant="outline" className="text-xs">{entry.file_type?.toUpperCase()}</Badge>}
-                      </div>
-                      <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEditEntry(entry)}>
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDeleteEntry(entry.id)} disabled={deleteEntry.isPending}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                    <CardTitle className="mt-3 text-base">{entry.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="line-clamp-3 text-sm text-muted-foreground">{entry.content}</p>
-                    {entry.file_name && (
-                      <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
-                        <File className="h-3 w-3" />
-                        <span className="truncate">{entry.file_name}</span>
-                      </div>
-                    )}
-                    <p className="mt-3 text-xs text-muted-foreground">Added {new Date(entry.created_at).toLocaleDateString()}</p>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-
-          {filteredEntries.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <FileText className="h-12 w-12 text-muted-foreground/50" />
-              <h3 className="mt-4 text-lg font-medium text-foreground">No entries found</h3>
-              <p className="mt-1 text-muted-foreground">
-                {searchQuery ? "Try adjusting your search" : "Add your first knowledge entry to get started"}
+          {isLoading ? (
+            <KnowledgeBaseSkeleton />
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-2xl border-2 border-dashed border-slate-100">
+              <AlertCircle className="h-10 w-10 text-red-500 mb-4" />
+              <h3 className="text-lg font-semibold text-slate-900">Failed to load knowledge base</h3>
+              <p className="text-slate-500 mt-2">There was an error fetching your data. Please try again.</p>
+              <Button variant="outline" className="mt-6" onClick={() => window.location.reload()}>Retry</Button>
+            </div>
+          ) : filteredEntries.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-2xl border-2 border-dashed border-slate-100">
+              <div className="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+                <FileText className="h-8 w-8 text-slate-300" />
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900">
+                {searchQuery ? "No entries found matching your search" : "Your knowledge base is empty"}
+              </h3>
+              <p className="text-slate-500 mt-2 max-w-sm">
+                {searchQuery ? "Try adjusting your filters or search terms." : "Start by adding common questions, snippets, or documents that your AI can learn from."}
               </p>
+              {!searchQuery && (
+                <Button className="mt-6" onClick={() => setIsAddDialogOpen(true)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add First Entry
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredEntries.map((entry) => (
+                <KnowledgeBaseEntryCard
+                  key={entry.id}
+                  entry={entry}
+                  onEdit={handleEditEntry}
+                  onDelete={handleDeleteEntry}
+                  selected={selectedIds.has(entry.id)}
+                  onToggleSelection={toggleSelection}
+                  isStale={entryHints[entry.id]?.stale}
+                  isDuplicate={entryHints[entry.id]?.duplicate}
+                />
+              ))}
             </div>
           )}
         </>
       ) : (
-        /* Gaps Detected Tab */
-        <div className="space-y-4">
-          {totalGaps > 0 && (
-            <Card className="border-primary/20 bg-primary/5">
-              <CardContent className="p-4">
-                <p className="text-sm text-foreground">
-                  <strong>Resolving these gaps could auto-handle ~{Math.round(totalGaps * 1.5)} more emails per month.</strong>{" "}
-                  Add KB entries for the topics below to improve your AI's resolution rate.
-                </p>
-              </CardContent>
-            </Card>
-          )}
-
+        /* Gaps View remains similar but styled */
+        <div className="space-y-6">
           {gapGroups.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <AlertTriangle className="h-12 w-12 text-muted-foreground/50" />
-              <h3 className="mt-4 text-lg font-medium text-foreground">No gaps detected</h3>
-              <p className="mt-1 text-muted-foreground">
-                Your knowledge base is covering all escalated topics. Great job!
-              </p>
+            <div className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-2xl border-2 border-dashed border-slate-100">
+              <div className="h-16 w-16 bg-green-50 rounded-full flex items-center justify-center mb-4 text-green-500">
+                <Plus className="h-8 w-8" />
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900">No knowledge gaps detected</h3>
+              <p className="text-slate-500 mt-2">The AI has all the information it needs for recent tickets!</p>
             </div>
           ) : (
-            <div className="space-y-3">
-              {gapGroups.map((gap) => (
-                <Card key={gap.detected_topic} className="border border-border">
-                  <CardContent className="flex items-center justify-between p-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="destructive" className="text-xs shrink-0">
-                          {gap.count} escalated
-                        </Badge>
-                        {gap.category && (
-                          <Badge variant="outline" className="text-xs capitalize shrink-0">
-                            {gap.category.replace("_", " ")}
+            <div className="grid gap-6">
+              {gapGroups.map((group) => (
+                <Card key={group.detected_topic} className="overflow-hidden border-slate-200">
+                  <CardContent className="p-0">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between p-6 gap-6">
+                      <div className="flex-1 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-lg font-bold text-slate-900">{group.detected_topic}</h3>
+                          <Badge variant="secondary" className="bg-orange-100 text-orange-700 border-none">
+                            {group.count} occurrences
                           </Badge>
-                        )}
+                        </div>
+                        <p className="text-slate-600 text-sm">{group.example_question}</p>
                       </div>
-                      <p className="mt-1 text-sm font-medium text-foreground">
-                        {gap.count} escalated email{gap.count !== 1 ? "s" : ""} about: <span className="text-primary">{gap.detected_topic}</span>
-                      </p>
+                      <div className="flex items-center gap-3">
+                        <Button 
+                          onClick={() => handleGenerateFromGap(group)} 
+                          disabled={generatingTopic === group.detected_topic}
+                          className="bg-slate-900 text-white hover:bg-slate-800"
+                        >
+                          {generatingTopic === group.detected_topic ? (
+                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                          ) : (
+                            <Plus className="h-4 w-4 mr-2" />
+                          )}
+                          Generate Entry
+                        </Button>
+                        <Button variant="outline" onClick={() => resolveGaps.mutate(group.ids)}>
+                          Dismiss
+                        </Button>
+                      </div>
                     </div>
-                    <Button
-                      size="sm"
-                      onClick={() => handleGenerateFromGap(gap)}
-                      disabled={generatingTopic === gap.detected_topic || resolveGaps.isPending}
-                    >
-                      {generatingTopic === gap.detected_topic ? (
-                        <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                      ) : (
-                        <Sparkles className="mr-1.5 h-3.5 w-3.5" />
-                      )}
-                      Generate Entry
-                    </Button>
                   </CardContent>
                 </Card>
               ))}
@@ -521,15 +546,22 @@ export default function KnowledgeBase() {
         </div>
       )}
 
+      {/* Bulk Action Bar */}
+      <BulkActionBar 
+        selectedCount={selectedIds.size}
+        onClear={() => setSelectedIds(new Set())}
+        onDelete={handleBulkDelete}
+        isDeleting={isDeletingBulk}
+      />
+
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Edit Knowledge Entry</DialogTitle>
-            <DialogDescription>Update this knowledge base entry.</DialogDescription>
           </DialogHeader>
           {editingEntry && (
-            <div className="space-y-4">
+            <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label>Type</Label>
                 <Select value={editingEntry.category} onValueChange={(v) => setEditingEntry({ ...editingEntry, category: v as KnowledgeEntry["category"] })}>
@@ -548,17 +580,17 @@ export default function KnowledgeBase() {
               </div>
               <div className="space-y-2">
                 <Label>Content</Label>
-                <Textarea rows={5} value={editingEntry.content} onChange={(e) => setEditingEntry({ ...editingEntry, content: e.target.value })} />
+                <Textarea rows={8} value={editingEntry.content} onChange={(e) => setEditingEntry({ ...editingEntry, content: e.target.value })} />
               </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
-                <Button onClick={handleSaveEdit} disabled={updateEntry.isPending}>
-                  {updateEntry.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Save Changes
-                </Button>
-              </DialogFooter>
             </div>
           )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleSaveEdit} disabled={updateEntry.isPending}>
+              {updateEntry.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Save Changes
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

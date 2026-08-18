@@ -5,7 +5,6 @@ import {
   X,
   CalendarIcon,
   Check,
-  ChevronDown,
   RotateCcw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -198,7 +197,7 @@ export function TriageFilterBar({
                   {['positive', 'neutral', 'negative'].map((s) => (
                     <CommandItem
                       key={s}
-                      onSelect={() => setSingleValue("sentiment", s)}
+                      onSelect={() => setSingleValue("sentiment", s as any)}
                     >
                       <div className={cn("mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary", filters.sentiment === s ? "bg-primary text-primary-foreground" : "opacity-50")}>
                         {filters.sentiment === s && <Check className="h-3 w-3" />}
@@ -215,7 +214,7 @@ export function TriageFilterBar({
                       {['breached', 'due_soon', 'on_track'].map((s) => (
                         <CommandItem
                           key={s}
-                          onSelect={() => setSingleValue("slaState", s)}
+                          onSelect={() => setSingleValue("slaState", s as any)}
                         >
                           <div className={cn("mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary", filters.slaState === s ? "bg-primary text-primary-foreground" : "opacity-50")}>
                             {filters.slaState === s && <Check className="h-3 w-3" />}
@@ -335,10 +334,10 @@ export function TriageFilterBar({
               </button>
             </Badge>
           )}
-          {filters.dateRange && (
+          {filters.dateRange && filters.dateRange.from && (
             <Badge variant="secondary" className="h-6 gap-1 pr-1">
-              Date: {format(filters.dateRange.from!, "MMM dd")}
-              {filters.dateRange.to ? ` – ${format(filters.dateRange.to, "MMM dd")}` : ""}
+              Date: {format(filters.dateRange.from, "MMM dd")}
+              {filters.dateRange.to && ` - ${format(filters.dateRange.to, "MMM dd")}`}
               <button onClick={() => removeFilter("dateRange")} className="ml-1 rounded-full p-0.5 hover:bg-muted">
                 <X className="h-3 w-3" />
               </button>

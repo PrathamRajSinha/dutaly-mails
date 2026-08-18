@@ -18,7 +18,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { useInstructionRules } from "@/hooks/useInstructionRules";
+import { useInstructionRules, InstructionRule } from "@/hooks/useInstructionRules";
 
 export function InstructionBuilder() {
   const { rules, addRule, updateRule, deleteRule, isLoading } = useInstructionRules();
@@ -148,7 +148,7 @@ export function InstructionBuilder() {
   );
 }
 
-function RuleItem({ rule, onUpdate, onDelete }: { rule: any, onUpdate: any, onDelete: any }) {
+function RuleItem({ rule, onUpdate, onDelete }: { rule: InstructionRule, onUpdate: (updates: Partial<InstructionRule> & { id: string }) => void, onDelete: (id: string) => void }) {
   return (
     <div
       className={cn(
