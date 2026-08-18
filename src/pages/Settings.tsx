@@ -941,14 +941,6 @@ export default function Settings() {
                 </Badge>
               </div>
 
-              <div className="space-y-2">
-                <Button variant="outline" size="sm" disabled aria-disabled="true">
-                  Notify me when available
-                </Button>
-                <p className="text-xs text-muted-foreground">
-                  This button is a placeholder and does not submit anything.
-                </p>
-              </div>
             </CardContent>
           </Card>
         </TabsContent>
