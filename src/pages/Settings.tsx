@@ -471,7 +471,6 @@ export default function Settings() {
   const { session } = useAuth();
   const { accounts, isLoading, disconnectAccount } = useEmailAccounts();
   const { data: slaSettings, isLoading: slaLoading, update: updateSla } = useSlaSettings();
-  const { data: integrations, isLoading: integrationsLoading, addIntegration, updateIntegration, deleteIntegration } = useIntegrations();
   const [searchParams, setSearchParams] = useSearchParams();
   const [newWhitelistEmail, setNewWhitelistEmail] = useState("");
   const [newBlacklistEmail, setNewBlacklistEmail] = useState("");
@@ -482,11 +481,6 @@ export default function Settings() {
   const [slaFirstResponse, setSlaFirstResponse] = useState(4);
   const [slaResolution, setSlaResolution] = useState(24);
 
-  // New integration form state
-  const [newIntProvider, setNewIntProvider] = useState<"webhook" | "slack">("webhook");
-  const [newIntUrl, setNewIntUrl] = useState("");
-  const [newIntSecret, setNewIntSecret] = useState("");
-  const [newIntEvents, setNewIntEvents] = useState<string[]>([]);
   
   // Notification settings
   const [emailNotifications, setEmailNotifications] = useState(true);
