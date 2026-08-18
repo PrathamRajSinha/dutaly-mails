@@ -295,7 +295,7 @@ function TicketsView({ searchQuery, onSearchChange }: { searchQuery: string; onS
     { value: "pending", label: "Pending", icon: <Clock className="h-4 w-4" />, count: tickets?.filter(t => t.status === "pending").length },
     { value: "resolved", label: "Resolutions", icon: <CheckCircle2 className="h-4 w-4" /> },
     { value: "closed", label: "Closed", icon: <XCircle className="h-4 w-4" /> },
-    { value: "auto_sent", label: "Auto-Sent Replies", icon: <Send className="h-4 w-4" /> },
+    { value: "auto_sent", label: "Auto-Sent Replies Replies", icon: <Send className="h-4 w-4" /> },
   ];
 
   const handleFlagWrong = async (entry: { customer_email: string; ticket_id: string | null }) => {

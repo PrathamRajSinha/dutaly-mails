@@ -31,12 +31,12 @@ import { formatDistanceToNow, format } from "date-fns";
 
 type TabValue = TicketStatus | "all" | "auto_sent";
 const statusTabs: { value: TabValue; label: string; icon: React.ReactNode }[] = [
-  { value: "all", label: "All", icon: null },
-  { value: "open", label: "Open", icon: <AlertCircle className="h-3.5 w-3.5" /> },
+  { value: "all", label: "All Tickets", icon: null },
+  { value: "open", label: "Open Tickets", icon: <AlertCircle className="h-3.5 w-3.5" /> },
   { value: "pending", label: "Pending", icon: <Clock className="h-3.5 w-3.5" /> },
   { value: "resolved", label: "Resolutions", icon: <CheckCircle2 className="h-3.5 w-3.5" /> },
   { value: "closed", label: "Closed", icon: <XCircle className="h-3.5 w-3.5" /> },
-  { value: "auto_sent", label: "Auto-Sent Replies", icon: <Send className="h-3.5 w-3.5" /> },
+  { value: "auto_sent", label: "Auto-Sent Replies Replies", icon: <Send className="h-3.5 w-3.5" /> },
 ];
 
 const priorityColors: Record<string, string> = {
@@ -120,7 +120,7 @@ export default function Tickets() {
     }
   };
 
-  // Auto-Sent audit view
+  // Auto-Sent Replies audit view
   if (activeTab === "auto_sent") {
     return (
       <div className="flex h-[calc(100vh-2rem)] overflow-hidden rounded-lg border border-border bg-card">

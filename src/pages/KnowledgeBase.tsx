@@ -518,7 +518,7 @@ export default function KnowledgeBase() {
                             {group.count} occurrences
                           </Badge>
                         </div>
-                        <p className="text-slate-600 text-sm">{group.example_question}</p>
+                        <p className="text-slate-600 text-sm">{group.category ?? "Uncategorised topic"}</p>
                       </div>
                       <div className="flex items-center gap-3">
                         <Button 
