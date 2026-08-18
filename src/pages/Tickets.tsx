@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
 import { TicketDetailPanel } from "@/components/tickets/TicketDetailPanel";
+import { TriageFilterBar, type FilterState } from "@/components/inbox/TriageFilterBar";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -30,12 +31,12 @@ import { formatDistanceToNow, format } from "date-fns";
 
 type TabValue = TicketStatus | "all" | "auto_sent";
 const statusTabs: { value: TabValue; label: string; icon: React.ReactNode }[] = [
-  { value: "all", label: "All", icon: null },
-  { value: "open", label: "Open", icon: <AlertCircle className="h-3.5 w-3.5" /> },
+  { value: "all", label: "All Tickets", icon: null },
+  { value: "open", label: "Open Tickets", icon: <AlertCircle className="h-3.5 w-3.5" /> },
   { value: "pending", label: "Pending", icon: <Clock className="h-3.5 w-3.5" /> },
-  { value: "resolved", label: "Resolved", icon: <CheckCircle2 className="h-3.5 w-3.5" /> },
+  { value: "resolved", label: "Resolutions", icon: <CheckCircle2 className="h-3.5 w-3.5" /> },
   { value: "closed", label: "Closed", icon: <XCircle className="h-3.5 w-3.5" /> },
-  { value: "auto_sent", label: "Auto-Sent", icon: <Send className="h-3.5 w-3.5" /> },
+  { value: "auto_sent", label: "Auto-Sent Replies Replies", icon: <Send className="h-3.5 w-3.5" /> },
 ];
 
 const priorityColors: Record<string, string> = {
@@ -56,6 +57,17 @@ export default function Tickets() {
   const [activeTab, setActiveTab] = useState<TabValue>("all");
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const [filters, setFilters] = useState<FilterState>({
+    accountIds: [],
+    statuses: [],
+    categories: [],
+    priorities: [],
+    sentiment: null,
+    slaState: null,
+    dateRange: null,
+  });
+
   const [angryExpanded, setAngryExpanded] = useState(true);
   const statusFilter = activeTab === "all" || activeTab === "auto_sent" ? undefined : activeTab;
   const { data: tickets, isLoading } = useTickets(statusFilter);
@@ -108,7 +120,7 @@ export default function Tickets() {
     }
   };
 
-  // Auto-Sent audit view
+  // Auto-Sent Replies audit view
   if (activeTab === "auto_sent") {
     return (
       <div className="flex h-[calc(100vh-2rem)] overflow-hidden rounded-lg border border-border bg-card">
@@ -120,7 +132,7 @@ export default function Tickets() {
               {statusTabs.map((tab) => (
                 <button
                   key={tab.value}
-                  onClick={() => setActiveTab(tab.value as any)}
+                  onClick={() => setActiveTab(tab.value as TabValue)}
                   className={cn(
                     "flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium whitespace-nowrap transition-colors",
                     activeTab === tab.value
@@ -179,10 +191,10 @@ export default function Tickets() {
         {/* List header */}
         <div className="border-b border-border px-4 py-3 space-y-3">
           <div className="flex items-center gap-2">
-            <h1 className="text-lg font-semibold text-foreground">Customer Inbox</h1>
+            <h1 className="text-lg font-semibold text-foreground">Tickets</h1>
             {pendingCount > 0 && (
               <Badge className="bg-destructive/10 text-destructive text-xs h-5 px-1.5">
-                {pendingCount} to review
+                {pendingCount} emails needing review
               </Badge>
             )}
           </div>
@@ -199,7 +211,7 @@ export default function Tickets() {
             {statusTabs.map((tab) => (
               <button
                 key={tab.value}
-                onClick={() => setActiveTab(tab.value as any)}
+                onClick={() => setActiveTab(tab.value as TabValue)}
                 className={cn(
                   "flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium whitespace-nowrap transition-colors",
                   activeTab === tab.value

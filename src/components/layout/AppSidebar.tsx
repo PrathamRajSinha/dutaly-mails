@@ -58,7 +58,7 @@ export function AppSidebar() {
 
   return (
     <aside
-      className="flex h-screen shrink-0 flex-col transition-[width] duration-200"
+      className="flex h-dvh shrink-0 flex-col transition-[width] duration-200"
       style={{ backgroundColor: '#0A0A0F', width }}
     >
       {/* Logo + collapse */}

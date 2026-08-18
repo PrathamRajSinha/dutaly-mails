@@ -67,6 +67,7 @@ import { TemplatePickerDialog } from "@/components/email-templates/TemplatePicke
 import { type EmailTemplate } from "@/hooks/useEmailTemplates";
 import { replaceVariables, renderEmailHtml } from "@/lib/emailHtml";
 import { TicketDetailPanel } from "@/components/tickets/TicketDetailPanel";
+import { TriageFilterBar, type FilterState } from "@/components/inbox/TriageFilterBar";
 // ─── Helpers ────────────────────────────────────────────────
 const getConfidenceColor = (confidence: number | null) => {
   if (!confidence) return "text-muted-foreground bg-muted";
@@ -272,6 +273,17 @@ function TicketsView({ searchQuery, onSearchChange }: { searchQuery: string; onS
   const [activeTab, setActiveTab] = useState<TicketTabValue>("all");
   const [expandedTicketId, setExpandedTicketId] = useState<string | null>(null);
   const statusFilter = activeTab === "all" || activeTab === "auto_sent" ? undefined : activeTab;
+
+  const [filters, setFilters] = useState<FilterState>({
+    accountIds: [],
+    statuses: [],
+    categories: [],
+    priorities: [],
+    sentiment: null,
+    slaState: null,
+    dateRange: null,
+  });
+
   const { data: tickets, isLoading } = useTickets(statusFilter);
   const { pendingCount } = useEmailQueue();
   const { data: autoSentLogs = [] } = useAutoSentAudit();
@@ -281,9 +293,9 @@ function TicketsView({ searchQuery, onSearchChange }: { searchQuery: string; onS
     { value: "all", label: "All", icon: <Eye className="h-4 w-4" />, count: tickets?.length },
     { value: "open", label: "Open", icon: <AlertCircle className="h-4 w-4" />, count: tickets?.filter(t => t.status === "open").length },
     { value: "pending", label: "Pending", icon: <Clock className="h-4 w-4" />, count: tickets?.filter(t => t.status === "pending").length },
-    { value: "resolved", label: "Resolved", icon: <CheckCircle2 className="h-4 w-4" /> },
+    { value: "resolved", label: "Resolutions", icon: <CheckCircle2 className="h-4 w-4" /> },
     { value: "closed", label: "Closed", icon: <XCircle className="h-4 w-4" /> },
-    { value: "auto_sent", label: "Auto-Sent", icon: <Send className="h-4 w-4" /> },
+    { value: "auto_sent", label: "Auto-Sent Replies Replies", icon: <Send className="h-4 w-4" /> },
   ];
 
   const handleFlagWrong = async (entry: { customer_email: string; ticket_id: string | null }) => {
