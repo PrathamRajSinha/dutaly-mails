@@ -997,7 +997,7 @@ export default function Settings() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{newIntProvider === "slack" ? "Slack Incoming Webhook URL" : "Webhook URL"}</Label>
+                  <div className="flex items-center justify-between"><Label>{newIntProvider === "slack" ? "Slack Incoming Webhook URL" : "Webhook URL"}</Label><ConfigStatus type={newIntProvider} value={newIntUrl} /></div>
                   <Input
                     placeholder={newIntProvider === "slack" ? "https://hooks.slack.com/services/..." : "https://your-api.com/webhook"}
                     value={newIntUrl}
