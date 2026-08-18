@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { EmailTemplateInput } from "@/hooks/useEmailTemplates";
 import { renderEmailHtml } from "@/lib/emailHtml";
 import { Badge } from "@/components/ui/badge";
-import { Info, Type, Palette, Layout, MousePointer2 } from "lucide-react";
+import { Info, Type, Palette, Layout, MousePointer2, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface TemplateEditorProps {

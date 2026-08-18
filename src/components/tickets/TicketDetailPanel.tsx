@@ -82,9 +82,9 @@ function SlaCountdown({ slaDueAt }: { slaDueAt: string | null }) {
   const overdue = isPast(due);
   
   return (
-    <div className={cn("flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium animate-pulse", isBreached ? "bg-destructive text-destructive-foreground" : "bg-primary/10 text-primary")}>
+    <div className={cn("flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium animate-pulse", overdue ? "bg-destructive text-destructive-foreground" : "bg-primary/10 text-primary")}>
       <Clock className="h-3.5 w-3.5" />
-      {isBreached ? <span>Overdue by {formatDistanceToNow(due)}</span> : <span>{formatDistanceToNow(due, { addSuffix: false })} left</span>}
+      {overdue ? <span>Overdue by {formatDistanceToNow(due)}</span> : <span>{formatDistanceToNow(due, { addSuffix: false })} left</span>}
     </div>
   );
 }

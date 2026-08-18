@@ -8,7 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, FileText, ArrowLeft, ChevronRight, Loader2 } from "lucide-react";
+import { Search, FileText, ArrowLeft, ChevronRight, Loader2, Loader2 } from "lucide-react";
 import { useEmailTemplates, type EmailTemplate } from "@/hooks/useEmailTemplates";
 import { renderEmailHtml } from "@/lib/emailHtml";
 import { cn } from "@/lib/utils";
