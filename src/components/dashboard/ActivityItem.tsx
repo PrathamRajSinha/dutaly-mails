@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Check, Clock, AlertCircle, XCircle, Forward, Send, FileEdit } from "lucide-react";
+import { Check, Clock, AlertCircle, XCircle, Forward, Send, FileEdit, Mail } from "lucide-react";
 
 interface ActivityItemProps {
   email: {
@@ -7,84 +7,86 @@ interface ActivityItemProps {
     subject: string;
     action: string;
     time: string;
+    fullTime: string;
     confidence?: number;
+    accountEmail?: string;
   };
 }
 
-const actionConfig: Record<string, { icon: typeof Check; label: string; badgeBg: string; badgeColor: string; iconBg: string; iconColor: string }> = {
+export const actionConfig: Record<string, { icon: any; label: string; badgeBg: string; badgeColor: string; iconBg: string; iconColor: string }> = {
   replied: {
     icon: Check,
     label: "Auto-resolved",
-    badgeBg: "#E1F5EE",
-    badgeColor: "#0F6E56",
-    iconBg: "#E1F5EE",
-    iconColor: "#1D9E75",
+    badgeBg: "#ECFDF5",
+    badgeColor: "#065F46",
+    iconBg: "#ECFDF5",
+    iconColor: "#10B981",
   },
   auto_replied: {
     icon: Send,
     label: "Auto-resolved",
-    badgeBg: "#E1F5EE",
-    badgeColor: "#0F6E56",
-    iconBg: "#E1F5EE",
-    iconColor: "#1D9E75",
+    badgeBg: "#ECFDF5",
+    badgeColor: "#065F46",
+    iconBg: "#ECFDF5",
+    iconColor: "#10B981",
   },
   auto_sent: {
     icon: Send,
     label: "Sent",
-    badgeBg: "#E1F5EE",
-    badgeColor: "#0F6E56",
-    iconBg: "#E1F5EE",
-    iconColor: "#1D9E75",
+    badgeBg: "#ECFDF5",
+    badgeColor: "#065F46",
+    iconBg: "#ECFDF5",
+    iconColor: "#10B981",
   },
   drafted: {
     icon: FileEdit,
     label: "Drafted",
-    badgeBg: "#EBE9FF",
-    badgeColor: "#7C6FE0",
-    iconBg: "#EBE9FF",
+    badgeBg: "#F0EFFF",
+    badgeColor: "#5850EC",
+    iconBg: "#F0EFFF",
     iconColor: "#7C6FE0",
   },
   ignored: {
     icon: XCircle,
     label: "Ignored",
-    badgeBg: "#F1EFE8",
-    badgeColor: "#5F5E5A",
-    iconBg: "#F1EFE8",
-    iconColor: "#5F5E5A",
+    badgeBg: "#F3F4F6",
+    badgeColor: "#374151",
+    iconBg: "#F3F4F6",
+    iconColor: "#6B7280",
   },
   queued: {
     icon: Clock,
-    label: "Queued for review",
-    badgeBg: "#FAEEDA",
-    badgeColor: "#BA7517",
-    iconBg: "#FAEEDA",
-    iconColor: "#BA7517",
+    label: "Needs Review",
+    badgeBg: "#FFFBEB",
+    badgeColor: "#92400E",
+    iconBg: "#FFFBEB",
+    iconColor: "#F59E0B",
   },
   forwarded: {
     icon: Forward,
     label: "Forwarded",
-    badgeBg: "#EBE9FF",
-    badgeColor: "#7C6FE0",
-    iconBg: "#EBE9FF",
+    badgeBg: "#F0EFFF",
+    badgeColor: "#5850EC",
+    iconBg: "#F0EFFF",
     iconColor: "#7C6FE0",
   },
   labeled: {
     icon: Check,
     label: "Labeled",
-    badgeBg: "#E6F1FB",
-    badgeColor: "#185FA5",
-    iconBg: "#E6F1FB",
-    iconColor: "#185FA5",
+    badgeBg: "#EFF6FF",
+    badgeColor: "#1E40AF",
+    iconBg: "#EFF6FF",
+    iconColor: "#3B82F6",
   },
 };
 
 const defaultConfig = {
   icon: AlertCircle,
-  label: "Unknown",
-  badgeBg: "#F1EFE8",
-  badgeColor: "#5F5E5A",
-  iconBg: "#F1EFE8",
-  iconColor: "#5F5E5A",
+  label: "Processing",
+  badgeBg: "#F3F4F6",
+  badgeColor: "#374151",
+  iconBg: "#F3F4F6",
+  iconColor: "#6B7280",
 };
 
 export function ActivityItem({ email }: ActivityItemProps) {
@@ -92,36 +94,60 @@ export function ActivityItem({ email }: ActivityItemProps) {
   const Icon = config.icon;
 
   return (
-    <div className="flex items-start gap-3 rounded-[10px] bg-card p-3 px-4 border border-border">
+    <div className="flex items-start gap-4 rounded-xl bg-white p-4 border border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200 transition-all group">
       <div
-        className="flex h-8 w-8 items-center justify-center rounded-full shrink-0"
+        className="flex h-10 w-10 items-center justify-center rounded-full shrink-0 shadow-sm border border-white"
         style={{ backgroundColor: config.iconBg }}
       >
-        <Icon className="h-3.5 w-3.5" style={{ color: config.iconColor }} />
+        <Icon className="h-5 w-5" style={{ color: config.iconColor }} />
       </div>
       <div className="min-w-0 flex-1">
-        <div className="flex items-start justify-between gap-2">
+        <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="truncate text-[13px] font-medium" style={{ color: '#1A1730' }}>
+            <h4 className="truncate text-[14px] font-semibold text-[#1A1730] group-hover:text-[#7C6FE0] transition-colors">
               {email.subject}
-            </p>
-            <p className="text-[11px]" style={{ color: '#9490B8' }}>From: {email.from}</p>
+            </h4>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="text-[12px] text-[#64748B] font-medium">From: {email.from}</span>
+              {email.accountEmail && (
+                <>
+                  <span className="text-[#E2E8F0]">•</span>
+                  <div className="flex items-center gap-1 text-[11px] text-[#9490B8]">
+                    <Mail className="h-3 w-3" />
+                    <span>{email.accountEmail}</span>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
-          <span className="whitespace-nowrap text-[11px]" style={{ color: '#9490B8' }}>
+          <time 
+            className="whitespace-nowrap text-[11px] font-medium text-[#9490B8] bg-slate-50 px-2 py-0.5 rounded-md border border-slate-100" 
+            title={email.fullTime}
+          >
             {email.time}
-          </span>
+          </time>
         </div>
-        <div className="mt-1.5 flex items-center gap-2">
+        
+        <div className="mt-3 flex items-center gap-3">
           <span
-            className="rounded-full px-2 py-0.5 text-[11px] font-medium"
+            className="rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider shadow-sm border border-white/20"
             style={{ backgroundColor: config.badgeBg, color: config.badgeColor }}
           >
             {config.label}
           </span>
+          
           {email.confidence !== undefined && email.confidence > 0 && (
-            <span className="text-[11px]" style={{ color: '#9490B8' }}>
-              {email.confidence}% confidence
-            </span>
+            <div className="flex items-center gap-1.5">
+              <div className="h-1 w-12 bg-slate-100 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-[#10B981]" 
+                  style={{ width: `${email.confidence}%` }}
+                />
+              </div>
+              <span className="text-[11px] font-medium text-[#64748B]">
+                {email.confidence}% confidence
+              </span>
+            </div>
           )}
         </div>
       </div>
