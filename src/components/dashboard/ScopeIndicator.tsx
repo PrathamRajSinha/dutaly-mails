@@ -12,7 +12,8 @@ export function ScopeIndicator({ dateRange = "This month", className }: ScopeInd
   const { accounts } = useEmailAccounts();
 
   const selectedAccount = accounts.find((a) => a.id === selectedAccountId);
-  const accountLabel = selectedAccountId === "all" ? "All accounts" : selectedAccount?.email || "Unknown";
+  const accountLabel =
+    selectedAccountId === "all" ? "All accounts" : selectedAccount?.email_address || "Unknown account";
 
   return (
     <div className={`flex items-center gap-3 text-[11px] text-[#64748B] ${className}`}>

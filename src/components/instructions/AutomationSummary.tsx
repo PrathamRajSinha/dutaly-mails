@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Settings2, MessageSquare, ShieldCheck, Mail, Zap } from "lucide-react";
+import { Zap, ShieldCheck, Mail, MessageSquare } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface AutomationSummaryProps {
   autoReply: boolean;
@@ -72,5 +72,3 @@ export function AutomationSummary({
     </Card>
   );
 }
-
-import { cn } from "@/lib/utils";
