@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 import { useEmailAccounts } from "@/hooks/useEmailAccounts";
+import { DateRange } from "react-day-picker";
 
 export interface FilterState {
   accountIds: string[];
@@ -34,7 +35,7 @@ export interface FilterState {
   priorities: string[];
   sentiment: 'positive' | 'neutral' | 'negative' | null;
   slaState: 'due_soon' | 'breached' | 'on_track' | null;
-  dateRange: { from: Date | undefined; to: Date | undefined } | null;
+  dateRange: DateRange | null;
 }
 
 interface TriageFilterBarProps {
