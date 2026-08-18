@@ -8,7 +8,7 @@ import { SelectedAccountProvider } from "@/contexts/SelectedAccountContext";
 export function AppLayout() {
   return (
     <SelectedAccountProvider>
-      <div className="flex h-screen bg-background">
+      <div className="flex h-dvh bg-background">
         <AppSidebar />
         <main className="flex flex-1 flex-col overflow-hidden">
           <AccountTabs />
