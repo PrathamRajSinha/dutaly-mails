@@ -59,7 +59,7 @@ export function KnowledgeBaseEntryCard({
         <Checkbox 
           checked={selected} 
           onCheckedChange={() => onToggleSelection(entry.id)}
-          aria-label=`Select entry: ${entry.title}`
+          aria-label={`Select entry: ${entry.title}`}
           className="bg-white"
         />
       </div>
