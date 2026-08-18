@@ -635,7 +635,7 @@ export default function Instructions() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              variant="destructive"
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
               onClick={() => {
                 setAutoReply(false);
                 setShowPauseConfirm(false);
