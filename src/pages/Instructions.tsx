@@ -460,7 +460,7 @@ export default function Instructions() {
             <div className="grid gap-6 md:grid-cols-2">
               <div className="space-y-2">
                 <Label className="text-sm font-semibold">Writing Tone</Label>
-                <Select value={tone} onValueChange={(v) => setTone(v as any)}>
+                <Select value={tone} onValueChange={(v) => setTone(v as typeof tone)}>
                   <SelectTrigger className="bg-white">
                     <SelectValue />
                   </SelectTrigger>
@@ -474,7 +474,7 @@ export default function Instructions() {
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-semibold">Reply Length</Label>
-                <Select value={replyLength} onValueChange={(v) => setReplyLength(v as any)}>
+                <Select value={replyLength} onValueChange={(v) => setReplyLength(v as typeof replyLength)}>
                   <SelectTrigger className="bg-white">
                     <SelectValue />
                   </SelectTrigger>

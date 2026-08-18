@@ -132,7 +132,7 @@ export default function Tickets() {
               {statusTabs.map((tab) => (
                 <button
                   key={tab.value}
-                  onClick={() => setActiveTab(tab.value as any)}
+                  onClick={() => setActiveTab(tab.value as TabValue)}
                   className={cn(
                     "flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium whitespace-nowrap transition-colors",
                     activeTab === tab.value
@@ -211,7 +211,7 @@ export default function Tickets() {
             {statusTabs.map((tab) => (
               <button
                 key={tab.value}
-                onClick={() => setActiveTab(tab.value as any)}
+                onClick={() => setActiveTab(tab.value as TabValue)}
                 className={cn(
                   "flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium whitespace-nowrap transition-colors",
                   activeTab === tab.value
