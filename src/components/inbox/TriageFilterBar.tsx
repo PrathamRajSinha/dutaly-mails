@@ -338,7 +338,7 @@ export function TriageFilterBar({
           {filters.dateRange && (
             <Badge variant="secondary" className="h-6 gap-1 pr-1">
               Date: {format(filters.dateRange.from!, "MMM dd")}
-              {filters.dateRange.to && }
+              {filters.dateRange.to ? ` – ${format(filters.dateRange.to, "MMM dd")}` : ""}
               <button onClick={() => removeFilter("dateRange")} className="ml-1 rounded-full p-0.5 hover:bg-muted">
                 <X className="h-3 w-3" />
               </button>
