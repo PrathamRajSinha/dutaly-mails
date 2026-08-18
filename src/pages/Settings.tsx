@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { ConfigStatus } from "@/components/settings/ConfigStatus";
 import { useSearchParams } from "react-router-dom";
 import {
   Mail,
@@ -36,7 +35,6 @@ import { useEmailAccounts } from "@/hooks/useEmailAccounts";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useSlaSettings } from "@/hooks/useSlaSettings";
-import { useIntegrations } from "@/hooks/useIntegrations";
 import type { Session } from "@supabase/supabase-js";
 import { ConnectInboxWizard } from "@/components/inbox-connect/ConnectInboxWizard";
 
