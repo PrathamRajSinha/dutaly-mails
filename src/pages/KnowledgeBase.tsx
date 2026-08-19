@@ -7,6 +7,9 @@ import {
   AlertCircle,
   FileText,
   Filter,
+  ShoppingBag,
+  Store,
+  Database,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -545,6 +548,49 @@ export default function KnowledgeBase() {
           )}
         </div>
       )}
+
+      {/* Integrations — Coming Soon */}
+      <div className="mt-10">
+        <Card className="border border-slate-200 bg-white">
+          <CardContent className="flex flex-col items-center gap-6 px-6 py-12 text-center sm:py-16">
+            <div className="flex items-center gap-3" aria-hidden="true">
+              <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-slate-50">
+                <ShoppingBag className="h-5 w-5 text-slate-400" />
+              </span>
+              <span className="h-px w-6 bg-slate-200" />
+              <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-slate-50">
+                <Store className="h-5 w-5 text-slate-400" />
+              </span>
+            </div>
+
+            <div className="max-w-md space-y-2">
+              <h2 className="text-xl font-semibold text-slate-900">
+                Native integrations are coming soon
+              </h2>
+              <p className="text-sm text-slate-500">
+                Sync your store data — products, orders, and customer history — directly into
+                your knowledge base so the AI can answer commerce questions accurately.
+                Nothing to configure here yet.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <Badge variant="secondary" className="gap-1.5 bg-slate-100 text-slate-600 border-none">
+                <ShoppingBag className="h-3 w-3" />
+                WooCommerce
+              </Badge>
+              <Badge variant="secondary" className="gap-1.5 bg-slate-100 text-slate-600 border-none">
+                <Store className="h-3 w-3" />
+                Shopify
+              </Badge>
+              <Badge variant="outline" className="gap-1.5">
+                <Database className="h-3 w-3" />
+                Auto-sync
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Bulk Action Bar */}
       <BulkActionBar 
