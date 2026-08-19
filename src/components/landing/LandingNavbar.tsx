@@ -40,7 +40,7 @@ export function LandingNavbar() {
     >
       <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-6">
         <Link to="/mails" aria-label="Dutaly home">
-          <img src={logoDarkBg} alt="Dutaly — AI-powered email support" className="h-6 w-auto" />
+          <img src={logoDarkBg} alt="Dutaly — AI-powered email support" className="h-9 w-auto" />
         </Link>
 
         <nav className="hidden items-center gap-9 md:flex">
