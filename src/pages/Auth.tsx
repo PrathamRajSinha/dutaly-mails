@@ -109,7 +109,7 @@ export default function Auth() {
           <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary">
             <Mail className="h-7 w-7 text-primary-foreground" />
           </div>
-          <img src={logoAsset.url} alt="Dutaly Mails" className="mt-4 h-7 w-auto" />
+          <img src={logoAsset.url} alt="Dutaly Mails" className="mt-4 h-9 w-auto" />
           <p className="mt-1 text-muted-foreground">
             AI agent for your inbox
           </p>

@@ -65,7 +65,7 @@ export function AppSidebar() {
       {/* Logo + collapse */}
       <div className="flex items-center justify-between px-3 py-5" style={{ paddingLeft: collapsed ? 12 : 20, paddingRight: 8 }}>
         {!collapsed && (
-          <img src={logoAsset.url} alt="Dutaly Mails" style={{ height: 22, width: "auto" }} />
+          <img src={logoAsset.url} alt="Dutaly Mails" style={{ height: 30, width: "auto" }} />
         )}
         <button
           onClick={() => setCollapsed((c) => !c)}

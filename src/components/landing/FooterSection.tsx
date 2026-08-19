@@ -29,7 +29,7 @@ export function FooterSection() {
       <div className="mx-auto max-w-[1200px] px-6">
         <div className="grid gap-12 md:grid-cols-[1.6fr_1fr_1fr_1fr]">
           <div>
-            <img src={logoDarkBg} alt="Dutaly — AI-powered email support" className="h-6 w-auto" />
+            <img src={logoDarkBg} alt="Dutaly — AI-powered email support" className="h-9 w-auto" />
             <p className="mt-5 max-w-[300px] text-[13.5px] leading-[1.75]" style={{ color: "rgba(255,255,255,0.35)" }}>
               Duta (दूत) means messenger or agent in Sanskrit. We build AI agents that handle your
               business communication — starting with email.
