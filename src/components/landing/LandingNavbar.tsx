@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
-import logoDarkBg from "@/assets/logo-dark-bg.png";
+import logoAsset from "@/assets/dutaly-mails-logo.png.asset.json";
+const logoDarkBg = logoAsset.url;
 import { useAuth } from "@/hooks/useAuth";
 
 const navLinks = [

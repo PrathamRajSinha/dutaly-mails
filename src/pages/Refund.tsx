@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import logoDarkBg from "@/assets/logo-dark-bg.png";
+import logoAsset from "@/assets/dutaly-mails-logo.png.asset.json";
+const logoDarkBg = logoAsset.url;
 import { Seo } from "@/components/Seo";
 
 export default function Refund() {
