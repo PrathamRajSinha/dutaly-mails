@@ -1,3 +1,4 @@
+import logoAsset from "@/assets/dutaly-mails-logo.png.asset.json";
 import { useState, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Tag, Loader2, Shield } from "lucide-react";
@@ -277,7 +278,7 @@ export default function OnboardingPayment() {
 
   return (
     <div className="flex min-h-screen flex-col items-center p-6" style={{ background: "#0A0A0F" }}>
-      <h1 style={{ color: "#7C6FE0", fontSize: 20, fontWeight: 500, marginTop: 32 }}>dutaly</h1>
+      <img src={logoAsset.url} alt="Dutaly Mails" style={{ height: 26, width: "auto", marginTop: 32 }} />
       <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 12, marginTop: 12 }}>Step 2 of 2</p>
 
       <h2 style={{ color: "#F0EEF8", fontSize: 28, fontWeight: 500, marginTop: 32, textAlign: "center" }}>

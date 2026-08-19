@@ -1,3 +1,4 @@
+import logoAsset from "@/assets/dutaly-mails-logo.png.asset.json";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Loader2, CheckCircle, ArrowLeft } from "lucide-react";
@@ -46,7 +47,7 @@ export default function ForgotPassword() {
     <div className="flex min-h-screen items-center justify-center p-4" style={{ background: "#0A0A0F" }}>
       <div className="w-full" style={{ maxWidth: 420 }}>
         <div className="mb-6 text-center">
-          <p style={{ color: "#7C6FE0", fontSize: 22, fontWeight: 500 }}>dutaly</p>
+          <img src={logoAsset.url} alt="Dutaly Mails" style={{ height: 28, width: "auto", margin: "0 auto" }} />
           <p style={{ color: "rgba(255,255,255,0.55)", fontSize: 13, marginTop: 4 }}>AI agent for your inbox</p>
         </div>
 
