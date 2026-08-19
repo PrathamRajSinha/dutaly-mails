@@ -278,7 +278,7 @@ export default function OnboardingPayment() {
 
   return (
     <div className="flex min-h-screen flex-col items-center p-6" style={{ background: "#0A0A0F" }}>
-      <img src={logoAsset.url} alt="Dutaly Mails" style={{ height: 26, width: "auto", marginTop: 32 }} />
+      <img src={logoAsset.url} alt="Dutaly Mails" style={{ height: 34, width: "auto", marginTop: 32 }} />
       <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 12, marginTop: 12 }}>Step 2 of 2</p>
 
       <h2 style={{ color: "#F0EEF8", fontSize: 28, fontWeight: 500, marginTop: 32, textAlign: "center" }}>

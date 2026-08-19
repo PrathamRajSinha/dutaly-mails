@@ -213,7 +213,7 @@ export default function Signup() {
       <div className="w-full" style={{ maxWidth: 420 }}>
         <div className="mb-6 text-center">
           <Link to="/mails" style={{ textDecoration: "none" }} aria-label="Dutaly home">
-            <img src={logoAsset.url} alt="Dutaly Mails" style={{ height: 28, width: "auto", margin: "0 auto" }} />
+            <img src={logoAsset.url} alt="Dutaly Mails" style={{ height: 36, width: "auto", margin: "0 auto" }} />
           </Link>
           <p style={{ color: "rgba(255,255,255,0.55)", fontSize: 13, marginTop: 4 }}>AI agent for your inbox</p>
         </div>

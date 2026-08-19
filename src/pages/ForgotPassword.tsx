@@ -47,7 +47,7 @@ export default function ForgotPassword() {
     <div className="flex min-h-screen items-center justify-center p-4" style={{ background: "#0A0A0F" }}>
       <div className="w-full" style={{ maxWidth: 420 }}>
         <div className="mb-6 text-center">
-          <img src={logoAsset.url} alt="Dutaly Mails" style={{ height: 28, width: "auto", margin: "0 auto" }} />
+          <img src={logoAsset.url} alt="Dutaly Mails" style={{ height: 36, width: "auto", margin: "0 auto" }} />
           <p style={{ color: "rgba(255,255,255,0.55)", fontSize: 13, marginTop: 4 }}>AI agent for your inbox</p>
         </div>
 

@@ -13,7 +13,7 @@ export default function Refund() {
       />
       <header className="border-b" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
         <div className="max-w-[880px] mx-auto px-6 h-14 flex items-center justify-between">
-          <Link to="/mails"><img src={logoDarkBg} alt="Dutaly" className="h-6 w-auto" /></Link>
+          <Link to="/mails"><img src={logoDarkBg} alt="Dutaly" className="h-9 w-auto" /></Link>
           <Link to="/mails" className="text-[13px]" style={{ color: "rgba(255,255,255,0.5)" }}>← Back</Link>
         </div>
       </header>
