@@ -1,3 +1,4 @@
+import logoAsset from "@/assets/dutaly-mails-logo.png.asset.json";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Eye, EyeOff, Loader2, Mail, ArrowLeft } from "lucide-react";
@@ -212,7 +213,7 @@ export default function Signup() {
       <div className="w-full" style={{ maxWidth: 420 }}>
         <div className="mb-6 text-center">
           <Link to="/mails" style={{ textDecoration: "none" }} aria-label="Dutaly home">
-            <span style={{ color: "#7C6FE0", fontSize: 22, fontWeight: 500 }}>dutaly</span>
+            <img src={logoAsset.url} alt="Dutaly Mails" style={{ height: 28, width: "auto", margin: "0 auto" }} />
           </Link>
           <p style={{ color: "rgba(255,255,255,0.55)", fontSize: 13, marginTop: 4 }}>AI agent for your inbox</p>
         </div>

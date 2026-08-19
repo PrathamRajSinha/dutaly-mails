@@ -1,3 +1,4 @@
+import logoAsset from "@/assets/dutaly-mails-logo.png.asset.json";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -64,7 +65,7 @@ export function AppSidebar() {
       {/* Logo + collapse */}
       <div className="flex items-center justify-between px-3 py-5" style={{ paddingLeft: collapsed ? 12 : 20, paddingRight: 8 }}>
         {!collapsed && (
-          <span style={{ color: '#E8E4FF', fontSize: '18px', fontWeight: 500 }}>dutaly</span>
+          <img src={logoAsset.url} alt="Dutaly Mails" style={{ height: 22, width: "auto" }} />
         )}
         <button
           onClick={() => setCollapsed((c) => !c)}
