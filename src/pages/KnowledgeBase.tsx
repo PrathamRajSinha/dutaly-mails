@@ -492,12 +492,25 @@ export default function KnowledgeBase() {
                 <FileText className="h-8 w-8 text-slate-300" />
               </div>
               <h3 className="text-lg font-semibold text-slate-900">
-                {searchQuery ? "No entries found matching your search" : "Your knowledge base is empty"}
+                {searchQuery || selectedCategory !== "All"
+                  ? "No entries match your current filters"
+                  : "Your knowledge base is empty"}
               </h3>
               <p className="text-slate-500 mt-2 max-w-sm">
-                {searchQuery ? "Try adjusting your filters or search terms." : "Start by adding common questions, snippets, or documents that your AI can learn from."}
+                {searchQuery || selectedCategory !== "All"
+                  ? "Try a different type or clear your search."
+                  : "Start by adding common questions, snippets, or documents that your AI can learn from."}
               </p>
-              {!searchQuery && (
+              {(searchQuery || selectedCategory !== "All") && (
+                <Button
+                  variant="outline"
+                  className="mt-6"
+                  onClick={() => { setSearchQuery(""); setSelectedCategory("All"); }}
+                >
+                  Clear filters
+                </Button>
+              )}
+              {!searchQuery && selectedCategory === "All" && (
                 <Button className="mt-6" onClick={() => setIsAddDialogOpen(true)}>
                   <Plus className="mr-2 h-4 w-4" />
                   Add First Entry
