@@ -366,11 +366,53 @@ ${emailData.body}`
             ? "send-gmail-reply" 
             : "send-imap-reply";
 
+          // Render an HTML version so mail clients don't fall back to a
+          // monospace/plain-text rendering.
+          const { data: template } = await supabase
+            .from("email_templates")
+            .select("font_family, font_size, text_color, accent_color, footer_text, footer_logo_url")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: true })
+            .limit(1)
+            .maybeSingle();
+
+          const fontStacks: Record<string, string> = {
+            "sans-serif": "Arial, Helvetica, sans-serif",
+            serif: "Georgia, 'Times New Roman', Times, serif",
+            monospace: "'Courier New', Courier, monospace",
+          };
+          const fontSizes: Record<string, string> = { small: "13px", medium: "15px", large: "17px" };
+          const fontStack = fontStacks[template?.font_family ?? "sans-serif"] || fontStacks["sans-serif"];
+          const fontSize = fontSizes[template?.font_size ?? "medium"] || fontSizes.medium;
+          const textColor = template?.text_color || "#333333";
+          const accentColor = template?.accent_color || "#4F46E5";
+
+          const escapedBody = String(parsedResponse.suggested_reply)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/\n/g, "<br />");
+
+          const footerHtml =
+            template?.footer_text || template?.footer_logo_url
+              ? `<hr style="border: none; border-top: 1px solid ${accentColor}; margin: 24px 0;" />
+         <div style="font-size: 12px; color: #999999;">
+           ${template?.footer_logo_url ? `<img src="${template.footer_logo_url}" alt="Logo" style="max-height: 40px; margin-bottom: 8px; display: block;" />` : ""}
+           ${template?.footer_text ? `<p style="margin: 0;">${template.footer_text.replace(/\n/g, "<br />")}</p>` : ""}
+         </div>`
+              : "";
+
+          const htmlBody = `<div style="font-family: ${fontStack}; font-size: ${fontSize}; color: ${textColor}; max-width: 600px; line-height: 1.6;">
+  <div>${escapedBody}</div>
+  ${footerHtml}
+</div>`;
+
           const sendPayload: Record<string, unknown> = {
             email_account_id: emailData.email_account_id,
             to_address: emailData.from_address,
             subject: emailData.subject,
             body: parsedResponse.suggested_reply,
+            html_body: htmlBody,
           };
 
           if (emailData.thread_id) {
