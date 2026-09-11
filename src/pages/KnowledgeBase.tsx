@@ -198,7 +198,7 @@ export default function KnowledgeBase() {
         .from("knowledge_base_entries")
         .insert({
           user_id: user.id,
-          category: newEntry.category,
+          category: "document",
           title: newEntry.title,
           content: newEntry.content || `Uploaded file: ${selectedFile.name}`,
           tags: newEntry.tags,
