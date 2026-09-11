@@ -285,80 +285,13 @@ serve(async (req) => {
           processed++;
           existingIds.add(msg.id);
           const result = await processResponse.json();
+          // NOTE: process-email owns auto-sending. Do NOT send here as well,
+          // otherwise every auto-reply goes out twice.
           console.log(`Email processed: ${result.action}, auto_send: ${result.auto_send}`);
-
-          // If auto_send is true, actually send the reply via Gmail
-          if (result.action === "reply" && result.auto_send && result.suggested_reply) {
-            console.log(`Auto-sending reply to ${fromAddress}...`);
-
-            try {
-              const sendResponse = await fetch(
-                `${supabaseUrl}/functions/v1/send-gmail-reply`,
-                {
-                  method: "POST",
-                  headers: {
-                    Authorization: authHeader,
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    email_account_id: account.id,
-                    to_address: fromAddress,
-                    subject: subject,
-                    body: result.suggested_reply,
-                    message_id: msg.id,
-                    thread_id: msg.threadId,
-                  }),
-                }
-              );
-
-              if (sendResponse.ok) {
-                const sendResult = await sendResponse.json();
-                console.log(`Auto-reply sent successfully, message ID: ${sendResult.message_id}`);
-
-                await supabase
-                  .from("email_queue")
-                  .update({
-                    status: "sent",
-                    reviewed_at: new Date().toISOString(),
-                    email_account_id: account.id,
-                  })
-                  .eq("external_email_id", msg.id)
-                  .eq("user_id", user.id);
-
-                await supabase.from("activity_logs").insert({
-                  user_id: user.id,
-                  email_account_id: account.id,
-                  action: "auto_sent",
-                  email_subject: subject,
-                  email_from: fromAddress,
-                  details: {
-                    intent: result.intent,
-                    confidence: result.confidence,
-                    sent_message_id: sendResult.message_id,
-                  },
-                });
-              } else {
-                const errorText = await sendResponse.text();
-                console.error("Failed to auto-send reply:", errorText);
-
-                await supabase
-                  .from("email_queue")
-                  .update({ status: "pending" })
-                  .eq("external_email_id", msg.id)
-                  .eq("user_id", user.id);
-              }
-            } catch (sendError) {
-              console.error("Error during auto-send:", sendError);
-              await supabase
-                .from("email_queue")
-                .update({ status: "pending" })
-                .eq("external_email_id", msg.id)
-                .eq("user_id", user.id);
-            }
-          }
         } else {
           console.error(`Failed to process email ${msg.id}:`, await processResponse.text());
         }
+
       }
     }
 
