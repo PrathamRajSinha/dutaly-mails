@@ -10,7 +10,9 @@ import {
   ShoppingBag,
   Store,
   Database,
+  Sparkles,
 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -71,7 +73,7 @@ export default function KnowledgeBase() {
   const [uploadTab, setUploadTab] = useState<"text" | "file">("text");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [mainTab, setMainTab] = useState<"entries" | "gaps">("entries");
+  const [mainTab, setMainTab] = useState<"entries" | "gaps" | "chat">("entries");
   const [generatingTopic, setGeneratingTopic] = useState<string | null>(null);
   
   // Selection state
@@ -400,10 +402,14 @@ export default function KnowledgeBase() {
 
       {/* Main Tabs */}
       <div className="mb-6">
-        <Tabs value={mainTab} onValueChange={(v) => setMainTab(v as "entries" | "gaps")}>
+        <Tabs value={mainTab} onValueChange={(v) => setMainTab(v as "entries" | "gaps" | "chat")}>
           <TabsList className="bg-slate-100 p-1">
             <TabsTrigger value="entries" className="px-6">
               Entries ({entries.length})
+            </TabsTrigger>
+            <TabsTrigger value="chat" className="px-6 flex items-center gap-2">
+              <Sparkles className="h-3.5 w-3.5" />
+              Build with chat
             </TabsTrigger>
             <TabsTrigger value="gaps" className="px-6 flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-orange-500 animate-pulse" />
@@ -418,7 +424,23 @@ export default function KnowledgeBase() {
         </Tabs>
       </div>
 
-      {mainTab === "entries" ? (
+      {mainTab === "chat" ? (
+        <KbChatPanel
+          onSaveEntry={async (entry) => {
+            await createEntry.mutateAsync({
+              title: entry.title,
+              content: entry.content,
+              category: entry.category as KnowledgeEntry["category"],
+              tags: [],
+              storage_path: null,
+              file_type: null,
+              file_name: null,
+              extracted_text: null,
+            });
+          }}
+        />
+      ) : mainTab === "entries" ? (
+
         <>
           {/* Filters & Search */}
           <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
