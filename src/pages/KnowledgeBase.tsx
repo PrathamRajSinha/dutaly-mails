@@ -45,7 +45,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import { KnowledgeBaseEntryCard } from "@/components/knowledge-base/KnowledgeBaseEntryCard";
 import { KnowledgeBaseSkeleton } from "@/components/knowledge-base/KnowledgeBaseSkeleton";
 import { BulkActionBar } from "@/components/knowledge-base/BulkActionBar";
+import { KbChatPanel } from "@/components/knowledge-base/KbChatPanel";
 import { differenceInDays } from "date-fns";
+
 
 const categories = ["All", "faq", "snippet", "document", "policy"];
 const ACCEPTED_FILE_TYPES = ".pdf,.doc,.docx,.ppt,.pptx,.txt,.md,.jpg,.jpeg,.png,.gif,.webp";
