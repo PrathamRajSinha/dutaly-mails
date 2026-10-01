@@ -279,6 +279,7 @@ function TicketsView({ searchQuery, onSearchChange }: { searchQuery: string; onS
     statuses: [],
     categories: [],
     priorities: [],
+    labels: [],
     sentiment: null,
     slaState: null,
     dateRange: null,

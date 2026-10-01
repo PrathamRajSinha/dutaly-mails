@@ -17,6 +17,7 @@ export interface QueuedEmail {
   suggested_reply: string | null;
   confidence_score: number | null;
   flag_reason: string | null;
+  labels?: string[] | null;
   intent: "support" | "sales" | "personal" | "newsletter" | "spam" | "unknown" | null;
   status: "pending" | "approved" | "edited" | "ignored" | "sent" | "sending" | "scheduled" | "snoozed";
   thread_id: string | null;

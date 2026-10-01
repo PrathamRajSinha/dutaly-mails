@@ -33,6 +33,7 @@ export interface FilterState {
   statuses: string[];
   categories: string[];
   priorities: string[];
+  labels?: string[];
   sentiment: 'positive' | 'neutral' | 'negative' | null;
   slaState: 'due_soon' | 'breached' | 'on_track' | null;
   dateRange: DateRange | null;
@@ -45,6 +46,7 @@ interface TriageFilterBarProps {
   availableCategories: string[];
   availableStatuses: string[];
   availablePriorities: string[];
+  availableLabels?: string[];
   viewMode: "tickets" | "emails";
 }
 
@@ -55,6 +57,7 @@ export function TriageFilterBar({
   availableCategories,
   availableStatuses,
   availablePriorities,
+  availableLabels = [],
   viewMode,
 }: TriageFilterBarProps) {
   const { accounts } = useEmailAccounts();
@@ -65,6 +68,7 @@ export function TriageFilterBar({
       statuses: [],
       categories: [],
       priorities: [],
+      labels: [],
       sentiment: null,
       slaState: null,
       dateRange: null,
@@ -72,7 +76,7 @@ export function TriageFilterBar({
   };
 
   const toggleValue = (field: keyof FilterState, value: string) => {
-    const current = filters[field] as string[];
+    const current = (filters[field] as string[] | undefined) ?? [];
     const updated = current.includes(value)
       ? current.filter((v) => v !== value)
       : [...current, value];
@@ -89,6 +93,7 @@ export function TriageFilterBar({
     if (filters.statuses.length > 0) count++;
     if (filters.categories.length > 0) count++;
     if (filters.priorities.length > 0) count++;
+    if ((filters.labels ?? []).length > 0) count++;
     if (filters.sentiment) count++;
     if (filters.slaState) count++;
     if (filters.dateRange) count++;
@@ -96,8 +101,8 @@ export function TriageFilterBar({
   }, [filters]);
 
   const removeFilter = (field: keyof FilterState, value?: string) => {
-    if (Array.isArray(filters[field])) {
-      const current = filters[field] as string[];
+    if (Array.isArray(filters[field]) || field === "labels") {
+      const current = (filters[field] as string[] | undefined) ?? [];
       onFiltersChange({ ...filters, [field]: current.filter((v) => v !== value) });
     } else {
       onFiltersChange({ ...filters, [field]: null });
@@ -119,7 +124,7 @@ export function TriageFilterBar({
               )}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-[200px] p-0" align="start">
+          <PopoverContent className="w-[240px] p-0" align="start">
             <Command>
               <CommandInput placeholder="Search filters..." />
               <CommandList>
@@ -187,6 +192,22 @@ export function TriageFilterBar({
                             {filters.priorities.includes(p) && <Check className="h-3 w-3" />}
                           </div>
                           <span className="capitalize">{p}</span>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </>
+                )}
+
+                {availableLabels.length > 0 && (
+                  <>
+                    <CommandSeparator />
+                    <CommandGroup heading="Labels">
+                      {availableLabels.map((l) => (
+                        <CommandItem key={l} onSelect={() => toggleValue("labels", l)}>
+                          <div className={cn("mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary", (filters.labels ?? []).includes(l) ? "bg-primary text-primary-foreground" : "opacity-50")}>
+                            {(filters.labels ?? []).includes(l) && <Check className="h-3 w-3" />}
+                          </div>
+                          <span className="truncate">{l}</span>
                         </CommandItem>
                       ))}
                     </CommandGroup>
@@ -315,6 +336,14 @@ export function TriageFilterBar({
             <Badge key={p} variant="secondary" className="h-6 gap-1 pr-1 capitalize">
               {p}
               <button onClick={() => removeFilter("priorities", p)} className="ml-1 rounded-full p-0.5 hover:bg-muted">
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          ))}
+          {(filters.labels ?? []).map((l) => (
+            <Badge key={l} variant="secondary" className="h-6 gap-1 pr-1">
+              {l}
+              <button onClick={() => removeFilter("labels", l)} className="ml-1 rounded-full p-0.5 hover:bg-muted">
                 <X className="h-3 w-3" />
               </button>
             </Badge>
