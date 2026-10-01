@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.93.3";
+import { normalizeLabels, getExistingLabels, labelPromptSection, mergeLabels } from "../_shared/labels.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -9,6 +10,7 @@ const corsHeaders = {
 
 interface ReprocessRequest {
   email_ids?: string[]; // optional; if omitted reprocess all eligible
+  relabel_only?: boolean; // only assign topic labels to emails that have none
 }
 
 serve(async (req) => {
@@ -43,10 +45,12 @@ serve(async (req) => {
     // Fetch target emails: explicit ids OR all "needs review" style entries
     let query = supabase
       .from("email_queue")
-      .select("id, from_address, from_name, subject, body, thread_id, suggested_reply, confidence_score, status")
+      .select("id, from_address, from_name, subject, body, thread_id, suggested_reply, confidence_score, status, labels, ticket_id")
       .eq("user_id", user.id);
 
-    if (body.email_ids && body.email_ids.length > 0) {
+    if (body.relabel_only) {
+      query = query.eq("labels", "{}").order("created_at", { ascending: false }).limit(25);
+    } else if (body.email_ids && body.email_ids.length > 0) {
       query = query.in("id", body.email_ids);
     } else {
       // Default: pending emails with no reply or low confidence
@@ -57,7 +61,7 @@ serve(async (req) => {
     if (targetsErr) throw targetsErr;
 
     const eligible = (targets || []).filter((e: any) => {
-      if (body.email_ids?.length) return true;
+      if (body.relabel_only || body.email_ids?.length) return true;
       return !e.suggested_reply || (e.confidence_score !== null && e.confidence_score < 0.7);
     });
 
@@ -95,6 +99,7 @@ serve(async (req) => {
       })
       .join("\n\n");
 
+    const existingLabels = await getExistingLabels(supabase, user.id).catch(() => [] as string[]);
     let reprocessed = 0;
     let updated = 0;
 
@@ -135,8 +140,11 @@ Respond ONLY with a JSON object:
   "action": "reply" | "ignore" | "queue",
   "confidence": 0.0 to 1.0,
   "reason": "Brief explanation",
-  "suggested_reply": "Reply text if action is reply, else null"
-}`,
+  "suggested_reply": "Reply text if action is reply, else null",
+  "labels": ["Short topic label"]
+}
+
+${labelPromptSection(existingLabels)}`,
               },
               {
                 role: "user",
@@ -157,9 +165,20 @@ Respond ONLY with a JSON object:
         const match = content.match(/\{[\s\S]*\}/);
         const parsed = JSON.parse(match ? match[0] : content);
 
+        const labels = normalizeLabels(parsed.labels);
+        if (email.ticket_id && labels.length) {
+          const { data: t } = await supabase.from("tickets").select("labels").eq("id", email.ticket_id).eq("user_id", user.id).maybeSingle();
+          if (t) await supabase.from("tickets").update({ labels: mergeLabels(t.labels || [], labels) }).eq("id", email.ticket_id);
+        }
+        if (body.relabel_only) {
+          await supabase.from("email_queue").update({ labels: labels.length ? labels : ["General"] }).eq("id", email.id).eq("user_id", user.id);
+          updated += 1; reprocessed += 1;
+          continue;
+        }
         await supabase
           .from("email_queue")
           .update({
+            labels,
             suggested_reply: parsed.suggested_reply || null,
             confidence_score: parsed.confidence ?? null,
             flag_reason: parsed.reason || null,
