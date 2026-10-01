@@ -68,6 +68,7 @@ import { type EmailTemplate } from "@/hooks/useEmailTemplates";
 import { replaceVariables, renderEmailHtml } from "@/lib/emailHtml";
 import { TicketDetailPanel } from "@/components/tickets/TicketDetailPanel";
 import { TriageFilterBar, type FilterState } from "@/components/inbox/TriageFilterBar";
+import { LabelChips, LabelChip } from "@/components/inbox/LabelChips";
 // ─── Helpers ────────────────────────────────────────────────
 const getConfidenceColor = (confidence: number | null) => {
   if (!confidence) return "text-muted-foreground bg-muted";
@@ -325,11 +326,35 @@ function TicketsView({ searchQuery, onSearchChange }: { searchQuery: string; onS
     }
   };
 
-  const filtered = (tickets ?? []).filter(
-    (t) =>
-      t.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.customer_email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const ticketList = tickets ?? [];
+  const availableLabels = Array.from(new Set(ticketList.flatMap((t) => t.labels ?? []))).sort();
+  const availableCategories = Array.from(new Set(ticketList.map((t) => t.category).filter(Boolean) as string[])).sort();
+  const filtered = ticketList.filter((t) => {
+    const q = searchQuery.toLowerCase();
+    if (!(t.subject.toLowerCase().includes(q) || t.customer_email.toLowerCase().includes(q) || (t.labels ?? []).some((l) => l.toLowerCase().includes(q)))) return false;
+    if (filters.accountIds.length && !filters.accountIds.includes(t.email_account_id ?? "")) return false;
+    if (filters.statuses.length && !filters.statuses.includes(t.status)) return false;
+    if (filters.categories.length && !filters.categories.includes(t.category ?? "")) return false;
+    if (filters.priorities.length && !filters.priorities.includes(t.priority)) return false;
+    if ((filters.labels ?? []).length && !(t.labels ?? []).some((l) => filters.labels!.includes(l))) return false;
+    if (filters.sentiment) {
+      const s = t.sentiment_score ?? 0.5;
+      const bucket = s < 0.4 ? "negative" : s > 0.6 ? "positive" : "neutral";
+      if (bucket !== filters.sentiment) return false;
+    }
+    if (filters.slaState) {
+      if (!t.sla_due_at) return false;
+      const ms = new Date(t.sla_due_at).getTime() - Date.now();
+      const state = ms < 0 ? "breached" : ms < 4 * 3600 * 1000 ? "due_soon" : "on_track";
+      if (state !== filters.slaState) return false;
+    }
+    if (filters.dateRange?.from) {
+      const d = new Date(t.created_at);
+      if (d < startOfDay(filters.dateRange.from)) return false;
+      if (filters.dateRange.to && d > endOfDay(filters.dateRange.to)) return false;
+    }
+    return true;
+  });
 
   const angryTickets = filtered.filter(
     (t) => t.escalation_flag && t.status !== "resolved" && t.status !== "closed"
@@ -363,8 +388,20 @@ function TicketsView({ searchQuery, onSearchChange }: { searchQuery: string; onS
         <div className="mb-6 flex flex-wrap items-center gap-3">
           <div className="relative max-w-md flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Search tickets..." className="pl-10" value={searchQuery} onChange={(e) => onSearchChange(e.target.value)} />
+            <Input placeholder="Search tickets or labels..." className="pl-10" value={searchQuery} onChange={(e) => onSearchChange(e.target.value)} />
           </div>
+        </div>
+        <div className="mb-6">
+          <TriageFilterBar
+            filters={filters}
+            onFiltersChange={setFilters}
+            resultCount={filtered.length}
+            availableCategories={availableCategories}
+            availableStatuses={["open", "pending", "resolved", "closed"]}
+            availablePriorities={["low", "medium", "high", "urgent"]}
+            availableLabels={availableLabels}
+            viewMode="tickets"
+          />
         </div>
 
         {/* Escalated Banner */}
@@ -541,6 +578,7 @@ function TicketCard({ ticket, isExpanded, onToggle }: { ticket: Ticket; isExpand
           >
             {ticket.priority}
           </span>
+          <div className="hidden md:flex"><LabelChips labels={ticket.labels} table="tickets" id={ticket.id} /></div>
           {ticket.category && (
             <Badge variant="outline" className="capitalize text-[10px] h-5">{ticket.category.replace("_", " ")}</Badge>
           )}
@@ -608,12 +646,40 @@ function EmailsView({ searchQuery, onSearchChange }: { searchQuery: string; onSe
     }
   };
 
+  const [labelFilter, setLabelFilter] = useState<string[]>([]);
+  const [relabelLoading, setRelabelLoading] = useState(false);
+  const emailLabelCounts = new Map<string, number>();
+  for (const e of allEmails) for (const l of e.labels ?? []) emailLabelCounts.set(l, (emailLabelCounts.get(l) || 0) + 1);
+  const emailLabels = [...emailLabelCounts.entries()].sort((a, b) => b[1] - a[1]).map(([l]) => l);
+  const unlabeledCount = allEmails.filter((e) => !(e.labels ?? []).length).length;
+  const handleRelabel = async () => {
+    if (!session?.access_token) return;
+    setRelabelLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("reprocess-queued-emails", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        body: { relabel_only: true },
+      });
+      if (error) throw error;
+      const count = (data as { reprocessed?: number })?.reprocessed ?? 0;
+      toast.success(count > 0 ? `Labelled ${count} email${count === 1 ? "" : "s"}` : "All emails already have labels");
+      queryClient.invalidateQueries({ queryKey: ["email-queue"] });
+    } catch {
+      toast.error("Couldn't label your emails right now. Please try again in a minute.");
+    } finally {
+      setRelabelLoading(false);
+    }
+  };
+
   const filterEmails = (emails: QueuedEmail[]) =>
     emails.filter((email) => {
+      const q = searchQuery.toLowerCase();
       const matchesSearch =
-        email.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        email.from_address.toLowerCase().includes(searchQuery.toLowerCase());
+        email.subject.toLowerCase().includes(q) ||
+        email.from_address.toLowerCase().includes(q) ||
+        (email.labels ?? []).some((l) => l.toLowerCase().includes(q));
       if (!matchesSearch) return false;
+      if (labelFilter.length && !(email.labels ?? []).some((l) => labelFilter.includes(l))) return false;
       const emailDate = new Date(email.queued_at);
       if (dateFrom && emailDate < startOfDay(dateFrom)) return false;
       if (dateTo && emailDate > endOfDay(dateTo)) return false;
@@ -735,6 +801,29 @@ function EmailsView({ searchQuery, onSearchChange }: { searchQuery: string; onSe
             <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground" onClick={() => applyDatePreset("all")}>Clear</Button>
           )}
         </div>
+
+        {(emailLabels.length > 0 || unlabeledCount > 0) && (
+          <div className="mb-6 flex flex-wrap items-center gap-1.5">
+            <span className="mr-1 text-xs text-muted-foreground">Labels:</span>
+            {emailLabels.slice(0, 20).map((l) => (
+              <LabelChip
+                key={l}
+                label={`${l} · ${emailLabelCounts.get(l)}`}
+                active={labelFilter.includes(l)}
+                onClick={() => setLabelFilter((f) => (f.includes(l) ? f.filter((x) => x !== l) : [...f, l]))}
+              />
+            ))}
+            {labelFilter.length > 0 && (
+              <Button variant="ghost" size="sm" className="h-6 px-2 text-xs" onClick={() => setLabelFilter([])}>Clear</Button>
+            )}
+            {unlabeledCount > 0 && (
+              <Button variant="outline" size="sm" className="ml-auto h-7 gap-1.5 text-xs" onClick={handleRelabel} disabled={relabelLoading}>
+                {relabelLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                Label {unlabeledCount} older email{unlabeledCount === 1 ? "" : "s"}
+              </Button>
+            )}
+          </div>
+        )}
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as EmailTabValue)}>
@@ -963,6 +1052,7 @@ function EmailCard({
               {confidencePercent}%
             </Badge>
           )}
+          <div className="hidden md:flex"><LabelChips labels={email.labels} table="email_queue" id={email.id} /></div>
           {email.intent && (
             <Badge variant="outline" className="capitalize text-[10px] h-5">{email.intent}</Badge>
           )}
