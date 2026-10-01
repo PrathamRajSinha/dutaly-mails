@@ -165,6 +165,8 @@ serve(async (req) => {
       return `[${entry.category.toUpperCase()}] ${entry.title}:\n${content}`;
     }).join("\n\n");
 
+    const existingLabels = await getExistingLabels(supabase, user.id).catch(() => [] as string[]);
+
     // Classify the email and generate response using Lovable AI
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -224,8 +226,11 @@ You must respond with a valid JSON object containing:
   "action": "reply" | "ignore" | "queue",
   "confidence": 0.0 to 1.0,
   "reason": "Brief explanation of your decision",
-  "suggested_reply": "The email reply if action is 'reply', otherwise null"
+  "suggested_reply": "The email reply if action is 'reply', otherwise null",
+  "labels": ["Short topic label", "..."]
 }
+
+${labelPromptSection(existingLabels)}
 
 DECISION RULES:
 - If the email is automated/transactional (order updates, banking alerts, promotions, newsletters), set action to "ignore" regardless of content
@@ -277,6 +282,7 @@ ${emailData.body}`
 
     // Ensure new fields have defaults if AI didn't return them
     const category = parsedResponse.category || "general";
+    const labels = normalizeLabels(parsedResponse.labels);
     const sentimentScore = typeof parsedResponse.sentiment_score === "number" ? parsedResponse.sentiment_score : 0.5;
     let escalationFlag = parsedResponse.escalation_flag === true;
 
@@ -339,6 +345,7 @@ ${emailData.body}`
         intent: parsedResponse.intent === "greeting" ? "personal" : parsedResponse.intent,
         status: queueStatus,
         thread_id: emailData.thread_id || null,
+        labels,
       })
       .select("id")
       .single();
@@ -496,14 +503,14 @@ ${emailData.body}`
       if (emailData.thread_id) {
         const { data: existingTicket } = await supabase
           .from("tickets")
-          .select("id, status")
+          .select("id, status, labels")
           .eq("user_id", user.id)
           .eq("thread_id", emailData.thread_id)
           .single();
 
         if (existingTicket) {
           ticketId = existingTicket.id;
-          const updateData: any = { last_customer_reply_at: new Date().toISOString() };
+          const updateData: any = { last_customer_reply_at: new Date().toISOString(), labels: mergeLabels(existingTicket.labels || [], labels) };
           if (existingTicket.status === "resolved" || existingTicket.status === "closed") {
             updateData.status = "open";
           }
@@ -525,6 +532,7 @@ ${emailData.body}`
           .insert({
             user_id: user.id,
             subject: emailData.subject,
+            labels,
             customer_email: emailData.from_address,
             status: "open",
             priority: escalationFlag ? "urgent" : "medium",
