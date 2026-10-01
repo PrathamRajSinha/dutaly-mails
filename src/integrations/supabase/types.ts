@@ -315,6 +315,7 @@ export type Database = {
           from_name: string | null
           id: string
           intent: string | null
+          labels: string[]
           queued_at: string
           reviewed_at: string | null
           scheduled_send_at: string | null
@@ -337,6 +338,7 @@ export type Database = {
           from_name?: string | null
           id?: string
           intent?: string | null
+          labels?: string[]
           queued_at?: string
           reviewed_at?: string | null
           scheduled_send_at?: string | null
@@ -359,6 +361,7 @@ export type Database = {
           from_name?: string | null
           id?: string
           intent?: string | null
+          labels?: string[]
           queued_at?: string
           reviewed_at?: string | null
           scheduled_send_at?: string | null
@@ -748,6 +751,7 @@ export type Database = {
           email_account_id: string | null
           escalation_flag: boolean | null
           id: string
+          labels: string[]
           last_customer_reply_at: string | null
           priority: string
           sentiment_score: number | null
@@ -766,6 +770,7 @@ export type Database = {
           email_account_id?: string | null
           escalation_flag?: boolean | null
           id?: string
+          labels?: string[]
           last_customer_reply_at?: string | null
           priority?: string
           sentiment_score?: number | null
@@ -784,6 +789,7 @@ export type Database = {
           email_account_id?: string | null
           escalation_flag?: boolean | null
           id?: string
+          labels?: string[]
           last_customer_reply_at?: string | null
           priority?: string
           sentiment_score?: number | null

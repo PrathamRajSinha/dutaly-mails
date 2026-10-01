@@ -15,6 +15,7 @@ export interface Ticket {
   priority: TicketPriority;
   assigned_to: string | null;
   category: string | null;
+  labels?: string[] | null;
   sentiment_score: number | null;
   escalation_flag: boolean;
   sla_due_at: string | null;

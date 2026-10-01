@@ -63,6 +63,7 @@ export default function Tickets() {
     statuses: [],
     categories: [],
     priorities: [],
+    labels: [],
     sentiment: null,
     slaState: null,
     dateRange: null,
