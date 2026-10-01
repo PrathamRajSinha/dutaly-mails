@@ -589,6 +589,7 @@ function TicketCard({ ticket, isExpanded, onToggle }: { ticket: Ticket; isExpand
 
       {isExpanded && (
         <CardContent className="border-t border-border px-0 pb-0 pt-0" style={{ backgroundColor: '#F4F3FF' }}>
+          <div className="flex items-center gap-2 px-4 pt-3"><span className="text-xs text-muted-foreground">Labels</span><LabelChips labels={ticket.labels} table="tickets" id={ticket.id} editable /></div>
           <TicketDetailPanel ticketId={ticket.id} onBack={onToggle} />
         </CardContent>
       )}
@@ -1062,6 +1063,7 @@ function EmailCard({
 
       {isExpanded && (
         <CardContent className="border-t border-border px-4 pb-4 pt-4 space-y-4" style={{ backgroundColor: '#F4F3FF' }}>
+          <div className="flex items-center gap-2"><span className="text-xs text-muted-foreground">Labels</span><LabelChips labels={email.labels} table="email_queue" id={email.id} editable /></div>
           {email.flag_reason && (
             <div className="flex items-start gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 p-3">
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
