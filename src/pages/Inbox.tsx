@@ -1,3 +1,4 @@
+import { ReadReceiptBadge } from "@/components/inbox/ReadReceiptBadge";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { format, formatDistanceToNow, startOfDay, endOfDay, subDays } from "date-fns";
 import {
@@ -566,6 +567,7 @@ function TicketCard({ ticket, isExpanded, onToggle }: { ticket: Ticket; isExpand
             {ticket.escalation_flag && <Flame className="h-3.5 w-3.5 text-destructive shrink-0" />}
             <h3 className="text-[13px] font-medium truncate" style={{ color: '#1A1730' }}>{ticket.subject}</h3>
             {statusBadge()}
+            <ReadReceiptBadge status={email.status} openedAt={email.opened_at} lastOpenedAt={email.last_opened_at} openCount={email.open_count} />
           </div>
           <p className="text-[11px] mt-0.5" style={{ color: '#9490B8' }}>
             {ticket.customer_email} · {formatTimeAgo(ticket.created_at)}
