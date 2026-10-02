@@ -42,25 +42,25 @@ export function StatCard({
       <div className="p-5">
         <div className="flex items-start justify-between">
           <div className="space-y-1.5 flex-1">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-[#64748B]">
+             <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
               {title}
             </p>
             
             {isLoading ? (
-              <div className="h-8 w-24 animate-pulse bg-slate-100 rounded" />
+               <div className="h-8 w-24 animate-pulse rounded bg-muted" />
             ) : !hasData ? (
-              <div className="flex items-center gap-1.5 text-[14px] text-[#9490B8] py-1">
+               <div className="flex items-center gap-1.5 py-1 text-[14px] text-muted-foreground">
                 <AlertCircle className="h-3.5 w-3.5" />
                 <span>N/A</span>
               </div>
             ) : (
-              <p className="text-[26px] font-bold leading-none tracking-tight text-[#1A1730]">
+               <p className="text-[26px] font-bold leading-none tracking-tight text-foreground">
                 {value}
               </p>
             )}
 
             {hasData && subtitle && (
-              <p className="text-[12px] font-medium text-[#64748B]">{subtitle}</p>
+               <p className="text-[12px] font-medium text-muted-foreground">{subtitle}</p>
             )}
             
             {hasData && trend && (

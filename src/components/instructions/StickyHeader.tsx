@@ -12,16 +12,16 @@ interface StickyHeaderProps {
 
 export function StickyHeader({ isDirty, isSaving, onSave, onDiscard }: StickyHeaderProps) {
   return (
-    <div className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-border/50 px-8 py-4 mb-6 -mx-8">
+    <div className="sticky top-0 z-50 mb-6 -mx-8 w-full border-b border-border/50 bg-background/90 px-8 py-4 backdrop-blur-md">
       <div className="max-w-[1200px] mx-auto flex items-center justify-between">
         <div>
-          <h1 className="text-[20px] font-semibold text-[#1A1730]">AI Instructions</h1>
+          <h1 className="text-[20px] font-semibold text-foreground">AI Instructions</h1>
           <div className="flex items-center gap-2 mt-0.5">
              <div className={cn(
                "h-2 w-2 rounded-full",
                isDirty ? "bg-amber-500 animate-pulse" : "bg-emerald-500"
              )} />
-             <p className="text-[13px] text-[#9490B8]">
+              <p className="text-[13px] text-muted-foreground">
                {isDirty ? "Unsaved changes" : "All changes saved"}
              </p>
           </div>
@@ -33,7 +33,7 @@ export function StickyHeader({ isDirty, isSaving, onSave, onDiscard }: StickyHea
               variant="ghost" 
               size="sm" 
               onClick={onDiscard}
-              className="text-[#9490B8] hover:text-[#1A1730]"
+              className="text-muted-foreground hover:text-foreground"
             >
               <RotateCcw className="mr-2 h-4 w-4" />
               Discard

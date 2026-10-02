@@ -125,8 +125,8 @@ export default function Templates() {
     <div className="p-8 max-w-7xl mx-auto">
       <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Email Templates</h1>
-          <p className="mt-1 text-sm text-slate-500 max-w-md">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Email Templates</h1>
+          <p className="mt-1 max-w-md text-sm text-muted-foreground">
             Create and manage professional email templates for your outgoing messages.
           </p>
         </div>
@@ -137,7 +137,7 @@ export default function Templates() {
       </div>
 
       {/* Filters & Search */}
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+      <div className="mb-8 flex flex-col gap-4 rounded-lg border border-border bg-card p-4 shadow-sm sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <Input 
@@ -170,14 +170,14 @@ export default function Templates() {
       </div>
 
       {filteredTemplates.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-2xl border-2 border-dashed border-slate-100">
-          <div className="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-            <FileText className="h-8 w-8 text-slate-300" />
+        <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-card py-20 text-center">
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+            <FileText className="h-8 w-8 text-muted-foreground" />
           </div>
-          <h3 className="text-lg font-semibold text-slate-900">
+          <h3 className="text-lg font-semibold text-foreground">
             {searchQuery || selectedCategory !== "All" ? "No templates match your filters" : "No templates yet"}
           </h3>
-          <p className="text-slate-500 mt-2 max-w-sm">
+          <p className="mt-2 max-w-sm text-muted-foreground">
             {searchQuery || selectedCategory !== "All" 
               ? "Try adjusting your search terms or category selection." 
               : "Create your first email template to speed up your communication."}
@@ -194,7 +194,7 @@ export default function Templates() {
               <CardContent className="p-6 space-y-4 flex flex-col h-full">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="font-bold text-slate-900 group-hover:text-primary transition-colors">{t.name}</h3>
+                    <h3 className="font-bold text-foreground transition-colors group-hover:text-primary">{t.name}</h3>
                     <Badge variant="secondary" className="mt-1 text-[10px] capitalize bg-slate-100 text-slate-600 border-none">
                       {t.category}
                     </Badge>
@@ -214,7 +214,7 @@ export default function Templates() {
                   </div>
                 </div>
                 
-                <p className="text-sm text-slate-600 line-clamp-3 leading-relaxed flex-1">
+                <p className="line-clamp-3 flex-1 text-sm leading-relaxed text-muted-foreground">
                   {t.body}
                 </p>
 
@@ -280,7 +280,7 @@ export default function Templates() {
             </div>
           </DialogHeader>
 
-          <div className="flex-1 overflow-hidden p-6 bg-white">
+          <div className="flex-1 overflow-hidden bg-card p-6">
             <TemplateEditor form={form} setForm={setForm} />
           </div>
         </DialogContent>

@@ -94,9 +94,9 @@ export function ActivityItem({ email }: ActivityItemProps) {
   const Icon = config.icon;
 
   return (
-    <div className="flex items-start gap-4 rounded-xl bg-white p-4 border border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200 transition-all group">
+    <div className="group flex items-start gap-4 rounded-lg border border-border bg-card p-4 shadow-sm transition-colors hover:bg-muted/40">
       <div
-        className="flex h-10 w-10 items-center justify-center rounded-full shrink-0 shadow-sm border border-white"
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border shadow-sm"
         style={{ backgroundColor: config.iconBg }}
       >
         <Icon className="h-5 w-5" style={{ color: config.iconColor }} />
@@ -104,15 +104,15 @@ export function ActivityItem({ email }: ActivityItemProps) {
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h4 className="truncate text-[14px] font-semibold text-[#1A1730] group-hover:text-[#7C6FE0] transition-colors">
+            <h4 className="truncate text-[14px] font-semibold text-foreground transition-colors group-hover:text-primary">
               {email.subject}
             </h4>
             <div className="flex items-center gap-2 mt-0.5">
-              <span className="text-[12px] text-[#64748B] font-medium">From: {email.from}</span>
+              <span className="text-[12px] font-medium text-muted-foreground">From: {email.from}</span>
               {email.accountEmail && (
                 <>
                   <span className="text-[#E2E8F0]">•</span>
-                  <div className="flex items-center gap-1 text-[11px] text-[#9490B8]">
+                  <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
                     <Mail className="h-3 w-3" />
                     <span>{email.accountEmail}</span>
                   </div>
@@ -121,7 +121,7 @@ export function ActivityItem({ email }: ActivityItemProps) {
             </div>
           </div>
           <time 
-            className="whitespace-nowrap text-[11px] font-medium text-[#9490B8] bg-slate-50 px-2 py-0.5 rounded-md border border-slate-100" 
+            className="whitespace-nowrap rounded-md border border-border bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground" 
             title={email.fullTime}
           >
             {email.time}
@@ -138,13 +138,13 @@ export function ActivityItem({ email }: ActivityItemProps) {
           
           {email.confidence !== undefined && email.confidence > 0 && (
             <div className="flex items-center gap-1.5">
-              <div className="h-1 w-12 bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-1 w-12 overflow-hidden rounded-full bg-muted">
                 <div 
                   className="h-full bg-[#10B981]" 
                   style={{ width: `${email.confidence}%` }}
                 />
               </div>
-              <span className="text-[11px] font-medium text-[#64748B]">
+              <span className="text-[11px] font-medium text-muted-foreground">
                 {email.confidence}% confidence
               </span>
             </div>

@@ -174,8 +174,8 @@ export default function Dashboard() {
     return (
       <div className="flex h-[80vh] items-center justify-center p-8">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-10 w-10 animate-spin text-[#7C6FE0]" />
-          <p className="text-[14px] font-medium text-[#64748B]">Loading your dashboard...</p>
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          <p className="text-[14px] font-medium text-muted-foreground">Loading your dashboard...</p>
         </div>
       </div>
     );
@@ -190,12 +190,12 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="p-8 max-w-[1400px] mx-auto min-h-screen bg-[#FDFDFF]">
+    <div className="min-h-screen max-w-[1400px] mx-auto bg-background p-8">
       {/* Header */}
       <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-[28px] font-bold tracking-tight text-[#1A1730]">Dashboard</h1>
-          <p className="mt-1 text-[14px] text-[#64748B]">
+          <h1 className="text-[28px] font-bold tracking-tight text-foreground">Dashboard</h1>
+          <p className="mt-1 text-[14px] text-muted-foreground">
             Real-time overview of your AI email operations and agent performance.
           </p>
         </div>
@@ -205,14 +205,14 @@ export default function Dashboard() {
             size="sm"
             onClick={handleFetchEmails}
             disabled={isFetching}
-            className="bg-white shadow-sm border-slate-200 hover:bg-slate-50 transition-all h-10 px-4"
+            className="h-10 border-border bg-card px-4 shadow-sm transition-colors hover:bg-muted"
           >
             {isFetching ? (
-              <Loader2 className="mr-2.5 h-4 w-4 animate-spin text-[#7C6FE0]" />
+              <Loader2 className="mr-2.5 h-4 w-4 animate-spin text-primary" />
             ) : (
-              <RefreshCw className="mr-2.5 h-4 w-4 text-[#7C6FE0]" />
+              <RefreshCw className="mr-2.5 h-4 w-4 text-primary" />
             )}
-            <span className="font-semibold text-[#1A1730]">Fetch Emails</span>
+            <span className="font-semibold text-foreground">Fetch Emails</span>
           </Button>
         </div>
       </div>
@@ -253,13 +253,13 @@ export default function Dashboard() {
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center justify-between px-1">
               <div className="flex items-center gap-3">
-                <h2 className="text-[17px] font-bold text-[#1A1730]">Recent Activity</h2>
-                <div className="flex items-center gap-1 text-[11px] font-medium text-[#9490B8] bg-slate-100 px-2 py-0.5 rounded-full">
+                <h2 className="text-[17px] font-bold text-foreground">Recent Activity</h2>
+                <div className="flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
                   {processedActivity.length} Recent
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <div className="hidden sm:flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+                <div className="hidden items-center rounded-lg border border-border bg-muted p-0.5 sm:flex">
                   {filterOptions.map((opt) => (
                     <button
                       key={opt.value}
@@ -267,8 +267,8 @@ export default function Dashboard() {
                       className={cn(
                         "px-3 py-1 text-[11px] font-bold rounded-md transition-all",
                         activeFilter === opt.value 
-                          ? "bg-white text-[#7C6FE0] shadow-sm" 
-                          : "text-[#64748B] hover:text-[#1A1730]"
+                          ? "bg-card text-primary shadow-sm" 
+                          : "text-muted-foreground hover:text-foreground"
                       )}
                     >
                       {opt.label}
@@ -276,36 +276,36 @@ export default function Dashboard() {
                   ))}
                 </div>
                 <Link to="/inbox">
-                  <Button variant="ghost" size="sm" className="text-[#7C6FE0] font-bold text-[12px] h-8 hover:bg-[#EBE9FF]/50">
+                  <Button variant="ghost" size="sm" className="h-8 text-[12px] font-bold text-primary hover:bg-primary/10">
                     View Queue <ChevronRight className="h-4 w-4 ml-0.5" />
                   </Button>
                 </Link>
               </div>
             </div>
 
-            <Card className="border-slate-200/60 shadow-sm">
+            <Card className="border-border shadow-sm">
               <CardContent className="p-4 space-y-3">
                 {isLoading ? (
                   <div className="space-y-4 py-4">
                     {[1, 2, 3].map(i => (
                       <div key={i} className="flex gap-4 p-4 animate-pulse">
-                        <div className="h-10 w-10 bg-slate-100 rounded-full shrink-0" />
+                        <div className="h-10 w-10 shrink-0 rounded-full bg-muted" />
                         <div className="flex-1 space-y-2">
-                          <div className="h-4 w-1/3 bg-slate-100 rounded" />
-                          <div className="h-3 w-1/2 bg-slate-50 rounded" />
+                          <div className="h-4 w-1/3 rounded bg-muted" />
+                          <div className="h-3 w-1/2 rounded bg-muted" />
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : processedActivity.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-16 text-center">
-                    <div className="h-12 w-12 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-                      <Mail className="h-6 w-6 text-slate-300" />
+                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                      <Mail className="h-6 w-6 text-muted-foreground" />
                     </div>
-                    <p className="text-[14px] font-semibold text-[#1A1730]">
+                    <p className="text-[14px] font-semibold text-foreground">
                       No activity found
                     </p>
-                    <p className="text-[12px] text-[#64748B] mt-1 max-w-[240px]">
+                    <p className="mt-1 max-w-[240px] text-[12px] text-muted-foreground">
                       {activeFilter === 'all' 
                         ? "Emails you fetch will appear here once they're processed by the AI."
                         : `No emails match the "${filterOptions.find(o => o.value === activeFilter)?.label}" filter.`}
@@ -332,15 +332,15 @@ export default function Dashboard() {
             </Card>
 
             {/* Status Legend */}
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 px-2 py-4 border-t border-slate-100 mt-2">
-              <span className="text-[11px] font-bold text-[#9490B8] uppercase tracking-wider flex items-center gap-1.5">
+            <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-border px-2 py-4">
+              <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                 <Info className="h-3 w-3" />
                 Status Legend
               </span>
               {Object.entries(actionConfig).slice(0, 5).map(([key, config]) => (
                 <div key={key} className="flex items-center gap-2">
                   <div className="h-2 w-2 rounded-full" style={{ backgroundColor: config.iconColor }} />
-                  <span className="text-[11px] font-medium text-[#64748B]">{config.label}</span>
+                  <span className="text-[11px] font-medium text-muted-foreground">{config.label}</span>
                 </div>
               ))}
             </div>
@@ -352,7 +352,7 @@ export default function Dashboard() {
 
             {(drafted.length > 0 || needsReview.length > 0) && (
               <div className="space-y-3">
-                <h3 className="text-[13px] font-bold text-[#1A1730] px-1">Attention Required</h3>
+                <h3 className="px-1 text-[13px] font-bold text-foreground">Attention Required</h3>
                 
                 {drafted.length > 0 && (
                   <Card className="border-indigo-100 bg-indigo-50/20 hover:bg-indigo-50/40 transition-colors group overflow-hidden relative shadow-sm">
@@ -360,14 +360,14 @@ export default function Dashboard() {
                       <div className="h-2 w-2 rounded-full bg-indigo-400 animate-pulse" />
                     </div>
                     <CardContent className="flex items-start gap-3 p-4">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-sm shrink-0">
+                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-card shadow-sm">
                         <FileEdit className="h-5 w-5 text-indigo-600" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h2 className="text-[14px] font-bold text-[#1A1730]">
+                        <h2 className="text-[14px] font-bold text-foreground">
                           {drafted.length} Draft{drafted.length !== 1 ? "s" : ""} Ready
                         </h2>
-                        <p className="mt-0.5 text-[11px] text-[#64748B] leading-normal">
+                        <p className="mt-0.5 text-[11px] leading-normal text-muted-foreground">
                           AI has prepared replies for your approval.
                         </p>
                         <Link to="/inbox?tab=drafted">
@@ -383,14 +383,14 @@ export default function Dashboard() {
                 {needsReview.length > 0 && (
                   <Card className="border-amber-100 bg-amber-50/20 hover:bg-amber-50/40 transition-colors group overflow-hidden relative shadow-sm">
                     <CardContent className="flex items-start gap-3 p-4">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-sm shrink-0">
+                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-card shadow-sm">
                         <AlertCircle className="h-5 w-5 text-amber-600" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h2 className="text-[14px] font-bold text-[#1A1730]">
+                        <h2 className="text-[14px] font-bold text-foreground">
                           {needsReview.length} Need Review
                         </h2>
-                        <p className="mt-0.5 text-[11px] text-[#64748B] leading-normal">
+                        <p className="mt-0.5 text-[11px] leading-normal text-muted-foreground">
                           Emails that the AI wasn't fully confident about.
                         </p>
                         <Link to="/inbox?tab=needs_review">
@@ -406,21 +406,21 @@ export default function Dashboard() {
             )}
 
             {/* Performance Mini Summary */}
-            <Card className="border-slate-200/60 shadow-sm overflow-hidden">
-              <CardHeader className="pb-3 bg-slate-50/50">
-                <CardTitle className="text-[13px] font-bold text-[#1A1730]">
+            <Card className="overflow-hidden border-border shadow-sm">
+              <CardHeader className="bg-muted/50 pb-3">
+                <CardTitle className="text-[13px] font-bold text-foreground">
                   Efficiency Stats
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-5 pt-5">
                 <div>
                   <div className="mb-2 flex justify-between items-end">
-                    <span className="text-[11px] font-medium text-[#64748B]">Auto-reply success</span>
-                    <span className="text-[11px] font-bold text-[#1A1730]">
+                    <span className="text-[11px] font-medium text-muted-foreground">Auto-reply success</span>
+                    <span className="text-[11px] font-bold text-foreground">
                       {totalActions > 0 ? Math.round((repliedCount / totalActions) * 100) : 0}%
                     </span>
                   </div>
-                  <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                  <div className="h-1.5 overflow-hidden rounded-full bg-muted">
                     <div
                       className="h-full rounded-full transition-all duration-700 ease-out"
                       style={{
@@ -431,12 +431,12 @@ export default function Dashboard() {
                   </div>
                 </div>
                 
-                <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                <div className="rounded-lg border border-border bg-muted/50 p-3">
                   <div className="flex items-center gap-2 mb-1">
                     <div className="h-1.5 w-1.5 rounded-full bg-[#7C6FE0]" />
-                    <span className="text-[11px] font-bold text-[#1A1730]">AI Availability</span>
+                    <span className="text-[11px] font-bold text-foreground">AI Availability</span>
                   </div>
-                  <p className="text-[10px] text-[#64748B] leading-normal">
+                  <p className="text-[10px] leading-normal text-muted-foreground">
                     Your agent is actively monitoring {accounts.filter(a => a.is_active).length} connected account(s).
                   </p>
                 </div>

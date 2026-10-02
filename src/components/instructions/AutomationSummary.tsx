@@ -21,48 +21,48 @@ export function AutomationSummary({
       <CardContent className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="flex items-start gap-3">
-            <div className="p-2 bg-white rounded-lg shadow-sm">
+            <div className="rounded-lg bg-card p-2 shadow-sm">
               <Zap className={cn("h-4 w-4", autoReply ? "text-amber-500" : "text-slate-400")} />
             </div>
             <div>
-              <p className="text-xs font-medium text-[#9490B8] uppercase tracking-wider">Status</p>
-              <p className="text-sm font-semibold text-[#1A1730]">
+              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Status</p>
+              <p className="text-sm font-semibold text-foreground">
                 {autoReply ? "Auto-Send Active" : "Review Mode Only"}
               </p>
             </div>
           </div>
 
           <div className="flex items-start gap-3">
-            <div className="p-2 bg-white rounded-lg shadow-sm">
+            <div className="rounded-lg bg-card p-2 shadow-sm">
               <ShieldCheck className="h-4 w-4 text-emerald-500" />
             </div>
             <div>
-              <p className="text-xs font-medium text-[#9490B8] uppercase tracking-wider">Confidence</p>
-              <p className="text-sm font-semibold text-[#1A1730]">
+              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Confidence</p>
+              <p className="text-sm font-semibold text-foreground">
                 {Math.round(confidenceThreshold * 100)}% Minimum
               </p>
             </div>
           </div>
 
           <div className="flex items-start gap-3">
-            <div className="p-2 bg-white rounded-lg shadow-sm">
+            <div className="rounded-lg bg-card p-2 shadow-sm">
               <Mail className="h-4 w-4 text-blue-500" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-medium text-[#9490B8] uppercase tracking-wider">Escalation</p>
-              <p className="text-sm font-semibold text-[#1A1730] truncate">
+              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Escalation</p>
+              <p className="truncate text-sm font-semibold text-foreground">
                 {backupEmail || "Review Queue"}
               </p>
             </div>
           </div>
 
           <div className="flex items-start gap-3">
-            <div className="p-2 bg-white rounded-lg shadow-sm">
+            <div className="rounded-lg bg-card p-2 shadow-sm">
               <MessageSquare className="h-4 w-4 text-purple-500" />
             </div>
             <div>
-              <p className="text-xs font-medium text-[#9490B8] uppercase tracking-wider">Low Confidence</p>
-              <p className="text-sm font-semibold text-[#1A1730]">
+              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Low Confidence</p>
+              <p className="text-sm font-semibold text-foreground">
                 {escalateUncertain ? "Always Escalate" : "Ignore"}
               </p>
             </div>

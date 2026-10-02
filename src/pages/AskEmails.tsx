@@ -159,21 +159,21 @@ export default function AskEmails() {
   };
 
   return (
-    <div className="flex h-full flex-col p-4 md:p-8 overflow-hidden bg-[#FAFAFF]">
+    <div className="flex h-full flex-col overflow-hidden bg-background p-4 md:p-8">
       {/* Header */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-[22px] font-semibold text-[#1A1730]">Inbox Intelligence</h1>
+            <h1 className="text-[22px] font-semibold text-foreground">Inbox Intelligence</h1>
             <Badge variant="secondary" className="bg-[#EBE9FF] text-[#7C6FE0] border-none text-[10px] font-bold uppercase tracking-wider">AI Powered</Badge>
           </div>
-          <p className="mt-0.5 text-[13px] text-[#9490B8]">
+          <p className="mt-0.5 text-[13px] text-muted-foreground">
             Analyze and query your inbox data with natural language
           </p>
         </div>
 
         {/* Date Range & Presets */}
-        <div className="flex flex-wrap items-center gap-2 bg-white p-1.5 rounded-xl border border-[rgba(124,111,224,0.1)] shadow-sm">
+        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-card p-1.5 shadow-sm">
           <div className="flex items-center gap-1 border-r border-[rgba(124,111,224,0.1)] pr-2 mr-1">
             {PRESETS.map((p) => (
               <Button
@@ -200,7 +200,7 @@ export default function AskEmails() {
                 <button
                   className={cn(
                     "inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-medium transition-all",
-                    startDate ? "text-[#7C6FE0] border-[#7C6FE0] bg-[#F4F3FF]" : "text-[#9490B8] border-[rgba(124,111,224,0.2)] bg-white hover:bg-[#F4F3FF]"
+                    startDate ? "border-primary bg-primary/10 text-primary" : "border-border bg-card text-muted-foreground hover:bg-muted"
                   )}
                 >
                   <CalendarIcon className="h-3.5 w-3.5" />
@@ -223,7 +223,7 @@ export default function AskEmails() {
                 <button
                   className={cn(
                     "inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-medium transition-all",
-                    endDate ? "text-[#7C6FE0] border-[#7C6FE0] bg-[#F4F3FF]" : "text-[#9490B8] border-[rgba(124,111,224,0.2)] bg-white hover:bg-[#F4F3FF]"
+                    endDate ? "border-primary bg-primary/10 text-primary" : "border-border bg-card text-muted-foreground hover:bg-muted"
                   )}
                 >
                   <CalendarIcon className="h-3.5 w-3.5" />
@@ -261,13 +261,13 @@ export default function AskEmails() {
           <div className="flex-1 overflow-y-auto space-y-6 mb-4 pr-2 custom-scrollbar">
             {messages.length === 0 && (
               <div className="flex flex-col items-center justify-center py-20 text-center">
-                <div className="rounded-2xl bg-[#EBE9FF] p-5 mb-6 shadow-sm border border-[rgba(124,111,224,0.1)]">
+                <div className="mb-6 rounded-lg border border-border bg-primary/10 p-5 shadow-sm">
                   <Sparkles className="h-10 w-10 text-[#7C6FE0]" />
                 </div>
-                <h3 className="text-lg font-semibold text-[#1A1730] mb-2">
+                <h3 className="mb-2 text-lg font-semibold text-foreground">
                   What can I help you find today?
                 </h3>
-                <p className="text-[14px] text-[#9490B8] mb-8 max-w-md mx-auto">
+                <p className="mx-auto mb-8 max-w-md text-[14px] text-muted-foreground">
                   Analyze trends, find specific details, or summarize your communication history across any timeframe.
                 </p>
                 <div className="flex flex-wrap justify-center gap-3">
@@ -276,7 +276,7 @@ export default function AskEmails() {
                       key={s}
                       onClick={() => handleSend(s)}
                       disabled={isLoading}
-                      className="rounded-xl border border-[rgba(124,111,224,0.15)] bg-white px-5 py-2.5 text-[13px] font-medium text-[#3D3A5C] shadow-sm transition-all hover:bg-[#F4F3FF] hover:border-[#7C6FE0] hover:text-[#7C6FE0] disabled:opacity-50"
+                      className="rounded-lg border border-border bg-card px-5 py-2.5 text-[13px] font-medium text-foreground shadow-sm transition-colors hover:border-primary hover:bg-muted hover:text-primary disabled:opacity-50"
                     >
                       {s}
                     </button>
@@ -302,13 +302,13 @@ export default function AskEmails() {
                       "shadow-sm",
                       msg.role === "user"
                         ? "bg-[#7C6FE0] text-white border-none rounded-2xl rounded-tr-none"
-                        : "bg-white border-[rgba(124,111,224,0.1)] rounded-2xl rounded-tl-none"
+                        : "rounded-2xl rounded-tl-none border-border bg-card"
                     )}
                   >
                     <CardContent className="p-4 md:p-5">
                       <p className={cn(
                         "whitespace-pre-wrap text-sm leading-relaxed",
-                        msg.role === "user" ? "text-white" : "text-[#3D3A5C]"
+                        msg.role === "user" ? "text-primary-foreground" : "text-foreground"
                       )}>
                         {msg.content}
                       </p>
@@ -382,7 +382,7 @@ export default function AskEmails() {
 
             {isLoading && (
               <div className="flex justify-start animate-pulse">
-                <Card className="bg-white border border-[rgba(124,111,224,0.1)] rounded-2xl rounded-tl-none">
+                <Card className="rounded-2xl rounded-tl-none border border-border bg-card">
                   <CardContent className="flex items-center gap-3 p-4">
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#F4F3FF]">
                       <Loader2 className="h-4 w-4 animate-spin text-[#7C6FE0]" />
@@ -396,9 +396,9 @@ export default function AskEmails() {
 
           {/* Input */}
           <div className="relative mt-auto">
-            <div className="flex items-center gap-3 rounded-2xl border border-[rgba(124,111,224,0.2)] bg-white p-2 pl-5 shadow-sm focus-within:border-[#7C6FE0] transition-all">
+            <div className="flex items-center gap-3 rounded-lg border border-border bg-card p-2 pl-5 shadow-sm transition-colors focus-within:border-primary">
               <input
-                className="flex-1 bg-transparent py-2.5 text-sm text-[#1A1730] placeholder:text-[#C4BEFF] outline-none min-h-[44px]"
+                className="min-h-[44px] flex-1 bg-transparent py-2.5 text-sm text-foreground outline-none placeholder:text-muted-foreground"
                 placeholder="Ask a question about your emails..."
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
