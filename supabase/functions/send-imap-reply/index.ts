@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.93.3";
 import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
+import { withTrackingPixel } from "../_shared/tracking.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,6 +15,7 @@ interface SendReplyRequest {
   subject: string;
   body: string;
   html_body?: string;
+  queue_email_id?: string;
   attachments?: string[]; // URLs to download
 }
 
@@ -137,6 +139,7 @@ serve(async (req) => {
     }
 
     const requestData: SendReplyRequest = await req.json();
+    requestData.html_body = await withTrackingPixel(supabase, supabaseUrl, user.id, requestData.queue_email_id, requestData.html_body, requestData.body);
     console.log("Sending SMTP reply to:", requestData.to_address, "Subject:", requestData.subject);
 
     // Get the email account

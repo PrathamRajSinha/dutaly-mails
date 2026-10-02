@@ -1,3 +1,4 @@
+import { ReadReceiptBadge } from "@/components/inbox/ReadReceiptBadge";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { format, formatDistanceToNow, isPast } from "date-fns";
 import {
@@ -334,6 +335,7 @@ export function TicketDetailPanel({ ticketId, onBack }: { ticketId: string; onBa
                           {email.intent && <Badge variant="outline" className="text-xs capitalize">{email.intent}</Badge>}
                           {email.confidence_score !== null && <Badge variant="secondary" className="text-xs">{Math.round(email.confidence_score * 100)}%</Badge>}
                           {isSent && <Badge className="bg-green-500/10 text-green-600 text-xs">Sent</Badge>}
+                          <ReadReceiptBadge status={email.status} openedAt={email.opened_at} lastOpenedAt={email.last_opened_at} openCount={email.open_count} />
                           {isIgnored && <Badge variant="secondary" className="text-xs">Ignored</Badge>}
                           {isPendingEmail && <Badge className="bg-yellow-500/10 text-yellow-600 text-xs">Needs Review</Badge>}
                         </div>

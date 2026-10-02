@@ -26,6 +26,9 @@ export interface QueuedEmail {
   created_at: string;
   scheduled_send_at: string | null;
   snoozed_until: string | null;
+  opened_at?: string | null;
+  last_opened_at?: string | null;
+  open_count?: number | null;
 }
 
 export type QueueTab = "needs_review" | "drafted" | "sent" | "ignored";
@@ -169,6 +172,7 @@ export function useEmailQueue(statusFilter?: string) {
         to_address: email.from_address,
         subject: email.subject,
         body: replyBody,
+        queue_email_id: email.id,
       };
 
       if (htmlBody) {

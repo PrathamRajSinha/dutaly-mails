@@ -1,3 +1,4 @@
+import { ReadReceiptBadge } from "@/components/inbox/ReadReceiptBadge";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { format, formatDistanceToNow, startOfDay, endOfDay, subDays } from "date-fns";
 import {
@@ -1042,6 +1043,7 @@ function EmailCard({
           <div className="flex items-center gap-2">
             <h3 className="text-sm font-medium text-card-foreground truncate">{email.subject}</h3>
             {statusBadge()}
+            <ReadReceiptBadge status={email.status} openedAt={email.opened_at} lastOpenedAt={email.last_opened_at} openCount={email.open_count} />
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">
             {email.from_name || email.from_address} · {formatTimeAgo(email.queued_at)}
