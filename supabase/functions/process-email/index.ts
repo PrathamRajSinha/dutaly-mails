@@ -421,6 +421,7 @@ ${emailData.body}`
             subject: emailData.subject,
             body: parsedResponse.suggested_reply,
             html_body: htmlBody,
+            queue_email_id: insertedEmail.id,
           };
 
           if (emailData.thread_id) {
