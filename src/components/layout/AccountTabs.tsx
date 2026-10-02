@@ -101,8 +101,8 @@ function TabButton({
       className={cn(
         "group flex items-center gap-1 whitespace-nowrap rounded-t-md border-b-2 transition-colors",
         active
-          ? "border-[#7C6FE0]"
-          : "border-transparent hover:bg-[#F4F3FF]",
+          ? "border-primary"
+          : "border-transparent hover:bg-muted",
         muted && !active && "opacity-60"
       )}
     >
@@ -112,7 +112,7 @@ function TabButton({
         className={cn(
           "flex items-center gap-1.5 pl-3 py-2 text-[12px] font-medium transition-colors",
           onClose ? "pr-1" : "pr-3",
-          active ? "text-[#1A1730]" : "text-[#9490B8] hover:text-[#1A1730]"
+          active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
         )}
       >
         {icon}
@@ -127,7 +127,7 @@ function TabButton({
           }}
           aria-label={`Disconnect ${label}`}
           className={cn(
-            "mr-1 flex h-5 w-5 items-center justify-center rounded text-[#9490B8] opacity-0 transition-opacity hover:bg-[#E8E5FA] hover:text-[#1A1730] group-hover:opacity-100",
+            "mr-1 flex h-5 w-5 items-center justify-center rounded text-muted-foreground opacity-0 transition-opacity hover:bg-muted hover:text-foreground group-hover:opacity-100",
             active && "opacity-100"
           )}
         >

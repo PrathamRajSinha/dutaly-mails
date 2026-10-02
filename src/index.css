@@ -134,20 +134,14 @@
     @apply bg-background text-foreground;
     font-family: var(--font-sans);
     font-size: 13px;
-    color: #3D3A5C;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  html.dark body { color: #B8B5D6; }
-
   h1, h2, h3, h4, h5, h6 {
     font-weight: 500;
-    color: #1A1730;
+    color: hsl(var(--foreground));
   }
-
-  html.dark h1, html.dark h2, html.dark h3,
-  html.dark h4, html.dark h5, html.dark h6 { color: #E8E4FF; }
 }
 
 /* Badge variants */
@@ -175,6 +169,8 @@ html.dark .badge-pending { background: #1f1b3d; color: #b8aef0; }
 
 /* Background remaps */
 html.dark [style*="#F4F3FF" i] { background-color: #0F0F18 !important; }
+html.dark [style*="#FDFDFF" i],
+html.dark [style*="#FAFAFF" i] { background-color: #0F0F18 !important; }
 html.dark [style*="#FFFFFF" i]:not(.preserve-light),
 html.dark [style*="#ffffff" i]:not(.preserve-light),
 html.dark [style*="background-color: #fff" i]:not(.preserve-light) {
@@ -184,6 +180,8 @@ html.dark [style*="#FAFAFA" i],
 html.dark [style*="#F9FAFB" i],
 html.dark [style*="#F5F5F5" i] { background-color: #14141C !important; }
 html.dark [style*="#EBE9FF" i] { background-color: #1F1B3D !important; }
+html.dark [style*="#E8E5FA" i],
+html.dark [style*="#F0EFFF" i] { background-color: #211D3B !important; }
 html.dark [style*="#F1EFE8" i] { background-color: #1A1820 !important; }
 
 /* Text-color remaps via specific declaration matching */
@@ -193,6 +191,8 @@ html.dark [style*="color: #3D3A5C" i],
 html.dark [style*="color:#3D3A5C" i] { color: #B8B5D6 !important; }
 html.dark [style*="color: #9490B8" i],
 html.dark [style*="color:#9490B8" i] { color: #7C7898 !important; }
+html.dark [style*="color: #64748B" i],
+html.dark [style*="color:#64748B" i] { color: #A9A6C0 !important; }
 html.dark [style*="color: #534AB7" i] { color: #B8AEF0 !important; }
 
 /* Border remaps */
@@ -205,11 +205,44 @@ html.dark [style*="border-color: #E5E7EB" i] {
 
 /* Common bg-white tailwind class */
 html.dark .bg-white { background-color: #16161F !important; }
-html.dark .bg-gray-50, html.dark .bg-slate-50 { background-color: #14141C !important; }
+html.dark .bg-gray-50, html.dark .bg-slate-50,
+html.dark .bg-slate-50\/50, html.dark .bg-slate-50\/30 { background-color: #14141C !important; }
+html.dark .bg-gray-100, html.dark .bg-slate-100,
+html.dark .bg-slate-100\/50 { background-color: #1C1B27 !important; }
+html.dark .bg-gray-200, html.dark .bg-slate-200 { background-color: #292737 !important; }
 html.dark .text-gray-900, html.dark .text-slate-900 { color: #E8E4FF !important; }
 html.dark .text-gray-700, html.dark .text-slate-700 { color: #B8B5D6 !important; }
-html.dark .text-gray-500, html.dark .text-slate-500 { color: #7C7898 !important; }
+html.dark .text-gray-600, html.dark .text-slate-600 { color: #AAA7C2 !important; }
+html.dark .text-gray-500, html.dark .text-slate-500,
+html.dark .text-gray-400, html.dark .text-slate-400 { color: #8E8AA8 !important; }
+html.dark .text-gray-300, html.dark .text-slate-300 { color: #716D89 !important; }
+html.dark .border-gray-50, html.dark .border-slate-50,
+html.dark .border-gray-100, html.dark .border-slate-100,
 html.dark .border-gray-200, html.dark .border-slate-200 { border-color: #2A2738 !important; }
+
+/* Legacy arbitrary palette utilities used throughout authenticated screens. */
+html.dark [class*="bg-[#FDFDFF]"],
+html.dark [class*="bg-[#FAFAFF]"],
+html.dark [class*="bg-[#F4F3FF]"] { background-color: hsl(var(--background)) !important; }
+html.dark [class*="bg-[#EBE9FF]"],
+html.dark [class*="bg-[#F0EFFF]"] { background-color: hsl(var(--muted)) !important; }
+html.dark [class*="text-[#1A1730]"] { color: hsl(var(--foreground)) !important; }
+html.dark [class*="text-[#3D3A5C]"],
+html.dark [class*="text-[#64748B]"] { color: hsl(var(--card-foreground)) !important; }
+html.dark [class*="text-[#9490B8]"] { color: hsl(var(--muted-foreground)) !important; }
+html.dark [class*="border-[rgba(124,111,224"] { border-color: hsl(var(--border)) !important; }
+
+html.dark input,
+html.dark textarea,
+html.dark select {
+  color: hsl(var(--foreground));
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: hsl(var(--muted-foreground));
+  opacity: 1;
+}
 
 @keyframes marquee {
   0% { transform: translateX(0); }
