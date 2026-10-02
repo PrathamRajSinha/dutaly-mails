@@ -316,6 +316,9 @@ export type Database = {
           id: string
           intent: string | null
           labels: string[]
+          last_opened_at: string | null
+          open_count: number
+          opened_at: string | null
           queued_at: string
           reviewed_at: string | null
           scheduled_send_at: string | null
@@ -325,6 +328,7 @@ export type Database = {
           suggested_reply: string | null
           thread_id: string | null
           ticket_id: string | null
+          tracking_id: string
           user_id: string
         }
         Insert: {
@@ -339,6 +343,9 @@ export type Database = {
           id?: string
           intent?: string | null
           labels?: string[]
+          last_opened_at?: string | null
+          open_count?: number
+          opened_at?: string | null
           queued_at?: string
           reviewed_at?: string | null
           scheduled_send_at?: string | null
@@ -348,6 +355,7 @@ export type Database = {
           suggested_reply?: string | null
           thread_id?: string | null
           ticket_id?: string | null
+          tracking_id?: string
           user_id: string
         }
         Update: {
@@ -362,6 +370,9 @@ export type Database = {
           id?: string
           intent?: string | null
           labels?: string[]
+          last_opened_at?: string | null
+          open_count?: number
+          opened_at?: string | null
           queued_at?: string
           reviewed_at?: string | null
           scheduled_send_at?: string | null
@@ -371,6 +382,7 @@ export type Database = {
           suggested_reply?: string | null
           thread_id?: string | null
           ticket_id?: string | null
+          tracking_id?: string
           user_id?: string
         }
         Relationships: [
@@ -886,6 +898,7 @@ export type Database = {
         Args: { p_resource_type: string; p_user_id: string }
         Returns: undefined
       }
+      record_email_open: { Args: { p_tracking_id: string }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
