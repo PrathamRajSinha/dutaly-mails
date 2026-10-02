@@ -173,6 +173,7 @@ html.dark [style*="#FDFDFF" i],
 html.dark [style*="#FAFAFF" i] { background-color: #0F0F18 !important; }
 html.dark [style*="#FFFFFF" i]:not(.preserve-light),
 html.dark [style*="#ffffff" i]:not(.preserve-light),
+html.dark [style*="rgb(255, 255, 255)" i]:not(.preserve-light),
 html.dark [style*="background-color: #fff" i]:not(.preserve-light) {
   background-color: #16161F !important;
 }
@@ -186,13 +187,17 @@ html.dark [style*="#F1EFE8" i] { background-color: #1A1820 !important; }
 
 /* Text-color remaps via specific declaration matching */
 html.dark [style*="color: #1A1730" i],
-html.dark [style*="color:#1A1730" i] { color: #E8E4FF !important; }
+html.dark [style*="color:#1A1730" i],
+html.dark [style*="color: rgb(26, 23, 48)" i] { color: #E8E4FF !important; }
 html.dark [style*="color: #3D3A5C" i],
-html.dark [style*="color:#3D3A5C" i] { color: #B8B5D6 !important; }
+html.dark [style*="color:#3D3A5C" i],
+html.dark [style*="color: rgb(61, 58, 92)" i] { color: #B8B5D6 !important; }
 html.dark [style*="color: #9490B8" i],
 html.dark [style*="color:#9490B8" i] { color: #7C7898 !important; }
 html.dark [style*="color: #64748B" i],
 html.dark [style*="color:#64748B" i] { color: #A9A6C0 !important; }
+html.dark [style*="color: #6B6890" i],
+html.dark [style*="color: rgb(107, 104, 144)" i] { color: #A9A6C0 !important; }
 html.dark [style*="color: #534AB7" i] { color: #B8AEF0 !important; }
 
 /* Border remaps */
@@ -236,6 +241,13 @@ html.dark input,
 html.dark textarea,
 html.dark select {
   color: hsl(var(--foreground));
+}
+
+html.dark input[style*="#F4F3FF" i],
+html.dark input[style*="rgb(244, 243, 255)" i] {
+  background-color: hsl(var(--muted)) !important;
+  color: hsl(var(--foreground)) !important;
+  border-color: hsl(var(--input)) !important;
 }
 
 html.dark input::placeholder,
