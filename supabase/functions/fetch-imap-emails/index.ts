@@ -163,7 +163,13 @@ function extractPlainBody(raw: string): string {
     }
   }
 
-  // Fallback: no MIME boundaries, treat as plain text
+  // Fallback: no MIME boundaries, treat as plain text (decode quoted-printable if present)
+  if (/=\r?\n|=[0-9A-F]{2}/.test(bodyContent)) {
+    bodyContent = decodeQuotedPrintable(bodyContent);
+    try {
+      bodyContent = new TextDecoder("utf-8").decode(Uint8Array.from(bodyContent, c => c.charCodeAt(0) & 0xff));
+    } catch { /* ignore */ }
+  }
   const plainBody = bodyContent.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
   return plainBody.substring(0, 5000);
 }
