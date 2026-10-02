@@ -52,7 +52,7 @@ export function KnowledgeBaseEntryCard({
 
   return (
     <Card className={cn(
-      "group relative flex flex-col transition-all duration-200 border-slate-200 hover:shadow-md",
+      "group relative flex flex-col border-border transition-all duration-200 hover:shadow-md",
       selected && "ring-2 ring-primary border-transparent bg-primary/5 shadow-sm"
     )}>
       <div className="absolute top-3 left-3 z-10">
@@ -60,7 +60,7 @@ export function KnowledgeBaseEntryCard({
           checked={selected} 
           onCheckedChange={() => onToggleSelection(entry.id)}
           aria-label={`Select entry: ${entry.title}`}
-          className="bg-white"
+          className="bg-card"
         />
       </div>
 
@@ -86,10 +86,10 @@ export function KnowledgeBaseEntryCard({
         </div>
 
         <div className="space-y-2 mb-4">
-          <h3 className="font-semibold text-slate-900 line-clamp-1 group-hover:text-primary transition-colors">
+          <h3 className="line-clamp-1 font-semibold text-foreground transition-colors group-hover:text-primary">
             {entry.title}
           </h3>
-          <p className="text-sm text-slate-600 line-clamp-3 leading-relaxed min-h-[4.5rem]">
+          <p className="min-h-[4.5rem] line-clamp-3 text-sm leading-relaxed text-muted-foreground">
             {entry.content}
           </p>
         </div>
@@ -127,7 +127,7 @@ export function KnowledgeBaseEntryCard({
           </div>
         )}
 
-        <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+        <div className="mt-auto flex items-center justify-between border-t border-border pt-4 text-[11px] text-muted-foreground">
           <div className="flex flex-col gap-1">
             <span className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
@@ -143,12 +143,12 @@ export function KnowledgeBaseEntryCard({
           {entry.tags && entry.tags.length > 0 && (
             <div className="flex -space-x-1">
               {entry.tags.slice(0, 2).map((tag, i) => (
-                <div key={i} className="h-5 px-1.5 rounded-full bg-slate-100 border border-white text-[9px] flex items-center">
+                <div key={i} className="flex h-5 items-center rounded-full border border-border bg-muted px-1.5 text-[9px]">
                   {tag}
                 </div>
               ))}
               {entry.tags.length > 2 && (
-                <div className="h-5 w-5 rounded-full bg-slate-100 border border-white text-[9px] flex items-center justify-center font-bold">
+                <div className="flex h-5 w-5 items-center justify-center rounded-full border border-border bg-muted text-[9px] font-bold">
                   +{entry.tags.length - 2}
                 </div>
               )}
