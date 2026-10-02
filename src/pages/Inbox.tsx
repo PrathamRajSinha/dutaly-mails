@@ -104,7 +104,13 @@ type EmailTabValue = "all_emails" | "needs_review" | "drafted" | "sent" | "ignor
 export default function UnifiedInbox() {
   const [viewMode, setViewMode] = useState<ViewMode>("tickets");
   const [searchQuery, setSearchQuery] = useState("");
-  const [autoFetchEnabled, setAutoFetchEnabled] = useState(false);
+  const [autoFetchEnabled, setAutoFetchEnabledState] = useState<boolean>(
+    () => typeof window !== "undefined" && localStorage.getItem("dutaly:autofetch") === "on"
+  );
+  const setAutoFetchEnabled = (v: boolean) => {
+    localStorage.setItem("dutaly:autofetch", v ? "on" : "off");
+    setAutoFetchEnabledState(v);
+  };
   const [isFetching, setIsFetching] = useState(false);
   const isFetchingRef = useRef(false);
   const { session } = useAuth();

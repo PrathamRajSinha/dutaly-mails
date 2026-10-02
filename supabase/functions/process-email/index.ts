@@ -281,6 +281,16 @@ ${emailData.body}`
       };
     }
 
+    // Strip leftover quoted-printable artifacts (e.g. "=20", soft breaks) from the reply
+    if (typeof parsedResponse.suggested_reply === "string") {
+      parsedResponse.suggested_reply = parsedResponse.suggested_reply
+        .replace(/=\r?\n/g, "")
+        .replace(/=(20|09)(?=\s|$)/g, "")
+        .replace(/=3D/gi, "=")
+        .replace(/[ \t]+$/gm, "")
+        .trim();
+    }
+
     // Ensure new fields have defaults if AI didn't return them
     const category = parsedResponse.category || "general";
     const labels = normalizeLabels(parsedResponse.labels);
