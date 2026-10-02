@@ -233,7 +233,7 @@ export default function Instructions() {
                 <div className="space-y-2">
                   {doRules.map((rule, i) => (
                     <div key={i} className="flex items-center gap-2 rounded-xl border border-emerald-100 bg-emerald-50/30 px-3 py-2">
-                      <span className="flex-1 text-sm text-[#3D3A5C]">{rule}</span>
+                      <span className="flex-1 text-sm text-foreground">{rule}</span>
                       <button
                         onClick={() => setDoRules(doRules.filter((_, idx) => idx !== i))}
                         className="text-muted-foreground hover:text-destructive transition-colors"
@@ -279,7 +279,7 @@ export default function Instructions() {
                 <div className="space-y-2">
                   {doNotRules.map((rule, i) => (
                     <div key={i} className="flex items-center gap-2 rounded-xl border border-destructive/10 bg-destructive/5 px-3 py-2">
-                      <span className="flex-1 text-sm text-[#3D3A5C]">{rule}</span>
+                      <span className="flex-1 text-sm text-foreground">{rule}</span>
                       <button
                         onClick={() => setDoNotRules(doNotRules.filter((_, idx) => idx !== i))}
                         className="text-muted-foreground hover:text-destructive transition-colors"
@@ -331,8 +331,8 @@ export default function Instructions() {
                 <div className="space-y-4 rounded-xl border p-4 bg-slate-50/30">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-semibold text-[#1A1730]">Review Mode (Approval Only)</p>
-                      <p className="text-xs text-[#9490B8]">AI drafts replies but never sends them automatically.</p>
+                       <p className="text-sm font-semibold text-foreground">Review Mode (Approval Only)</p>
+                       <p className="text-xs text-muted-foreground">AI drafts replies but never sends them automatically.</p>
                     </div>
                     <Switch 
                       checked={!autoReply} 
@@ -350,8 +350,8 @@ export default function Instructions() {
                   
                   <div className="flex items-center justify-between border-t pt-4">
                     <div>
-                      <p className="text-sm font-semibold text-[#1A1730]">Auto-Send Enabled</p>
-                      <p className="text-xs text-[#9490B8]">AI will automatically send replies when confident.</p>
+                       <p className="text-sm font-semibold text-foreground">Auto-Send Enabled</p>
+                       <p className="text-xs text-muted-foreground">AI will automatically send replies when confident.</p>
                     </div>
                     <Switch 
                       checked={autoReply} 
@@ -369,8 +369,8 @@ export default function Instructions() {
                 <div className="space-y-4 rounded-xl border p-4 bg-slate-50/30">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-semibold text-[#1A1730]">Confidence Threshold</p>
-                      <p className="text-xs text-[#9490B8]">Minimum confidence needed to auto-send.</p>
+                       <p className="text-sm font-semibold text-foreground">Confidence Threshold</p>
+                       <p className="text-xs text-muted-foreground">Minimum confidence needed to auto-send.</p>
                     </div>
                     <span className="text-sm font-bold text-primary">{Math.round(confidenceThreshold * 100)}%</span>
                   </div>
@@ -397,12 +397,12 @@ export default function Instructions() {
 
              <div className="rounded-xl border p-4 bg-slate-50/30 space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-white rounded-lg shadow-sm border text-primary">
+                   <div className="rounded-lg border bg-card p-2 text-primary shadow-sm">
                     <ShieldCheck className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-[#1A1730]">Safety & Escalation</p>
-                    <p className="text-xs text-[#9490B8]">Handle uncertainty and critical emails.</p>
+                     <p className="text-sm font-semibold text-foreground">Safety & Escalation</p>
+                     <p className="text-xs text-muted-foreground">Handle uncertainty and critical emails.</p>
                   </div>
                 </div>
 
@@ -410,7 +410,7 @@ export default function Instructions() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium">Escalate uncertain emails</p>
-                      <p className="text-xs text-[#9490B8]">Queue emails below threshold for review.</p>
+                       <p className="text-xs text-muted-foreground">Queue emails below threshold for review.</p>
                     </div>
                     <Switch checked={escalateUncertain} onCheckedChange={setEscalateUncertain} />
                   </div>
@@ -418,7 +418,7 @@ export default function Instructions() {
                   <div className="space-y-2">
                     <Label className="text-xs font-medium uppercase text-[#9490B8]">Escalation Destination</Label>
                     {backupEmail ? (
-                      <div className="flex items-center gap-2 rounded-lg border bg-white px-3 py-2 shadow-sm">
+                       <div className="flex items-center gap-2 rounded-lg border bg-card px-3 py-2 shadow-sm">
                         <Mail className="h-4 w-4 text-primary" />
                         <span className="flex-1 text-sm font-medium">{backupEmail}</span>
                         <Button
@@ -461,7 +461,7 @@ export default function Instructions() {
               <div className="space-y-2">
                 <Label className="text-sm font-semibold">Writing Tone</Label>
                 <Select value={tone} onValueChange={(v) => setTone(v as typeof tone)}>
-                  <SelectTrigger className="bg-white">
+                   <SelectTrigger className="bg-card">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -475,7 +475,7 @@ export default function Instructions() {
               <div className="space-y-2">
                 <Label className="text-sm font-semibold">Reply Length</Label>
                 <Select value={replyLength} onValueChange={(v) => setReplyLength(v as typeof replyLength)}>
-                  <SelectTrigger className="bg-white">
+                   <SelectTrigger className="bg-card">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -496,7 +496,7 @@ export default function Instructions() {
                     value={signature}
                     onChange={(e) => setSignature(e.target.value)}
                     placeholder="Best regards,\nThe Support Team"
-                    className="bg-white"
+                     className="bg-card"
                   />
                 </div>
                 <div className="space-y-2">
@@ -506,7 +506,7 @@ export default function Instructions() {
                     value={emailFooter}
                     onChange={(e) => setEmailFooter(e.target.value)}
                     placeholder="This was generated by AI..."
-                    className="bg-white"
+                     className="bg-card"
                   />
                 </div>
               </div>

@@ -553,10 +553,7 @@ function TicketCard({ ticket, isExpanded, onToggle }: { ticket: Ticket; isExpand
   return (
     <Card className="border border-border overflow-hidden">
       <div
-        className="flex cursor-pointer items-center gap-4 p-4 transition-colors"
-        style={{ backgroundColor: 'transparent' }}
-        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#F4F3FF')}
-        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+        className="flex cursor-pointer items-center gap-4 p-4 transition-colors hover:bg-muted/60"
         onClick={onToggle}
       >
         <div className={cn("flex h-9 w-9 items-center justify-center rounded-full shrink-0", statusBgColor())}>
@@ -565,10 +562,10 @@ function TicketCard({ ticket, isExpanded, onToggle }: { ticket: Ticket; isExpand
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             {ticket.escalation_flag && <Flame className="h-3.5 w-3.5 text-destructive shrink-0" />}
-            <h3 className="text-[13px] font-medium truncate" style={{ color: '#1A1730' }}>{ticket.subject}</h3>
+            <h3 className="truncate text-[13px] font-medium text-foreground">{ticket.subject}</h3>
             {statusBadge()}
           </div>
-          <p className="text-[11px] mt-0.5" style={{ color: '#9490B8' }}>
+          <p className="mt-0.5 text-[11px] text-muted-foreground">
             {ticket.customer_email} · {formatTimeAgo(ticket.created_at)}
           </p>
         </div>
@@ -589,7 +586,7 @@ function TicketCard({ ticket, isExpanded, onToggle }: { ticket: Ticket; isExpand
       </div>
 
       {isExpanded && (
-        <CardContent className="border-t border-border px-0 pb-0 pt-0" style={{ backgroundColor: '#F4F3FF' }}>
+        <CardContent className="border-t border-border bg-muted/40 px-0 pb-0 pt-0">
           <div className="flex items-center gap-2 px-4 pt-3"><span className="text-xs text-muted-foreground">Labels</span><LabelChips labels={ticket.labels} table="tickets" id={ticket.id} editable /></div>
           <TicketDetailPanel ticketId={ticket.id} onBack={onToggle} />
         </CardContent>
@@ -1016,10 +1013,7 @@ function EmailCard({
 
   return (
     <div
-      className="overflow-hidden transition-colors"
-      style={{ backgroundColor: 'transparent' }}
-      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#F4F3FF')}
-      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+      className="overflow-hidden transition-colors hover:bg-muted/60"
     >
       <div className="flex cursor-pointer items-center gap-4 p-4" onClick={onToggle}>
         <div className={cn(
@@ -1064,7 +1058,7 @@ function EmailCard({
       </div>
 
       {isExpanded && (
-        <CardContent className="border-t border-border px-4 pb-4 pt-4 space-y-4" style={{ backgroundColor: '#F4F3FF' }}>
+        <CardContent className="space-y-4 border-t border-border bg-muted/40 px-4 pb-4 pt-4">
           <div className="flex items-center gap-2"><span className="text-xs text-muted-foreground">Labels</span><LabelChips labels={email.labels} table="email_queue" id={email.id} editable /></div>
           {email.flag_reason && (
             <div className="flex items-start gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 p-3">
@@ -1075,7 +1069,7 @@ function EmailCard({
 
           <div>
             <h4 className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Original Email</h4>
-            <div className="rounded-xl bg-white p-4" style={{ borderLeft: '3px solid rgba(124,111,224,0.3)' }}>
+            <div className="rounded-lg border-l-[3px] border-l-primary/30 bg-card p-4">
               <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{email.body}</p>
             </div>
           </div>
@@ -1088,7 +1082,7 @@ function EmailCard({
               {isEditing ? (
                 <Textarea className="min-h-[120px]" value={editedReply} onChange={(e) => setEditedReply(e.target.value)} />
               ) : (
-                <div className="rounded-xl p-4" style={{ backgroundColor: '#F4F3FF', borderLeft: '3px solid #7C6FE0' }}>
+                <div className="rounded-lg border-l-[3px] border-l-primary bg-muted p-4">
                   <p className="whitespace-pre-wrap text-[13px] leading-relaxed text-foreground">{email.suggested_reply}</p>
                 </div>
               )}

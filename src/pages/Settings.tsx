@@ -573,8 +573,8 @@ export default function Settings() {
     <div className="p-8">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-[20px] font-medium text-[#1A1730]">Settings</h1>
-        <p className="mt-0.5 text-[13px] text-[#9490B8]">
+        <h1 className="text-[20px] font-medium text-foreground">Settings</h1>
+        <p className="mt-0.5 text-[13px] text-muted-foreground">
           Connect your inbox and configure automation settings
         </p>
       </div>
@@ -631,8 +631,8 @@ export default function Settings() {
             <Card className="border border-border">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#F4F3FF]">
-                    <Mail className="h-5 w-5 text-[#7C6FE0]" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                    <Mail className="h-5 w-5 text-primary" />
                   </div>
                   Add an inbox
                 </CardTitle>
@@ -641,7 +641,7 @@ export default function Settings() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button onClick={() => setWizardOpen(true)} style={{ backgroundColor: "#7C6FE0" }}>
+                <Button onClick={() => setWizardOpen(true)}>
                   <Plus className="mr-2 h-4 w-4" />
                   Connect inbox
                 </Button>

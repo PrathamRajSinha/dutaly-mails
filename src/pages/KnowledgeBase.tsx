@@ -290,8 +290,8 @@ export default function KnowledgeBase() {
       {/* Header */}
       <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Knowledge Base</h1>
-          <p className="mt-1 text-sm text-slate-500 max-w-md">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Knowledge Base</h1>
+          <p className="mt-1 max-w-md text-sm text-muted-foreground">
             The source of truth for your AI. Add FAQs, documents, and policies to help the AI provide accurate responses.
           </p>
         </div>
@@ -405,7 +405,7 @@ export default function KnowledgeBase() {
       {/* Main Tabs */}
       <div className="mb-6">
         <Tabs value={mainTab} onValueChange={(v) => setMainTab(v as "entries" | "gaps" | "chat")}>
-          <TabsList className="bg-slate-100 p-1">
+          <TabsList className="bg-muted p-1">
             <TabsTrigger value="entries" className="px-6">
               Entries ({entries.length})
             </TabsTrigger>
@@ -445,7 +445,7 @@ export default function KnowledgeBase() {
 
         <>
           {/* Filters & Search */}
-          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div className="mb-8 flex flex-col gap-4 rounded-lg border border-border bg-card p-4 shadow-sm sm:flex-row sm:items-center">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <Input 
@@ -480,23 +480,23 @@ export default function KnowledgeBase() {
           {isLoading ? (
             <KnowledgeBaseSkeleton />
           ) : error ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-2xl border-2 border-dashed border-slate-100">
+            <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-card py-20 text-center">
               <AlertCircle className="h-10 w-10 text-red-500 mb-4" />
-              <h3 className="text-lg font-semibold text-slate-900">Failed to load knowledge base</h3>
-              <p className="text-slate-500 mt-2">There was an error fetching your data. Please try again.</p>
+              <h3 className="text-lg font-semibold text-foreground">Failed to load knowledge base</h3>
+              <p className="mt-2 text-muted-foreground">There was an error fetching your data. Please try again.</p>
               <Button variant="outline" className="mt-6" onClick={() => window.location.reload()}>Retry</Button>
             </div>
           ) : filteredEntries.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-2xl border-2 border-dashed border-slate-100">
-              <div className="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-                <FileText className="h-8 w-8 text-slate-300" />
+            <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-card py-20 text-center">
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+                <FileText className="h-8 w-8 text-muted-foreground" />
               </div>
-              <h3 className="text-lg font-semibold text-slate-900">
+              <h3 className="text-lg font-semibold text-foreground">
                 {searchQuery || selectedCategory !== "All"
                   ? "No entries match your current filters"
                   : "Your knowledge base is empty"}
               </h3>
-              <p className="text-slate-500 mt-2 max-w-sm">
+              <p className="mt-2 max-w-sm text-muted-foreground">
                 {searchQuery || selectedCategory !== "All"
                   ? "Try a different type or clear your search."
                   : "Start by adding common questions, snippets, or documents that your AI can learn from."}
@@ -538,12 +538,12 @@ export default function KnowledgeBase() {
         /* Gaps View remains similar but styled */
         <div className="space-y-6">
           {gapGroups.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-2xl border-2 border-dashed border-slate-100">
+            <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-card py-20 text-center">
               <div className="h-16 w-16 bg-green-50 rounded-full flex items-center justify-center mb-4 text-green-500">
                 <Plus className="h-8 w-8" />
               </div>
-              <h3 className="text-lg font-semibold text-slate-900">No knowledge gaps detected</h3>
-              <p className="text-slate-500 mt-2">The AI has all the information it needs for recent tickets!</p>
+              <h3 className="text-lg font-semibold text-foreground">No knowledge gaps detected</h3>
+              <p className="mt-2 text-muted-foreground">The AI has all the information it needs for recent tickets!</p>
             </div>
           ) : (
             <div className="grid gap-6">
@@ -553,12 +553,12 @@ export default function KnowledgeBase() {
                     <div className="flex flex-col md:flex-row md:items-center justify-between p-6 gap-6">
                       <div className="flex-1 space-y-2">
                         <div className="flex items-center gap-2">
-                          <h3 className="text-lg font-bold text-slate-900">{group.detected_topic}</h3>
+                          <h3 className="text-lg font-bold text-foreground">{group.detected_topic}</h3>
                           <Badge variant="secondary" className="bg-orange-100 text-orange-700 border-none">
                             {group.count} occurrences
                           </Badge>
                         </div>
-                        <p className="text-slate-600 text-sm">{group.category ?? "Uncategorised topic"}</p>
+                        <p className="text-sm text-muted-foreground">{group.category ?? "Uncategorised topic"}</p>
                       </div>
                       <div className="flex items-center gap-3">
                         <Button 
@@ -588,7 +588,7 @@ export default function KnowledgeBase() {
 
       {/* Integrations — Coming Soon */}
       <div className="mt-10">
-        <Card className="border border-slate-200 bg-white">
+        <Card className="border border-border bg-card">
           <CardContent className="flex flex-col items-center gap-6 px-6 py-12 text-center sm:py-16">
             <div className="flex items-center gap-3" aria-hidden="true">
               <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-slate-50">
@@ -601,10 +601,10 @@ export default function KnowledgeBase() {
             </div>
 
             <div className="max-w-md space-y-2">
-              <h2 className="text-xl font-semibold text-slate-900">
+              <h2 className="text-xl font-semibold text-foreground">
                 Native integrations are coming soon
               </h2>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-muted-foreground">
                 Sync your store data — products, orders, and customer history — directly into
                 your knowledge base so the AI can answer commerce questions accurately.
                 Nothing to configure here yet.
