@@ -18,6 +18,7 @@ interface SendReplyRequest {
   attachments?: string[]; // URLs to download
   thread_id?: string;
   message_id?: string;
+  is_new?: boolean; // fresh email, not a reply
 }
 
 interface AttachmentData {
@@ -89,7 +90,8 @@ function createEmailRaw(
   body: string,
   fromEmail: string,
   htmlBody?: string,
-  attachments?: AttachmentData[]
+  attachments?: AttachmentData[],
+  isNew = false
 ): string {
   const boundary = `boundary_${crypto.randomUUID().replace(/-/g, "")}`;
   const hasAttachments = attachments && attachments.length > 0;
@@ -98,7 +100,7 @@ function createEmailRaw(
   const headers = [
     `From: ${fromEmail}`,
     `To: ${to}`,
-    `Subject: Re: ${subject.replace(/^Re:\s*/i, "")}`,
+    (isNew ? `Subject: =?UTF-8?B?${btoa(unescape(encodeURIComponent(subject)))}?=` : `Subject: Re: ${subject.replace(/^Re:\s*/i, "")}`),
     `MIME-Version: 1.0`,
   ];
 
@@ -219,7 +221,8 @@ serve(async (req) => {
       requestData.body,
       account.email_address,
       requestData.html_body,
-      attachmentData
+      attachmentData,
+      !!requestData.is_new
     );
 
     // Send via Gmail API

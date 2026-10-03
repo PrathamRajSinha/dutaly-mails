@@ -21,18 +21,13 @@ Rules:
 - Write entry content as a clear, complete answer a support agent could send, in plain text (no markdown).
 - Do not repeat an entry that already exists with the same title.
 
-AUTOMATION REQUESTS:
-- If the user asks you to create a task, set a reminder, or set up a forwarding rule, propose it in "actions" instead of a KB entry. Never claim it is done; the user must approve it.
-- task / reminder: { "type": "task" | "reminder", "title": string, "details": string, "due_at": ISO 8601 datetime or null }
-- forward_rule: { "type": "forward_rule", "title": short description, "forward_to": email, "label_match": string|null, "subject_contains": string|null, "from_match": string|null, "sentiment_below": number 0-1 or null, "note": string|null }
-- If a required detail (like the forward-to email) is missing, ask for it instead of proposing.
-- Current time: __NOW__.
+OUT OF SCOPE:
+- If the user asks you to send an email, set a reminder, create a task or a forwarding rule, reply that this is done in Inbox Intelligence (in the sidebar), and return no entries.
 
 Respond with ONLY valid JSON (no markdown fences) shaped as:
 {
   "reply": "your next message to the user",
-  "kb_entries": [ { "title": string, "content": string, "category": "faq" | "snippet" | "policy" } ],
-  "actions": []
+  "kb_entries": [ { "title": string, "content": string, "category": "faq" | "snippet" | "policy" } ]
 }`;
 
 serve(async (req) => {
