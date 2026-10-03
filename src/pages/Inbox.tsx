@@ -1124,7 +1124,10 @@ function EmailCard({
                 {readOnly ? "Reply Sent" : "AI Suggested Reply"}
               </h4>
               {isEditing ? (
-                <Textarea className="min-h-[120px]" value={editedReply} onChange={(e) => setEditedReply(e.target.value)} />
+                <div className="space-y-2">
+                  <Textarea className="min-h-[120px]" value={editedReply} onChange={(e) => setEditedReply(e.target.value)} />
+                  {improveControls(editedReply)}
+                </div>
               ) : (
                 <div className="rounded-lg border-l-[3px] border-l-primary bg-muted p-4">
                   <p className="whitespace-pre-wrap text-[13px] leading-relaxed text-foreground">{email.suggested_reply}</p>
