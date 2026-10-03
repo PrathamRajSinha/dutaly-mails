@@ -250,7 +250,7 @@ export function KbChatPanel({ onSaveEntry }: KbChatPanelProps) {
           <Textarea
             rows={1}
             value={input}
-            placeholder="Answer, or ask e.g. “Remind me Friday to follow up with John”"
+            placeholder="Tell me about your business, policies or common questions…"
             className="min-h-[44px] resize-none placeholder:text-muted-foreground/60"
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {

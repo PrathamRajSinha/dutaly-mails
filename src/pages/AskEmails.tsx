@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { format, subDays, startOfDay, endOfDay } from "date-fns";
 import { 
   CalendarIcon, 
@@ -23,12 +23,15 @@ import { toast } from "sonner";
 import { EmailDetailDialog, type EmailSummary } from "@/components/ask-emails/EmailDetailDialog";
 import { EmailReferenceList } from "@/components/ask-emails/EmailReferenceList";
 import { RecentQuestions } from "@/components/ask-emails/RecentQuestions";
+import { AgentActionCard, type AgentAction } from "@/components/ask-emails/AgentActionCard";
+import { useQuery } from "@tanstack/react-query";
 
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
   emailCount?: number;
   emails?: EmailSummary[];
+  actions?: AgentAction[];
 }
 
 const SUGGESTIONS = [
@@ -36,6 +39,7 @@ const SUGGESTIONS = [
   "What unresolved questions do I have?",
   "Which emails had low confidence scores?",
   "List all senders and their topics",
+  "Remind me tomorrow at 10am to review escalations",
 ];
 
 const PRESETS = [
@@ -54,6 +58,58 @@ export default function AskEmails() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedEmail, setSelectedEmail] = useState<EmailSummary | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [mention, setMention] = useState<{ query: string; start: number } | null>(null);
+  const [mentionIdx, setMentionIdx] = useState(0);
+
+  // Known contacts for @ suggestions
+  const { data: contacts = [] } = useQuery({
+    queryKey: ["agent-contacts", session?.user?.id],
+    enabled: !!session,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("email_queue")
+        .select("from_address, from_name")
+        .order("queued_at", { ascending: false })
+        .limit(1000);
+      const map = new Map<string, string>();
+      for (const r of data ?? []) {
+        const a = r.from_address?.toLowerCase();
+        if (a && !map.has(a)) map.set(a, r.from_name || "");
+      }
+      return [...map].map(([email, name]) => ({ email, name }));
+    },
+  });
+
+  const mentionMatches = useMemo(() => {
+    if (!mention) return [];
+    const q = mention.query.toLowerCase();
+    return contacts.filter((c) => c.email.includes(q) || c.name.toLowerCase().includes(q)).slice(0, 6);
+  }, [mention, contacts]);
+
+  const updateMention = (value: string, caret: number) => {
+    const m = /(^|\s)@([^\s@]*)$/.exec(value.slice(0, caret));
+    setMention(m ? { query: m[2], start: caret - m[2].length - 1 } : null);
+    setMentionIdx(0);
+  };
+
+  const pickMention = (email: string) => {
+    if (!mention) return;
+    const caret = mention.start + 1 + mention.query.length;
+    const next = input.slice(0, mention.start) + email + " " + input.slice(caret);
+    setInput(next);
+    setMention(null);
+    requestAnimationFrame(() => {
+      const pos = mention.start + email.length + 1;
+      inputRef.current?.focus();
+      inputRef.current?.setSelectionRange(pos, pos);
+    });
+  };
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+  }, [messages, isLoading]);
   
   // Persistence
   const [recentQuestions, setRecentQuestions] = useState<string[]>([]);
@@ -76,7 +132,14 @@ export default function AskEmails() {
     localStorage.setItem("ask-emails-recent", JSON.stringify(updatedRecent));
 
     const userMsg: ChatMessage = { role: "user", content: q };
+    const history = [...messages, userMsg].map((m) => ({
+      role: m.role,
+      content: m.actions?.length
+        ? `${m.content}\n[Proposed: ${m.actions.map((a) => a.type === "send_email" ? `email to ${a.to} "${a.subject}": ${a.body}` : `${a.type} "${a.title}"`).join("; ")}]`
+        : m.content,
+    }));
     setMessages((prev) => [...prev, userMsg]);
+    setMention(null);
     setInput("");
     setIsLoading(true);
 
@@ -84,7 +147,8 @@ export default function AskEmails() {
       const { data, error } = await supabase.functions.invoke("ask-about-emails", {
         headers: { Authorization: `Bearer ${session.access_token}` },
         body: {
-          question: q,
+          messages: history,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           start_date: startDate ? startDate.toISOString() : undefined,
           end_date: endDate ? endDate.toISOString() : undefined,
         },
@@ -106,12 +170,13 @@ export default function AskEmails() {
             content: data.answer,
             emailCount: data.email_count,
             emails: data.emails || [],
+            actions: data.actions || [],
           },
         ]);
       }
     } catch (err) {
       console.error("Ask error:", err);
-      toast.error("Failed to get answer");
+      toast.error("Couldn't reach the assistant. Please try again.");
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: "Sorry, something went wrong. Please try again." },
@@ -168,7 +233,7 @@ export default function AskEmails() {
             <Badge variant="secondary" className="bg-[#EBE9FF] text-[#7C6FE0] border-none text-[10px] font-bold uppercase tracking-wider">AI Powered</Badge>
           </div>
           <p className="mt-0.5 text-[13px] text-muted-foreground">
-            Analyze and query your inbox data with natural language
+            Ask about your emails, or tell it to send mail, set reminders and create rules. Type @ to pick a contact.
           </p>
         </div>
 
@@ -258,7 +323,7 @@ export default function AskEmails() {
         {/* Main Content */}
         <div className="flex-1 flex flex-col min-w-0">
           {/* Chat Area */}
-          <div className="flex-1 overflow-y-auto space-y-6 mb-4 pr-2 custom-scrollbar">
+          <div ref={scrollRef} className="flex-1 overflow-y-auto space-y-6 mb-4 pr-2 custom-scrollbar">
             {messages.length === 0 && (
               <div className="flex flex-col items-center justify-center py-20 text-center">
                 <div className="mb-6 rounded-lg border border-border bg-primary/10 p-5 shadow-sm">
@@ -334,6 +399,12 @@ export default function AskEmails() {
                       )}
                     </CardContent>
                   </Card>
+
+                  {msg.actions?.map((a, ai) => (
+                    <div key={ai} className="w-full min-w-[min(560px,80vw)]">
+                      <AgentActionCard action={a} />
+                    </div>
+                  ))}
                   
                   {/* Message Actions */}
                   <div className={cn(
@@ -396,13 +467,36 @@ export default function AskEmails() {
 
           {/* Input */}
           <div className="relative mt-auto">
+            {mention && mentionMatches.length > 0 && (
+              <div className="absolute bottom-full left-0 z-20 mb-2 w-full max-w-md overflow-hidden rounded-lg border border-border bg-popover shadow-lg">
+                {mentionMatches.map((c, ci) => (
+                  <button
+                    key={c.email}
+                    type="button"
+                    onMouseDown={(e) => { e.preventDefault(); pickMention(c.email); }}
+                    className={cn("flex w-full flex-col items-start px-3 py-2 text-left text-sm", ci === mentionIdx ? "bg-muted" : "hover:bg-muted")}
+                  >
+                    <span className="font-medium text-foreground">{c.name || c.email}</span>
+                    {c.name && <span className="text-xs text-muted-foreground">{c.email}</span>}
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="flex items-center gap-3 rounded-lg border border-border bg-card p-2 pl-5 shadow-sm transition-colors focus-within:border-primary">
               <input
+                ref={inputRef}
                 className="min-h-[44px] flex-1 bg-transparent py-2.5 text-sm text-foreground outline-none placeholder:text-muted-foreground"
-                placeholder="Ask a question about your emails..."
+                placeholder="Ask anything, or e.g. “Email @john about tomorrow’s meeting”"
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
+                onChange={(e) => { setInput(e.target.value); updateMention(e.target.value, e.target.selectionStart ?? e.target.value.length); }}
+                onBlur={() => setTimeout(() => setMention(null), 100)}
                 onKeyDown={(e) => {
+                  if (mention && mentionMatches.length) {
+                    if (e.key === "ArrowDown") { e.preventDefault(); setMentionIdx((i) => (i + 1) % mentionMatches.length); return; }
+                    if (e.key === "ArrowUp") { e.preventDefault(); setMentionIdx((i) => (i - 1 + mentionMatches.length) % mentionMatches.length); return; }
+                    if (e.key === "Enter" || e.key === "Tab") { e.preventDefault(); pickMention(mentionMatches[mentionIdx].email); return; }
+                    if (e.key === "Escape") { setMention(null); return; }
+                  }
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
                     handleSend();
