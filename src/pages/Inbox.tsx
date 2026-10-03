@@ -939,17 +939,24 @@ function EmailCard({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user, session } = useAuth();
 
-  const handleHelpMeWrite = async () => {
+  const [improveNotes, setImproveNotes] = useState("");
+  const [improveOpen, setImproveOpen] = useState(false);
+
+  const handleHelpMeWrite = async (instructions?: string) => {
+    const draft = (isEditing ? editedReply : composedReply).trim();
     setIsGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-reply", {
         headers: { Authorization: `Bearer ${session?.access_token}` },
         body: {
+          email_id: email.id,
           subject: email.subject,
           body: email.body,
           from_name: email.from_name,
           from_address: email.from_address,
           intent: email.intent,
+          draft: isComposing || isEditing ? draft : "",
+          instructions: instructions?.trim() || "",
         },
       });
       if (error) throw error;
@@ -957,13 +964,44 @@ function EmailCard({
       const reply = data?.reply || "";
       if (isEditing) setEditedReply(reply);
       else { setComposedReply(reply); setIsComposing(true); }
-      toast.success("AI draft generated");
+      setImproveOpen(false);
+      toast.success(draft ? "Draft improved" : "AI draft generated");
     } catch (err: any) {
-      toast.error(err.message || "Failed to generate reply");
+      toast.error(err.message || "We couldn't write a reply. Please try again.");
     } finally {
       setIsGenerating(false);
     }
   };
+
+  const improveControls = (current: string) => (
+    <div className="flex flex-wrap items-center gap-2">
+      <Button variant="outline" size="sm" onClick={() => handleHelpMeWrite()} disabled={isGenerating} className="gap-1.5">
+        {isGenerating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" />}
+        {isGenerating ? "Writing..." : current.trim() ? "Improve" : "Help me write"}
+      </Button>
+      <Popover open={improveOpen} onOpenChange={setImproveOpen}>
+        <PopoverTrigger asChild>
+          <Button variant="ghost" size="sm" disabled={isGenerating} className="gap-1.5">
+            <Sparkles className="h-3.5 w-3.5" />Improve with instructions
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-80 space-y-2" align="start">
+          <p className="text-xs text-muted-foreground">Tell the AI how to change it — tone, extra context, or edits.</p>
+          <Textarea
+            className="min-h-[80px]"
+            placeholder="e.g. Make it warmer and offer a call next week"
+            value={improveNotes}
+            maxLength={500}
+            onChange={(e) => setImproveNotes(e.target.value)}
+          />
+          <Button size="sm" className="w-full" disabled={isGenerating || !improveNotes.trim()} onClick={() => handleHelpMeWrite(improveNotes)}>
+            {isGenerating ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Wand2 className="mr-1.5 h-3.5 w-3.5" />}
+            Improve
+          </Button>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
 
   const confidencePercent = email.confidence_score ? Math.round(email.confidence_score * 100) : null;
   const hasReply = !!email.suggested_reply;
@@ -1102,11 +1140,8 @@ function EmailCard({
               </h4>
               {isComposing ? (
                 <div className="space-y-2">
-                  <Textarea className="min-h-[120px]" placeholder="Write your reply here..." value={composedReply} onChange={(e) => setComposedReply(e.target.value)} />
-                  <Button variant="outline" size="sm" onClick={handleHelpMeWrite} disabled={isGenerating} className="gap-1.5">
-                    {isGenerating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" />}
-                    {isGenerating ? "Writing..." : "Help me write"}
-                  </Button>
+                  <Textarea className="min-h-[120px]" placeholder="Type a quick reply, e.g. “Thanks — when can we schedule a call?” then press Improve" value={composedReply} onChange={(e) => setComposedReply(e.target.value)} />
+                  {improveControls(composedReply)}
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground">No suggested reply. Compose one manually or ignore.</p>
