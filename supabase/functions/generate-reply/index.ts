@@ -109,25 +109,63 @@ ${intent ? `Detected intent: ${intent}` : ""}
 
 ${body}${draft ? `\n\n---\nUSER'S DRAFT REPLY:\n${draft}` : ""}`;
 
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
       method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Lovable-API-Key": LOVABLE_API_KEY,
+        "X-Lovable-AIG-SDK": "fetch",
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [{ role: "system", content: system }, { role: "user", content: userMsg }],
-        temperature: 0.4,
+        model: "openai/gpt-6-astra",
+        instructions: system,
+        input: [{ role: "user", content: userMsg }],
+        reasoning: { effort: "low" },
+        store: false,
+        stream: true,
       }),
     });
 
-    if (!aiResponse.ok) {
+    if (!aiResponse.ok || !aiResponse.body) {
       if (aiResponse.status === 429) return json({ error: "Too many requests right now. Please try again in a moment." }, 429);
       if (aiResponse.status === 402) return json({ error: "AI credits have run out. Please add more to keep writing replies." }, 402);
-      console.error("AI Gateway error:", await aiResponse.text());
+      if (aiResponse.status === 403) return json({ error: "AI writing is currently unavailable for this workspace." }, 403);
+      console.error("AI Gateway error:", aiResponse.status, await aiResponse.text());
       throw new Error("We couldn't write a reply. Please try again.");
     }
 
-    const aiResult = await aiResponse.json();
-    return json({ reply: aiResult.choices?.[0]?.message?.content || "" });
+    // Read the streamed response and collect the reply text
+    const reader = aiResponse.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = "";
+    let reply = "";
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      let idx;
+      while ((idx = buf.indexOf("\n")) >= 0) {
+        const line = buf.slice(0, idx).trim();
+        buf = buf.slice(idx + 1);
+        if (!line.startsWith("data:")) continue;
+        const payload = line.slice(5).trim();
+        if (!payload || payload === "[DONE]") continue;
+        try {
+          const ev = JSON.parse(payload);
+          if (ev.type === "response.output_text.delta" && typeof ev.delta === "string") reply += ev.delta;
+          if (ev.type === "response.failed" || ev.type === "error") {
+            console.error("AI stream error:", payload);
+            throw new Error("We couldn't write a reply. Please try again.");
+          }
+        } catch (e) {
+          if (e instanceof Error && e.message.startsWith("We couldn't")) throw e;
+        }
+      }
+    }
+
+    if (!reply.trim()) return json({ error: "The AI didn't return a reply. Please try again." }, 502);
+    return json({ reply: reply.trim() });
   } catch (error: unknown) {
     console.error("Error in generate-reply:", error);
     return json({ error: error instanceof Error ? error.message : "Something went wrong." }, 500);
