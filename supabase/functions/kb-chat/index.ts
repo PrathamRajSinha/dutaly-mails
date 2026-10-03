@@ -21,10 +21,18 @@ Rules:
 - Write entry content as a clear, complete answer a support agent could send, in plain text (no markdown).
 - Do not repeat an entry that already exists with the same title.
 
+AUTOMATION REQUESTS:
+- If the user asks you to create a task, set a reminder, or set up a forwarding rule, propose it in "actions" instead of a KB entry. Never claim it is done; the user must approve it.
+- task / reminder: { "type": "task" | "reminder", "title": string, "details": string, "due_at": ISO 8601 datetime or null }
+- forward_rule: { "type": "forward_rule", "title": short description, "forward_to": email, "label_match": string|null, "subject_contains": string|null, "from_match": string|null, "sentiment_below": number 0-1 or null, "note": string|null }
+- If a required detail (like the forward-to email) is missing, ask for it instead of proposing.
+- Current time: __NOW__.
+
 Respond with ONLY valid JSON (no markdown fences) shaped as:
 {
   "reply": "your next message to the user",
-  "kb_entries": [ { "title": string, "content": string, "category": "faq" | "snippet" | "policy" } ]
+  "kb_entries": [ { "title": string, "content": string, "category": "faq" | "snippet" | "policy" } ],
+  "actions": []
 }`;
 
 serve(async (req) => {
@@ -84,7 +92,7 @@ serve(async (req) => {
         model: "openai/gpt-6-astra",
         reasoning_effort: "low",
         messages: [
-          { role: "system", content: SYSTEM },
+          { role: "system", content: SYSTEM.replace("__NOW__", new Date().toISOString()) },
           { role: "system", content: context },
           ...(messages as { role: string; content: string }[]).slice(-24).map((m) => ({
             role: m.role === "assistant" ? "assistant" : "user",
@@ -130,10 +138,33 @@ serve(async (req) => {
           : "snippet",
       }));
 
+    const s = (v: unknown, n: number) => (typeof v === "string" && v.trim() ? v.trim().slice(0, n) : null);
+    const actions = (Array.isArray(parsed.actions) ? parsed.actions : [])
+      .slice(0, 3)
+      .map((a: Record<string, unknown>) => {
+        if (a?.type === "forward_rule") {
+          const to = s(a.forward_to, 320);
+          if (!to || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) return null;
+          const sb = typeof a.sentiment_below === "number" && a.sentiment_below > 0 && a.sentiment_below <= 1 ? a.sentiment_below : null;
+          return { type: "forward_rule", title: s(a.title, 120) || "Forwarding rule", forward_to: to,
+            label_match: s(a.label_match, 40), subject_contains: s(a.subject_contains, 120), from_match: s(a.from_match, 200),
+            sentiment_below: sb, note: s(a.note, 1000) };
+        }
+        if (a?.type === "task" || a?.type === "reminder") {
+          const title = s(a.title, 200);
+          if (!title) return null;
+          const due = s(a.due_at, 40);
+          return { type: a.type, title, details: s(a.details, 1000), due_at: due && !isNaN(Date.parse(due)) ? new Date(due).toISOString() : null };
+        }
+        return null;
+      })
+      .filter(Boolean);
+
     return new Response(
       JSON.stringify({
         reply: typeof parsed.reply === "string" ? parsed.reply : "Got it.",
         kb_entries,
+        actions,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
