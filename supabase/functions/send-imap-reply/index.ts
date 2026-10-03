@@ -17,6 +17,7 @@ interface SendReplyRequest {
   html_body?: string;
   queue_email_id?: string;
   attachments?: string[]; // URLs to download
+  is_new?: boolean;
 }
 
 // ===== IMAP APPEND helper to save sent message to Sent folder =====
@@ -179,7 +180,7 @@ serve(async (req) => {
       },
     });
 
-    const subject = requestData.subject.startsWith("Re:")
+    const subject = requestData.is_new || requestData.subject.startsWith("Re:")
       ? requestData.subject
       : `Re: ${requestData.subject}`;
 
