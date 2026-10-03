@@ -236,18 +236,6 @@ export default function UnifiedInbox() {
             {/* Segmented control */}
             <div className="flex items-center rounded-full p-1" style={{ backgroundColor: '#EBE9FF' }}>
               <button
-                onClick={() => setViewMode("tickets")}
-                className={cn(
-                  "flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-all",
-                  viewMode === "tickets"
-                    ? "bg-white text-foreground shadow-sm"
-                    : "text-[#9490B8] hover:text-foreground"
-                )}
-              >
-                <Inbox className="h-3.5 w-3.5" />
-                Tickets
-              </button>
-              <button
                 onClick={() => setViewMode("emails")}
                 className={cn(
                   "flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-all",
@@ -258,6 +246,18 @@ export default function UnifiedInbox() {
               >
                 <Mail className="h-3.5 w-3.5" />
                 Emails
+              </button>
+              <button
+                onClick={() => setViewMode("tickets")}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-all",
+                  viewMode === "tickets"
+                    ? "bg-white text-foreground shadow-sm"
+                    : "text-[#9490B8] hover:text-foreground"
+                )}
+              >
+                <Inbox className="h-3.5 w-3.5" />
+                Tickets
               </button>
             </div>
           </div>
