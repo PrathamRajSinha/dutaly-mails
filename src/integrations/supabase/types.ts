@@ -189,6 +189,42 @@ export type Database = {
         }
         Relationships: []
       }
+      automation_tasks: {
+        Row: {
+          created_at: string
+          details: string | null
+          due_at: string | null
+          id: string
+          kind: string
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          due_at?: string | null
+          id?: string
+          kind?: string
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          due_at?: string | null
+          id?: string
+          kind?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       category_thresholds: {
         Row: {
           category: string
@@ -302,6 +338,139 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      email_forward_logs: {
+        Row: {
+          created_at: string
+          email_from: string | null
+          email_queue_id: string | null
+          email_subject: string | null
+          error: string | null
+          forward_to: string
+          id: string
+          rule_id: string | null
+          success: boolean
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_from?: string | null
+          email_queue_id?: string | null
+          email_subject?: string | null
+          error?: string | null
+          forward_to: string
+          id?: string
+          rule_id?: string | null
+          success?: boolean
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email_from?: string | null
+          email_queue_id?: string | null
+          email_subject?: string | null
+          error?: string | null
+          forward_to?: string
+          id?: string
+          rule_id?: string | null
+          success?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_forward_logs_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "email_forwarding_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_forwarding_rules: {
+        Row: {
+          created_at: string
+          forward_to: string
+          from_match: string | null
+          id: string
+          is_active: boolean
+          label_match: string | null
+          name: string
+          note: string | null
+          sentiment_below: number | null
+          skip_auto_replied: boolean
+          subject_contains: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          forward_to: string
+          from_match?: string | null
+          id?: string
+          is_active?: boolean
+          label_match?: string | null
+          name?: string
+          note?: string | null
+          sentiment_below?: number | null
+          skip_auto_replied?: boolean
+          subject_contains?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          forward_to?: string
+          from_match?: string | null
+          id?: string
+          is_active?: boolean
+          label_match?: string | null
+          name?: string
+          note?: string | null
+          sentiment_below?: number | null
+          skip_auto_replied?: boolean
+          subject_contains?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      email_open_events: {
+        Row: {
+          client: string | null
+          country: string | null
+          created_at: string
+          email_queue_id: string
+          id: string
+          is_proxy: boolean
+          user_id: string
+        }
+        Insert: {
+          client?: string | null
+          country?: string | null
+          created_at?: string
+          email_queue_id: string
+          id?: string
+          is_proxy?: boolean
+          user_id: string
+        }
+        Update: {
+          client?: string | null
+          country?: string | null
+          created_at?: string
+          email_queue_id?: string
+          id?: string
+          is_proxy?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_open_events_email_queue_id_fkey"
+            columns: ["email_queue_id"]
+            isOneToOne: false
+            referencedRelation: "email_queue"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       email_queue: {
         Row: {
@@ -899,6 +1068,15 @@ export type Database = {
         Returns: undefined
       }
       record_email_open: { Args: { p_tracking_id: string }; Returns: undefined }
+      record_email_open_event: {
+        Args: {
+          p_client: string
+          p_country: string
+          p_is_proxy: boolean
+          p_tracking_id: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
