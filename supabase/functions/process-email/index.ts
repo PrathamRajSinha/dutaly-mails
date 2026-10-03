@@ -626,6 +626,60 @@ ${emailData.body}`
       console.error("Ticket logic error (non-fatal):", ticketErr);
     }
 
+    // --- FORWARDING RULES ---
+    try {
+      const { data: rules } = await supabase
+        .from("email_forwarding_rules")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("is_active", true);
+      if (rules?.length && emailData.email_account_id) {
+        const { data: fwdAccount } = await supabase
+          .from("email_accounts").select("provider").eq("id", emailData.email_account_id).single();
+        const subj = String(emailData.subject || "").toLowerCase();
+        const from = String(emailData.from_address || "").toLowerCase();
+        const lowerLabels = labels.map((l: string) => l.toLowerCase());
+        for (const rule of rules) {
+          if (rule.skip_auto_replied && autoSendSucceeded) continue;
+          if (rule.label_match && !lowerLabels.includes(String(rule.label_match).toLowerCase())) continue;
+          if (rule.sentiment_below != null && !(sentimentScore < Number(rule.sentiment_below))) continue;
+          if (rule.subject_contains && !subj.includes(String(rule.subject_contains).toLowerCase())) continue;
+          if (rule.from_match) {
+            const m = String(rule.from_match).toLowerCase().replace(/^@/, "");
+            if (!(from === m || from.endsWith("@" + m) || from.endsWith("." + m))) continue;
+          }
+          if (!rule.label_match && rule.sentiment_below == null && !rule.subject_contains && !rule.from_match) continue;
+
+          const esc = (t: string) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br />");
+          const header = `---------- Forwarded message ----------\nFrom: ${emailData.from_name || ""} <${emailData.from_address}>\nSubject: ${emailData.subject}\n\n`;
+          const text = `${rule.note ? rule.note + "\n\n" : ""}${header}${emailData.body}`;
+          let ok = false; let errMsg: string | null = null;
+          try {
+            const r = await fetch(`${supabaseUrl}/functions/v1/${fwdAccount?.provider === "gmail" ? "send-gmail-reply" : "send-imap-reply"}`, {
+              method: "POST",
+              headers: { Authorization: authHeader, "Content-Type": "application/json" },
+              body: JSON.stringify({
+                email_account_id: emailData.email_account_id,
+                to_address: rule.forward_to,
+                subject: `Fwd: ${emailData.subject}`,
+                body: text,
+                html_body: `<div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.5;">${esc(text)}</div>`,
+              }),
+            });
+            ok = r.ok;
+            if (!ok) errMsg = (await r.text()).slice(0, 300);
+          } catch (e) { errMsg = e instanceof Error ? e.message : "Forward failed"; }
+          await supabase.from("email_forward_logs").insert({
+            user_id: user.id, rule_id: rule.id, email_queue_id: insertedEmail.id,
+            email_subject: emailData.subject, email_from: emailData.from_address,
+            forward_to: rule.forward_to, success: ok, error: errMsg,
+          });
+        }
+      }
+    } catch (fwdErr) {
+      console.error("Forwarding rules error (non-fatal):", fwdErr);
+    }
+
     // Increment usage counter
     if (!autoSendSucceeded) {
       // Only increment if we didn't already increment during auto-send
