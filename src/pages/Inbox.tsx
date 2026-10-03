@@ -102,7 +102,7 @@ type EmailTabValue = "all_emails" | "needs_review" | "drafted" | "sent" | "ignor
 
 // ─── Main Component ─────────────────────────────────────────
 export default function UnifiedInbox() {
-  const [viewMode, setViewMode] = useState<ViewMode>("tickets");
+  const [viewMode, setViewMode] = useState<ViewMode>("emails");
   const [searchQuery, setSearchQuery] = useState("");
   const [autoFetchEnabled, setAutoFetchEnabledState] = useState<boolean>(
     () => typeof window !== "undefined" && localStorage.getItem("dutaly:autofetch") === "on"
@@ -236,18 +236,6 @@ export default function UnifiedInbox() {
             {/* Segmented control */}
             <div className="flex items-center rounded-full p-1" style={{ backgroundColor: '#EBE9FF' }}>
               <button
-                onClick={() => setViewMode("tickets")}
-                className={cn(
-                  "flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-all",
-                  viewMode === "tickets"
-                    ? "bg-white text-foreground shadow-sm"
-                    : "text-[#9490B8] hover:text-foreground"
-                )}
-              >
-                <Inbox className="h-3.5 w-3.5" />
-                Tickets
-              </button>
-              <button
                 onClick={() => setViewMode("emails")}
                 className={cn(
                   "flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-all",
@@ -258,6 +246,18 @@ export default function UnifiedInbox() {
               >
                 <Mail className="h-3.5 w-3.5" />
                 Emails
+              </button>
+              <button
+                onClick={() => setViewMode("tickets")}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-all",
+                  viewMode === "tickets"
+                    ? "bg-white text-foreground shadow-sm"
+                    : "text-[#9490B8] hover:text-foreground"
+                )}
+              >
+                <Inbox className="h-3.5 w-3.5" />
+                Tickets
               </button>
             </div>
           </div>
@@ -1067,9 +1067,9 @@ function EmailCard({
         <CardContent className="space-y-4 border-t border-border bg-muted/40 px-4 pb-4 pt-4">
           <div className="flex items-center gap-2"><span className="text-xs text-muted-foreground">Labels</span><LabelChips labels={email.labels} table="email_queue" id={email.id} editable /></div>
           {email.flag_reason && (
-            <div className="flex items-start gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 p-3">
-              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
-              <p className="text-sm text-amber-800">{email.flag_reason}</p>
+            <div className="flex items-start gap-2 rounded-lg border border-border bg-muted/50 p-3">
+              <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">{email.flag_reason}</p>
             </div>
           )}
 
@@ -1135,7 +1135,7 @@ function EmailCard({
 
           <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleFileUpload} />
 
-          {!readOnly && (
+          {!readOnly && !["sent", "approved", "edited"].includes(email.status) && (
             <div className="flex flex-wrap gap-2">
               {isEditing ? (
                 <>
