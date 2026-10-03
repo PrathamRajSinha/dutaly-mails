@@ -53,6 +53,8 @@ import {
 import { StickyHeader } from "@/components/instructions/StickyHeader";
 import { AutomationSummary } from "@/components/instructions/AutomationSummary";
 import { InstructionSection } from "@/components/instructions/InstructionSection";
+import { AutomationRulesTab } from "@/components/settings/AutomationRulesTab";
+import { Forward } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function Instructions() {
@@ -567,6 +569,18 @@ export default function Instructions() {
                  />
                </div>
              )}
+          </div>
+        </InstructionSection>
+
+        {/* Automation */}
+        <InstructionSection
+          id="automation"
+          title="Automation"
+          description="Forwarding rules, tasks & reminders, and the forwarding log."
+          icon={<Forward className="h-5 w-5" />}
+        >
+          <div className="py-2">
+            <AutomationRulesTab />
           </div>
         </InstructionSection>
       </Accordion>
