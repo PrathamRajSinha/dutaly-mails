@@ -37,6 +37,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSlaSettings } from "@/hooks/useSlaSettings";
 import type { Session } from "@supabase/supabase-js";
 import { ConnectInboxWizard } from "@/components/inbox-connect/ConnectInboxWizard";
+import { AutomationRulesTab } from "@/components/settings/AutomationRulesTab";
+import { Forward } from "lucide-react";
 
 interface EmailAccount {
   id: string;
@@ -589,6 +591,10 @@ export default function Settings() {
             <Shield className="h-4 w-4" />
             Safety & Filters
           </TabsTrigger>
+          <TabsTrigger value="automation" className="gap-2">
+            <Forward className="h-4 w-4" />
+            Automation
+          </TabsTrigger>
           <TabsTrigger value="notifications" className="gap-2">
             <Bell className="h-4 w-4" />
             Notifications
@@ -943,6 +949,10 @@ export default function Settings() {
 
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="automation">
+          <AutomationRulesTab />
         </TabsContent>
 
       </Tabs>
