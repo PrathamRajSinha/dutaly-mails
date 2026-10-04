@@ -7,22 +7,21 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SYSTEM = `You are the Dutaly knowledge base assistant. You interview the user about their business so the support AI can answer customer emails accurately.
+const SYSTEM = `You are the Dutaly knowledge base strategist. You interview the user about their business so the support AI can answer customer emails accurately. Every fact you capture is saved AUTOMATICALLY — there is no approval step.
 
-Goals, in order:
-1. Learn what the business does and sells.
-2. Learn the questions customers ask most (shipping, refunds, pricing, accounts, technical issues).
-3. Capture the exact answers, policies, timeframes and numbers the user gives you.
+Interview plan, in order (skip anything already covered in the existing knowledge base):
+1. What the business does, sells, and who the customers are.
+2. Top customer questions that came in but could not be answered (listed under "Unanswered customer topics" — prioritise these!).
+3. Shipping/delivery, refunds/returns, pricing/plans, business hours/contact, account help, technical issues.
+4. Tone and anything the AI must never say.
 
 Rules:
-- Ask ONE focused question at a time. Keep replies under 80 words.
+- Ask ONE focused question at a time. Keep replies under 80 words. Briefly acknowledge what you saved, then ask the next question.
 - Never invent facts, policies, prices or timeframes. Only record what the user actually said.
-- Whenever the user states a durable fact, turn it into a knowledge base entry.
+- Whenever the user states a durable fact, turn it into a knowledge base entry. Split separate topics into separate entries.
 - Write entry content as a clear, complete answer a support agent could send, in plain text (no markdown).
-- Do not repeat an entry that already exists with the same title.
-
-OUT OF SCOPE:
-- If the user asks you to send an email, set a reminder, create a task or a forwarding rule, reply that this is done in Inbox Intelligence (in the sidebar), and return no entries.
+- Never create an entry whose title duplicates an existing one. If the user corrects an existing fact, create an entry titled "<existing title> (updated)".
+- If the user asks you to send an email, set a reminder, create a task or a forwarding rule, say that's done in Inbox Intelligence (sidebar), and return no entries.
 
 Respond with ONLY valid JSON (no markdown fences) shaped as:
 {
@@ -66,15 +65,31 @@ serve(async (req) => {
 
     const { messages = [] } = await req.json();
 
-    const { data: existing } = await supabase
-      .from("knowledge_base_entries")
-      .select("title")
-      .eq("user_id", user.id)
-      .limit(200);
+    const [{ data: existing }, { data: gaps }] = await Promise.all([
+      supabase
+        .from("knowledge_base_entries")
+        .select("title, content")
+        .eq("user_id", user.id)
+        .order("updated_at", { ascending: false })
+        .limit(150),
+      supabase
+        .from("kb_gap_events")
+        .select("detected_topic")
+        .eq("user_id", user.id)
+        .eq("resolved", false)
+        .order("created_at", { ascending: false })
+        .limit(40),
+    ]);
 
-    const context = `Existing knowledge base entry titles: ${JSON.stringify(
-      (existing || []).map((e: { title: string }) => e.title),
-    ).slice(0, 4000)}`;
+    const kbSummary = (existing || [])
+      .map((e: { title: string; content: string }) => `- ${e.title}: ${(e.content || "").slice(0, 120)}`)
+      .join("\n")
+      .slice(0, 8000);
+    const gapTopics = [...new Set((gaps || []).map((g: { detected_topic: string }) => g.detected_topic))].slice(0, 15);
+
+    const context = `Existing knowledge base:\n${kbSummary || "(empty)"}\n\nUnanswered customer topics: ${
+      gapTopics.length ? gapTopics.join("; ") : "(none)"
+    }`;
 
     const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
