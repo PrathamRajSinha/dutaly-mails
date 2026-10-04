@@ -36,6 +36,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useSlaSettings } from "@/hooks/useSlaSettings";
 import type { Session } from "@supabase/supabase-js";
+import { IntegrationsTab } from "@/components/settings/IntegrationsTab";
 import { ConnectInboxWizard } from "@/components/inbox-connect/ConnectInboxWizard";
 
 interface EmailAccount {
@@ -904,45 +905,7 @@ export default function Settings() {
 
         {/* Integrations Tab */}
         <TabsContent value="integrations">
-          <Card className="border border-border">
-            <CardContent className="flex flex-col items-center gap-6 px-6 py-12 text-center sm:py-16">
-              <div className="flex items-center gap-3" aria-hidden="true">
-                <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-secondary">
-                  <MessageSquare className="h-5 w-5 text-muted-foreground" />
-                </span>
-                <span className="h-px w-6 bg-border" />
-                <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-secondary">
-                  <Webhook className="h-5 w-5 text-muted-foreground" />
-                </span>
-              </div>
-
-              <div className="max-w-md space-y-2">
-                <h2 className="text-xl font-semibold text-card-foreground">
-                  Integrations are coming soon
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  Slack notifications and outgoing webhooks for ticket events will be
-                  available in a future release. Nothing to configure here yet.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                <Badge variant="secondary" className="gap-1.5">
-                  <MessageSquare className="h-3 w-3" />
-                  Slack
-                </Badge>
-                <Badge variant="secondary" className="gap-1.5">
-                  <Webhook className="h-3 w-3" />
-                  Webhooks
-                </Badge>
-                <Badge variant="outline" className="gap-1.5">
-                  <Bell className="h-3 w-3" />
-                  Ticket events
-                </Badge>
-              </div>
-
-            </CardContent>
-          </Card>
+          <IntegrationsTab />
         </TabsContent>
 
 

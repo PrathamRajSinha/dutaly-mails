@@ -17,6 +17,37 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    const body = await req.json().catch(() => ({}));
+
+    // Test mode: signed-in user sends a sample event to one of their integrations
+    if (body?.test_integration_id) {
+      const authHeader = req.headers.get("Authorization") ?? "";
+      const token = authHeader.replace("Bearer ", "");
+      const { data: userData } = await supabase.auth.getUser(token);
+      if (!userData?.user) {
+        return new Response(JSON.stringify({ error: "Please sign in again." }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      const { data: intg } = await supabase.from("integrations").select("*")
+        .eq("id", String(body.test_integration_id)).eq("user_id", userData.user.id).maybeSingle();
+      if (!intg) {
+        return new Response(JSON.stringify({ error: "Integration not found." }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      const testEvent = {
+        event_type: "ticket.created",
+        created_at: new Date().toISOString(),
+        payload_json: { ticket_id: "test", subject: "Test from Dutaly", customer_email: "customer@example.com", priority: "medium", category: "general", sentiment_score: 0.8, test: true },
+      };
+      try {
+        const config = intg.config_json || {};
+        if (intg.provider === "slack") await dispatchSlack(config, testEvent);
+        else if (intg.provider === "zapier") await dispatchZapier(config, testEvent);
+        else await dispatchWebhook(config, testEvent);
+        return new Response(JSON.stringify({ ok: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      } catch (e) {
+        return new Response(JSON.stringify({ error: "We couldn't reach that link. Double-check the URL and try again." , details: String(e) }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+    }
+
     // Fetch undelivered events (limit 50 per run)
     const { data: events, error: eventsError } = await supabase
       .from("integration_events")
@@ -99,8 +130,9 @@ serve(async (req) => {
             await dispatchWebhook(config, event);
           } else if (integration.provider === "slack") {
             await dispatchSlack(config, event);
+          } else if (integration.provider === "zapier") {
+            await dispatchZapier(config, event);
           }
-          // Other providers can be added here
         } catch (err) {
           console.error(`Failed to dispatch to ${integration.provider} (integration ${integration.id}):`, err);
           allSucceeded = false;
@@ -130,6 +162,19 @@ serve(async (req) => {
     );
   }
 });
+
+async function dispatchZapier(config: any, event: any) {
+  const url = config.url;
+  if (!url) return;
+  const data = typeof event.payload_json === "string" ? JSON.parse(event.payload_json) : event.payload_json;
+  // Flat payload so fields map easily inside Zapier
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ event: event.event_type, timestamp: event.created_at, ...data }),
+  });
+  if (!res.ok) throw new Error(`Zapier hook failed with status ${res.status}`);
+}
 
 async function dispatchWebhook(config: any, event: any) {
   const url = config.url;
