@@ -599,6 +599,16 @@ ${emailData.body}`
             payload_json: eventPayload,
           });
         }
+
+        // Deliver to Slack/Zapier right away (fire-and-forget)
+        fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/dispatch-integration-events`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+          },
+          body: "{}",
+        }).catch((e) => console.error("dispatch trigger failed", e));
       }
 
       // --- KB GAP DETECTION ---
