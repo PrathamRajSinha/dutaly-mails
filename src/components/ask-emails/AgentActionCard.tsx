@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { format } from "date-fns";
-import { CalendarClock, Check, Forward, ListTodo, Loader2, Mail, Send, X } from "lucide-react";
+import { CalendarClock, Check, Eye, Forward, ListTodo, Loader2, Mail, Send, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,9 +9,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useEmailAccounts } from "@/hooks/useEmailAccounts";
 import { toast } from "sonner";
+import { renderEmailHtml, replaceVariables, type EmailTemplateStyle } from "@/lib/emailHtml";
+
+type ActionTemplate = EmailTemplateStyle & { id: string; name: string };
 
 export type AgentAction =
-  | { type: "send_email"; to: string; subject: string; body: string }
+  | { type: "send_email"; to: string; subject: string; body: string; template?: ActionTemplate | null }
   | { type: "task" | "reminder"; title: string; details?: string | null; due_at?: string | null }
   | {
       type: "forward_rule"; title: string; forward_to: string; label_match?: string | null;
@@ -33,6 +36,15 @@ export function AgentActionCard({ action }: { action: AgentAction }) {
   const [body, setBody] = useState(isEmail ? action.body : "");
   const [fromId, setFromId] = useState<string>("");
   const accountId = fromId || active[0]?.id || "";
+  const selectedAccount = active.find((a) => a.id === accountId);
+  const recipientName = to.split("@")[0]?.replace(/[._-]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) || "there";
+  const senderName = selectedAccount?.email_address.split("@")[0]?.replace(/[._-]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) || "The Team";
+  const resolvedBody = replaceVariables(body, { sender_name: recipientName, subject, my_name: senderName });
+  const template = isEmail ? action.template : null;
+  const emailHtml = renderEmailHtml(resolvedBody, template || {
+    font_family: "sans-serif", font_size: "medium", text_color: "#333333",
+    accent_color: "#7C6FE0", footer_text: "", footer_logo_url: "",
+  });
 
   const sendEmail = async () => {
     if (!session) return;
@@ -41,11 +53,9 @@ export function AgentActionCard({ action }: { action: AgentAction }) {
     const account = active.find((a) => a.id === accountId);
     if (!account) return toast.error("Connect an email account in Settings first.");
     setState("saving");
-    const html = `<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#1f1f1f">${body
-      .trim().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>")}</div>`;
     const { data, error } = await supabase.functions.invoke(account.provider === "gmail" ? "send-gmail-reply" : "send-imap-reply", {
       headers: { Authorization: `Bearer ${session.access_token}` },
-      body: { email_account_id: account.id, to_address: to.trim(), subject: subject.trim() || "(no subject)", body: body.trim(), html_body: html, is_new: true },
+      body: { email_account_id: account.id, to_address: to.trim(), subject: subject.trim() || "(no subject)", body: resolvedBody.trim(), html_body: emailHtml, is_new: true },
     });
     if (error || data?.error) {
       setState("idle");
@@ -81,6 +91,12 @@ export function AgentActionCard({ action }: { action: AgentAction }) {
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-primary">
           <Mail className="h-3.5 w-3.5" /> Email ready to send
         </div>
+        {template && (
+          <div className="flex items-center gap-2 rounded-md border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-foreground">
+            <Eye className="h-3.5 w-3.5 text-primary" />
+            Using <span className="font-semibold">{template.name}</span> with its saved design
+          </div>
+        )}
         <div className="grid gap-2 text-sm">
           <div className="flex items-center gap-2">
             <span className="w-14 shrink-0 text-xs text-muted-foreground">From</span>
@@ -102,6 +118,10 @@ export function AgentActionCard({ action }: { action: AgentAction }) {
             <Input className="h-8" value={subject} onChange={(e) => setSubject(e.target.value)} disabled={state !== "idle"} />
           </div>
           <Textarea rows={Math.min(12, body.split("\n").length + 1)} value={body} onChange={(e) => setBody(e.target.value)} disabled={state !== "idle"} />
+          <div className="overflow-hidden rounded-md border border-border bg-background">
+            <div className="border-b border-border bg-muted/40 px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Recipient preview</div>
+            <div className="max-h-72 overflow-y-auto bg-background p-5" dangerouslySetInnerHTML={{ __html: emailHtml }} />
+          </div>
         </div>
         {state === "done" ? (
           <p className="flex items-center gap-1.5 text-xs font-medium text-primary"><Check className="h-3.5 w-3.5" />Sent</p>

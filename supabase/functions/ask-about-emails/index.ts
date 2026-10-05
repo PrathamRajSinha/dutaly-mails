@@ -17,12 +17,13 @@ ANSWERING:
 - Plain text only. No markdown (no **, #, bullets with *). Simple numbered lists are fine.
 
 ACTIONS (the app shows each as a card the user approves; you never perform them yourself):
-- send_email: { "type": "send_email", "to": email, "subject": string, "body": plain-text email body including greeting and sign-off }
+- send_email: { "type": "send_email", "to": email, "subject": string, "body": email body including greeting and sign-off, "template_id": saved template id or null }
 - task / reminder: { "type": "task" | "reminder", "title": string, "details": string|null, "due_at": ISO 8601 datetime or null }
 - forward_rule: { "type": "forward_rule", "title": short description, "forward_to": email, "label_match": string|null, "subject_contains": string|null, "from_match": string|null, "sentiment_below": number 0-1 or null, "note": string|null }
 - When the user asks you to email/mail/send/write to someone, IMMEDIATELY propose a send_email action with a complete, polished draft. Do not ask "should I?" first. Do not say you cannot send — the user sends it with one click on the card.
 - Your "reply" should be one short sentence like "Here's the email, ready to send." Do not repeat the full email in "reply".
 - If the user asks to change a draft, propose a new send_email action with the revision.
+- If the user asks to use a saved template, use that template's exact body and template_id. Do not paraphrase, shorten, or restyle it unless they explicitly ask for changes.
 - If the recipient is a name, resolve it from the known contacts list. If you can't resolve it, ask for the address.
 - Never claim an action is done.
 - Current time: __NOW__ (user timezone: __TZ__). Resolve relative dates like "tomorrow" in that timezone.
@@ -67,6 +68,21 @@ serve(async (req) => {
     if (emailsError) throw new Error("Failed to fetch emails");
     const list = (emails || []).reverse();
 
+    const { data: templates, error: templatesError } = await supabase
+      .from("email_templates")
+      .select("id, name, category, body, font_family, font_size, text_color, accent_color, footer_text, footer_logo_url")
+      .eq("user_id", user.id)
+      .order("updated_at", { ascending: false });
+    if (templatesError) throw new Error("Failed to fetch templates");
+
+    const savedTemplates = templates || [];
+    const latestRequest = history[history.length - 1]?.content.toLowerCase() || "";
+    const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+    const normalizedRequest = normalize(latestRequest);
+    const explicitlyNamedTemplate = savedTemplates
+      .filter((template) => normalize(template.name).length > 2 && normalizedRequest.includes(normalize(template.name)))
+      .sort((a, b) => b.name.length - a.name.length)[0];
+
     const contacts = new Map<string, string>();
     for (const e of list) if (e.from_address) contacts.set(e.from_address.toLowerCase(), e.from_name || "");
 
@@ -89,6 +105,7 @@ serve(async (req) => {
         messages: [
           { role: "system", content: SYSTEM.replace("__NOW__", new Date().toISOString()).replace("__TZ__", tz) },
           { role: "system", content: `Known contacts: ${JSON.stringify([...contacts].map(([a, n]) => (n ? `${n} <${a}>` : a))).slice(0, 6000)}` },
+          { role: "system", content: `SAVED EMAIL TEMPLATES:\n${JSON.stringify(savedTemplates.map((t) => ({ id: t.id, name: t.name, category: t.category, body: t.body }))).slice(0, 30000) || "(none)"}` },
           { role: "system", content: `EMAILS (${list.length}):\n${emailContext || "(none in this range)"}`.slice(0, 120000) },
           ...history,
         ],
@@ -115,9 +132,26 @@ serve(async (req) => {
     const actions = (Array.isArray(parsed.actions) ? parsed.actions : []).slice(0, 3).map((a: Record<string, unknown>) => {
       if (a?.type === "send_email") {
         const to = s(a.to, 320);
-        const b = s(a.body, 10000);
-        if (!to || !EMAIL_RE.test(to) || !b) return null;
-        return { type: "send_email", to, subject: s(a.subject, 250) || "(no subject)", body: b };
+        const requestedTemplateId = s(a.template_id, 80);
+        const selectedTemplate = explicitlyNamedTemplate || savedTemplates.find((template) => template.id === requestedTemplateId);
+        const emailBody = explicitlyNamedTemplate?.body || s(a.body, 10000) || selectedTemplate?.body;
+        if (!to || !EMAIL_RE.test(to) || !emailBody) return null;
+        return {
+          type: "send_email",
+          to,
+          subject: s(a.subject, 250) || selectedTemplate?.name || "(no subject)",
+          body: emailBody,
+          template: selectedTemplate ? {
+            id: selectedTemplate.id,
+            name: selectedTemplate.name,
+            font_family: selectedTemplate.font_family,
+            font_size: selectedTemplate.font_size,
+            text_color: selectedTemplate.text_color,
+            accent_color: selectedTemplate.accent_color,
+            footer_text: selectedTemplate.footer_text,
+            footer_logo_url: selectedTemplate.footer_logo_url,
+          } : null,
+        };
       }
       if (a?.type === "forward_rule") {
         const to = s(a.forward_to, 320);

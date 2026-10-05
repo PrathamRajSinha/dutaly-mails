@@ -135,7 +135,7 @@ export default function AskEmails() {
     const history = [...messages, userMsg].map((m) => ({
       role: m.role,
       content: m.actions?.length
-        ? `${m.content}\n[Proposed: ${m.actions.map((a) => a.type === "send_email" ? `email to ${a.to} "${a.subject}": ${a.body}` : `${a.type} "${a.title}"`).join("; ")}]`
+        ? `${m.content}\n[Proposed: ${m.actions.map((a) => a.type === "send_email" ? `email to ${a.to} "${a.subject}"${a.template ? ` using template "${a.template.name}" (template_id: ${a.template.id})` : ""}: ${a.body}` : `${a.type} "${a.title}"`).join("; ")}]`
         : m.content,
     }));
     setMessages((prev) => [...prev, userMsg]);
