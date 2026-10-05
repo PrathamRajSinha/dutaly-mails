@@ -43,10 +43,11 @@ Return ONLY JSON: {"name": short template name, "category": one lowercase word, 
 ${FORMAT_RULES}
 Return ONLY JSON: {"body": the improved template}`;
 
-    const userMsg = mode === "generate"
+    const userMsgBase = mode === "generate"
       ? `Template request: ${prompt}${tone ? `\nTone: ${tone}` : ""}`
       : `Current template:\n${body}\n\nInstructions: ${prompt || "Make it clearer, warmer and more professional."}${tone ? `\nTone: ${tone}` : ""}`;
 
+    const userMsg = `${userMsgBase}\n\nRespond with a JSON object only.`;
     const res = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
       method: "POST",
       headers: { "Lovable-API-Key": key, "X-Lovable-AIG-SDK": "fetch", "Content-Type": "application/json" },
