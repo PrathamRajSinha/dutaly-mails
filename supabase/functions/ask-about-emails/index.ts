@@ -12,7 +12,7 @@ ANSWERING:
 - Plain text only. No markdown (no **, #, bullets with *). Simple numbered lists are fine.
 
 ACTIONS (the app shows each as a card the user approves; you never perform them yourself):
-- send_email: { "type": "send_email", "to": email, "subject": string, "body": email body including greeting and sign-off, "template_id": saved template id or null }
+- send_email: { "type": "send_email", "to": email, "subject": string, "body": email body including greeting and sign-off, "template_id": saved template id or null, "recipient_first_name": recipient's first name (from contacts or the request) or null }
 - task / reminder: { "type": "task" | "reminder", "title": string, "details": string|null, "due_at": ISO 8601 datetime or null }
 - forward_rule: { "type": "forward_rule", "title": short description, "forward_to": email, "label_match": string|null, "subject_contains": string|null, "from_match": string|null, "sentiment_below": number 0-1 or null, "note": string|null }
 - When the user asks you to email/mail/send/write to someone, IMMEDIATELY propose a send_email action with a complete, polished draft. Do not ask "should I?" first. Do not say you cannot send — the user sends it with one click on the card.
@@ -137,6 +137,7 @@ serve(async (req) => {
         return {
           type: "send_email",
           to,
+          recipient_name: (s(a.recipient_first_name, 60) || (contacts.get(to.toLowerCase()) || "").trim().split(/\s+/)[0] || null),
           subject: s(a.subject, 250) || selectedTemplate?.name || "(no subject)",
           body: emailBody,
           template: selectedTemplate ? {

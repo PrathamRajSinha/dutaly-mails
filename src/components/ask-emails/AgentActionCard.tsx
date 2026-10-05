@@ -14,7 +14,7 @@ import { renderEmailHtml, replaceVariables, type EmailTemplateStyle } from "@/li
 type ActionTemplate = EmailTemplateStyle & { id: string; name: string };
 
 export type AgentAction =
-  | { type: "send_email"; to: string; subject: string; body: string; template?: ActionTemplate | null }
+  | { type: "send_email"; to: string; subject: string; body: string; template?: ActionTemplate | null; recipient_name?: string | null }
   | { type: "task" | "reminder"; title: string; details?: string | null; due_at?: string | null }
   | {
       type: "forward_rule"; title: string; forward_to: string; label_match?: string | null;
@@ -37,7 +37,7 @@ export function AgentActionCard({ action }: { action: AgentAction }) {
   const [fromId, setFromId] = useState<string>("");
   const accountId = fromId || active[0]?.id || "";
   const selectedAccount = active.find((a) => a.id === accountId);
-  const recipientName = to.split("@")[0]?.replace(/[._-]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) || "there";
+  const recipientName = (isEmail && action.recipient_name) || to.split("@")[0]?.replace(/[._-]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) || "there";
   const senderName = selectedAccount?.email_address.split("@")[0]?.replace(/[._-]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) || "The Team";
   const resolvedBody = replaceVariables(body, { sender_name: recipientName, subject, my_name: senderName });
   const template = isEmail ? action.template : null;
