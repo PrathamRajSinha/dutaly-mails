@@ -134,7 +134,7 @@ serve(async (req) => {
         const to = s(a.to, 320);
         const requestedTemplateId = s(a.template_id, 80);
         const selectedTemplate = explicitlyNamedTemplate || savedTemplates.find((template) => template.id === requestedTemplateId);
-        const emailBody = selectedTemplate?.body || s(a.body, 10000);
+        const emailBody = explicitlyNamedTemplate?.body || s(a.body, 10000) || selectedTemplate?.body;
         if (!to || !EMAIL_RE.test(to) || !emailBody) return null;
         return {
           type: "send_email",
