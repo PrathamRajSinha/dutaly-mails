@@ -64,7 +64,24 @@ export default function AskEmails() {
   const { session } = useAuth();
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const chatKey = `ask-emails-chat:${session?.user?.id ?? "anon"}`;
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    try {
+      const uid = session?.user?.id;
+      const raw = uid ? localStorage.getItem(`ask-emails-chat:${uid}`) : null;
+      return raw ? JSON.parse(raw) : [];
+    } catch { return []; }
+  });
+  const loadedKey = useRef<string | null>(session?.user?.id ? chatKey : null);
+  useEffect(() => {
+    if (!session?.user?.id) return;
+    if (loadedKey.current !== chatKey) {
+      loadedKey.current = chatKey;
+      try { const raw = localStorage.getItem(chatKey); setMessages(raw ? JSON.parse(raw) : []); } catch { setMessages([]); }
+      return;
+    }
+    try { localStorage.setItem(chatKey, JSON.stringify(messages.slice(-60))); } catch { /* storage full */ }
+  }, [messages, chatKey, session?.user?.id]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedEmail, setSelectedEmail] = useState<EmailSummary | null>(null);
@@ -408,6 +425,13 @@ export default function AskEmails() {
       <div className="flex flex-1 gap-6 overflow-hidden">
         {/* Main Content */}
         <div className="flex-1 flex flex-col min-w-0">
+          {messages.length > 0 && (
+            <div className="mb-2 flex justify-end">
+              <Button variant="ghost" size="sm" className="h-7 text-xs text-muted-foreground" onClick={() => setMessages([])}>
+                New chat
+              </Button>
+            </div>
+          )}
           {/* Chat Area */}
           <div ref={scrollRef} className="flex-1 overflow-y-auto space-y-6 mb-4 pr-2 custom-scrollbar">
             {messages.length === 0 && (
