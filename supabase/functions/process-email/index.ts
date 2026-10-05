@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.93.3";
 import { normalizeLabels, getExistingLabels, labelPromptSection, mergeLabels } from "../_shared/labels.ts";
+import { fontStacks, fontSizes, formatBody } from "../_shared/emailFormat.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -394,22 +395,12 @@ ${emailData.body}`
             .limit(1)
             .maybeSingle();
 
-          const fontStacks: Record<string, string> = {
-            "sans-serif": "Arial, Helvetica, sans-serif",
-            serif: "Georgia, 'Times New Roman', Times, serif",
-            monospace: "'Courier New', Courier, monospace",
-          };
-          const fontSizes: Record<string, string> = { small: "13px", medium: "15px", large: "17px" };
           const fontStack = fontStacks[template?.font_family ?? "sans-serif"] || fontStacks["sans-serif"];
           const fontSize = fontSizes[template?.font_size ?? "medium"] || fontSizes.medium;
           const textColor = template?.text_color || "#333333";
           const accentColor = template?.accent_color || "#4F46E5";
 
-          const escapedBody = String(parsedResponse.suggested_reply)
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/\n/g, "<br />");
+          const escapedBody = formatBody(String(parsedResponse.suggested_reply));
 
           const footerHtml =
             template?.footer_text || template?.footer_logo_url
