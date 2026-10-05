@@ -10,7 +10,8 @@ import {
   Bookmark,
   BookmarkCheck,
   ChevronRight,
-  Inbox
+  Inbox,
+  FileText
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -62,6 +63,9 @@ export default function AskEmails() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [mention, setMention] = useState<{ query: string; start: number } | null>(null);
   const [mentionIdx, setMentionIdx] = useState(0);
+  const [templateMention, setTemplateMention] = useState<{ query: string; start: number } | null>(null);
+  const [templateMentionIdx, setTemplateMentionIdx] = useState(0);
+  const [selectedTemplate, setSelectedTemplate] = useState<{ id: string; name: string } | null>(null);
 
   // Known contacts for @ suggestions
   const { data: contacts = [] } = useQuery({
@@ -82,16 +86,41 @@ export default function AskEmails() {
     },
   });
 
+  const { data: templates = [] } = useQuery({
+    queryKey: ["agent-templates", session?.user?.id],
+    enabled: !!session,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("email_templates")
+        .select("id, name, category")
+        .order("updated_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
   const mentionMatches = useMemo(() => {
     if (!mention) return [];
     const q = mention.query.toLowerCase();
     return contacts.filter((c) => c.email.includes(q) || c.name.toLowerCase().includes(q)).slice(0, 6);
   }, [mention, contacts]);
 
+  const templateMatches = useMemo(() => {
+    if (!templateMention) return [];
+    const q = templateMention.query.toLowerCase();
+    return templates.filter((t) => t.name.toLowerCase().includes(q) || t.category.toLowerCase().includes(q)).slice(0, 6);
+  }, [templateMention, templates]);
+
   const updateMention = (value: string, caret: number) => {
     const m = /(^|\s)@([^\s@]*)$/.exec(value.slice(0, caret));
     setMention(m ? { query: m[2], start: caret - m[2].length - 1 } : null);
     setMentionIdx(0);
+    const beforeCaret = value.slice(0, caret);
+    const tm = /(^|\s)\/template(?:\s+([^\n]*))?$/i.exec(beforeCaret);
+    const slashStart = beforeCaret.toLowerCase().lastIndexOf("/template");
+    setTemplateMention(tm && slashStart >= 0 ? { query: (tm[2] || "").trim(), start: slashStart } : null);
+    setTemplateMentionIdx(0);
+    if (selectedTemplate && !value.includes(`using template "${selectedTemplate.name}"`)) setSelectedTemplate(null);
   };
 
   const pickMention = (email: string) => {
@@ -104,6 +133,18 @@ export default function AskEmails() {
       const pos = mention.start + email.length + 1;
       inputRef.current?.focus();
       inputRef.current?.setSelectionRange(pos, pos);
+    });
+  };
+
+  const pickTemplate = (template: { id: string; name: string }) => {
+    if (!templateMention) return;
+    const next = `${input.slice(0, templateMention.start)}using template "${template.name}" `;
+    setInput(next);
+    setSelectedTemplate(template);
+    setTemplateMention(null);
+    requestAnimationFrame(() => {
+      inputRef.current?.focus();
+      inputRef.current?.setSelectionRange(next.length, next.length);
     });
   };
 
@@ -125,6 +166,7 @@ export default function AskEmails() {
   const handleSend = async (question?: string) => {
     const q = question || input.trim();
     if (!q || !session?.access_token) return;
+    const chosenTemplate = selectedTemplate;
 
     // Add to recent
     const updatedRecent = [q, ...recentQuestions.filter(rq => rq !== q)].slice(0, 10);
@@ -140,6 +182,8 @@ export default function AskEmails() {
     }));
     setMessages((prev) => [...prev, userMsg]);
     setMention(null);
+    setTemplateMention(null);
+    setSelectedTemplate(null);
     setInput("");
     setIsLoading(true);
 
@@ -151,6 +195,7 @@ export default function AskEmails() {
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           start_date: startDate ? startDate.toISOString() : undefined,
           end_date: endDate ? endDate.toISOString() : undefined,
+          template_id: chosenTemplate?.id,
         },
       });
 
@@ -467,6 +512,24 @@ export default function AskEmails() {
 
           {/* Input */}
           <div className="relative mt-auto">
+            {templateMention && (
+              <div className="absolute bottom-full left-0 z-20 mb-2 w-full max-w-md overflow-hidden rounded-lg border border-border bg-popover shadow-lg">
+                {templateMatches.length ? templateMatches.map((template, index) => (
+                  <button
+                    key={template.id}
+                    type="button"
+                    onMouseDown={(event) => { event.preventDefault(); pickTemplate(template); }}
+                    className={cn("flex w-full items-center gap-3 px-3 py-2 text-left text-sm", index === templateMentionIdx ? "bg-muted" : "hover:bg-muted")}
+                  >
+                    <FileText className="h-4 w-4 shrink-0 text-primary" />
+                    <span className="min-w-0">
+                      <span className="block truncate font-medium text-foreground">{template.name}</span>
+                      <span className="block truncate text-xs text-muted-foreground">{template.category}</span>
+                    </span>
+                  </button>
+                )) : <p className="px-3 py-3 text-sm text-muted-foreground">No matching templates</p>}
+              </div>
+            )}
             {mention && mentionMatches.length > 0 && (
               <div className="absolute bottom-full left-0 z-20 mb-2 w-full max-w-md overflow-hidden rounded-lg border border-border bg-popover shadow-lg">
                 {mentionMatches.map((c, ci) => (
@@ -486,11 +549,17 @@ export default function AskEmails() {
               <input
                 ref={inputRef}
                 className="min-h-[44px] flex-1 bg-transparent py-2.5 text-sm text-foreground outline-none placeholder:text-muted-foreground"
-                placeholder="Ask anything, or e.g. “Email @john about tomorrow’s meeting”"
+                placeholder="Ask anything — use @ for contacts or /template for templates"
                 value={input}
                 onChange={(e) => { setInput(e.target.value); updateMention(e.target.value, e.target.selectionStart ?? e.target.value.length); }}
-                onBlur={() => setTimeout(() => setMention(null), 100)}
+                onBlur={() => setTimeout(() => { setMention(null); setTemplateMention(null); }, 100)}
                 onKeyDown={(e) => {
+                  if (templateMention && templateMatches.length) {
+                    if (e.key === "ArrowDown") { e.preventDefault(); setTemplateMentionIdx((i) => (i + 1) % templateMatches.length); return; }
+                    if (e.key === "ArrowUp") { e.preventDefault(); setTemplateMentionIdx((i) => (i - 1 + templateMatches.length) % templateMatches.length); return; }
+                    if (e.key === "Enter" || e.key === "Tab") { e.preventDefault(); pickTemplate(templateMatches[templateMentionIdx]); return; }
+                    if (e.key === "Escape") { setTemplateMention(null); return; }
+                  }
                   if (mention && mentionMatches.length) {
                     if (e.key === "ArrowDown") { e.preventDefault(); setMentionIdx((i) => (i + 1) % mentionMatches.length); return; }
                     if (e.key === "ArrowUp") { e.preventDefault(); setMentionIdx((i) => (i - 1 + mentionMatches.length) % mentionMatches.length); return; }

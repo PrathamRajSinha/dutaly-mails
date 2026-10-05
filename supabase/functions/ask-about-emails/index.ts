@@ -1,11 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.93.3";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -44,7 +39,7 @@ serve(async (req) => {
     if (authError || !user) return json({ error: "Please sign in again." }, 401);
 
     const body = await req.json();
-    const { start_date, end_date, timezone } = body ?? {};
+    const { start_date, end_date, timezone, template_id } = body ?? {};
     let history: { role: string; content: string }[] = Array.isArray(body?.messages) ? body.messages : [];
     if (!history.length && typeof body?.question === "string") history = [{ role: "user", content: body.question }];
     history = history
@@ -82,6 +77,9 @@ serve(async (req) => {
     const explicitlyNamedTemplate = savedTemplates
       .filter((template) => normalize(template.name).length > 2 && normalizedRequest.includes(normalize(template.name)))
       .sort((a, b) => b.name.length - a.name.length)[0];
+    const explicitlySelectedTemplate = typeof template_id === "string"
+      ? savedTemplates.find((template) => template.id === template_id)
+      : undefined;
 
     const contacts = new Map<string, string>();
     for (const e of list) if (e.from_address) contacts.set(e.from_address.toLowerCase(), e.from_name || "");
@@ -133,8 +131,8 @@ serve(async (req) => {
       if (a?.type === "send_email") {
         const to = s(a.to, 320);
         const requestedTemplateId = s(a.template_id, 80);
-        const selectedTemplate = explicitlyNamedTemplate || savedTemplates.find((template) => template.id === requestedTemplateId);
-        const emailBody = explicitlyNamedTemplate?.body || s(a.body, 10000) || selectedTemplate?.body;
+        const selectedTemplate = explicitlySelectedTemplate || explicitlyNamedTemplate || savedTemplates.find((template) => template.id === requestedTemplateId);
+        const emailBody = (explicitlySelectedTemplate || explicitlyNamedTemplate)?.body || s(a.body, 10000) || selectedTemplate?.body;
         if (!to || !EMAIL_RE.test(to) || !emailBody) return null;
         return {
           type: "send_email",
