@@ -549,7 +549,7 @@ export default function AskEmails() {
               <input
                 ref={inputRef}
                 className="min-h-[44px] flex-1 bg-transparent py-2.5 text-sm text-foreground outline-none placeholder:text-muted-foreground"
-                placeholder="Ask anything, or e.g. “Email @john about tomorrow’s meeting”"
+                placeholder="Ask anything — use @ for contacts or /template for templates"
                 value={input}
                 onChange={(e) => { setInput(e.target.value); updateMention(e.target.value, e.target.selectionStart ?? e.target.value.length); }}
                 onBlur={() => setTimeout(() => { setMention(null); setTemplateMention(null); }, 100)}
