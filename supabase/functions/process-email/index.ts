@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.93.3";
 import { normalizeLabels, getExistingLabels, labelPromptSection, mergeLabels } from "../_shared/labels.ts";
+import { fontStacks, fontSizes, formatBody } from "../_shared/emailFormat.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
