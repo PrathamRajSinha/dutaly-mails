@@ -35,6 +35,16 @@ interface ChatMessage {
   actions?: AgentAction[];
 }
 
+const SLASH_ACTIONS = [
+  {
+    id: "template",
+    command: "/template",
+    label: "Use template",
+    description: "Write with a saved email template",
+    icon: FileText,
+  },
+] as const;
+
 const SUGGESTIONS = [
   "Summarize all support emails",
   "What unresolved questions do I have?",
@@ -63,6 +73,8 @@ export default function AskEmails() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [mention, setMention] = useState<{ query: string; start: number } | null>(null);
   const [mentionIdx, setMentionIdx] = useState(0);
+  const [slashAction, setSlashAction] = useState<{ query: string; start: number } | null>(null);
+  const [slashActionIdx, setSlashActionIdx] = useState(0);
   const [templateMention, setTemplateMention] = useState<{ query: string; start: number } | null>(null);
   const [templateMentionIdx, setTemplateMentionIdx] = useState(0);
   const [selectedTemplate, setSelectedTemplate] = useState<{ id: string; name: string } | null>(null);
@@ -111,6 +123,14 @@ export default function AskEmails() {
     return templates.filter((t) => t.name.toLowerCase().includes(q) || t.category.toLowerCase().includes(q)).slice(0, 6);
   }, [templateMention, templates]);
 
+  const slashActionMatches = useMemo(() => {
+    if (!slashAction) return [];
+    const query = slashAction.query.toLowerCase();
+    return SLASH_ACTIONS.filter((action) =>
+      action.label.toLowerCase().includes(query) || action.id.includes(query)
+    );
+  }, [slashAction]);
+
   const updateMention = (value: string, caret: number) => {
     const m = /(^|\s)@([^\s@]*)$/.exec(value.slice(0, caret));
     setMention(m ? { query: m[2], start: caret - m[2].length - 1 } : null);
@@ -120,7 +140,27 @@ export default function AskEmails() {
     const slashStart = beforeCaret.toLowerCase().lastIndexOf("/template");
     setTemplateMention(tm && slashStart >= 0 ? { query: (tm[2] || "").trim(), start: slashStart } : null);
     setTemplateMentionIdx(0);
+    const command = !tm ? /(^|\s)\/([^\s/]*)$/.exec(beforeCaret) : null;
+    setSlashAction(command ? { query: command[2], start: caret - command[2].length - 1 } : null);
+    setSlashActionIdx(0);
     if (selectedTemplate && !value.includes(`using template "${selectedTemplate.name}"`)) setSelectedTemplate(null);
+  };
+
+  const pickSlashAction = (action: (typeof SLASH_ACTIONS)[number]) => {
+    if (!slashAction) return;
+    const caret = slashAction.start + slashAction.query.length + 1;
+    const next = `${input.slice(0, slashAction.start)}${action.command} ${input.slice(caret)}`;
+    setInput(next);
+    setSlashAction(null);
+    if (action.id === "template") {
+      setTemplateMention({ query: "", start: slashAction.start });
+      setTemplateMentionIdx(0);
+    }
+    requestAnimationFrame(() => {
+      const position = slashAction.start + action.command.length + 1;
+      inputRef.current?.focus();
+      inputRef.current?.setSelectionRange(position, position);
+    });
   };
 
   const pickMention = (email: string) => {
@@ -182,6 +222,7 @@ export default function AskEmails() {
     }));
     setMessages((prev) => [...prev, userMsg]);
     setMention(null);
+    setSlashAction(null);
     setTemplateMention(null);
     setSelectedTemplate(null);
     setInput("");
@@ -512,6 +553,32 @@ export default function AskEmails() {
 
           {/* Input */}
           <div className="relative mt-auto">
+            {slashAction && (
+              <div className="absolute bottom-full left-0 z-20 mb-2 w-full max-w-md overflow-hidden rounded-lg border border-border bg-popover shadow-lg">
+                <div className="border-b border-border px-3 py-2 text-xs font-medium text-muted-foreground">Actions</div>
+                {slashActionMatches.length ? slashActionMatches.map((action, index) => {
+                  const ActionIcon = action.icon;
+                  return (
+                    <Button
+                      key={action.id}
+                      type="button"
+                      variant="ghost"
+                      onMouseDown={(event) => { event.preventDefault(); pickSlashAction(action); }}
+                      className={cn("h-auto w-full justify-start gap-3 rounded-none px-3 py-2 text-left", index === slashActionIdx && "bg-muted")}
+                    >
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-border bg-background">
+                        <ActionIcon className="h-4 w-4 text-primary" />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-medium text-foreground">{action.label}</span>
+                        <span className="block truncate text-xs font-normal text-muted-foreground">{action.description}</span>
+                      </span>
+                      <span className="text-xs font-normal text-muted-foreground">{action.command}</span>
+                    </Button>
+                  );
+                }) : <p className="px-3 py-3 text-sm text-muted-foreground">No matching actions</p>}
+              </div>
+            )}
             {templateMention && (
               <div className="absolute bottom-full left-0 z-20 mb-2 w-full max-w-md overflow-hidden rounded-lg border border-border bg-popover shadow-lg">
                 {templateMatches.length ? templateMatches.map((template, index) => (
@@ -549,16 +616,22 @@ export default function AskEmails() {
               <input
                 ref={inputRef}
                 className="min-h-[44px] flex-1 bg-transparent py-2.5 text-sm text-foreground outline-none placeholder:text-muted-foreground"
-                placeholder="Ask anything — use @ for contacts or /template for templates"
+                placeholder="Ask anything — use @ for contacts or / for actions"
                 value={input}
                 onChange={(e) => { setInput(e.target.value); updateMention(e.target.value, e.target.selectionStart ?? e.target.value.length); }}
-                onBlur={() => setTimeout(() => { setMention(null); setTemplateMention(null); }, 100)}
+                onBlur={() => setTimeout(() => { setMention(null); setSlashAction(null); setTemplateMention(null); }, 100)}
                 onKeyDown={(e) => {
                   if (templateMention && templateMatches.length) {
                     if (e.key === "ArrowDown") { e.preventDefault(); setTemplateMentionIdx((i) => (i + 1) % templateMatches.length); return; }
                     if (e.key === "ArrowUp") { e.preventDefault(); setTemplateMentionIdx((i) => (i - 1 + templateMatches.length) % templateMatches.length); return; }
                     if (e.key === "Enter" || e.key === "Tab") { e.preventDefault(); pickTemplate(templateMatches[templateMentionIdx]); return; }
                     if (e.key === "Escape") { setTemplateMention(null); return; }
+                  }
+                  if (slashAction && slashActionMatches.length) {
+                    if (e.key === "ArrowDown") { e.preventDefault(); setSlashActionIdx((i) => (i + 1) % slashActionMatches.length); return; }
+                    if (e.key === "ArrowUp") { e.preventDefault(); setSlashActionIdx((i) => (i - 1 + slashActionMatches.length) % slashActionMatches.length); return; }
+                    if (e.key === "Enter" || e.key === "Tab") { e.preventDefault(); pickSlashAction(slashActionMatches[slashActionIdx]); return; }
+                    if (e.key === "Escape") { setSlashAction(null); return; }
                   }
                   if (mention && mentionMatches.length) {
                     if (e.key === "ArrowDown") { e.preventDefault(); setMentionIdx((i) => (i + 1) % mentionMatches.length); return; }
