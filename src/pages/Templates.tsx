@@ -8,6 +8,7 @@ import {
   Eye,
   Search,
   Filter,
+  Wand2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -130,10 +131,16 @@ export default function Templates() {
             Create and manage professional email templates for your outgoing messages.
           </p>
         </div>
-        <Button onClick={openCreate} className="shadow-sm hover:shadow-md transition-shadow">
-          <Plus className="mr-2 h-4 w-4" />
-          Create Template
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={openCreate}>
+            <Wand2 className="mr-2 h-4 w-4" />
+            Make with AI
+          </Button>
+          <Button onClick={openCreate} className="shadow-sm hover:shadow-md transition-shadow">
+            <Plus className="mr-2 h-4 w-4" />
+            Create Template
+          </Button>
+        </div>
       </div>
 
       {/* Filters & Search */}
