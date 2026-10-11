@@ -1,12 +1,20 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Karla:wght@300;400;500;600;700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
+    --landing-background: 240 20% 5%;
+    --landing-surface: 240 15% 10%;
+    --landing-raised: 240 12% 14%;
+    --landing-foreground: 252 33% 94%;
+    --landing-muted: 245 7% 65%;
+    --landing-accent: 247 45% 68%;
+    --landing-cta: 247 45% 58%;
+    --landing-line: 250 10% 22%;
+    --landing-success: 157 40% 66%;
+    --landing-warning: 40 64% 69%;
+    --landing-danger: 0 64% 73%;
     /* App interior background: #F4F3FF */
     --background: 245 100% 98%;
     /* Page header / foreground: #1A1730 */

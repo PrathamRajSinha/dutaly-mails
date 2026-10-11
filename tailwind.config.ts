@@ -14,6 +14,16 @@ export default {
   	},
   	extend: {
   		colors: {
+            landing: {
+                background: 'hsl(var(--landing-background) / <alpha-value>)',
+                surface: 'hsl(var(--landing-surface) / <alpha-value>)',
+                raised: 'hsl(var(--landing-raised) / <alpha-value>)',
+                foreground: 'hsl(var(--landing-foreground) / <alpha-value>)',
+                muted: 'hsl(var(--landing-muted) / <alpha-value>)',
+                accent: 'hsl(var(--landing-accent) / <alpha-value>)',
+                line: 'hsl(var(--landing-line) / <alpha-value>)',
+                success: 'hsl(var(--landing-success) / <alpha-value>)',
+            },
   			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',
   			ring: 'hsl(var(--ring))',

@@ -1,21 +1,7 @@
-:root {
-  --landing-background: 240 20% 5%;
-  --landing-surface: 240 15% 10%;
-  --landing-raised: 240 12% 14%;
-  --landing-foreground: 252 33% 94%;
-  --landing-muted: 245 7% 65%;
-  --landing-accent: 247 45% 68%;
-  --landing-cta: 247 45% 58%;
-  --landing-line: 250 10% 22%;
-  --landing-success: 157 40% 66%;
-  --landing-warning: 40 64% 69%;
-  --landing-danger: 0 64% 73%;
-  --landing-paper: 240 11% 96%;
-  --landing-ink: 240 14% 12%;
-}
 .landing-page { font-family: 'Roboto', sans-serif; font-size: 16px; letter-spacing: 0; }
 .landing-page h1, .landing-page h2, .landing-page h3 { font-family: 'Lora', Georgia, serif; font-weight: 400; color: inherit; letter-spacing: 0; }
 .landing-page .landing-ui, .landing-page button, .landing-page nav a, .landing-nav, .landing-footer { font-family: 'Roboto', sans-serif; letter-spacing: 0; }
+.landing-page .font-display { font-family: 'Lora', Georgia, serif; }
 .landing-wrap { max-width: 1400px; margin-inline: auto; padding-inline: 56px; }
 .landing-label { display: flex; align-items: center; gap: 20px; font: 400 11px 'Roboto', sans-serif; text-transform: uppercase; color: hsl(var(--landing-muted)); }
 .landing-label span { color: hsl(var(--landing-accent)); }
