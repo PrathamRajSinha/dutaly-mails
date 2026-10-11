@@ -4,7 +4,6 @@ import { Seo } from "@/components/Seo";
 import { LandingNavbar } from "@/components/landing/LandingNavbar";
 
 import { HeroSection } from "@/components/landing/HeroSection";
-import { TrustedBySection } from "@/components/landing/TrustedBySection";
 import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { InteractiveDemoSection } from "@/components/landing/InteractiveDemoSection";
 import { StatsSection } from "@/components/landing/StatsSection";
@@ -39,7 +38,7 @@ export default function Landing() {
   }, []);
 
   return (
-    <div className="landing-page relative min-h-screen overflow-x-hidden" style={{ background: "#0A0A0F" }}>
+    <div className="landing-page relative min-h-screen overflow-x-hidden bg-landing-background text-landing-foreground">
       <Seo
 
         title="Dutaly — AI helpdesk that handles your inbox"
@@ -47,8 +46,8 @@ export default function Landing() {
         path="/mails"
       />
       <LandingNavbar />
+      <main>
       <HeroSection />
-      <TrustedBySection />
       <FeaturesSection />
       <InteractiveDemoSection />
       <StatsSection />
@@ -56,6 +55,7 @@ export default function Landing() {
       
       <FaqSection />
       <CTASection />
+      </main>
       <FooterSection />
     </div>
   );
