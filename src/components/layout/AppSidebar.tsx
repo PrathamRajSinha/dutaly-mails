@@ -14,6 +14,7 @@ import {
   PanelLeft,
   Moon,
   Sun,
+  MessageCircle,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -25,6 +26,7 @@ const navItems = [
   { icon: BookOpen, label: "Knowledge Base", path: "/knowledge-base" },
   { icon: FileText, label: "Instructions", path: "/instructions" },
   { icon: Ticket, label: "Templates", path: "/templates" },
+  { icon: MessageCircle, label: "WhatsApp", path: "/whatsapp" },
   { icon: Sparkles, label: "Inbox Intelligence", path: "/ask" },
   { icon: Settings, label: "Settings", path: "/settings" },
 ];
