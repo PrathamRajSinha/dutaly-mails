@@ -1054,6 +1054,113 @@ export type Database = {
           },
         ]
       }
+      whatsapp_accounts: {
+        Row: {
+          access_token: string
+          app_secret: string | null
+          auto_reply_enabled: boolean
+          created_at: string
+          display_phone_number: string | null
+          id: string
+          is_active: boolean
+          last_status: string | null
+          phone_number_id: string
+          updated_at: string
+          user_id: string
+          verified_name: string | null
+          verify_token: string
+          waba_id: string
+        }
+        Insert: {
+          access_token: string
+          app_secret?: string | null
+          auto_reply_enabled?: boolean
+          created_at?: string
+          display_phone_number?: string | null
+          id?: string
+          is_active?: boolean
+          last_status?: string | null
+          phone_number_id: string
+          updated_at?: string
+          user_id: string
+          verified_name?: string | null
+          verify_token?: string
+          waba_id: string
+        }
+        Update: {
+          access_token?: string
+          app_secret?: string | null
+          auto_reply_enabled?: boolean
+          created_at?: string
+          display_phone_number?: string | null
+          id?: string
+          is_active?: boolean
+          last_status?: string | null
+          phone_number_id?: string
+          updated_at?: string
+          user_id?: string
+          verified_name?: string | null
+          verify_token?: string
+          waba_id?: string
+        }
+        Relationships: []
+      }
+      whatsapp_messages: {
+        Row: {
+          body: string
+          contact_name: string | null
+          contact_wa_id: string
+          created_at: string
+          direction: string
+          error: string | null
+          id: string
+          is_ai: boolean
+          message_type: string
+          status: string | null
+          user_id: string
+          wa_message_id: string | null
+          whatsapp_account_id: string
+        }
+        Insert: {
+          body?: string
+          contact_name?: string | null
+          contact_wa_id: string
+          created_at?: string
+          direction: string
+          error?: string | null
+          id?: string
+          is_ai?: boolean
+          message_type?: string
+          status?: string | null
+          user_id: string
+          wa_message_id?: string | null
+          whatsapp_account_id: string
+        }
+        Update: {
+          body?: string
+          contact_name?: string | null
+          contact_wa_id?: string
+          created_at?: string
+          direction?: string
+          error?: string | null
+          id?: string
+          is_ai?: boolean
+          message_type?: string
+          status?: string | null
+          user_id?: string
+          wa_message_id?: string | null
+          whatsapp_account_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_messages_whatsapp_account_id_fkey"
+            columns: ["whatsapp_account_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
